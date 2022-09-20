@@ -1,14 +1,14 @@
 pkgs: config:
 let
-  inherit (pkgs) buildPlatform callPackage runCommandNoCC closureInfo stdenv writeText s6-rc;
+  inherit (pkgs) buildPlatform callPackage stdenvNoCC closureInfo stdenv writeText s6-rc;
 
   # we need to generate s6 db,  by generating closure of all
   # config.services and calling s6-rc-compile on them
   allServices = closureInfo {
     rootPaths = builtins.attrValues config.services;
   };
-  s6db = stdenv.mkDerivation {
-    name = "make-s6-db";
+  s6db = stdenvNoCC.mkDerivation  {
+    name = "s6-rc-db";
     nativeBuildInputs = [pkgs.buildPackages.s6-rc];
     builder = writeText "find-s6-services" ''
     source $stdenv/setup
