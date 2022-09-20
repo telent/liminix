@@ -9,6 +9,9 @@
     };
   };
   kernel = {
+    checkedConfig = {
+      "BINFMT_SCRIPT" = "y";
+    };
     config = {
       SYSVIPC= "y";
       NO_HZ= "y";
@@ -343,17 +346,9 @@
       UIO_CIF= "m";
       EXT2_FS= "y";
       EXT3_FS= "y";
-      REISERFS_FS= "m";
-      REISERFS_PROC_INFO= "y";
-      REISERFS_FS_XATTR= "y";
-      REISERFS_FS_POSIX_ACL= "y";
-      REISERFS_FS_SECURITY= "y";
       JFS_FS= "m";
       JFS_POSIX_ACL= "y";
       JFS_SECURITY= "y";
-      XFS_FS= "m";
-      XFS_QUOTA= "y";
-      XFS_POSIX_ACL= "y";
       QUOTA= "y";
       QFMT_V2= "y";
       FUSE_FS= "m";
@@ -366,9 +361,6 @@
       PROC_KCORE= "y";
       TMPFS= "y";
       CONFIGFS_FS= "y";
-      AFFS_FS= "m";
-      HFS_FS= "m";
-      HFSPLUS_FS= "m";
       BEFS_FS= "m";
       BFS_FS= "m";
       EFS_FS= "m";
@@ -382,10 +374,10 @@
       ROMFS_FS= "m";
       SYSV_FS= "m";
       UFS_FS= "m";
-      NFS_FS= "y";
-      ROOT_NFS= "y";
-      NFSD= "y";
-      NFSD_V3= "y";
+      # NFS_FS= "y";
+      # ROOT_NFS= "y";
+      # NFSD= "y";
+      # NFSD_V3= "y";
       NLS_CODEPAGE_437= "m";
       NLS_CODEPAGE_737= "m";
       NLS_CODEPAGE_775= "m";
@@ -444,6 +436,13 @@
       CRYPTO_TWOFISH= "m";
       RCU_CPU_STALL_TIMEOUT = "60";
       ENABLE_DEFAULT_TRACERS = "y";
+
+
+      SQUASHFS = "y";
+      SQUASHFS_XZ = "y";
+      VIRTIO_PCI = "y";
+      VIRTIO_BLK = "y";
+      VIRTIO_NET = "y";
     };
   };
 }

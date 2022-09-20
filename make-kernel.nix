@@ -24,6 +24,6 @@ in
 {
   vmlinux = callPackage ./make-vmlinux.nix {
     inherit tree;
-    config = config.kernel.config;
+    inherit (config.kernel) config;# checkedConfig;
   };
 }

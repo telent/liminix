@@ -25,5 +25,11 @@ let
 in {
   outputs = {
     inherit squashfs kernel;
+    default = nixpkgs.pkgs.runCommand "both-kinds" {} ''
+      mkdir $out
+      cd $out
+      ln -s ${squashfs} squashfs
+      ln -s ${kernel.vmlinux} vmlinux
+   '';
   };
 }
