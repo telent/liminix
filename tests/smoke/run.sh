@@ -1,5 +1,5 @@
 set -e
-NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build  -I liminix-config=./tests/smoke/configuration.nix -o smoke.img
+NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build  -I liminix-config=./tests/smoke/configuration.nix --arg device "import ./devices/$DEVICE.nix" -o smoke.img
 
 TESTS=$(cat <<"EOF"
 
