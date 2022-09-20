@@ -17,6 +17,17 @@ underpowered for the full NixOS experience.
 
 ## Running tests
 
-Assuming you have nixpkgs checked out in a peer diretory of this one,
+Assuming you have nixpkgs checked out in a peer directory of this one,
 
     NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH ./run-tests.sh
+
+
+
+## Articles of interest
+
+* [Build Safety of Software in 28 Popular Home Routers](https://cyber-itl.org/assets/papers/2018/build_safety_of_software_in_28_popular_home_routers.pdf):
+   "of the access points and routers we reviewed, not a single one
+took full advantage of the basic application armoring features
+provided by the operating system. Indeed, only one or two models even
+came close, and no brand did well consistently across all models
+tested"
