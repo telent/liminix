@@ -4,11 +4,13 @@
 let
   overlay = import ./overlay.nix;
   nixpkgs = import <nixpkgs> ( device.system // {overlays = [overlay]; });
-  config = (import <liminix-config>) {
-    config = {
-      systemPackages = [];
-      services = {};
-    };
+  baseConfig = {
+    systemPackages = [];
+    services = {};
+    kernel = device.kernel;
+  };
+  config = baseConfig // (import <liminix-config>) {
+    config = baseConfig;
     tools = nixpkgs.pkgs.callPackage  ./tools {};
     inherit (nixpkgs) pkgs;
   };
@@ -18,4 +20,10 @@ let
                (builtins.attrValues config.services)
     ;
   };
-in (import ./make-image.nix) nixpkgs finalConfig
+  squashfs = (import ./make-image.nix) nixpkgs finalConfig;
+  kernel = (import ./make-kernel.nix)  nixpkgs finalConfig;
+in {
+  outputs = {
+    inherit squashfs kernel;
+  };
+}
