@@ -1,6 +1,6 @@
 pkgs: config:
 let
-  inherit (pkgs) buildPlatform callPackage stdenvNoCC closureInfo stdenv writeText s6-rc;
+  inherit (pkgs) callPackage stdenvNoCC closureInfo stdenv writeText s6-rc;
 
   # we need to generate s6 db,  by generating closure of all
   # config.services and calling s6-rc-compile on them

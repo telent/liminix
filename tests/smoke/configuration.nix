@@ -24,9 +24,9 @@ in rec {
     # the simplest approach at the consumer end  is to require the
     # producer to create a file per output variable.
     name = "ntp";
-    run = let s = services;
-              r =  "${pkgs.ntp}/bin/ntp $(cat ${output s.dhcpv4 "ntp_servers"}) $(cat ${output s.dhcpv6 "NTP_IP"})";
-          in (builtins.trace r r);
+    run = let inherit (services) dhcpv4 dhcpv6;
+          in "${pkgs.ntp}/bin/ntp $(cat ${output dhcpv4 "ntp_servers"}) $(cat ${output dhcpv6 "NTP_IP"})";
+
     # I don't think it's possible to standardise the file names
     # generally, as different services have different outputs, but it
     # would be cool if services that provide an interface could use
@@ -41,16 +41,16 @@ in rec {
   };
 
   services.defaultroute4 =
-    let s = services;
+    let inherit (services) dhcpv4;
     in oneshot {
       name = "defaultroute4";
       up = ''
-        ip route add default gw $(cat ${output s.dhcpv4 "address"})
-        echo "1" > /sys/net/ipv4/$(cat ${output s.dhcpv4 "ifname"})
+        ip route add default gw $(cat ${output dhcpv4 "address"})
+        echo "1" > /sys/net/ipv4/$(cat ${output dhcpv4 "ifname"})
       '';
       down = ''
-        ip route del default gw $(cat ${output s.dhcpv4 "address"})
-        echo "0" > /sys/net/ipv4/$(cat ${output s.dhcpv4 "ifname"})
+        ip route del default gw $(cat ${output dhcpv4 "address"})
+        echo "0" > /sys/net/ipv4/$(cat ${output dhcpv4 "ifname"})
       '';
     };
   systemPackages = [ pkgs.hello ] ;

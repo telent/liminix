@@ -14,6 +14,7 @@ chmod -R +w $db
 # check we have closure of config.services (lo.link.service exists only
 # as a dependency)
 test "$(s6-rc-db -c $db type lo.link.service)" = "oneshot"
+test "$(s6-rc-db -c $db type ntp.service)" = "longrun"
 echo OK
 EOF
      )
