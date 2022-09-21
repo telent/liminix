@@ -1,7 +1,7 @@
 { config, tools, pkgs } :
 let
   inherit (tools.networking) interface address udhcpc odhcpc;
-  inherit (tools.services) oneshot longrun bundle output;
+  inherit (tools.services) oneshot longrun bundle target output;
 in rec {
   services.loopback =
     let iface = interface { type = "loopback"; device = "lo";};
@@ -25,7 +25,7 @@ in rec {
     # producer to create a file per output variable.
     name = "ntp";
     run = let inherit (services) dhcpv4 dhcpv6;
-          in "${pkgs.ntp}/bin/ntp $(cat ${output dhcpv4 "ntp_servers"}) $(cat ${output dhcpv6 "NTP_IP"})";
+          in "${pkgs.ntp}/bin/ntpd $(cat ${output dhcpv4 "ntp_servers"}) $(cat ${output dhcpv6 "NTP_IP"})";
 
     # I don't think it's possible to standardise the file names
     # generally, as different services have different outputs, but it
@@ -53,5 +53,11 @@ in rec {
         echo "0" > /sys/net/ipv4/$(cat ${output dhcpv4 "ifname"})
       '';
     };
+
+  services.default = target {
+    name = "default";
+    contents = with services; [ loopback ntp defaultroute4 ];
+  };
+
   systemPackages = [ pkgs.hello ] ;
 }

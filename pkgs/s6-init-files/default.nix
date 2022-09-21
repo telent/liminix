@@ -32,7 +32,7 @@ let
     halt = { type="f"; file = hpr "-h"; mode="0755"; };
     init = {
       type="f"; mode="0755";
-      file = "#!${execline}/bin/execlineb -S0\n${s6-linux-init}/bin/s6-linux-init -c /etc/s6-linux-init/current -m 0022 -p ${lib.makeBinPath [execline s6-linux-init s6-rc]}:/usr/bin:/bin -d /dev -- \"\\$@\"";
+      file = "#!${execline}/bin/execlineb -S0\n${s6-linux-init}/bin/s6-linux-init -c /etc/s6-linux-init/current -m 0022 -p ${lib.makeBinPath [busybox execline s6-linux-init s6-rc]}:/usr/bin:/bin -d /dev -- \"\\$@\"";
     };
   };
   scripts = symlink "${initscripts}/scripts";
@@ -45,8 +45,8 @@ let
           file = ''
               #!${execline}/bin/execlineb -P
               ${execline}/bin/fdmove -c 2 1
-              ${execline}/bin/bin/fdmove 1 3
-              ${s6}/s6-ipcserver -1 -a 0700 -c 1 -- s
+              ${execline}/bin/fdmove 1 3
+              ${s6}/bin/s6-ipcserver -1 -a 0700 -c 1 -- s
               ${s6}/bin/s6-sudod -dt30000 -- "/etc/s6-linux-init/current"/scripts/runlevel
             '';
           mode = "0755";
@@ -98,7 +98,7 @@ let
           quit = message: ''
               #!${execline}/bin/execlineb -P
               ${execline}/bin/redirfd -w 2 /dev/console
-              ${execline}/bin/bin/fdmove -c 1 2
+              ${execline}/bin/fdmove -c 1 2
               ${execline}/bin/foreground { ${s6-linux-init}/bin/s6-linux-init-echo -- ${message} }
               ${s6-linux-init}/bin/s6-linux-init-hpr -fr
             '';

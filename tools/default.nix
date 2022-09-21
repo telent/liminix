@@ -1,6 +1,8 @@
 {
   stdenvNoCC
 , s6-rc
+, lib
+, busybox
 } :let
   inherit (builtins) concatStringsSep;
   longrun = {
@@ -13,6 +15,7 @@
     type = "longrun";
     buildInputs = dependencies;
     dependencies = builtins.map (d: d.name) dependencies;
+    shell = "${busybox}/bin/sh";
     inherit run;
     builder = ./builder.sh;
   };
@@ -32,23 +35,27 @@
     # even though the built output has no references to their
     # store directories?
     buildInputs = dependencies;
+    shell = "${busybox}/bin/sh";
     inherit up down;
     dependencies = builtins.map (d: d.name) dependencies;
     builder = ./builder.sh;
   };
-  bundle = {
+  target = {
     name
     , contents ? []
     , dependencies ? []
     , ...
   }: stdenvNoCC.mkDerivation {
-    name = "${name}.bundle";
+    inherit name;
     type = "bundle";
     contents = builtins.map (d: d.name) contents;
-    buildInputs = dependencies ++ contents;
+    buildInputs = dependencies ++ (lib.debug.traceSeqN 2 contents contents);
     dependencies = builtins.map (d: d.name) dependencies;
+    shell = "${busybox}/bin/sh";
     builder = ./builder.sh;
   };
+  bundle = { name, ... } @args : target (args // { name = "${name}.bundle";});
+
 in {
   networking = {
     interface = { type, device }  @ args: oneshot {
@@ -66,7 +73,7 @@ in {
     };
     udhcpc = interface: { ... } @ args: longrun {
       name = "${interface.device}.udhcp";
-      run = "udhchpcd ${interface.device}";
+      run = "${busybox}/bin/udhcpc -f -i ${interface.device}";
     };
     odhcpc = interface: { ... } @ args: longrun {
       name = "${interface.device}.odhcp";
@@ -74,7 +81,7 @@ in {
     };
   };
   services = {
-    inherit longrun oneshot bundle;
+    inherit longrun oneshot bundle target;
     output = service: name: "/run/services/outputs/${service.name}/${name}";
   };
 }
