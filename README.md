@@ -53,16 +53,3 @@ took full advantage of the basic application armoring features
 provided by the operating system. Indeed, only one or two models even
 came close, and no brand did well consistently across all models
 tested"
-
-
-
-
------
-
-s6/ directory has the result of running s6-linux-init-maker, plus edits
-to the scripts for s6-rc
-
-- need to fix the bin/ directory (maybe they were copied from
- s6-linux-init?)
-
-- maybe the run-image directory can be added as a squashfs source directory?
