@@ -37,17 +37,11 @@ let
     s6-rc-compile $out/compiled $srcs
     '';
   };
-  rcS = writeScript "rcS" ''
-    #!${pkgs.pkgsStatic.busybox}/bin/sh
-    echo WHEEEE
-    PATH=${pkgs.pkgsStatic.busybox}/bin:$PATH
-    export PATH
-    mount -t devtmpfs none /dev/
-    mount -t devpts none /dev/pts
-    mount -t proc none /proc
-    mkdir -p /run/services
-  '';
   s6-pseudofiles = pkgs.s6-init-files;
+  profile  = writeScript ".profile" ''
+    PATH=${lib.makeBinPath (with pkgs; [busybox execline s6-linux-init s6-rc])}
+    export PATH
+  '';
   pseudofiles = writeText "pseudofiles" ''
      / d 0755 0 0
      /bin d 0755 0 0
@@ -63,18 +57,19 @@ let
      /dev/tty c 0777 root root 5 0
      /dev/console c 0600 root root 5 1
      /proc d 0555 root root
+     /sys d 0555 root root
      /dev/pts d 0755 0 0
      /etc/init.d d 0755 0 0
      /bin/init s 0755 0 0 /etc/s6-linux-init/current/bin/init
      /bin/sh s 0755 0 0 ${pkgs.pkgsStatic.busybox}/bin/sh
      /bin/busybox s 0755 0 0 ${pkgs.busybox}/bin/busybox
-     /etc/init.d/rcS s 0755 0 0 ${rcS}
      /etc/s6-rc d 0755 0 0
      /etc/s6-rc/compiled s 0755 0 0 ${s6db}/compiled
      /etc/passwd f 0644 0 0 echo  "root::0:0:root:/:/bin/sh"
+     /.profile s 0644 0 0 ${profile}
   '';
   storefs = callPackage <nixpkgs/nixos/lib/make-squashfs.nix> {
-    storeContents = [ pseudofiles pkgs.strace s6-pseudofiles rcS  pkgs.pkgsStatic.busybox s6db pkgs.s6-linux-init ] ++ config.packages ;
+    storeContents = [ pseudofiles pkgs.strace s6-pseudofiles pkgs.pkgsStatic.busybox s6db pkgs.s6-linux-init ] ++ config.packages ;
     # comp =  "xz -Xdict-size 100%"
   };
 in runCommand "frob-squashfs" {
