@@ -1,0 +1,13 @@
+/service/s6-linux-init-runleveld/notification-fd f 0644 0 0 echo -n "3" |qprint -d
+/service/s6-linux-init-runleveld/run f 0755 0 0 echo -n "       hello=0A	      newline=0A" |qprint -d
+/service/s6-linux-init-runleveld d 0755 0 0
+/service/s6-linux-init-shutdownd/fifo i 0600 0 0 f
+/service/s6-linux-init-shutdownd/run f 0755 0 0 echo -n "s6-linux-init/bin/s6-linux-init-shutdownd -c  =22/etc/s6-linux-init/current=22 -g 3000=0A" |qprint -d
+/service/s6-linux-init-shutdownd d 0755 0 0
+/service/s6-svscan-log/fifo i 0600 0 0 f
+/service/s6-svscan-log/notification-fd f 0644 0 0 echo -n "3" |qprint -d
+/service/s6-svscan-log/run f 0644 0 0 echo -n "gdsgdfgsdgf=0A" |qprint -d
+/service/s6-svscan-log d 0755 0 0
+/service d 0755 0 0
+
+/uncaught-logs d 2750 0 0

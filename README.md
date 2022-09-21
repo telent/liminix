@@ -1,10 +1,6 @@
 # Liminix
 
-Līminis + Nix
-
-* Līminis : Latin, genitive declension of limen. "Of the threshold"
-* Nix :  a tool for reproducible and declarative configuration management
-* Liminix : a Nix-based system for configuring consumer wifi routers
+A Nix-based system for configuring consumer wifi routers.
 
 ## What is this?
 
@@ -15,6 +11,11 @@ Gargoyle or Tomato run on. It's a reboot/restart/rewrite of NixWRT.
 This is not NixOS-on-your-router: it's aimed at devices that are
 underpowered for the full NixOS experience. It uses busybox tools,
 musl instead of GNU libc, and s6-rc instead of systemd.
+
+The Liminix name comes from Liminis, in Latin the genitive declension
+of "limen", or "of the threshold". Your router stands at the threshold
+of your (online) home and everything you send to/receive from the
+outside word goes across it.
 
 
 ## Building
@@ -52,3 +53,16 @@ took full advantage of the basic application armoring features
 provided by the operating system. Indeed, only one or two models even
 came close, and no brand did well consistently across all models
 tested"
+
+
+
+
+-----
+
+s6/ directory has the result of running s6-linux-init-maker, plus edits
+to the scripts for s6-rc
+
+- need to fix the bin/ directory (maybe they were copied from
+ s6-linux-init?)
+
+- maybe the run-image directory can be added as a squashfs source directory?
