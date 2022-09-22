@@ -11,7 +11,6 @@ let
   };
   config = baseConfig // (import <liminix-config>) {
     config = baseConfig;
-    tools = nixpkgs.pkgs.callPackage  ./tools {};
     inherit (nixpkgs) pkgs;
   };
   finalConfig = config // {

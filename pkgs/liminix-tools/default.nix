@@ -3,6 +3,7 @@
 , s6-rc
 , lib
 , busybox
+, callPackage
 } :let
   inherit (builtins) concatStringsSep;
   longrun = {
@@ -71,10 +72,7 @@ in {
       up = "ip address add ${addr} dev ${interface.device} ";
       down = "ip address del ${addr} dev ${interface.device} ";
     };
-    udhcpc = interface: { ... } @ args: longrun {
-      name = "${interface.device}.udhcp";
-      run = "${busybox}/bin/udhcpc -f -i ${interface.device}";
-    };
+    udhcpc = callPackage ./networking/udhcpc.nix {};
     odhcpc = interface: { ... } @ args: longrun {
       name = "${interface.device}.odhcp";
       run = "odhcpcd ${interface.device}";

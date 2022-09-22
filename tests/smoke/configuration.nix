@@ -1,7 +1,7 @@
-{ config, tools, pkgs } :
+{ config, pkgs } :
 let
-  inherit (tools.networking) interface address udhcpc odhcpc;
-  inherit (tools.services) oneshot longrun bundle target output;
+  inherit (pkgs.liminix.networking) interface address udhcpc odhcpc;
+  inherit (pkgs.liminix.services) oneshot longrun bundle target output;
 in rec {
   services.loopback =
     let iface = interface { type = "loopback"; device = "lo";};
