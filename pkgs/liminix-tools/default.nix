@@ -50,7 +50,7 @@
     inherit name;
     type = "bundle";
     contents = builtins.map (d: d.name) contents;
-    buildInputs = dependencies ++ (lib.debug.traceSeqN 2 contents contents);
+    buildInputs = dependencies ++ contents;
     dependencies = builtins.map (d: d.name) dependencies;
     shell = "${busybox}/bin/sh";
     builder = ./builder.sh;
