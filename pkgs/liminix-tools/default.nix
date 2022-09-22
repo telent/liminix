@@ -80,6 +80,6 @@ in {
   };
   services = {
     inherit longrun oneshot bundle target;
-    output = service: name: "/run/services/outputs/${service.name}/${name}";
+    output = service: name: "/run/s6-rc/scandir/${service.name}/data/outputs/${name}";
   };
 }
