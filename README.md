@@ -32,11 +32,53 @@ you plan to install onto it. For example:
 
 `outputs.default` is intended to do something appropriate for the
 device, whatever that is. For the qemu device, it creates a directory
-containing a squashfs root image and a kernel, with which you could
-then run
+containing a squashfs root image and a kernel.
 
-    ./run-qemu.sh result/vmlinux result/squashfs
 
+## QEMU
+
+QEMU is useful for developing userland without needing to keep
+flashing or messing with U-Boot: it also enables testing against
+emulated network peers using [QEMU socket networking](https://wiki.qemu.org/Documentation/Networking#Socket),
+which may be preferable to letting Liminix loose on your actual LAN.
+
+We have some tooling to make this easier.
+
+### Networks
+
+We observe these conventions for QEMU network sockets, so that we can
+run multiple emulated instances and have them wired up to each other
+in the right way
+
+* multicast 230.0.0.1:1234  : access (interconnect between router and "isp")
+* multicast 230.0.0.1:1235  : lan
+* multicast 230.0.0.1:1236  : world (the internet)
+
+### Running instances
+
+`./scripts/run-qemu.sh` accepts a kernel vmlinux image and a squashfs
+and runs qemu with appropriate config for two ethernet interfaces
+hooked up to "lan" and "access" respectively. It connects the Liminix serial console
+and the [QEMU monitor](https://www.qemu.org/docs/master/system/monitor.html) to
+stdin/stdout. Use ^P (not ^A) to switch to the monitor.
+
+If you run with `--background /path/to/unix/socket` it will fork into
+the background and open a Unix socket at that pathname to communicate
+on. Use `./scripts/connect-qemu.sh` to connect to it, and ^O to
+disconnect.
+
+### Emulated upstream connection
+
+In the tests/support/ppp-server directory there are instructions and a script
+to configure [Mikrotik RouterOS](https://mikrotik.com/software) as
+a PPPoE access concentrator connected to the `access` and `world`
+networks, so that Liminix PPPoE client support can be tested.
+_Liminix does not provide RouterOS licences and it is your own
+responsibility if you use this to ensure you're compliant with
+the terms of Mikrotik's licencing._
+
+This may be supplemented or replaced in time with configuurations for
+RP-PPPoE and/or Accel PPP.
 
 ## Running tests
 
