@@ -1,0 +1,71 @@
+Thu Sep 22 00:12:42 BST 2022
+
+Making quite reasonable progress, though only running under emulation.
+Since almost everything so far has been a recap of nixwrt, that's to
+be expected.
+
+The example config starts some services at boot, or at least attempts
+to. Next we shoud
+
+ - add some network config to run-qemu
+ - implement udhcp and odhcp properly to write outputs
+  and create resolv.conf and all that
+ - write some kind of test so we can refactor the crap
+ - not let the tests write random junk everywhere
+
+Thu Sep 22 12:46:36 BST 2022
+
+We can store outputs in the s6 scan directory, it seems:
+
+> There is, however, a guarantee that s6-supervise will never touch subdirectories named data or env. So if you need to store user information in the service directory with the guarantee that it will never be mistaken for a configuration file, no matter the version of s6, you should store that information in the data or env subdirectories of the service directory.
+
+https://skarnet.org/software/s6/servicedir.html
+
+> process 'store/pj0b27l5728cypa5mmagz0q8ibzpik0h-execline-mips-unknown-linux-musl-2.9.0.1-bin/bin/execlineb' started with executable stack
+
+https://skarnet.org/lists/skaware/1550.html
+
+
+Thu Sep 22 16:14:49 BST 2022
+
+what network peers do we want to model for testing?
+
+- wan: pppoe
+- wan: ip over ethernet, w/ dhcp service provided
+- wan: l2tp over (ip over ethernet, w/ dhcp service provided)
+- lan: something with a dhcp client
+
+https://accel-ppp.readthedocs.io/en/latest/ could use this for testing
+pppoe and l2tp?
+
+
+Thu Sep 22 22:57:47 BST 2022
+
+To build a nixos vm with accel-ppp installed (not yet configured)
+
+  nix-build '<nixpkgs/nixos>' -A vm -I nixos-config=./tests/ppp-server-configuration.nix -o ppp-server
+  QEMU_OPTS="-display none -serial mon:stdio -nographic" ./ppp-server/bin/run-nixos-vm
+
+To test it's configured I thought I'd run it against an OpenWrt qemu
+install, so, fun with qemu networking ensues. This config in ../openwrt-qemu
+is using two multicast socket networks -
+
+nix-shell -p qemu --run "./run.sh ./openwrt-22.03.0-x86-64-generic-kernel.bin openwrt-22.03.0-x86-64-generic-ext4-rootfs.img "
+
+so hopefully we can spin up other VMs connected either to its lan or
+its wan: *however* we do first need to configure its wan to use pppoe
+
+uci set network.wan=interface
+uci set network.wan.device='eth1'
+uci set network.wan.proto='pppoe'
+uci set network.wan.username='db123@a.1'
+uci set network.wan.password='NotReallyTheSecret'
+
+(it's ext4 so this will probably stick)
+
+
+Fri Sep 23 10:27:22 BST 2022
+
+* mcast=230.0.0.1:1234  : access (interconnect between router and isp)
+* mcast=230.0.0.1:1235  : lan
+* mcast=230.0.0.1:1236  : world (the internet)
