@@ -4,6 +4,7 @@
 , lib
 , busybox
 , callPackage
+, writeAshScript
 } :let
   inherit (builtins) concatStringsSep;
   longrun = {
@@ -37,7 +38,9 @@
     # store directories?
     buildInputs = dependencies;
     shell = "${busybox}/bin/sh";
-    inherit up down;
+    # up and down for oneshots are pathnames not scripts
+    up = writeAshScript "${name}-up" {} up;
+    down = writeAshScript "${name}-down" {} down;
     dependencies = builtins.map (d: d.name) dependencies;
     builder = ./builder.sh;
   };
