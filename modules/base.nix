@@ -1,4 +1,3 @@
-{ device } :
 { lib, ...}:
 let inherit (lib) mkEnableOption mkOption types;
 in {
@@ -11,7 +10,6 @@ in {
     };
     kernel = mkOption {
       type = types.anything;
-      default = { inherit (device.kernel) config checkedConfig; };
     };
   };
 }

@@ -5,7 +5,8 @@ let
   overlay = import ./overlay.nix;
   nixpkgs = import <nixpkgs> ( device.system // {overlays = [overlay]; });
   config = (import ./merge-modules.nix) [
-    (import ./modules/base.nix { inherit device; })
+    ./modules/base.nix
+    ({ lib, ... } : { config = { inherit (device) kernel; }; })
     <liminix-config>
   ] nixpkgs.pkgs;
   finalConfig = config // {
@@ -15,7 +16,7 @@ let
     ;
   };
   squashfs = (import ./make-image.nix) nixpkgs finalConfig;
-  kernel = (import ./make-kernel.nix)  nixpkgs finalConfig;
+  kernel = (import ./make-kernel.nix)  nixpkgs finalConfig.kernel.config;
 in {
   outputs = {
     inherit squashfs kernel;
