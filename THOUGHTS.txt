@@ -69,3 +69,16 @@ Fri Sep 23 10:27:22 BST 2022
 * mcast=230.0.0.1:1234  : access (interconnect between router and isp)
 * mcast=230.0.0.1:1235  : lan
 * mcast=230.0.0.1:1236  : world (the internet)
+
+
+Sun Sep 25 20:56:28 BST 2022
+
+1) shutdown doesn't work as its using the busybox one not s6
+
+2) think we shouldn't have process-based services like dhcp, ppp
+implement "address provider interface" - instead have a separate
+service for interface address that depends on the service and uses its
+output
+
+* ppp is not like dhcp because dhcp finds addresses for an existing
+  interface but ppp makes a new one
