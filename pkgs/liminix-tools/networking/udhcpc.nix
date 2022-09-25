@@ -40,6 +40,7 @@ esac
 in longrun {
   inherit name;
   run = "${busybox}/bin/udhcpc -f -i ${interface.device} -s ${script}";
+  dependencies = [ interface ];
 }
 
 # lease=86400
