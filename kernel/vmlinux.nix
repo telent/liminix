@@ -15,7 +15,7 @@ let writeConfig = name : config: writeText name
             (name: value: (if value == "n" then "# CONFIG_${name} is not set" else "CONFIG_${name}=${value}"))
             config
           ));
-    kconfigFile = writeConfig "nixwrt_kconfig" config;
+    kconfigFile = writeConfig "kconfig" config;
     checkedConfigFile = writeConfig "checked_kconfig" checkedConfig ;
     inherit lib; in
 stdenv.mkDerivation rec {
@@ -26,37 +26,35 @@ stdenv.mkDerivation rec {
                       (with buildPackages.pkgs;
                         [rsync bc bison flex pkgconfig openssl ncurses.all perl]);
   CC = "${stdenv.cc.bintools.targetPrefix}gcc";
-  HOSTCC = "gcc -I${buildPackages.pkgs.openssl}/include -I${buildPackages.pkgs.ncurses}/include";
-  HOST_EXTRACFLAGS = "-I${buildPackages.pkgs.openssl.dev}/include -L${buildPackages.pkgs.openssl.out}/lib -L${buildPackages.pkgs.ncurses.out}/lib " ;
+  HOSTCC = with buildPackages.pkgs;
+    "gcc -I${openssl}/include -I${ncurses}/include";
+  HOST_EXTRACFLAGS = with buildPackages.pkgs;
+    "-I${openssl.dev}/include -L${openssl.out}/lib -L${ncurses.out}/lib";
   PKG_CONFIG_PATH = "./pkgconfig";
   CROSS_COMPILE = stdenv.cc.bintools.targetPrefix;
   ARCH = "mips";  # kernel uses "mips" here for both mips and mipsel
   dontStrip = true;
   dontPatchELF = true;
   outputs = ["out"  "modulesupport"];
-  phases = ["butcherPkgconfig"
-#            "patchScripts"
-            "configurePhase"
-            "checkConfigurationPhase"
-            "buildPhase"
-            "installPhase"
-           ];
+  phases = [
+    "butcherPkgconfig"
+    "configurePhase"
+    "checkConfigurationPhase"
+    "buildPhase"
+    "installPhase"
+  ];
 
-  # this is here to work around what I think is a bug in nixpkgs packaging
-  # of ncurses: it installs pkg-config data files which don't produce
-  # any -L options when queried with "pkg-config --lib ncurses".  For a
-  # regular nixwrt compilation you'll never even notice, this only becomes
-  # an issue if you do a nix-shell in this derivation and expect "make nconfig"
-  # to work.
+  # this is here to work around what I think is a bug in nixpkgs
+  # packaging of ncurses: it installs pkg-config data files which
+  # don't produce any -L options when queried with "pkg-config --lib
+  # ncurses".  For a regular build you'll never even notice, this only
+  # becomes an issue if you do a nix-shell in this derivation and
+  # expect "make nconfig" to work.
   butcherPkgconfig = ''
     cp -r ${buildPackages.pkgs.ncurses.dev}/lib/pkgconfig .
     chmod +w pkgconfig pkgconfig/*.pc
     for i in pkgconfig/*.pc; do test -f $i && sed -i 's/^Libs:/Libs: -L''${libdir} /'  $i;done
   '';
-
-  # patchScripts = ''
-  #   patchShebangs --build scripts/
-  # '';
 
   configurePhase = ''
     export KBUILD_OUTPUT=`pwd`
@@ -74,7 +72,7 @@ stdenv.mkDerivation rec {
     echo "OK"
   '';
 
-  KBUILD_BUILD_HOST = "nixwrt.builder";
+  KBUILD_BUILD_HOST = "liminix.builder";
   buildPhase = ''
     make -C ${tree} vmlinux
   '';

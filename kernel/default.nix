@@ -27,7 +27,6 @@ let
     phases = [ "unpackPhase" "patchScripts" "installPhase" ];
     patchScripts = ''
       patchShebangs scripts/
-      # substituteInPlace Makefile --replace /bin/pwd ${buildPackages.pkgs.coreutils}/bin/pwd
     '';
     installPhase = ''
       mkdir -p $out
