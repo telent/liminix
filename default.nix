@@ -16,7 +16,9 @@ let
     ;
   };
   squashfs = (import ./make-image.nix) nixpkgs finalConfig;
-  kernel = (import ./make-kernel.nix)  nixpkgs finalConfig.kernel.config;
+  kernel = nixpkgs.pkgs.callPackage ./kernel {
+    inherit (finalConfig.kernel) config;
+  };
 in {
   outputs = {
     inherit squashfs kernel;
