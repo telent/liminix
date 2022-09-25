@@ -27,4 +27,7 @@ in {
       ln -s ${kernel.vmlinux} vmlinux
    '';
   };
+  # this is just here as a convenience, so that we can get a
+  # cross-compiling nix-shell for any package we're customizing
+  inherit (nixpkgs) pkgs;
 }
