@@ -19,4 +19,7 @@ expression or there is more than one reference to `up`, `down` etc.
 * the parameters to a derivation are sorted alphabetically, except for
 `lib`, `stdenv` and maybe other non-package "special cases"
 
-* indentation is whatever emacs nix-mode says it is
+* indentation is whatever emacs nix-mode says it is.
+
+  * where a `let` form defines multiple names, put a newline after the
+  token `let`, and indent each name two characters
