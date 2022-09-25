@@ -5,15 +5,19 @@
 } :
 let
   inherit (liminix.services) longrun;
+in
+interface: { ... } @ args:
+let
+  name = "${interface.device}.udhcp";
   script = writeShellScript "udhcp-notify" ''
 action=$1
-env > /run/udhcp.values
 
 set_address() {
     ip address replace $ip/$mask dev $interface
-    mkdir -p data/outputs
+    dir=/run/service-state/${name}.service/
+    mkdir -p $dir
     for i in lease mask ip router siaddr dns serverid subnet opt53 interface ; do
-        echo ''${!i} > data/outputs/$i
+        echo ''${!i} > $dir/$i
     done
 }
 case $action in
@@ -33,10 +37,8 @@ case $action in
     ;;
 esac
 '';
-
-in
-interface: { ... } @ args: longrun {
-  name = "${interface.device}.udhcp";
+in longrun {
+  inherit name;
   run = "${busybox}/bin/udhcpc -f -i ${interface.device} -s ${script}";
 }
 
