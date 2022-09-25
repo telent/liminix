@@ -1,4 +1,4 @@
-{ config, pkgs } :
+{ config, pkgs, ... } :
 let
   inherit (pkgs.liminix.networking) interface address udhcpc odhcpc;
   inherit (pkgs.liminix.services) oneshot longrun bundle target output;

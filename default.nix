@@ -4,15 +4,10 @@
 let
   overlay = import ./overlay.nix;
   nixpkgs = import <nixpkgs> ( device.system // {overlays = [overlay]; });
-  baseConfig = {
-    systemPackages = [];
-    services = {};
-    kernel = device.kernel;
-  };
-  config = baseConfig // (import <liminix-config>) {
-    config = baseConfig;
-    inherit (nixpkgs) pkgs;
-  };
+  config = (import ./merge-modules.nix) [
+    (import ./modules/base.nix { inherit device; })
+    <liminix-config>
+  ] nixpkgs.pkgs;
   finalConfig = config // {
     packages = (with nixpkgs.pkgs; [ s6-rc ]) ++
                config.systemPackages ++

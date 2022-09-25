@@ -1,8 +1,8 @@
-module : initial : pkgs :
+modules : pkgs :
 let evalModules = (import <nixpkgs/lib>).evalModules;
-in evalModules {
-  modules = [
-    { _module.args = { inherit pkgs; }; }
-    module
-  ];
-}
+in (evalModules {
+  modules =
+    [
+      { _module.args = { inherit pkgs; lib = pkgs.lib; }; }
+    ] ++ modules;
+}).config
