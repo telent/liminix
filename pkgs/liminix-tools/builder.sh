@@ -11,6 +11,7 @@ test -n "$contents" && for d in $contents; do
     touch $out/${name}/contents.d/$d
 done
 test -n "$run" && (echo -e "#!$shell\n$run" > $out/${name}/run)
+test -n "${notificationFd}" && (echo ${notificationFd} > $out/${name}/notification-fd)
 test -n "$up" && (echo -e "#!$shell\n$up" > $out/${name}/up)
 test -n "$down" && (echo -e "#!$shell\n$down" > $out/${name}/down)
 for i in $out/${name}/{down,up,run} ; do test -f $i && chmod +x $i; done

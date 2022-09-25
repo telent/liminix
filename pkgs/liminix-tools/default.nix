@@ -11,6 +11,7 @@
     name
     , run
     , outputs ? []
+    , notification-fd ? null
     , dependencies ? []
   } @ args: stdenvNoCC.mkDerivation {
     name = "${name}.service";
@@ -19,6 +20,7 @@
     dependencies = builtins.map (d: d.name) dependencies;
     shell = "${busybox}/bin/sh";
     inherit run;
+    notificationFd = notification-fd;
     builder = ./builder.sh;
   };
   oneshot = {
