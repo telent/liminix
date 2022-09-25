@@ -77,6 +77,7 @@ in {
       name = "${interface.device}.odhcp";
       run = "odhcpcd ${interface.device}";
     };
+    pppoe = callPackage ./networking/pppoe.nix {};
   };
   services = {
     inherit longrun oneshot bundle target;

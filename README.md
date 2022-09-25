@@ -95,3 +95,5 @@ took full advantage of the basic application armoring features
 provided by the operating system. Indeed, only one or two models even
 came close, and no brand did well consistently across all models
 tested"
+
+* [A PPPoE Implementation for Linux](https://static.usenix.org/publications/library/proceedings/als00/2000papers/papers/full_papers/skoll/skoll_html/index.html): "Many DSL service providers use PPPoE for residential broadband Internet access. This paper briefly describes the PPPoE protocol, presents strategies for implementing it under Linux and describes in detail a user-space implementation of a PPPoE client."
