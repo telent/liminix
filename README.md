@@ -17,6 +17,34 @@ of "limen", or "of the threshold". Your router stands at the threshold
 of your (online) home and everything you send to/receive from the
 outside word goes across it.
 
+### What about NixWRT?
+
+This is an in-progress rewrite of NixWRT, incorporating Lessons
+Learned. That said, as of today (September 2022) it is not yet
+anywhere _near_ feature parity.
+
+Liminix will eventually provide these differentiators over NixWRT:
+
+* a writable filesystem so that software updates or reconfiguration
+  (e.g. changing passwords) don't require taking the device offline to
+  reflash it.
+
+* more flexible service management with dependencies, to allow
+  configurations such as "route through PPPoE if it is healthy, with
+  fallback to LTE"
+
+* a spec for valid configuration options (a la NixOS module options)
+  to that we can detect errors at evaluation time instead of producing
+  a bad image.
+
+* a network-based mechanism for secrets management so that changes can
+  be pushed from a central location to several Liminix devices at once
+
+* send device metrics and logs to a monitoring/alerting/o11y
+  infrastructure
+
+Today though, it does approximately none of these things and certainly
+not on real hardware.
 
 ## Building
 
