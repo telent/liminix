@@ -66,12 +66,14 @@ in {
     } // {
       inherit device;
     };
-    address = interface: { family, addr } @ args: oneshot {
-      dependencies = [ interface ];
-      name = "${interface.device}.addr.${addr}";
-      up = "ip address add ${addr} dev ${interface.device} ";
-      down = "ip address del ${addr} dev ${interface.device} ";
-    };
+    address = interface: { family, prefixLength, address } @ args:
+      let inherit (builtins) toString;
+      in oneshot {
+        dependencies = [ interface ];
+        name = "${interface.device}.addr.${address}";
+        up = "ip address add ${address}/${toString prefixLength} dev ${interface.device} ";
+        down = "ip address del ${address}/${toString prefixLength} dev ${interface.device} ";
+      };
     udhcpc = callPackage ./networking/udhcpc.nix {};
     odhcpc = interface: { ... } @ args: longrun {
       name = "${interface.device}.odhcp";

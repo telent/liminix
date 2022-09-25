@@ -8,8 +8,8 @@ in rec {
     in bundle {
       name = "loopback";
       contents = [
-        (address iface { family = "inet4"; addr ="127.0.0.1";})
-        (address iface { family = "inet6"; addr ="::1";})
+        (address iface { family = "inet4"; address ="127.0.0.1"; prefixLength = 8;})
+        (address iface { family = "inet6"; address ="::1"; prefixLength = 128;})
       ];
     };
   services.dhcpv4 =
