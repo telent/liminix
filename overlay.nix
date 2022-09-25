@@ -3,6 +3,8 @@ final: prev: {
   s6-init-files = final.callPackage ./pkgs/s6-init-files {};
   strace = prev.strace.override { libunwind = null; };
   liminix = final.callPackage ./pkgs/liminix-tools {};
+  writeAshScript = final.callPackage ./pkgs/write-ash-script {};
+
   pppoe = prev.rpPPPoE.overrideAttrs (o: {
     # use newer rp-pppoe, it builds cleanly
     src = final.fetchFromGitHub {
