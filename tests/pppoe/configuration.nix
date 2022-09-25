@@ -14,33 +14,50 @@ in rec {
     };
 
   kernel.config = {
+    "IKCONFIG_PROC" = "y";
     "PPP" = "y";
     "PPPOE" = "y";
     "PPPOL2TP" = "y";
+    "PPP_ASYNC" = "y";
+    "PPP_BSDCOMP" = "y";
+    "PPP_DEFLATE" = "y";
+    "PPP_MPPE" = "y";
+    "PPP_SYNC_TTY" = "y";
+  };
+
+  services.syslogd = longrun {
+    name = "syslogd";
+    run = "${pkgs.busybox}/bin/syslogd -n -O /run/syslog";
   };
 
   services.pppoe =
     let iface = interface { type = "hardware"; device = "eth0"; };
-    in pppoe iface {};
+    in pppoe iface {
+      ppp-options = [
+        "debug" "+ipv6" "noauth"
+        "name" "db123@a.1"
+        "password" "NotReallyTheSecret"
+      ];
+    };
 
   services.defaultroute4 =
     let iface = services.pppoe;
     in oneshot {
       name = "defaultroute4";
       up = ''
-        ip route add default gw $(cat ${output iface "address"})
-        echo "1" > /sys/net/ipv4/$(cat ${output iface "ifname"})
+        ip route add default via $(cat ${output iface "address"})
+        echo "1" > /proc/sys/net/ipv4/conf/$(cat ${output iface "ifname"}/forwarding)
       '';
       down = ''
-        ip route del default gw $(cat ${output iface "address"})
-        echo "0" > /sys/net/ipv4/$(cat ${output iface "ifname"})
+        ip route del default via $(cat ${output iface "address"})
+        echo "0" > /proc/sys/net/ipv4/conf/$(cat ${output iface "ifname"}/forwarding)
       '';
       dependencies = [iface];
     };
 
   services.default = target {
     name = "default";
-    contents = with services; [ loopback defaultroute4 ];
+    contents = with services; [ loopback defaultroute4 syslogd ];
   };
 
   systemPackages = [ pkgs.hello ] ;
