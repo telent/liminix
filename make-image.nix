@@ -17,10 +17,6 @@
 , writeText
 } : config :
 let
-  s6-rc-db = s6-rc-database.override {
-    services = builtins.attrValues config.services;
-  };
-
   pseudofiles = writeText "pseudofiles" ''
      / d 0755 0 0
      /bin d 0755 0 0
@@ -42,8 +38,6 @@ let
      /bin/init s 0755 0 0 ${s6-init-bin}/bin/init
      /bin/sh s 0755 0 0 ${busybox}/bin/sh
      /bin/busybox s 0755 0 0 ${busybox}/bin/busybox
-     /etc/s6-rc d 0755 0 0
-     /etc/s6-rc/compiled s 0755 0 0 ${s6-rc-db}/compiled
      /etc/passwd f 0644 0 0 echo  "root::0:0:root:/:/bin/sh"
   '';
 
