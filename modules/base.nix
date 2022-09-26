@@ -1,6 +1,8 @@
-{ lib, ...}:
+{ lib, pkgs, ...}:
 let
   inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;
+  inherit (pkgs.pseudofile) dir symlink;
+
   type_service = types.package // {
     name = "service";
     description = "s6-rc service";

@@ -2,9 +2,7 @@
   writeText
 , lib
 }:
-filename  : attrset :
 let
-  inherit (lib.debug) traceSeqN;
   inherit (lib.attrsets) mapAttrsToList;
   visit = prefix: attrset:
     let
@@ -33,5 +31,8 @@ let
                 line)
           attrset;
     in builtins.concatStringsSep "\n" l;
-  res =  (visit "" attrset);
-in writeText filename res
+in {
+  write = filename : attrset : writeText filename (visit "" attrset);
+  dir = contents: { type = "d"; inherit contents; };
+  symlink = target: { type = "s"; inherit target; };
+}

@@ -1,5 +1,7 @@
-let
-  dir = contents: { type = "d"; inherit contents; };
+{
+  pseudofile
+}: let
+  inherit (pseudofile) dir;
   structure = {
     service = dir {
       s6-linux-init-runleveld = dir {
@@ -42,4 +44,4 @@ let
     };
     uncaught-logs = (dir {}) // {mode = "2750";};
   };
-in structure
+in pseudofile.write "pseudo.s6-init" structure

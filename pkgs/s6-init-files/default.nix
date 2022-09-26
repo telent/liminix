@@ -21,8 +21,7 @@ let
       patchShebangs $out/scripts
     '';
   };
-  dir = contents: { type = "d"; inherit contents; };
-  symlink = target: { type = "s"; inherit target; };
+  inherit (pseudofile) dir symlink;
   scripts = symlink "${initscripts}/scripts";
   env = dir {};
   run-image = dir {
@@ -141,4 +140,4 @@ let
     inherit scripts env run-image;
   };};};};
 
-in pseudofile "pseudo.s6-init" structure
+in pseudofile.write "pseudo.s6-init" structure

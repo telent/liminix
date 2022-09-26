@@ -4,8 +4,7 @@ expr=$(cat <<"EXPR"
 let
   overlay = import <liminix/overlay.nix>;
   nixpkgs = import <nixpkgs> { overlays = [overlay]; };
-  structure = import ./structure.nix;
-in nixpkgs.pkgs.pseudofile "pseudo.s6-init" structure
+in nixpkgs.pkgs.callPackage ./test.nix {}
 EXPR
     )
 
