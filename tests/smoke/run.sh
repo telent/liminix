@@ -10,7 +10,7 @@ trap cleanup EXIT
 trap 'echo "command $(eval echo $BASH_COMMAND) failed with exit code $?"; exit $?' ERR
 unsquashfs -q -d $dest_path -excludes smoke.img  /dev
 cd $dest_path;
-db=nix/store/*-s6-rc-db/compiled/
+db=nix/store/*-s6-rc-database/compiled/
 test -d $db
 chmod -R +w $db
 # check we have closure of config.services (lo.link.service exists only
@@ -20,6 +20,5 @@ test "$(s6-rc-db -c $db type ntp.service)" = "longrun"
 echo OK
 EOF
      )
-
 
 nix-shell -p s6-rc -p squashfsTools --run "$TESTS" || exit 1

@@ -10,6 +10,8 @@ final: prev: {
 
   s6-init-bin =  final.callPackage ./pkgs/s6-init-bin {};
 
+  s6-rc-database = final.callPackage ./pkgs/s6-rc-database {};
+
   pppoe = prev.rpPPPoE.overrideAttrs (o: {
     # use newer rp-pppoe, it builds cleanly
     src = final.fetchFromGitHub {

@@ -2,45 +2,24 @@ pkgs: config:
 let
   inherit (pkgs)
     callPackage
-    closureInfo
     lib
     runCommand
     s6-rc
+    s6-init-files
     stdenv
     stdenvNoCC
     writeScript
     writeText;
 
-  # we need to generate s6 db,  by generating closure of all
-  # config.services and calling s6-rc-compile on them
-  allServices = closureInfo {
-    rootPaths = builtins.attrValues config.services;
+  s6-rc-db = pkgs.s6-rc-database.override {
+    services = builtins.attrValues config.services;
   };
-  s6db = stdenvNoCC.mkDerivation  {
-    name = "s6-rc-db";
-    nativeBuildInputs = [pkgs.buildPackages.s6-rc];
-    builder = writeText "find-s6-services" ''
-    source $stdenv/setup
-    mkdir -p $out
-    srcs=""
-    shopt -s nullglob
-    for i in $(cat  ${allServices}/store-paths ); do
-      if test -d $i; then
-        for j in $i/* ; do
-          if test -f $j/type ; then
-            srcs="$srcs $i"
-          fi
-        done
-      fi
-    done
-    s6-rc-compile $out/compiled $srcs
-    '';
-  };
-  s6-pseudofiles = pkgs.s6-init-files;
+
   profile  = writeScript ".profile" ''
     PATH=${lib.makeBinPath (with pkgs; [ s6-init-bin busybox execline s6-linux-init s6-rc])}
     export PATH
   '';
+
   pseudofiles = writeText "pseudofiles" ''
      / d 0755 0 0
      /bin d 0755 0 0
@@ -63,12 +42,14 @@ let
      /bin/sh s 0755 0 0 ${pkgs.busybox}/bin/sh
      /bin/busybox s 0755 0 0 ${pkgs.busybox}/bin/busybox
      /etc/s6-rc d 0755 0 0
-     /etc/s6-rc/compiled s 0755 0 0 ${s6db}/compiled
+     /etc/s6-rc/compiled s 0755 0 0 ${s6-rc-db}/compiled
      /etc/passwd f 0644 0 0 echo  "root::0:0:root:/:/bin/sh"
      /.profile s 0644 0 0 ${profile}
   '';
   storefs = callPackage <nixpkgs/nixos/lib/make-squashfs.nix> {
-    storeContents = [ pseudofiles s6-pseudofiles s6db pkgs.s6-linux-init ] ++ config.packages ;
+    # add pseudofiles to store so that the packages they
+    # depend on are also added
+    storeContents = [ pseudofiles s6-init-files ] ++ config.packages ;
     # comp =  "xz -Xdict-size 100%"
   };
 in runCommand "frob-squashfs" {
@@ -77,6 +58,6 @@ in runCommand "frob-squashfs" {
     cp ${storefs} ./store.img
     chmod +w store.img
     mksquashfs - store.img -no-recovery -quiet -no-progress  -root-becomes store -p "/ d 0755 0 0"
-    mksquashfs - store.img -no-recovery -quiet -no-progress  -root-becomes nix  -pf ${pseudofiles} -pf ${s6-pseudofiles}
+    mksquashfs - store.img -no-recovery -quiet -no-progress  -root-becomes nix  -pf ${pseudofiles} -pf ${s6-init-files}
     cp store.img $out
   ''
