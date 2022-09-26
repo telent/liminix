@@ -15,7 +15,7 @@
     , dependencies ? []
   } @ args: stdenvNoCC.mkDerivation {
     name = "${name}.service";
-    type = "longrun";
+    serviceType = "longrun";
     buildInputs = dependencies;
     dependencies = builtins.map (d: d.name) dependencies;
     shell = "${busybox}/bin/sh";
@@ -34,7 +34,7 @@
     # stdenvNoCC is to avoid generating derivations with names
     # like foo.service-mips-linux-musl
     name = "${name}.service";
-    type = "oneshot";
+    serviceType = "oneshot";
     # does this suffice to make sure dependencies are included
     # even though the built output has no references to their
     # store directories?
@@ -53,7 +53,7 @@
     , ...
   }: stdenvNoCC.mkDerivation {
     inherit name;
-    type = "bundle";
+    serviceType = "bundle";
     contents = builtins.map (d: d.name) contents;
     buildInputs = dependencies ++ contents;
     dependencies = builtins.map (d: d.name) dependencies;

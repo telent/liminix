@@ -1,6 +1,6 @@
 source $stdenv/setup
 mkdir -p $out/${name}
-echo $type > $out/${name}/type
+echo $serviceType > $out/${name}/type
 mkdir -p $out/${name}/dependencies.d
 echo $buildInputs > $out/buildInputs
 test -n "$dependencies" && for d in $dependencies; do
