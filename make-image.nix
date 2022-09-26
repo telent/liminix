@@ -38,7 +38,6 @@ let
      /bin/init s 0755 0 0 ${s6-init-bin}/bin/init
      /bin/sh s 0755 0 0 ${busybox}/bin/sh
      /bin/busybox s 0755 0 0 ${busybox}/bin/busybox
-     /etc/passwd f 0644 0 0 echo  "root::0:0:root:/:/bin/sh"
   '';
 
   config-pseudofiles = pseudofile.write "config.etc"

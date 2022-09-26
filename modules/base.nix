@@ -37,7 +37,8 @@ in {
             PATH=${lib.makeBinPath (with pkgs; [ s6-init-bin busybox execline s6-linux-init s6-rc])}
             export PATH
           '');
-
+        passwd = { file = "root::0:0:root:/:/bin/sh\n"; };
+        group = { file = "root::0:\n"; };
       };
     };
   };
