@@ -3,8 +3,9 @@
 
 if test "$1" = "--background" ; then
     socket=$2
-    echo "running in background, socket is $socket"
-    flags="--daemonize -chardev socket,id=sock,path=$2,server=on,wait=off,mux=on -mon chardev=sock,mode=readline -serial chardev:sock  "
+    pid="`dirname $socket`/`basename $socket .sock`.pid"
+    echo "running in background, socket is $socket, pid $pid"
+    flags="--daemonize --pidfile $pid -chardev socket,id=sock,path=$2,server=on,wait=off,mux=on -mon chardev=sock,mode=readline -serial chardev:sock  "
     shift;shift
 else
     flags="-serial mon:stdio"

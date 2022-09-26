@@ -1,0 +1,19 @@
+set timeout 60
+
+spawn socat unix-connect:foo.sock -
+send "\r\n"
+expect "login:" {  send "root\r\n" }
+expect "/ #"
+set FINISHED 0
+set EXIT "1" 
+while { $FINISHED < 5 } {
+  send "ip address show dev ppp0 | grep ppp0\r\n"
+  
+  expect {
+    "192.168.100.1" { set FINISHED 10; set EXIT 0; }
+    "can't find device" { send_user "waiting ..." ; send "\r\n"; sleep 3 }
+  }
+  set FINISHED [ expr $FINISHED + 1 ]
+}
+
+exit $EXIT
