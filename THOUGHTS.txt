@@ -102,7 +102,7 @@ look for obvious wastes of space
 8) some of configuration.nix (e.g. defining routes) should be moved into
 tools
 
-9) split tools up instead of having it all one file
+DONE 9) split tools up instead of having it all one file
 
 10) is it OK to depend on squashfs pseudofiles if we might want to
 switch to ubifs? will there always be a squashfs underneath? might
@@ -125,5 +125,7 @@ service, kernel config should be checked in some way
 DONE 17) rename nixwrt references in kernel builder
 
 18) maybe stop suffixing all the service names with .service
+
+19) syslogd - use busybox or s6?
 
 chat -s -S ogin:--ogin: root / "ip address show dev ppp0 | grep ppp0" 192.168.100.1  "/nix/store/*-s6-linux-init-*/bin/s6-linux-init-hpr -p"
