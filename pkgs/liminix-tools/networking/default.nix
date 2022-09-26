@@ -25,4 +25,15 @@ in {
     run = "odhcpcd ${interface.device}";
   };
   pppoe = callPackage ./pppoe.nix {};
+  route = { name, target, via, dependencies }:
+    oneshot {
+      inherit name;
+      up = ''
+        ip route add ${target} via ${via}
+      '';
+      down = ''
+        ip route del ${target} via ${via}
+      '';
+      inherit dependencies;
+    };
 }

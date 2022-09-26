@@ -1,6 +1,6 @@
 { config, pkgs, ... } :
 let
-  inherit (pkgs.liminix.networking) interface address udhcpc odhcpc;
+  inherit (pkgs.liminix.networking) interface address udhcpc odhcpc route;
   inherit (pkgs.liminix.services) oneshot longrun bundle target output;
 in rec {
   services.loopback =
@@ -40,18 +40,22 @@ in rec {
     dependencies = [services.dhcpv4];
   };
 
-  services.defaultroute4 =
-    let inherit (services) dhcpv4;
+  services.defaultroute4 = route {
+    name = "defautlrote";
+    via = "$(cat ${output services.dhcpv4 "address"})";
+    target = "default";
+    dependencies = [ services.dhcpv4 ];
+  };
+
+  services.packet_forwarding =
+    let
+      iface = services.dhcpv4;
+      filename = "/proc/sys/net/ipv4/conf/$(cat ${output iface "ifname"})/forwarding";
     in oneshot {
-      name = "defaultroute4";
-      up = ''
-        ip route add default gw $(cat ${output dhcpv4 "address"})
-        echo "1" > /sys/net/ipv4/$(cat ${output dhcpv4 "ifname"})
-      '';
-      down = ''
-        ip route del default gw $(cat ${output dhcpv4 "address"})
-        echo "0" > /sys/net/ipv4/$(cat ${output dhcpv4 "ifname"})
-      '';
+      name = "let-the-ip-flow";
+      up = "echo 1 > ${filename}";
+      down = "echo 0 > ${filename}";
+      dependencies = [iface];
     };
 
   services.default = target {

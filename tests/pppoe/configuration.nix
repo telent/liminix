@@ -1,6 +1,6 @@
 { config, pkgs, ... } :
 let
-  inherit (pkgs.liminix.networking) interface address pppoe;
+  inherit (pkgs.liminix.networking) interface address pppoe route;
   inherit (pkgs.liminix.services) oneshot longrun bundle target output;
 in rec {
   services.loopback =
@@ -40,24 +40,32 @@ in rec {
       ];
     };
 
-  services.defaultroute4 =
-    let iface = services.pppoe;
+  services.defaultroute4 = route {
+    name = "defautlrote";
+    via = "$(cat ${output services.pppoe "address"})";
+    target = "default";
+    dependencies = [ services.pppoe ];
+  };
+
+  services.packet_forwarding =
+    let
+      iface = services.pppoe;
+      filename = "/proc/sys/net/ipv4/conf/$(cat ${output iface "ifname"})/forwarding";
     in oneshot {
-      name = "defaultroute4";
-      up = ''
-        ip route add default via $(cat ${output iface "address"})
-        echo "1" > /proc/sys/net/ipv4/conf/$(cat ${output iface "ifname"}/forwarding)
-      '';
-      down = ''
-        ip route del default via $(cat ${output iface "address"})
-        echo "0" > /proc/sys/net/ipv4/conf/$(cat ${output iface "ifname"}/forwarding)
-      '';
+      name = "let-the-ip-flow";
+      up = "echo 1 > ${filename}";
+      down = "echo 0 > ${filename}";
       dependencies = [iface];
     };
 
   services.default = target {
     name = "default";
-    contents = with services; [ loopback defaultroute4 syslogd ];
+    contents = with services; [
+      loopback
+      defaultroute4
+      packet_forwarding
+      syslogd
+    ];
   };
 
   systemPackages = [ pkgs.hello ] ;
