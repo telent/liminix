@@ -5,6 +5,7 @@
 , callPackage
 , execline
 , lib
+, pseudofile
 , runCommand
 , s6-init-bin
 , s6-init-files
@@ -19,11 +20,6 @@ let
   s6-rc-db = s6-rc-database.override {
     services = builtins.attrValues config.services;
   };
-
-  profile  = writeScript ".profile" ''
-    PATH=${lib.makeBinPath ([ s6-init-bin busybox execline s6-linux-init s6-rc])}
-    export PATH
-  '';
 
   pseudofiles = writeText "pseudofiles" ''
      / d 0755 0 0
@@ -49,12 +45,19 @@ let
      /etc/s6-rc d 0755 0 0
      /etc/s6-rc/compiled s 0755 0 0 ${s6-rc-db}/compiled
      /etc/passwd f 0644 0 0 echo  "root::0:0:root:/:/bin/sh"
-     /.profile s 0644 0 0 ${profile}
   '';
+
+  config-pseudofiles = pseudofile.write "config.etc"
+    (config.environment.contents);
+
   storefs = callPackage <nixpkgs/nixos/lib/make-squashfs.nix> {
     # add pseudofiles to store so that the packages they
     # depend on are also added
-    storeContents = [ pseudofiles s6-init-files ] ++ config.packages ;
+    storeContents = [
+      pseudofiles
+      s6-init-files
+      config-pseudofiles
+    ] ++ config.packages ;
   };
 in runCommand "frob-squashfs" {
     nativeBuildInputs = with buildPackages; [ squashfsTools qprint ];
@@ -62,6 +65,6 @@ in runCommand "frob-squashfs" {
     cp ${storefs} ./store.img
     chmod +w store.img
     mksquashfs - store.img -no-recovery -quiet -no-progress  -root-becomes store -p "/ d 0755 0 0"
-    mksquashfs - store.img -no-recovery -quiet -no-progress  -root-becomes nix  -pf ${pseudofiles} -pf ${s6-init-files}
+    mksquashfs - store.img -no-recovery -quiet -no-progress  -root-becomes nix  -pf ${pseudofiles} -pf ${s6-init-files} -pf ${config-pseudofiles}
     cp store.img $out
   ''
