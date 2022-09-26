@@ -5,8 +5,10 @@
 , busybox
 , callPackage
 , writeAshScript
-} :let
+}:
+let
   inherit (builtins) concatStringsSep;
+  output = service: name: "/run/service-state/${service.name}/${name}";
   longrun = {
     name
     , run
@@ -61,33 +63,6 @@
     builder = ./builder.sh;
   };
   bundle = { name, ... } @args : target (args // { name = "${name}.bundle";});
-
 in {
-  networking = {
-    interface = { type, device }  @ args: oneshot {
-      name = "${device}.link";
-      up = "ip link set up dev ${device}";
-      down = "ip link set down dev ${device}";
-    } // {
-      inherit device;
-    };
-    address = interface: { family, prefixLength, address } @ args:
-      let inherit (builtins) toString;
-      in oneshot {
-        dependencies = [ interface ];
-        name = "${interface.device}.addr.${address}";
-        up = "ip address add ${address}/${toString prefixLength} dev ${interface.device} ";
-        down = "ip address del ${address}/${toString prefixLength} dev ${interface.device} ";
-      };
-    udhcpc = callPackage ./networking/udhcpc.nix {};
-    odhcpc = interface: { ... } @ args: longrun {
-      name = "${interface.device}.odhcp";
-      run = "odhcpcd ${interface.device}";
-    };
-    pppoe = callPackage ./networking/pppoe.nix {};
-  };
-  services = {
-    inherit longrun oneshot bundle target;
-    output = service: name: "/run/service-state/${service.name}/${name}";
-  };
+  inherit target bundle oneshot longrun output;
 }

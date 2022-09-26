@@ -2,7 +2,10 @@ final: prev: {
   pseudofile = final.callPackage ./pkgs/pseudofile {};
   s6-init-files = final.callPackage ./pkgs/s6-init-files {};
   strace = prev.strace.override { libunwind = null; };
-  liminix = final.callPackage ./pkgs/liminix-tools {};
+  liminix = {
+    services = final.callPackage ./pkgs/liminix-tools/services {};
+    networking =  final.callPackage ./pkgs/liminix-tools/networking {};
+  };
   writeAshScript = final.callPackage ./pkgs/write-ash-script {};
 
   pppoe = prev.rpPPPoE.overrideAttrs (o: {
