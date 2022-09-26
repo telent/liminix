@@ -33,7 +33,6 @@ let
         done
       fi
     done
-    echo s6-rc-compile $out/compiled $srcs
     s6-rc-compile $out/compiled $srcs
     '';
   };
@@ -61,7 +60,7 @@ let
      /dev/pts d 0755 0 0
      /etc/init.d d 0755 0 0
      /bin/init s 0755 0 0 ${pkgs.s6-init-bin}/bin/init
-     /bin/sh s 0755 0 0 ${pkgs.pkgsStatic.busybox}/bin/sh
+     /bin/sh s 0755 0 0 ${pkgs.busybox}/bin/sh
      /bin/busybox s 0755 0 0 ${pkgs.busybox}/bin/busybox
      /etc/s6-rc d 0755 0 0
      /etc/s6-rc/compiled s 0755 0 0 ${s6db}/compiled
@@ -69,7 +68,7 @@ let
      /.profile s 0644 0 0 ${profile}
   '';
   storefs = callPackage <nixpkgs/nixos/lib/make-squashfs.nix> {
-    storeContents = [ pseudofiles pkgs.strace s6-pseudofiles pkgs.pkgsStatic.busybox s6db pkgs.s6-linux-init ] ++ config.packages ;
+    storeContents = [ pseudofiles s6-pseudofiles s6db pkgs.s6-linux-init ] ++ config.packages ;
     # comp =  "xz -Xdict-size 100%"
   };
 in runCommand "frob-squashfs" {
