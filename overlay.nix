@@ -8,6 +8,8 @@ final: prev: {
   };
   writeAshScript = final.callPackage ./pkgs/write-ash-script {};
 
+  s6-init-bin =  final.callPackage ./pkgs/s6-init-bin {};
+
   pppoe = prev.rpPPPoE.overrideAttrs (o: {
     # use newer rp-pppoe, it builds cleanly
     src = final.fetchFromGitHub {

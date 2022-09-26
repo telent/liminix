@@ -75,7 +75,7 @@ Sun Sep 25 20:56:28 BST 2022
 
 TODO - bugs, missing bits, other infelicities as they occur to me:
 
-1) shutdown doesn't work as its using the busybox one not s6.
+DONE 1) shutdown doesn't work as its using the busybox one not s6.
 
 2) perhaps we shouldn't have process-based services like dhcp, ppp
 implement "address provider interface" - instead have a separate
@@ -120,7 +120,7 @@ we want to change the pseudofiles in an overlay?
 is that specified or fluke?
 
 16) tighten up the module specs. (DONE) services.foo should be a s6-rc
-service, kernel config should be checked in some way
+service, (DONE) kernel config should be checked in some way
 
 DONE 17) rename nixwrt references in kernel builder
 

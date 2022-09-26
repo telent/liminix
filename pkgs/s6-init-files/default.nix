@@ -23,18 +23,6 @@ let
   };
   dir = contents: { type = "d"; inherit contents; };
   symlink = target: { type = "s"; inherit target; };
-  hpr = arg: "#!${execline}/bin/execlineb -S0\n${s6-linux-init}/bin/s6-linux-init-hpr ${arg} \$@";
-  bin = dir {
-    shutdown = symlink "${s6-linux-init}/bin/s6-linux-init-shutdown";
-    telinit = symlink "${s6-linux-init}/bin/s6-linux-init-telinit";
-    reboot = { type="f"; file = hpr "-r"; mode="0755"; };
-    poweroff = { type="f"; file = hpr "-p"; mode="0755"; };
-    halt = { type="f"; file = hpr "-h"; mode="0755"; };
-    init = {
-      type="f"; mode="0755";
-      file = "#!${execline}/bin/execlineb -S0\n${s6-linux-init}/bin/s6-linux-init -c /etc/s6-linux-init/current -m 0022 -p ${lib.makeBinPath [busybox execline s6-linux-init s6-rc]}:/usr/bin:/bin -d /dev -- \"\\$@\"";
-    };
-  };
   scripts = symlink "${initscripts}/scripts";
   env = dir {};
   run-image = dir {
@@ -150,7 +138,7 @@ let
     uncaught-logs = (dir {}) // {mode = "2750";};
   };
   structure = { etc = dir { s6-linux-init = dir { current = dir {
-    inherit bin scripts env run-image;
+    inherit scripts env run-image;
   };};};};
 
 in pseudofile "pseudo.s6-init" structure

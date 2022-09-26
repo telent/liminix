@@ -39,7 +39,7 @@ let
   };
   s6-pseudofiles = pkgs.s6-init-files;
   profile  = writeScript ".profile" ''
-    PATH=${lib.makeBinPath (with pkgs; [busybox execline s6-linux-init s6-rc])}
+    PATH=${lib.makeBinPath (with pkgs; [ s6-init-bin busybox execline s6-linux-init s6-rc])}
     export PATH
   '';
   pseudofiles = writeText "pseudofiles" ''
@@ -60,7 +60,7 @@ let
      /sys d 0555 root root
      /dev/pts d 0755 0 0
      /etc/init.d d 0755 0 0
-     /bin/init s 0755 0 0 /etc/s6-linux-init/current/bin/init
+     /bin/init s 0755 0 0 ${pkgs.s6-init-bin}/bin/init
      /bin/sh s 0755 0 0 ${pkgs.pkgsStatic.busybox}/bin/sh
      /bin/busybox s 0755 0 0 ${pkgs.busybox}/bin/busybox
      /etc/s6-rc d 0755 0 0
