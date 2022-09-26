@@ -15,8 +15,15 @@ in {
     services = mkOption {
       type = types.attrsOf type_service;
     };
-    kernel = mkOption {
-      type = types.anything;
+    kernel = {
+      config = mkOption {
+        # mostly the values are y n or m, but sometimes
+        # other strings are also used
+        type = types.attrsOf types.nonEmptyStr;
+      };
+      checkedConfig = mkOption {
+        type = types.attrsOf types.nonEmptyStr;
+      };
     };
   };
 }
