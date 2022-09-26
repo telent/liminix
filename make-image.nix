@@ -1,22 +1,27 @@
-pkgs: config:
+{
+  stdenv
+, busybox
+, buildPackages
+, callPackage
+, execline
+, lib
+, runCommand
+, s6-init-bin
+, s6-init-files
+, s6-linux-init
+, s6-rc
+, s6-rc-database
+, stdenvNoCC
+, writeScript
+, writeText
+} : config :
 let
-  inherit (pkgs)
-    callPackage
-    lib
-    runCommand
-    s6-rc
-    s6-init-files
-    stdenv
-    stdenvNoCC
-    writeScript
-    writeText;
-
-  s6-rc-db = pkgs.s6-rc-database.override {
+  s6-rc-db = s6-rc-database.override {
     services = builtins.attrValues config.services;
   };
 
   profile  = writeScript ".profile" ''
-    PATH=${lib.makeBinPath (with pkgs; [ s6-init-bin busybox execline s6-linux-init s6-rc])}
+    PATH=${lib.makeBinPath ([ s6-init-bin busybox execline s6-linux-init s6-rc])}
     export PATH
   '';
 
@@ -38,9 +43,9 @@ let
      /sys d 0555 root root
      /dev/pts d 0755 0 0
      /etc/init.d d 0755 0 0
-     /bin/init s 0755 0 0 ${pkgs.s6-init-bin}/bin/init
-     /bin/sh s 0755 0 0 ${pkgs.busybox}/bin/sh
-     /bin/busybox s 0755 0 0 ${pkgs.busybox}/bin/busybox
+     /bin/init s 0755 0 0 ${s6-init-bin}/bin/init
+     /bin/sh s 0755 0 0 ${busybox}/bin/sh
+     /bin/busybox s 0755 0 0 ${busybox}/bin/busybox
      /etc/s6-rc d 0755 0 0
      /etc/s6-rc/compiled s 0755 0 0 ${s6-rc-db}/compiled
      /etc/passwd f 0644 0 0 echo  "root::0:0:root:/:/bin/sh"
@@ -50,10 +55,9 @@ let
     # add pseudofiles to store so that the packages they
     # depend on are also added
     storeContents = [ pseudofiles s6-init-files ] ++ config.packages ;
-    # comp =  "xz -Xdict-size 100%"
   };
 in runCommand "frob-squashfs" {
-    nativeBuildInputs = with pkgs.buildPackages; [ squashfsTools qprint ];
+    nativeBuildInputs = with buildPackages; [ squashfsTools qprint ];
   } ''
     cp ${storefs} ./store.img
     chmod +w store.img

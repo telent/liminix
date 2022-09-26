@@ -10,12 +10,11 @@ let
     <liminix-config>
   ] nixpkgs.pkgs;
   finalConfig = config // {
-    packages = (with nixpkgs.pkgs; [ s6-rc ]) ++
+    packages = (with nixpkgs.pkgs; [ s6-init-files s6-rc ]) ++
                config.systemPackages ++
-               (builtins.attrValues config.services)
-    ;
+               (builtins.attrValues config.services);
   };
-  squashfs = (import ./make-image.nix) nixpkgs finalConfig;
+  squashfs = (nixpkgs.pkgs.callPackage ./make-image.nix {}) finalConfig;
   kernel = nixpkgs.pkgs.callPackage ./kernel {
     inherit (finalConfig.kernel) config;
   };
