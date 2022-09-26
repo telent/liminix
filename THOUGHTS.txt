@@ -73,12 +73,57 @@ Fri Sep 23 10:27:22 BST 2022
 
 Sun Sep 25 20:56:28 BST 2022
 
-1) shutdown doesn't work as its using the busybox one not s6
+TODO - bugs, missing bits, other infelicities as they occur to me:
 
-2) think we shouldn't have process-based services like dhcp, ppp
+1) shutdown doesn't work as its using the busybox one not s6.
+
+2) perhaps we shouldn't have process-based services like dhcp, ppp
 implement "address provider interface" - instead have a separate
 service for interface address that depends on the service and uses its
 output
 
 * ppp is not like dhcp because dhcp finds addresses for an existing
   interface but ppp makes a new one
+
+3) when I killed ppp it restarted, but I don't think it reran
+defaultroute which is supposed to depend on it. (Might be important
+e.g. if we'd been assigned a different IP address). Investigate
+semantics of s6-rc service dependencies
+
+DONE 4) make the pppoe test run unattended
+
+5) write a test for udhcp
+
+6) squashfs size is ~ 14MB for a configuration with not much in it,
+look for obvious wastes of space
+
+7) some of the pppoe config should be moved into a ppp service
+
+8) some of configuration.nix (e.g. defining routes) should be moved into
+tools
+
+9) split tools up instead of having it all one file
+
+10) is it OK to depend on squashfs pseudofiles if we might want to
+switch to ubifs? will there always be a squashfs underneath? might
+we want to change the pseudofiles in an overlay?
+
+11) haven't done (overlayfs) overlays at all
+
+12) overlay.nix needs splitting up
+
+13) upgrade ppp to something with an ipv6-up-script option
+
+14) add ipv6 support generally
+
+15) "ip address add" seems to magically recognise v4 vs v6 but
+is that specified or fluke?
+
+16) tighten up the module specs. (DONE) services.foo should be a s6-rc
+service, kernel config should be checked in some way
+
+DONE 17) rename nixwrt references in kernel builder
+
+18) maybe stop suffixing all the service names with .service
+
+chat -s -S ogin:--ogin: root / "ip address show dev ppp0 | grep ppp0" 192.168.100.1  "/nix/store/*-s6-linux-init-*/bin/s6-linux-init-hpr -p"
