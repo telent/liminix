@@ -4,6 +4,7 @@ let
     services = builtins.attrValues config.services;
   };
   inherit (pkgs.pseudofile) dir symlink;
+  inherit (pkgs) s6-init-bin;
 in {
   config = {
     environment = dir {
@@ -11,6 +12,9 @@ in {
         s6-rc = dir {
           compiled = symlink "${s6-rc-db}/compiled";
         };
+      };
+      bin = dir {
+        init = symlink "${s6-init-bin}/bin/init";
       };
     };
   };

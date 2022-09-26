@@ -3,17 +3,9 @@
 , busybox
 , buildPackages
 , callPackage
-, execline
-, lib
 , pseudofile
 , runCommand
-, s6-init-bin
 , s6-init-files
-, s6-linux-init
-, s6-rc
-, s6-rc-database
-, stdenvNoCC
-, writeScript
 , writeText
 } : config :
 let
@@ -35,7 +27,6 @@ let
      /sys d 0555 root root
      /dev/pts d 0755 0 0
      /etc/init.d d 0755 0 0
-     /bin/init s 0755 0 0 ${s6-init-bin}/bin/init
      /bin/sh s 0755 0 0 ${busybox}/bin/sh
      /bin/busybox s 0755 0 0 ${busybox}/bin/busybox
   '';
@@ -44,7 +35,7 @@ let
     (config.environment.contents);
 
   storefs = callPackage <nixpkgs/nixos/lib/make-squashfs.nix> {
-    # add pseudofiles to store so that the packages they
+    # add pseudofiles as packages to store so that the packages they
     # depend on are also added
     storeContents = [
       pseudofiles
