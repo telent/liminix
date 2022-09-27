@@ -6,10 +6,9 @@
 , pseudofile
 , runCommand
 , writeText
-} : config :
+} : filesystem :
 let
-  pseudofiles =
-    pseudofile.write "files.pf" (config.filesystem.contents);
+  pseudofiles = pseudofile.write "files.pf" filesystem;
 
   storefs = callPackage <nixpkgs/nixos/lib/make-squashfs.nix> {
     # 1) Every required package is referenced from somewhere

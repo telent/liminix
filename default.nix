@@ -11,7 +11,7 @@ let
     <liminix-config>
     ./modules/s6
   ] nixpkgs.pkgs;
-  squashfs = liminix.builders.squashfs config;
+  squashfs = liminix.builders.squashfs config.filesystem.contents;
   kernel = callPackage ./kernel {
     inherit (config.kernel) config;
   };
