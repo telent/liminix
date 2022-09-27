@@ -23,3 +23,10 @@ expression or there is more than one reference to `up`, `down` etc.
 
   * where a `let` form defines multiple names, put a newline after the
   token `let`, and indent each name two characters
+
+* should it be a package or a module? packages are self-contained -
+  they live in /nix/store/eeeeeee-name and don't directly change
+  system behaviour by their presence or absense. modules can add to
+  /etc or /bin or other global state, create services, all that
+  side-effecty stuff.  generally it should be a package unless it
+  can't be.

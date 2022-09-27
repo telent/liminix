@@ -129,3 +129,36 @@ DONE 17) rename nixwrt references in kernel builder
 19) syslogd - use busybox or s6?
 
 chat -s -S ogin:--ogin: root / "ip address show dev ppp0 | grep ppp0" 192.168.100.1  "/nix/store/*-s6-linux-init-*/bin/s6-linux-init-hpr -p"
+
+
+Working towards a general goal of having a derivation we can
+usefully run `nix path-info` on - or some other tool that will
+tell us what's making the images big. The squashfs doesn't
+have this information.
+
+Towards that end (really? can't remember how ...) what would be a
+way for packages to declare "I want to add files to /etc"? Is that
+even a good idea?
+
+Thinking we should turn s6-init-files back into a real derivation.
+
+Tue Sep 27 00:31:45 BST 2022
+
+> Thinking we should turn s6-init-files back into a real derivation.
+
+This turns out to be Not That Simple, because it contains weird shit
+(sticky bits and fifos).
+
+Tue Sep 27 09:50:44 BST 2022
+
+* allow modules to register activation scripts that are run on the
+root filesystem once all packages are installed
+
+  - do they run on build or on host? if we're upgrading in place
+  how do we ship filesystem changes to the host?
+
+or:
+
+* allow modules to declare environment.*, use pseudofile on build and
+  create real files on host. will need to keep the implementation on
+  host faily simple because restricted environment
