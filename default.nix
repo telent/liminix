@@ -8,10 +8,10 @@ let
     ./modules/base.nix
     ({ lib, ... } : { config = { inherit (device) kernel; }; })
     <liminix-config>
-    ./modules/s6-rc.nix
+    ./modules/s6
   ] nixpkgs.pkgs;
   finalConfig = config // {
-    packages = (with nixpkgs.pkgs; [ s6-init-files s6-rc ]) ++
+    packages = (with nixpkgs.pkgs; [ s6-rc ]) ++
                config.systemPackages ++
                (builtins.attrValues config.services);
   };

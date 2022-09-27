@@ -5,7 +5,6 @@
 , callPackage
 , pseudofile
 , runCommand
-, s6-init-files
 , writeText
 } : config :
 let
@@ -39,7 +38,6 @@ let
     # depend on are also added
     storeContents = [
       pseudofiles
-      s6-init-files
       config-pseudofiles
     ] ++ config.packages ;
   };
@@ -49,6 +47,6 @@ in runCommand "frob-squashfs" {
     cp ${storefs} ./store.img
     chmod +w store.img
     mksquashfs - store.img -no-recovery -quiet -no-progress  -root-becomes store -p "/ d 0755 0 0"
-    mksquashfs - store.img -no-recovery -quiet -no-progress  -root-becomes nix  -pf ${pseudofiles} -pf ${s6-init-files} -pf ${config-pseudofiles}
+    mksquashfs - store.img -no-recovery -quiet -no-progress  -root-becomes nix  -pf ${pseudofiles}  -pf ${config-pseudofiles}
     cp store.img $out
   ''
