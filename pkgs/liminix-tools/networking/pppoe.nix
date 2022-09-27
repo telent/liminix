@@ -32,6 +32,7 @@ let
     "ip-up-script" ip-up
     "ipparam" name
     "nodetach"
+    "logfd" "2"
   ];
 
 in

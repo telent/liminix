@@ -25,11 +25,6 @@ in rec {
     "PPP_SYNC_TTY" = "y";
   };
 
-  services.syslogd = longrun {
-    name = "syslogd";
-    run = "${pkgs.busybox}/bin/syslogd -n -O /run/syslog";
-  };
-
   services.pppoe =
     let iface = interface { type = "hardware"; device = "eth0"; };
     in pppoe iface {
@@ -64,7 +59,6 @@ in rec {
       loopback
       defaultroute4
       packet_forwarding
-      syslogd
     ];
   };
 

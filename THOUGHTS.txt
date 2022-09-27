@@ -168,9 +168,6 @@ Tue Sep 27 16:14:18 BST 2022
 TODO list is getting both longer and shorter, though longer on
 average.
 
-DONE 1) rename config.environment as .filesystem. and add module
-types for it
-
 2) perhaps we shouldn't use process-based services like [ou]dhcp as
 queryable endpoint for interface addresses (e.g. when adding routes).
 Instead have a separate service for interface address that depends on
@@ -186,13 +183,7 @@ creates the interface instead of using an existing unconfigured one
 
 5) write a test for udhcp
 
-DONE 6) squashfs size is ~ 14MB for a configuration with not much in it,
-look for obvious wastes of space
-
 7) some of the pppoe config should be moved into a ppp service
-
-8) some of configuration.nix (e.g. defining routes) should be moved into
-tools
 
 11) haven't done (overlayfs) overlays at all
 
@@ -203,19 +194,16 @@ tools
 15) "ip address add" seems to magically recognise v4 vs v6 but
 is that specified or fluke?
 
-DONE 18) maybe stop suffixing all the service names with .service
+19) ship logs somehow to log collection system
 
-19) syslogd - use busybox or s6? the only thing (so far) using it is pppd.
-Maybe we could LD_PRELOAD it to use stderr instead
+21) dhcp, dns, hostap service for lan
 
-
-DONE 20) The option currently called defaultPackages needs a better name as
-it doesn't have the same semantics as nixos
-environment.defaultPackages.  maybe call it packagesInProfile or
-packagesOnPath. or defaultProfile.packages
-
+22) support real hardware
 
 Tue Sep 27 22:00:36 BST 2022
 
 Found the cause of huge image size: rp-pppoe ships with scripts that
 reference build-time packages, so we have x86-64 glibc in there
+
+We don't need syslog just to accommodate ppp, there's an underdocumented
+option for it to log to a file descriptor
