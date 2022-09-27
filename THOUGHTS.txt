@@ -160,5 +160,54 @@ root filesystem once all packages are installed
 or:
 
 * allow modules to declare environment.*, use pseudofile on build and
-  create real files on host. will need to keep the implementation on
+create real files on host. will need to keep the implementation on
   host faily simple because restricted environment
+
+Tue Sep 27 16:14:18 BST 2022
+
+TODO list is getting both longer and shorter, though longer on
+average.
+
+DONE 1) rename config.environment as .filesystem. and add module
+types for it
+
+2) perhaps we shouldn't use process-based services like [ou]dhcp as
+queryable endpoint for interface addresses (e.g. when adding routes).
+Instead have a separate service for interface address that depends on
+the *dhcp and uses its output
+
+3) when I killed ppp it restarted, but I don't think it reran
+defaultroute which is supposed to depend on it. (Might be important
+e.g. if we'd been assigned a different IP address). Investigate
+semantics of s6-rc service dependencies
+
+4) figure out a nice way to fit ppp into this model as it actually
+creates the interface instead of using an existing unconfigured one
+
+5) write a test for udhcp
+
+6) squashfs size is ~ 14MB for a configuration with not much in it,
+look for obvious wastes of space
+
+7) some of the pppoe config should be moved into a ppp service
+
+8) some of configuration.nix (e.g. defining routes) should be moved into
+tools
+
+11) haven't done (overlayfs) overlays at all
+
+13) upgrade ppp to something with an ipv6-up-script option, move ppp and pppoe derivations into their own files
+
+14) add ipv6 support generally
+
+15) "ip address add" seems to magically recognise v4 vs v6 but
+is that specified or fluke?
+
+18) maybe stop suffixing all the service names with .service
+
+19) syslogd - use busybox or s6?
+
+20) The option currently called defaultPackages needs a better name as
+it doesn't have the same semantics as nixos
+environment.defaultPackages.  maybe call it packagesInProfile or
+packagesOnPath. or defaultProfile.packages
