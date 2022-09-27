@@ -63,5 +63,5 @@ in rec {
     contents = with services; [ loopback ntp defaultroute4 ];
   };
 
-  systemPackages = [ pkgs.hello ] ;
+  defaultProfile.packages = [ pkgs.hello ] ;
 }

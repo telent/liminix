@@ -68,5 +68,5 @@ in rec {
     ];
   };
 
-  systemPackages = [ pkgs.hello ] ;
+  defaultProfile.packages = [ pkgs.hello ] ;
 }

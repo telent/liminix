@@ -1,4 +1,4 @@
-{ lib, pkgs, ...}:
+{ lib, pkgs, config, ...}:
 let
   inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;
   inherit (pkgs.pseudofile) dir symlink;
@@ -12,8 +12,12 @@ let
 
 in {
   options = {
-    systemPackages = mkOption {
-      type = types.listOf types.package;
+    # analogous to nixos systemPackages, but we don't symlink into
+    # /run/current-system, we just add the paths in /etc/profile
+    defaultProfile = {
+      packages = mkOption {
+        type = types.listOf types.package;
+      };
     };
     services = mkOption {
       type = types.attrsOf type_service;
@@ -31,6 +35,8 @@ in {
     };
   };
   config = {
+    defaultProfile.packages = with pkgs;
+      [ s6-init-bin busybox execline s6-linux-init s6-rc ];
     environment = dir {
       bin = dir {
         sh = symlink "${busybox}/bin/sh";
@@ -48,7 +54,7 @@ in {
       etc = dir {
         profile = symlink
           (pkgs.writeScript ".profile" ''
-            PATH=${lib.makeBinPath (with pkgs; [ s6-init-bin busybox execline s6-linux-init s6-rc])}
+            PATH=${lib.makeBinPath config.defaultProfile.packages}
             export PATH
           '');
         passwd = { file = "root::0:0:root:/:/bin/sh\n"; };
