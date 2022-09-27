@@ -17,7 +17,7 @@ interface: {
 let
   name = "${interface.device}.pppoe";
   ip-up = writeAshScript "ip-up" {} ''
-    outputs=/run/service-state/${name}.service/
+    outputs=/run/service-state/${name}/
     mkdir -p $outputs
     (cd $outputs
     echo $1 > ifname

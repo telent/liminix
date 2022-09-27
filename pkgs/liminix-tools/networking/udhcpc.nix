@@ -14,7 +14,7 @@ action=$1
 
 set_address() {
     ip address replace $ip/$mask dev $interface
-    dir=/run/service-state/${name}.service/
+    dir=/run/service-state/${name}/
     mkdir -p $dir
     for i in lease mask ip router siaddr dns serverid subnet opt53 interface ; do
         echo ''${!i} > $dir/$i
