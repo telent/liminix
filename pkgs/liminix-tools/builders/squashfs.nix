@@ -23,7 +23,7 @@ in runCommand "frob-squashfs" {
 } ''
     cp ${storefs} ./store.img
     chmod +w store.img
-    mksquashfs - store.img -no-recovery -quiet -no-progress  -root-becomes store -p "/ d 0755 0 0"
-    mksquashfs - store.img -no-recovery -quiet -no-progress  -root-becomes nix  -p "/ d 0755 0 0" -pf ${pseudofiles}
+    mksquashfs - store.img -exit-on-error -no-recovery -quiet -no-progress  -root-becomes store -p "/ d 0755 0 0"
+    mksquashfs - store.img -exit-on-error -no-recovery -quiet -no-progress  -root-becomes nix  -p "/ d 0755 0 0" -pf ${pseudofiles}
     cp store.img $out
 ''
