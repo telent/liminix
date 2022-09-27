@@ -11,10 +11,12 @@ else
     flags="-serial mon:stdio"
 fi
 
+INIT=${INIT-/bin/init}
+
 qemu-system-mips \
     -M malta -m 256 \
     -echr 16 \
-    -append "default console=ttyS0,38400n8 panic=10 oops=panic init=/bin/init  loglevel=8 root=/dev/vda" \
+    -append "default console=ttyS0,38400n8 panic=10 oops=panic init=$INIT loglevel=8 root=/dev/vda" \
     -drive file=$2,format=raw,readonly=on,if=virtio \
     -netdev socket,id=access,mcast=230.0.0.1:1234 \
     -device virtio-net-pci,disable-legacy=on,disable-modern=off,netdev=access,mac=ba:ad:1d:ea:21:02 \
