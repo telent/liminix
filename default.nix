@@ -4,7 +4,7 @@
 let
   overlay = import ./overlay.nix;
   nixpkgs = import <nixpkgs> ( device.system // {overlays = [overlay]; });
-  inherit (nixpkgs.pkgs) callPackage liminix;
+  inherit (nixpkgs.pkgs) callPackage writeText liminix;
   config = (import ./merge-modules.nix) [
     ./modules/base.nix
     ({ lib, ... } : { config = { inherit (device) kernel; }; })
@@ -24,6 +24,9 @@ in {
       ln -s ${squashfs} squashfs
       ln -s ${kernel.vmlinux} vmlinux
    '';
+    # this exists so that you can run "nix-store -q --tree" on it and find
+    # out what's in the image, which is nice if it's unexpectedly huge
+    manifest = writeText "manifest.json" (builtins.toJSON config.filesystem.contents);
   };
   # this is just here as a convenience, so that we can get a
   # cross-compiling nix-shell for any package we're customizing

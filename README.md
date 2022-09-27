@@ -114,6 +114,16 @@ Assuming you have nixpkgs checked out in a peer directory of this one,
 
     NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH ./run-tests.sh
 
+## Diagnosing unexpectedly large images
+
+Sometimes you can add a package and it causes the image size to balloon
+because it has dependencies on other things you didn't know about. Build the
+`outputs.manifest` attribute, which is a json representation of the
+filesystem, and you can run `nix-store --query` on it:
+
+    NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build -I liminix-config=path/to/your/configuration.nix --arg device "import ./devices/qemu.nix" -A outputs.manifest -o manifest
+    nix-store -q --tree manifest
+
 
 ## Articles of interest
 
