@@ -12,15 +12,7 @@ final: prev: {
   s6-init-bin =  final.callPackage ./pkgs/s6-init-bin {};
   s6-rc-database = final.callPackage ./pkgs/s6-rc-database {};
 
-  pppoe = prev.rpPPPoE.overrideAttrs (o: {
-    # use newer rp-pppoe, it builds cleanly
-    src = final.fetchFromGitHub {
-      owner = "dfskoll";
-      repo = "rp-pppoe";
-      rev = "7cfd8c0405d14cf1c8d799d41d8207fd707979c1";
-      hash = "sha256-MFdCwNj8c52blxEuXH5ltT2yYDmKMH5MLUgtddZV25E=";
-    };
-  });
+  pppoe = final.callPackage ./pkgs/pppoe {};
   ppp =
     (prev.ppp.override {
       libpcap = null;
