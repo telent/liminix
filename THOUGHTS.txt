@@ -203,9 +203,11 @@ tools
 15) "ip address add" seems to magically recognise v4 vs v6 but
 is that specified or fluke?
 
-18) maybe stop suffixing all the service names with .service
+DONE 18) maybe stop suffixing all the service names with .service
 
-19) syslogd - use busybox or s6?
+19) syslogd - use busybox or s6? the only thing (so far) using it is pppd.
+Maybe we could LD_PRELOAD it to use stderr instead
+
 
 DONE 20) The option currently called defaultPackages needs a better name as
 it doesn't have the same semantics as nixos

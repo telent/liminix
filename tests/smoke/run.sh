@@ -13,10 +13,10 @@ cd $dest_path;
 db=nix/store/*-s6-rc-database/compiled/
 test -d $db
 chmod -R +w $db
-# check we have closure of config.services (lo.link.service exists only
+# check we have closure of config.services (lo.link service exists only
 # as a dependency)
-test "$(s6-rc-db -c $db type lo.link.service)" = "oneshot"
-test "$(s6-rc-db -c $db type ntp.service)" = "longrun"
+test "$(s6-rc-db -c $db type lo.link)" = "oneshot"
+test "$(s6-rc-db -c $db type ntp)" = "longrun"
 echo OK
 EOF
      )

@@ -16,7 +16,7 @@ let
     , notification-fd ? null
     , dependencies ? []
   } @ args: stdenvNoCC.mkDerivation {
-    name = "${name}.service";
+    inherit name;
     serviceType = "longrun";
     buildInputs = dependencies;
     dependencies = builtins.map (d: d.name) dependencies;
@@ -35,7 +35,7 @@ let
   } @ args: stdenvNoCC.mkDerivation {
     # stdenvNoCC is to avoid generating derivations with names
     # like foo.service-mips-linux-musl
-    name = "${name}.service";
+    inherit name;
     serviceType = "oneshot";
     # does this suffice to make sure dependencies are included
     # even though the built output has no references to their
@@ -62,7 +62,7 @@ let
     shell = "${busybox}/bin/sh";
     builder = ./builder.sh;
   };
-  bundle = { name, ... } @args : target (args // { name = "${name}.bundle";});
+  bundle = { name, ... } @args : target (args // { inherit name;});
 in {
   inherit target bundle oneshot longrun output;
 }
