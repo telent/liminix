@@ -4,6 +4,7 @@
 let
   overlay = import ./overlay.nix;
   nixpkgs = import <nixpkgs> ( device.system // {overlays = [overlay]; });
+  inherit (nixpkgs.pkgs) callPackage liminix;
   config = (import ./merge-modules.nix) [
     ./modules/base.nix
     ({ lib, ... } : { config = { inherit (device) kernel; }; })
@@ -11,13 +12,12 @@ let
     ./modules/s6
   ] nixpkgs.pkgs;
   finalConfig = config // {
-    packages = (with nixpkgs.pkgs; [ s6-rc ]) ++
-               config.systemPackages ++
+    packages = config.systemPackages ++
                (builtins.attrValues config.services);
   };
-  squashfs = (nixpkgs.pkgs.callPackage ./make-image.nix {}) finalConfig;
-  kernel = nixpkgs.pkgs.callPackage ./kernel {
-    inherit (finalConfig.kernel) config;
+  squashfs = liminix.builders.squashfs finalConfig;
+  kernel = callPackage ./kernel {
+    inherit (config.kernel) config;
   };
 in {
   outputs = {

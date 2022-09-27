@@ -4,6 +4,9 @@ final: prev: {
   liminix = {
     services = final.callPackage ./pkgs/liminix-tools/services {};
     networking =  final.callPackage ./pkgs/liminix-tools/networking {};
+    builders =  {
+      squashfs = final.callPackage ./pkgs/liminix-tools/builders/squashfs.nix {};
+    };
   };
   writeAshScript = final.callPackage ./pkgs/write-ash-script {};
   s6-init-bin =  final.callPackage ./pkgs/s6-init-bin {};
