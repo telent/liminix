@@ -21,6 +21,10 @@ let
               else if attrs'.type == "d" then
                 (visit "${prefix}/${filename}" attrs.contents) +
                 "\n" + line
+              else if attrs'.type == "c" then
+                with attrs'; "${line} ${major} ${minor}"
+              else if attrs'.type == "b" then
+                with attrs'; "${line} ${major} ${minor}"
               else if attrs'.type == "s" then
                 "${line} ${attrs'.target}"
               else if attrs'.type == "l" then

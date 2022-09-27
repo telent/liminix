@@ -2,6 +2,7 @@
 let
   inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;
   inherit (pkgs.pseudofile) dir symlink;
+  inherit (pkgs) busybox;
 
   type_service = types.package // {
     name = "service";
@@ -31,6 +32,19 @@ in {
   };
   config = {
     environment = dir {
+      bin = dir {
+        sh = symlink "${busybox}/bin/sh";
+        busybox = symlink "${busybox}/bin/busybox";
+      };
+      dev =
+        let node = type: major: minor: mode : { inherit type major minor mode; };
+        in dir {
+          null =    node "c" "1" "3" "0666";
+          zero =    node "c" "1" "5" "0666";
+          tty =     node "c" "5" "0" "0666";
+          console = node "c" "5" "1" "0600";
+          pts =     dir {};
+        };
       etc = dir {
         profile = symlink
           (pkgs.writeScript ".profile" ''
@@ -40,6 +54,9 @@ in {
         passwd = { file = "root::0:0:root:/:/bin/sh\n"; };
         group = { file = "root::0:\n"; };
       };
+      proc = dir {};
+      run = dir {};
+      sys = dir {};
     };
   };
 }
