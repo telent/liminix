@@ -22,7 +22,7 @@ in {
     services = mkOption {
       type = types.attrsOf type_service;
     };
-    environment = mkOption { type = types.anything; };
+    filesystem = mkOption { type = types.anything; };
     kernel = {
       config = mkOption {
         # mostly the values are y n or m, but sometimes
@@ -37,7 +37,7 @@ in {
   config = {
     defaultProfile.packages = with pkgs;
       [ s6-init-bin busybox execline s6-linux-init s6-rc ];
-    environment = dir {
+    filesystem = dir {
       bin = dir {
         sh = symlink "${busybox}/bin/sh";
         busybox = symlink "${busybox}/bin/busybox";

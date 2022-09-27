@@ -9,12 +9,12 @@
 } : config :
 let
   pseudofiles =
-    pseudofile.write "config.etc" (config.environment.contents);
+    pseudofile.write "files.pf" (config.filesystem.contents);
 
   storefs = callPackage <nixpkgs/nixos/lib/make-squashfs.nix> {
     # 1) Every required package is referenced from somewhere
     # outside /nix/store. 2) Every file outside the store is
-    # specified by config.environment. 3) Therefore, closing over
+    # specified by config.filesystem. 3) Therefore, closing over
     # the pseudofile will give us all the needed packages
     storeContents = [ pseudofiles ];
   };

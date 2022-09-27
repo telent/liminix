@@ -134,7 +134,7 @@ let
   };
 in {
   config = {
-    environment = dir {
+    filesystem = dir {
       etc = dir {
         s6-rc = dir {
           compiled = symlink "${s6-rc-db}/compiled";
