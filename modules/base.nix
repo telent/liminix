@@ -33,10 +33,27 @@ in {
         type = types.attrsOf types.nonEmptyStr;
       };
     };
+    groups =  mkOption {
+      type = types.attrsOf types.anything;
+    };
+    users =  mkOption {
+      type = types.attrsOf types.anything;
+    };
   };
   config = {
     defaultProfile.packages = with pkgs;
       [ s6-init-bin busybox execline s6-linux-init s6-rc ];
+
+    users.root = {
+      uid = 0; gid= 0; gecos = "Root of all evaluation";
+      dir = "/";
+      passwd = "";
+      shell = "/bin/sh";
+    };
+    groups.root = {
+      gid = 0; usernames = ["root"];
+    };
+
     filesystem = dir {
       bin = dir {
         sh = symlink "${busybox}/bin/sh";
@@ -57,8 +74,6 @@ in {
             PATH=${lib.makeBinPath config.defaultProfile.packages}
             export PATH
           '');
-        passwd = { file = "root::0:0:root:/:/bin/sh\n"; };
-        group = { file = "root::0:\n"; };
       };
       proc = dir {};
       run = dir {};

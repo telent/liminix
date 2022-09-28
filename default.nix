@@ -10,6 +10,7 @@ let
     ({ lib, ... } : { config = { inherit (device) kernel; }; })
     <liminix-config>
     ./modules/s6
+    ./modules/users.nix
   ] nixpkgs.pkgs;
   squashfs = liminix.builders.squashfs config.filesystem.contents;
   kernel = callPackage ./kernel {
