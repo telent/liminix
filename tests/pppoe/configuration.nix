@@ -1,6 +1,6 @@
-{ config, pkgs, ... } :
+{ config, pkgs, lib, ... } :
 let
-  inherit (pkgs.liminix.networking) interface address pppoe route;
+  inherit (pkgs.liminix.networking) interface address pppoe route dnsmasq;
   inherit (pkgs.liminix.services) oneshot longrun bundle target output;
 in rec {
   services.loopback =
@@ -12,6 +12,10 @@ in rec {
         (address iface { family = "inet6"; address ="::1"; prefixLength = 128;})
       ];
     };
+
+  services.lan4 =
+    let iface = interface { type = "hardware"; device = "eth1";};
+    in address iface { family = "inet4"; address ="192.168.19.1"; prefixLength = 24;};
 
   kernel.config = {
     "IKCONFIG_PROC" = "y";
@@ -53,14 +57,29 @@ in rec {
       dependencies = [iface];
     };
 
+  users.dnsmasq = {
+    uid = 51; gid= 51; gecos = "DNS/DHCP service user";
+    dir = "/run/dnsmasq";
+    shell = "/bin/false";
+  };
+  groups.dnsmasq = {
+    gid = 51; usernames = ["dnsmasq"];
+  };
+  services.dns =
+    dnsmasq {
+      interface = services.lan4;
+      ranges = ["192.168.19.10,192.168.19.253"];
+      domain = "fake.liminix.org";
+    };
+
   services.default = target {
     name = "default";
     contents = with services; [
       loopback
       defaultroute4
       packet_forwarding
+      dns
     ];
   };
-
   defaultProfile.packages = [ pkgs.hello ] ;
 }

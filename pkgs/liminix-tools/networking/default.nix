@@ -18,6 +18,8 @@ in {
       name = "${interface.device}.addr.${address}";
       up = "ip address add ${address}/${toString prefixLength} dev ${interface.device} ";
       down = "ip address del ${address}/${toString prefixLength} dev ${interface.device} ";
+    } // {
+      inherit (interface) device;
     };
   udhcpc = callPackage ./udhcpc.nix {};
   odhcpc = interface: { ... } @ args: longrun {
@@ -25,6 +27,7 @@ in {
     run = "odhcpcd ${interface.device}";
   };
   pppoe = callPackage ./pppoe.nix {};
+  dnsmasq = callPackage ./dnsmasq.nix {};
   route = { name, target, via, dependencies }:
     oneshot {
       inherit name;

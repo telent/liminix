@@ -23,3 +23,9 @@ fi
 
 ../../scripts/run-qemu.sh --background foo.sock result/vmlinux result/squashfs
 nix-shell -p expect --run "expect getaddress.expect"
+
+set -o pipefail
+response=$(nix-shell -p python3Packages.scapy --run 'python ./test-dhcp-service.py' )
+
+echo "$response"
+echo "$response" | nix-shell -p jq --run "jq -e 'select((.router ==  \"192.168.19.1\") and (.server_id==\"192.168.19.1\"))'"

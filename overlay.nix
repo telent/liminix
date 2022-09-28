@@ -12,6 +12,10 @@ final: prev: {
   s6-init-bin =  final.callPackage ./pkgs/s6-init-bin {};
   s6-rc-database = final.callPackage ./pkgs/s6-rc-database {};
 
+  dnsmasq = prev.dnsmasq.override {
+    dbusSupport = false;
+  };
+
   pppoe = final.callPackage ./pkgs/pppoe {};
   ppp =
     (prev.ppp.override {

@@ -207,3 +207,16 @@ reference build-time packages, so we have x86-64 glibc in there
 
 We don't need syslog just to accommodate ppp, there's an underdocumented
 option for it to log to a file descriptor
+
+Wed Sep 28 16:04:02 BST 2022
+
+Based on https://unix.stackexchange.com/a/431953 if we can forge
+ethernet packets we might be able to write tests for e.g. "is the vm
+running a dhcp server"
+
+Wed Sep 28 21:29:05 BST 2022
+
+We can use Python "scapy" to generate dhcp request packets, and Python
+'socket' model to send them encapsulated in UDP. Win
+
+It's extremely janky python
