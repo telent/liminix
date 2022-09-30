@@ -231,10 +231,6 @@
       NET_ACT_PEDIT= "m";
       NET_ACT_SIMP= "m";
       NET_ACT_SKBEDIT= "m";
-      CFG80211= "m";
-      MAC80211= "m";
-      MAC80211_MESH= "y";
-      RFKILL= "m";
       DEVTMPFS= "y";
       CONNECTOR= "m";
       MTD= "y";
@@ -437,7 +433,12 @@
       RCU_CPU_STALL_TIMEOUT = "60";
       ENABLE_DEFAULT_TRACERS = "y";
 
-
+      CFG80211= "y";
+      MAC80211= "y";
+      MAC80211_MESH= "y";
+      RFKILL= "y";
+      WLAN = "y";
+      MAC80211_HWSIM = "y";
       SQUASHFS = "y";
       SQUASHFS_XZ = "y";
       VIRTIO_PCI = "y";
