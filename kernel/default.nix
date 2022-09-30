@@ -5,6 +5,7 @@
 , fetchFromGitHub
 
 , config
+, checkedConfig
 }:
 let
   source = fetchFromGitHub {
@@ -36,7 +37,6 @@ let
 in
 {
   vmlinux = callPackage ./vmlinux.nix {
-    inherit tree;
-    inherit config;
+    inherit tree config checkedConfig;
   };
 }

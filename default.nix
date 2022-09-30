@@ -14,7 +14,7 @@ let
   ] nixpkgs.pkgs;
   squashfs = liminix.builders.squashfs config.filesystem.contents;
   kernel = callPackage ./kernel {
-    inherit (config.kernel) config;
+    inherit (config.kernel) config checkedConfig;
   };
 in {
   outputs = {
