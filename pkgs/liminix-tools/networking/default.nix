@@ -28,6 +28,7 @@ in {
   };
   pppoe = callPackage ./pppoe.nix {};
   dnsmasq = callPackage ./dnsmasq.nix {};
+  hostapd = callPackage ./hostapd.nix {};
   route = { name, target, via, dependencies }:
     oneshot {
       inherit name;

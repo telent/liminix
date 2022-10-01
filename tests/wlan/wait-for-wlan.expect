@@ -1,0 +1,21 @@
+set timeout 60
+
+spawn socat unix-connect:foo.sock -
+send "\r\n"
+expect "login:" {  send "root\r\n" }
+expect "/ #"
+set FINISHED 0
+set EXIT "1"
+send "ls -l /run/uncaught-logs/current\r\n"
+expect "/ #"
+while { $FINISHED < 10 } {
+  send "grep AP-ENABLED /run/uncaught-logs/current || echo not\r\n"
+  
+  expect {
+    "wlan0: AP-ENABLED" { set FINISHED 10; set EXIT 0; }
+    "not" { send_user "waiting ..." ; sleep 5 }
+  }
+  set FINISHED [ expr $FINISHED + 1 ]
+}
+
+exit $EXIT
