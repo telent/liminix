@@ -125,6 +125,20 @@ filesystem, and you can run `nix-store --query` on it:
     nix-store -q --tree manifest
 
 
+## Contributing
+
+Contributions are welcome, though in these early days there may be a
+bit of back and forth involved before patches are merged.  Have a read
+of [CONTRIBUTING](CONTRIBUTING.md) and [STYLE](STYLE.md) and try to
+intuit the unarticulated vision :-)
+
+Liminix' primary repo is https://gti.telent.net/dan/liminix. There's a
+[mirror on Github](https://github.com/telent/liminix) for convenience
+and visibility: you can open PRs against that but be aware that the
+process of merging them may be arcane. Some day, we will have
+federated Gitea using ActivityPub.
+
+
 ## Articles of interest
 
 * [Build Safety of Software in 28 Popular Home Routers](https://cyber-itl.org/assets/papers/2018/build_safety_of_software_in_28_popular_home_routers.pdf):
