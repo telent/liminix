@@ -4,12 +4,16 @@
 , lib
 , busybox
 , callPackage
-, writeAshScript
+, writeScript
 }:
 let
   inherit (builtins) concatStringsSep;
   output = service: name: "/run/service-state/${service.name}/${name}";
-
+  serviceScript = commands : ''
+    #!${busybox}/bin/sh
+    output() { cat $1/.outputs/$2; }
+    ${commands}
+  '';
   service = {
     name
     , serviceType
@@ -21,14 +25,12 @@ let
     , dependencies ? []
     , contents ? []
   } @ args: stdenvNoCC.mkDerivation {
-    # stdenvNoCC is to avoid generating derivations with names
+    # we use stdenvNoCC to avoid generating derivations with names
     # like foo.service-mips-linux-musl
-    inherit name serviceType;
-    inherit run up down;
+    inherit name serviceType up down run;
     buildInputs = dependencies ++ contents;
     dependencies = builtins.map (d: d.name) dependencies;
     contents = builtins.map (d: d.name) contents;
-    shell = "${busybox}/bin/sh";
     notificationFd = notification-fd;
     builder = ./builder.sh;
   };
@@ -41,6 +43,7 @@ let
     , dependencies ? []
   } @ args: service (args //{
     serviceType = "longrun";
+    run = serviceScript run;
   });
   oneshot = {
     name
@@ -51,8 +54,8 @@ let
     , ...
   } @ args : service (args  // {
     serviceType = "oneshot";
-    up = writeAshScript "${name}-up" {} up;
-    down = writeAshScript "${name}-down" {} down;
+    up = writeScript "${name}-up" (serviceScript up);
+    down= writeScript "${name}-down" (serviceScript down);
   });
   bundle = {
     name

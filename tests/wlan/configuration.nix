@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... } :
 let
   inherit (pkgs.liminix.networking) interface address hostapd route dnsmasq;
-  inherit (pkgs.liminix.services) oneshot longrun bundle target output;
+  inherit (pkgs.liminix.services) oneshot longrun bundle target;
 in rec {
   services.loopback =
     let iface = interface { type = "loopback"; device = "lo";};

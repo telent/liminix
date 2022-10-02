@@ -41,7 +41,7 @@ in rec {
 
   services.defaultroute4 = route {
     name = "defautlrote";
-    via = "$(cat ${output services.pppoe "address"})";
+    via = "$(output ${services.pppoe} address)";
     target = "default";
     dependencies = [ services.pppoe ];
   };
@@ -49,7 +49,7 @@ in rec {
   services.packet_forwarding =
     let
       iface = services.pppoe;
-      filename = "/proc/sys/net/ipv4/conf/$(cat ${output iface "ifname"})/forwarding";
+      filename = "/proc/sys/net/ipv4/conf/$(output ${iface} ifname)/forwarding";
     in oneshot {
       name = "let-the-ip-flow";
       up = "echo 1 > ${filename}";

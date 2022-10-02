@@ -1,7 +1,7 @@
 { config, pkgs, ... } :
 let
   inherit (pkgs.liminix.networking) interface address udhcpc odhcpc route;
-  inherit (pkgs.liminix.services) oneshot longrun bundle target output;
+  inherit (pkgs.liminix.services) oneshot longrun bundle target;
 in rec {
   services.loopback =
     let iface = interface { type = "loopback"; device = "lo";};
@@ -21,11 +21,9 @@ in rec {
     in odhcpc iface { uid = "e7"; };
 
   services.ntp = longrun {
-    # the simplest approach at the consumer end  is to require the
-    # producer to create a file per output variable.
     name = "ntp";
     run = let inherit (services) dhcpv4 dhcpv6;
-          in "${pkgs.ntp}/bin/ntpd $(cat ${output dhcpv4 "ntp_servers"}) $(cat ${output dhcpv6 "NTP_IP"})";
+          in "${pkgs.ntp}/bin/ntpd $(output ${dhcpv4} ntp_servers) $(output ${dhcpv6} NTP_IP})";
 
     # I don't think it's possible to standardise the file names
     # generally, as different services have different outputs, but it
@@ -42,7 +40,7 @@ in rec {
 
   services.defaultroute4 = route {
     name = "defautlrote";
-    via = "$(cat ${output services.dhcpv4 "address"})";
+    via = "$(output ${services.dhcpv4} address)";
     target = "default";
     dependencies = [ services.dhcpv4 ];
   };
@@ -50,7 +48,7 @@ in rec {
   services.packet_forwarding =
     let
       iface = services.dhcpv4;
-      filename = "/proc/sys/net/ipv4/conf/$(cat ${output iface "ifname"})/forwarding";
+      filename = "/proc/sys/net/ipv4/conf/$(output ${iface} ifname)/forwarding";
     in oneshot {
       name = "let-the-ip-flow";
       up = "echo 1 > ${filename}";
