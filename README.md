@@ -114,7 +114,12 @@ Assuming you have nixpkgs checked out in a peer directory of this one,
 
     NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH ./run-tests.sh
 
-## Diagnosing unexpectedly large images
+Some of the tests require the emulated upstream connection to be running.
+
+
+## Troubleshooting
+
+### Diagnosing unexpectedly large images
 
 Sometimes you can add a package and it causes the image size to balloon
 because it has dependencies on other things you didn't know about. Build the

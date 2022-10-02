@@ -3,7 +3,7 @@
 To test a router, we need an upstream connection. In this directory,
 find
 
-* run.sh, a script that will start a RouterOS image in qemu.
+* chr.sh, a script that will start a RouterOS image in qemu.
   Login when prompted, username is "admin", blank password
 * routeros.config, a set of commands you can feed into routeros
   to set up PPPoE
