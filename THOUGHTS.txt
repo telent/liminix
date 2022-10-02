@@ -220,3 +220,89 @@ We can use Python "scapy" to generate dhcp request packets, and Python
 'socket' model to send them encapsulated in UDP. Win
 
 It's extremely janky python
+
+Thu Sep 29 15:24:37 BST 2022
+
+Two points to ponder
+
+1) where service config depends on outputs of other services, we
+do that rather ugly "$(cat ${output ....})" construct. Can we improve on
+that? Maybe we could have some kind of tooling to read them as environment
+variables ...
+
+2) we have given no consideration yet to secrets. we want the secrets to
+be not in the store; we want some way of refreshing them when they change
+
+Sat Oct  1 14:24:21 BST 2022
+
+The MAC80211_HWSIM kernel config creates virtual wlan[01] devices
+which hostapd will work with, and a hwsim0 which we can use to monitor
+(though not inject) trafic. Could we use this for wifi tests? How do
+we make the guest hwsim0 visible to the host?
+
+
+Sat Oct  1 18:41:31 BST 2022
+
+virtual serial ports: I struggled with qemu for ages to get this to work.
+You also need the unhelpfully named CONFIG_VIRTIO_CONSOLE option in
+kconfig
+
+QEMU_OPTIONS="-nodefaults  -chardev socket,path=/tmp/wlan,server=on,wait=off,id=wlan  -device virtio-serial-pci -device virtserialport,name=wlan,chardev=wlan"
+
+Sun Oct  2 09:34:48 BST 2022
+
+We could implement the secrets store as a service, then the secrets
+are outputs.
+
+Things we can do in qemu
+
+1) make interface address service that depends on dhcp, instead of
+  being set by it directly
+2) check out restart behaviour of dependent services when depended-on
+  service dies
+3) pppd _creates_ an interface, work out how to fit it into this model
+5) add bridge support for lan
+8) upgrade ppp to something with an ipv6-up-script option, move ppp and pppoe derivations into their own files
+9) get ipv6 address from pppoe
+10) get ipv6 delegation from pppoe and add prefix to lan
+11) support dhcp6 in dnsmasq, and advertise prefix on lan
+12) firewalling and nat
+ - default deny or zero trust?
+14) write secrets holder as a service with outputs
+20) should we check that references to outputs actually correspond with
+  those provided by a service
+
+Things we probably do on hardware
+
+6) writable filesystem (ubifs?)
+7) overlay with squashfs/ubifs - useful? think about workflows for
+how this thing is installed
+16) gl-ar750
+17) mediatek device - gl-mt300 or whatever I have lying around
+18) some kind of arm (banana pi router?)
+19) should we give routeros a hardware ethernet and maybe an l2tp upstream,
+ then we could dogfood the hardware devices.  we could run an l2tp service
+ at mythic-beasts, got a /48 there
+
+
+
+https://skarnet.org/software/s6/s6-fghack.html looks like a handy thing
+we hope we'll never have to use
+
+Sun Oct  2 22:22:17 BST 2022
+
+> make interface address service that depends on dhcp, instead of being set by it directly
+
+We can do this for dhcp, but we can't do it for ppp. Running the ppp service
+creates a ppp[012n] interface and assigns it an ipv4 address and there's not
+a whole lot we can easily do to unbundle that.
+
+So
+
+- the ppp service needs to behave as if it were a "link" service
+- either it *also* needs to behave as an address service, or we could
+  have an address service that subscribes to it and does nothing other than
+  translate output formats
+
+Note regarding that second bullet: at the moment the static address
+service has no outputs anyway!
