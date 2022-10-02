@@ -44,6 +44,10 @@ in {
     defaultProfile.packages = with pkgs;
       [ s6 s6-init-bin busybox execline s6-linux-init s6-rc ];
 
+    kernel.config = {
+      "IKCONFIG_PROC" = "y";
+    };
+
     users.root = {
       uid = 0; gid= 0; gecos = "Root of all evaluation";
       dir = "/";
