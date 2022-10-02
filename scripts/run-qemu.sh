@@ -12,7 +12,7 @@ else
 fi
 
 INIT=${INIT-/bin/init}
-
+echo $QEMU_OPTIONS
 qemu-system-mips \
     -M malta -m 256 \
     -echr 16 \
@@ -22,4 +22,4 @@ qemu-system-mips \
     -device virtio-net-pci,disable-legacy=on,disable-modern=off,netdev=access,mac=ba:ad:1d:ea:21:02 \
     -netdev socket,id=lan,mcast=230.0.0.1:1235 \
     -device virtio-net-pci,disable-legacy=on,disable-modern=off,netdev=lan,mac=ba:ad:1d:ea:21:01 \
-    -kernel $1 -display none $flags
+    -kernel $1 -display none $flags     ${QEMU_OPTIONS}
