@@ -1,3 +1,7 @@
+# This "device" generates images that can be used with the QEMU
+# emulator. The default output is a directory containing separate
+# kernel (uncompressed vmlinux) and initrd (squashfs) images
+
 {
   system = {
     crossSystem = {
@@ -446,4 +450,5 @@
       VIRTIO_NET = "y";
     };
   };
+  outputs.default = "directory";
 }

@@ -34,9 +34,9 @@ let
       cp -a . $out
     '';
   };
-in
-{
+in rec {
   vmlinux = callPackage ./vmlinux.nix {
     inherit tree config checkedConfig;
   };
+  uimage = callPackage ./uimage.nix { };
 }

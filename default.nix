@@ -16,19 +16,33 @@ let
   kernel = callPackage ./kernel {
     inherit (config.kernel) config checkedConfig;
   };
-in {
-  outputs = {
+  outputs = rec {
     inherit squashfs kernel;
-    default = nixpkgs.pkgs.runCommand "both-kinds" {} ''
-      mkdir $out
-      cd $out
-      ln -s ${squashfs} squashfs
-      ln -s ${kernel.vmlinux} vmlinux
-   '';
+    uimage = kernel.uimage {
+      inherit (device.boot) loadAddress entryPoint;
+      inherit (kernel) vmlinux;
+    };
+
+    combined-image = nixpkgs.pkgs.runCommand "firmware.bin" {
+      nativeBuildInputs = [ nixpkgs.buildPackages.ubootTools ];
+    } ''
+      dd if=${uimage} of=$out bs=128k conv=sync
+      dd if=${squashfs} of=$out bs=128k conv=sync,nocreat,notrunc oflag=append
+    '';
+
+    directory = nixpkgs.pkgs.runCommand "both-kinds" {} ''
+       mkdir $out
+       cd $out
+       ln -s ${squashfs} squashfs
+       ln -s ${kernel.vmlinux} vmlinux
+    '';
     # this exists so that you can run "nix-store -q --tree" on it and find
     # out what's in the image, which is nice if it's unexpectedly huge
     manifest = writeText "manifest.json" (builtins.toJSON config.filesystem.contents);
   };
+in {
+  outputs = outputs // { default = outputs.${device.outputs.default}; };
+
   # this is just here as a convenience, so that we can get a
   # cross-compiling nix-shell for any package we're customizing
   inherit (nixpkgs) pkgs;

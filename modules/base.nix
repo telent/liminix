@@ -31,6 +31,7 @@ in {
       };
       checkedConfig = mkOption {
         type = types.attrsOf types.nonEmptyStr;
+        default = {};
       };
     };
     groups =  mkOption {
