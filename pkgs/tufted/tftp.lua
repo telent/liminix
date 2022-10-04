@@ -286,7 +286,7 @@ function tftp:listen(rrq_generator_callback, wrq_generator_callback, hosts, port
             }```
             On error, responds to the client with an ERROR packet, and returns nil.
         ]]
-        local okay, generator, tsize = pcall(callbacks[request.opcode], request.filename)
+        local okay, generator, tsize = pcall(callbacks[request.opcode], request.filename, host, port)
         if not okay then
             requestsocket:sendto(self.ERROR(ERR_NOTFOUND), host, port)
             return nil
