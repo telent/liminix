@@ -339,7 +339,8 @@ function tftp:listen(rrq_generator_callback, wrq_generator_callback, hosts, port
     local logfile = logfile or io.stderr
     --listen on all given addresses, default to localhost if not given
     for i, address in pairs((type(hosts) == 'table' and hosts) or (hosts ~= nil and{hosts}) or {'127.0.0.1'}) do
-        socket:bind(address, port)
+       local ok, err = socket:bind(address, port)
+       if not ok then error(err .. " binding to " .. address .. ":" .. port) end
     end
 
     --[[The main event loop does two things:
