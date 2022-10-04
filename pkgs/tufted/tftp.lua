@@ -354,7 +354,7 @@ function tftp:listen(rrq_generator_callback, wrq_generator_callback, hosts, port
             for _ in pairs(ready_fds) do
                 n = n + 1
             end
-            log(('There are %d sockets ready'):format(n))
+--            log(('There are %d sockets ready'):format(n))
         end
         for fd, status in pairs(ready_fds) do
 --            pretty.dump(ready_fds)
