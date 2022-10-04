@@ -39,6 +39,7 @@ let
     # this exists so that you can run "nix-store -q --tree" on it and find
     # out what's in the image, which is nice if it's unexpectedly huge
     manifest = writeText "manifest.json" (builtins.toJSON config.filesystem.contents);
+    tftpd = nixpkgs.pkgs.buildPackages.tufted;
   };
 in {
   outputs = outputs // { default = outputs.${device.outputs.default}; };

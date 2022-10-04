@@ -16,6 +16,8 @@ final: prev: {
     dbusSupport = false;
   };
 
+  tufted = final.callPackage ./pkgs/tufted {};
+
   pppoe = final.callPackage ./pkgs/pppoe {};
   ppp =
     (prev.ppp.override {

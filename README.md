@@ -116,6 +116,22 @@ Assuming you have nixpkgs checked out in a peer directory of this one,
 
 Some of the tests require the emulated upstream connection to be running.
 
+## Hardware
+
+How you get the thing onto hardware will vary according to the device,
+but is likely to involve U-Boot and TFTP.
+
+There is a rudimentary TFTP server bundled with the system which runs
+from the command line, has an allowlist for client connections, and
+follows symlinks, so you can have your device download images direct
+from the `./result` directory without exposing `/nix/store/` to the
+internet or mucking about copying files to `/tftproot`. If the
+permitted device is to be given the IP address 192.168.8.251 you might
+do something like this:
+
+    $ NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build -I liminix-config=./tests/smoke/configuration.nix --arg device "import ./devices/gl-ar750.nix" -A outputs.tftpd -o tftpd
+    $  ./tftpd/bin/tufted -a 192.168.8.251 result
+
 
 ## Troubleshooting
 
