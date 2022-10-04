@@ -247,15 +247,16 @@ function tftp:listen(rrq_generator_callback, wrq_generator_callback, hosts, port
     and get data from / send data to user-generated source/sink functions.
     Data is generated/received by functions returned by the the user-supplied
     ``rrq_generator_callback``/``wrq_generator_callback`` factory functions.
-    For every valid request packet received the generator function returned by
-    ``xrq_generator_callback`` will be called expecting data.
-
-    When called with a single argument,
-        (the requested resource as a C-style string (no embedded NUL chars))
-    ``xrq_generator_callback`` should return a source or sink function that:
-        (SOURCE) takes a single argument of the required data length in bytes
-         and returns blocks of data until complete.
-            must return as follows
+    For each resource requested, the generator function will be called
+    with three arguments:
+       - the requested resource as a C-style string (no embedded NUL chars)
+       - the ip address of the peer, as a dotted-quad string ("1.2.3.4")
+       - the port number of the peer
+    It should return a source or sink function that will be called repeatedly
+    until the data transfer is complete:
+        (SOURCE) will be called once for each block of data : it takes a
+         single argument of the requested data length in bytes
+         and returns the next block of data. It must return as follows
                 `true, data` on success
                 `true, nil` on wouldblock but should retry next round,
                 `false` on finished
