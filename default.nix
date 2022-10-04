@@ -26,10 +26,10 @@ let
     combined-image = nixpkgs.pkgs.runCommand "firmware.bin" {
       nativeBuildInputs = [ nixpkgs.buildPackages.ubootTools ];
     } ''
-      dd if=${uimage} of=$out bs=128k conv=sync
-      dd if=${squashfs} of=$out bs=128k conv=sync,nocreat,notrunc oflag=append
+      mkdir $out
+      dd if=${uimage} of=$out/firmware.bin bs=128k conv=sync
+      dd if=${squashfs} of=$out/firmware.bin bs=128k conv=sync,nocreat,notrunc oflag=append
     '';
-
     directory = nixpkgs.pkgs.runCommand "both-kinds" {} ''
        mkdir $out
        cd $out
