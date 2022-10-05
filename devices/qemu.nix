@@ -13,9 +13,6 @@
     };
   };
   kernel = {
-    checkedConfig = {
-      "BINFMT_SCRIPT" = "y";
-    };
     config = {
       SYSVIPC= "y";
       NO_HZ= "y";

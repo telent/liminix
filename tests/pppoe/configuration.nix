@@ -18,7 +18,6 @@ in rec {
     in address iface { family = "inet4"; address ="192.168.19.1"; prefixLength = 24;};
 
   kernel.config = {
-    "IKCONFIG_PROC" = "y";
     "PPP" = "y";
     "PPPOE" = "y";
     "PPPOL2TP" = "y";
