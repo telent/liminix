@@ -26,7 +26,7 @@
       SLAB= "y";
       MIPS_MALTA= "y";
       CPU_LITTLE_ENDIAN= "n";
-      CPU_BIG_ENDIAN= "n";
+      CPU_BIG_ENDIAN= "y";
       CPU_MIPS32_R2= "y";
       PAGE_SIZE_16KB= "y";
       NR_CPUS= "1";
