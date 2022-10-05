@@ -16,13 +16,19 @@ let
   kernel = callPackage ./kernel {
     inherit (config.kernel) config checkedConfig;
   };
+
   outputs = rec {
     inherit squashfs kernel;
+    dtb =  kernel.dtb {
+      dts = "qca9531_glinet_gl-ar750.dts";
+
+    };
     uimage = kernel.uimage {
+      commandLine = "earlyprintk=serial,ttyS0 console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 rootfstype=squashfs";
       inherit (device.boot) loadAddress entryPoint;
       inherit (kernel) vmlinux;
+      inherit dtb;
     };
-
     combined-image = nixpkgs.pkgs.runCommand "firmware.bin" {
       nativeBuildInputs = [ nixpkgs.buildPackages.ubootTools ];
     } ''

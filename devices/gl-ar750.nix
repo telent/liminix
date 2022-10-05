@@ -28,9 +28,11 @@
   };
   kernel = {
     checkedConfig = {
-      "MIPS_RAW_APPENDED_DTB" = "y";
+      "MIPS_ELF_APPENDED_DTB" = "y";
     };
     config = {
+      MIPS_ELF_APPENDED_DTB = "y";
+
       # this is all copied from nixwrt ath79 config. Clearly not all
       # of it is device config, some of it is wifi config or
       # installation method config or ...
@@ -46,7 +48,6 @@
       "IMAGE_CMDLINE_HACK" = "n";
       "IP_PNP" = "y";
       "JFFS2_FS" = "n";
-      "MIPS_RAW_APPENDED_DTB" = "y";
       "MODULE_SIG" = "y";
       "MTD_CMDLINE_PARTS" = "y";
       "MTD_SPLIT_FIRMWARE" = "y";

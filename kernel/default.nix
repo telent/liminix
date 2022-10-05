@@ -34,9 +34,24 @@ let
       cp -a . $out
     '';
   };
+
+  openwrtSource = fetchFromGitHub {
+    repo = "openwrt";
+    owner = "openwrt";
+    rev = "a5265497a4f6da158e95d6a450cb2cb6dc085cab";
+    hash = "sha256-YYi4gkpLjbOK7bM2MGQjAyEBuXJ9JNXoz/JEmYf8xE8=";
+  };
+
+
 in rec {
   vmlinux = callPackage ./vmlinux.nix {
     inherit tree config checkedConfig;
   };
+
   uimage = callPackage ./uimage.nix { };
+
+  dtb = callPackage ./dtb.nix {
+    openwrt = openwrtSource;
+    kernel = tree;
+  };
 }
