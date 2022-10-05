@@ -56,4 +56,21 @@ final: prev: {
       '';
       postFixup = "";
     });
+
+
+  # we need to build real lzma instead of using xz, because the lzma
+  # decoder in u-boot doesn't understand streaming lzma archives
+  # ("Stream with EOS marker is not supported") and xz can't create
+  # non-streaming ones.  See
+  # https://sourceforge.net/p/squashfs/mailman/message/26599379/
+
+  lzma = final.stdenv.mkDerivation {
+    pname = "lzma";
+    version = "4.32.7";
+    configureFlags = [ "--enable-static" "--disable-shared"];
+    src = final.buildPackages.fetchurl {
+      url = "https://tukaani.org/lzma/lzma-4.32.7.tar.gz";
+      sha256 = "0b03bdvm388kwlcz97aflpr3ir1zpa3m0bq3s6cd3pp5a667lcwz";
+    };
+  };
 }
