@@ -5,6 +5,7 @@ let
   overlay = import ./overlay.nix;
   nixpkgs = import <nixpkgs> ( device.system // {overlays = [overlay]; });
   inherit (nixpkgs.pkgs) callPackage writeText liminix;
+  inherit (nixpkgs.lib) concatStringsSep;
   config = (import ./merge-modules.nix) [
     ./modules/base.nix
     ({ lib, ... } : { config = { inherit (device) kernel; }; })
@@ -24,7 +25,7 @@ let
 
     };
     uimage = kernel.uimage {
-      commandLine = "earlyprintk=serial,ttyS0 console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 rootfstype=squashfs";
+      commandLine = concatStringsSep " " config.boot.commandLine;
       inherit (device.boot) loadAddress entryPoint;
       inherit (kernel) vmlinux;
       inherit dtb;

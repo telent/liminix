@@ -34,6 +34,9 @@ in {
         default = {};
       };
     };
+    boot.commandLine = mkOption {
+      type = types.listOf types.nonEmptyStr;
+    };
     groups =  mkOption {
       type = types.attrsOf types.anything;
     };
@@ -50,9 +53,14 @@ in {
         IKCONFIG = "y";
         IKCONFIG_PROC = "y";
         PROC_FS = "y";
+        # s6-linux-init mounts this on /dev
+        DEVTMPFS = "y";
       };
       checkedConfig = config;
     };
+    boot.commandLine = [
+      "earlyprintk=serial,ttyS0 console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 rootfstype=squashfs"
+    ];
     users.root = {
       uid = 0; gid= 0; gecos = "Root of all evaluation";
       dir = "/";
