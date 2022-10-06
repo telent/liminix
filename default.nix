@@ -37,11 +37,13 @@ let
       dd if=${uimage} of=$out/firmware.bin bs=128k conv=sync
       dd if=${squashfs} of=$out/firmware.bin bs=128k conv=sync,nocreat,notrunc oflag=append
     '';
-    directory = nixpkgs.pkgs.runCommand "both-kinds" {} ''
-       mkdir $out
-       cd $out
-       ln -s ${squashfs} squashfs
-       ln -s ${kernel.vmlinux} vmlinux
+    directory = nixpkgs.pkgs.runCommand "liminix" {} ''
+      mkdir $out
+      cd $out
+      ln -s ${squashfs} squashfs
+      ln -s ${kernel.vmlinux} vmlinux
+      ln -s ${manifest} manifest
+      ln -s ${uimage} uimage
     '';
     # this exists so that you can run "nix-store -q --tree" on it and find
     # out what's in the image, which is nice if it's unexpectedly huge

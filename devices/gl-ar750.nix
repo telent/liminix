@@ -83,7 +83,7 @@
       # "KEYS" = "y";
     };
   };
-  outputs.default = "combined-image";
+  outputs.default = "directory";
   boot = {
     loadAddress = "0x80060000";
     entryPoint  = "0x80060000";
