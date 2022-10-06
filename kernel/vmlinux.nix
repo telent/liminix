@@ -15,7 +15,7 @@ let writeConfig = name : config: writeText name
             (name: value: (if value == "n" then "# CONFIG_${name} is not set" else "CONFIG_${name}=${value}"))
             config
           ));
-    kconfigFile = writeConfig "kconfig" config;
+    kconfigFile = writeConfig "kconfig" (config // checkedConfig);
     checkedConfigFile = writeConfig "checked_kconfig" checkedConfig ;
     inherit lib; in
 stdenv.mkDerivation rec {
