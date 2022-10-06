@@ -10,12 +10,6 @@
 # DIY users: the serial port connections have headers preinstalled
 # and don't need soldering
 
-# The default output is a combined image containing a kernel
-# packaged as a "uimage" and initrd filesystem. This can be
-# downloaded to the device using TFTP and then written into
-# flash, or if PHRAM suport is enabled (handy for development)
-# unpacked and run directly into RAM
-
 {
   system = {
     crossSystem = {
@@ -26,23 +20,38 @@
       };
     };
   };
-  kernel = {
+  kernel = rec {
     checkedConfig = {
       "MIPS_ELF_APPENDED_DTB" = "y";
-    };
-    config = {
-      CPU_LITTLE_ENDIAN= "n";
-      CPU_BIG_ENDIAN= "y";
-      ATH79 = "y";
-      MIPS_ELF_APPENDED_DTB = "y";
+      # possibly not all of these are needed, I just
+      # copied them from qemu
+      HW_CONSOLE = "y";
+      VT_HW_CONSOLE_BINDING = "y";
+      SERIAL_8250_CONSOLE = "y";
+      SERIAL_8250 = "y";
+      SERIAL_CORE_CONSOLE = "y";
+      DUMMY_CONSOLE = "y";
+      DUMMY_CONSOLE_COLUMNS = "80";
+      DUMMY_CONSOLE_ROWS = "25";
+      # FRAMEBUFFER_CONSOLE = "y";
+      CONSOLE_LOGLEVEL_DEFAULT = "8";
+      CONSOLE_LOGLEVEL_QUIET = "4";
+
 
       # "empty" initramfs source should create an initial
       # filesystem that has a /dev/console node and not much
       # else.  Note that pid 1 is started *before* the root
       # filesystem is mounted and it expects /dev/console to
       # be present already
-      BLK_DEV_INITRD = "y";
-      INITRAMFS_SOURCE = "\"\"";
+      BLK_DEV_INITRD = "n";
+    };
+    config = checkedConfig // {
+      CPU_LITTLE_ENDIAN= "n";
+      CPU_BIG_ENDIAN= "y";
+      ATH79 = "y";
+      MIPS_ELF_APPENDED_DTB = "y";
+
+#      INITRAMFS_SOURCE = "\"\"";
 
       # this is all copied from nixwrt ath79 config. Clearly not all
       # of it is device config, some of it is wifi config or
