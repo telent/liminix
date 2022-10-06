@@ -1,4 +1,6 @@
-{ device ? (import devices/gl-ar750.nix)
+{
+  device ? (import devices/gl-ar750.nix)
+, phram ? false
 }:
 
 let
@@ -12,6 +14,7 @@ let
     <liminix-config>
     ./modules/s6
     ./modules/users.nix
+    (if phram then  ./modules/phram.nix else (args: {}))
   ] nixpkgs.pkgs;
   squashfs = liminix.builders.squashfs config.filesystem.contents;
   kernel = callPackage ./kernel {
@@ -37,6 +40,22 @@ let
       dd if=${uimage} of=$out/firmware.bin bs=128k conv=sync
       dd if=${squashfs} of=$out/firmware.bin bs=128k conv=sync,nocreat,notrunc oflag=append
     '';
+    boot-scr =
+      let
+        inherit (nixpkgs.lib.trivial) toHexString;
+        uimageStart = 10485760; # 0xa00000
+        squashfsStart = uimageStart + 2 * 1024 * 1024;
+        squashfsSize = 8;
+        cmd = "mtdparts=phram0:${toString squashfsSize}M(nix) phram.phram=phram0,0x${toHexString squashfsStart},${toString squashfsSize}Mi memmap=${toString squashfsSize}M\$0x${toHexString squashfsStart} root=1f00";
+      in
+        nixpkgs.pkgs.buildPackages.writeScript "firmware.bin" ''
+          setenv serverip 192.168.8.148
+          setenv ipaddr 192.168.8.251
+          setenv bootargs '${concatStringsSep " " config.boot.commandLine} ${cmd}'
+          tftp 0x8${toHexString uimageStart} result/uimage ; tftp 0x8${toHexString squashfsStart} result/squashfs
+          bootm 0x${toHexString uimageStart}
+        '';
+
     directory = nixpkgs.pkgs.runCommand "liminix" {} ''
       mkdir $out
       cd $out
@@ -44,6 +63,8 @@ let
       ln -s ${kernel.vmlinux} vmlinux
       ln -s ${manifest} manifest
       ln -s ${uimage} uimage
+      ${if phram then "ln -s ${boot-scr} boot.scr" else ""}
+      ln -s ${boot-scr} flash.scr
     '';
     # this exists so that you can run "nix-store -q --tree" on it and find
     # out what's in the image, which is nice if it's unexpectedly huge
