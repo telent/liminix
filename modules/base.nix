@@ -55,6 +55,10 @@ in {
         PROC_FS = "y";
         # s6-linux-init mounts this on /dev
         DEVTMPFS = "y";
+        # some or all of these may be fix for "tmpfs: Unknown parameter 'mode'" error
+        TMPFS = "y";
+        TMPFS_POSIX_ACL = "y";
+        TMPFS_XATTR = "y";
       };
       checkedConfig = config;
     };

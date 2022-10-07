@@ -73,7 +73,7 @@ let
       run = {
         file = ''
               #!${execline}/bin/execlineb -P
-              ${busybox}/bin/getty -l ${busybox}/bin/login 38400 /dev/console
+              ${busybox}/bin/getty -l ${busybox}/bin/login 115200 /dev/console
           '';
         mode = "0755";
       };
