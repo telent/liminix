@@ -47,7 +47,7 @@
       # be present already
       BLK_DEV_INITRD = "n";
     };
-    config = checkedConfig // {
+    config = {
       CPU_LITTLE_ENDIAN= "n";
       CPU_BIG_ENDIAN= "y";
       ATH79 = "y";
@@ -67,11 +67,8 @@
       # at boot time unless we disable trying to call it
       "FW_LOADER_USER_HELPER" = "n";
 
-      # "IMAGE_CMDLINE_HACK" = "n";
-
       "MODULE_SIG" = "y";
       "MTD_CMDLINE_PARTS" = "y";
-#      "MTD_SPLIT_FIRMWARE" = "y";
       "PARTITION_ADVANCED" = "y";
       "PRINTK_TIME" = "y";
       "SQUASHFS" = "y";
