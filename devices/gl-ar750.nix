@@ -23,17 +23,19 @@
   kernel = rec {
     checkedConfig = {
       "MIPS_ELF_APPENDED_DTB" = "y";
-      # possibly not all of these are needed, I just
-      # copied them from qemu
-      HW_CONSOLE = "y";
-      VT_HW_CONSOLE_BINDING = "y";
+      OF = "y";
+      USE_OF = "y";
       SERIAL_8250_CONSOLE = "y";
       SERIAL_8250 = "y";
       SERIAL_CORE_CONSOLE = "y";
-      DUMMY_CONSOLE = "y";
-      DUMMY_CONSOLE_COLUMNS = "80";
-      DUMMY_CONSOLE_ROWS = "25";
-      # FRAMEBUFFER_CONSOLE = "y";
+
+      # need this to open console device at boot. dmesg goes from
+      # [    0.272934] Warning: unable to open an initial console.
+      # to
+      # [    0.247413] printk: console [ttyS0] disabled
+      # [     0.25200] 18020000.uart: ttyS0 at MMIO 0x1802000 (irq = 10, base_baud = 1562500) is a 16550A
+      SERIAL_OF_PLATFORM = "y";
+
       CONSOLE_LOGLEVEL_DEFAULT = "8";
       CONSOLE_LOGLEVEL_QUIET = "4";
 
