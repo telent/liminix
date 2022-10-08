@@ -341,3 +341,8 @@ For Liminix we're not going to do that.
    PHRAM support)
 * it means we need to memmap out enough ram for the whole image inc kernel when really
   all we need to reserve is the rootfs bit
+
+
+Sat Oct  8 11:23:08 BST 2022
+
+"halt" and "reboot" don't work on gl-ar750
