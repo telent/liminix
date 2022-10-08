@@ -306,3 +306,38 @@ So
 
 Note regarding that second bullet: at the moment the static address
 service has no outputs anyway!
+
+
+Tue Oct  4 22:43:02 BST 2022
+
+While trying to make the TFTP workflow not awful I seem to have written
+a TFTP server.
+
+
+Thu Oct  6 19:26:40 BST 2022
+
+We have a booting kernel on gl-ar750, but we aren't at a point that it can
+find a root filesystem
+
+I'd *like* to be able to use the same delivery mechanism (kernel uimage
+concatenated monolithic
+
+
+Sat Oct  8 11:12:09 BST 2022
+
+We have it booting on hardware, mounting root fs, running getty :-)
+
+For NixWRT TFTP boots we used a single image with both kernel and squashfs, and
+relied on CONFIG_MTD_SPLIT_FIRMWARE to identify where the boundary was and create
+/dev/mdtn devices at the right offsets so that the kernel could find the
+squashfs
+
+For Liminix we're not going to do that.
+
+* CONFIG_MTD_SPLIT_FIRMWARE is only available in OpenWrt patches
+* it's an uncomfortable level of automagic just to save us doing two TFTPs
+  instea of one
+* the generated image is anyway not the one we'd write to flash (has unneeded
+   PHRAM support)
+* it means we need to memmap out enough ram for the whole image inc kernel when really
+  all we need to reserve is the rootfs bit
