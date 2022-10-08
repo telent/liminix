@@ -12,9 +12,18 @@ final: prev: {
   s6-init-bin =  final.callPackage ./pkgs/s6-init-bin {};
   s6-rc-database = final.callPackage ./pkgs/s6-rc-database {};
 
-  dnsmasq = prev.dnsmasq.override {
+
+  dnsmasq =
+    let d =  prev.dnsmasq.overrideAttrs(o: {
+          preBuild =  ''
+              makeFlagsArray=("COPTS=")
+          '';
+        });
+    in d.override {
     dbusSupport = false;
+    nettle = null;
   };
+
 
   tufted = final.callPackage ./pkgs/tufted {};
 
