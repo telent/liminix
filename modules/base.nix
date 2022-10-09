@@ -53,6 +53,9 @@ in {
         IKCONFIG = "y";
         IKCONFIG_PROC = "y";
         PROC_FS = "y";
+
+        MODULES = "y";
+
         # s6-linux-init mounts this on /dev
         DEVTMPFS = "y";
         # some or all of these may be fix for "tmpfs: Unknown parameter 'mode'" error

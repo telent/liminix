@@ -86,7 +86,7 @@ stdenv.mkDerivation rec {
 
   KBUILD_BUILD_HOST = "liminix.builder";
   buildPhase = ''
-    make -C ${tree} vmlinux
+    make -C ${tree} vmlinux modules_prepare
   '';
 
   installPhase = ''
