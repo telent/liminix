@@ -37,6 +37,7 @@ let
   };
 
   openwrtSource = fetchFromGitHub {
+    name = "openwrt-source-tree";
     repo = "openwrt";
     owner = "openwrt";
     rev = "a5265497a4f6da158e95d6a450cb2cb6dc085cab";
