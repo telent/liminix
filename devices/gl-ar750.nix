@@ -25,6 +25,9 @@
       "MIPS_ELF_APPENDED_DTB" = "y";
       OF = "y";
       USE_OF = "y";
+      ATH79 = "y";
+      SOC_QCA955X = "y";        #  actually QCA9531, is this even right?
+      LIMINIX = "y";
       SERIAL_8250_CONSOLE = "y";
       SERIAL_8250 = "y";
       SERIAL_CORE_CONSOLE = "y";

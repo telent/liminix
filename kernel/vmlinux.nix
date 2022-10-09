@@ -16,6 +16,17 @@ let writeConfig = name : config: writeText name
             config
           ));
     kconfigFile = writeConfig "kconfig" (config // checkedConfig);
+    # KLUDGE FIXME. some symbols we need to enable in some configurations don't
+    # have a prompt (!), so we can't turn them on just by adding FOO=y  and make oldconfig
+    #
+    # (!) yes, that was my reaction too
+    kconfigLocal = writeText "Kconfig.local" ''
+      config LIMINIX
+             prompt "Local symbols"
+             bool
+             default y
+             select SOC_QCA955X
+    '';
     checkedConfigFile = writeConfig "checked_kconfig" checkedConfig ;
     inherit lib; in
 stdenv.mkDerivation rec {
@@ -60,6 +71,7 @@ stdenv.mkDerivation rec {
     export KBUILD_OUTPUT=`pwd`
     cp ${kconfigFile} .config
     cp ${kconfigFile} .config.orig
+    cp ${kconfigLocal} Kconfig.local
     ( cd ${tree} && make V=1 olddefconfig )
   '';
 

@@ -25,7 +25,8 @@ let
   tree = stdenvNoCC.mkDerivation {
     name = "spindled-kernel-tree";
     src = source;
-    phases = [ "unpackPhase" "patchScripts" "installPhase" ];
+    phases = [ "unpackPhase" "patchPhase" "patchScripts" "installPhase" ];
+    patches = [ ./random.patch ];
     patchScripts = ''
       patchShebangs scripts/
     '';

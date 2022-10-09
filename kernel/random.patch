@@ -1,0 +1,9 @@
+diff --git a/Kconfig b/Kconfig
+index 745bc773f567..24a6ea92ee19 100644
+--- a/Kconfig
++++ b/Kconfig
+@@ -30,3 +30,4 @@ source "lib/Kconfig"
+ source "lib/Kconfig.debug"
+ 
+ source "Documentation/Kconfig"
++source "Kconfig.local"
