@@ -44,7 +44,7 @@ let
       let
         inherit (nixpkgs.lib.trivial) toHexString;
         uimageStart = 10485760; # 0xa00000
-        squashfsStart = uimageStart + 2 * 1024 * 1024;
+        squashfsStart = uimageStart + 4 * 1024 * 1024;
         squashfsSize = 8;
         cmd = "mtdparts=phram0:${toString squashfsSize}M(nix) phram.phram=phram0,0x${toHexString squashfsStart},${toString squashfsSize}Mi memmap=${toString squashfsSize}M\$0x${toHexString squashfsStart} root=1f00";
       in
