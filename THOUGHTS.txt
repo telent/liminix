@@ -346,3 +346,58 @@ For Liminix we're not going to do that.
 Sat Oct  8 11:23:08 BST 2022
 
 "halt" and "reboot" don't work on gl-ar750
+
+Sat Oct  8 13:10:00 BST 2022
+
+Where do we go with this ar750?
+
+- wired networking
+- wifi
+
+
+Sun Oct  9 09:57:35 BST 2022
+
+We want to be able to package kernel modules as regular derivations, so that
+they get added to the filesystem
+
+This means they need access to kernel.modulesupport
+
+This means  kernel.modulesupport needs to be in pkgs too?
+
+This is fine, probably, but we'd like to avoid closing over vmlinux because
+there's no need for it to be in the filesystem
+
+Mon Oct 10 22:57:23 BST 2022
+
+The problem is that kernel kconfig options are manipulated in the
+liminix modules, which means that data must be (transitively) available
+to modules, so they can't be regular packages as they're tied so tightly
+to the exact config. Unless we define a second overlay that references
+the configuration object, but my head hurts when I start to think about that
+so maybe not.
+
+Tue Oct 11 00:00:13 BST 2022
+
+Building ag71xx (ethernet driver) as a module doesn't work because
+it references a symbol ath79_pll_base in the kernel that hasn't been
+marked with EXPORT_SYMBOL.
+
+We could forge an object file that "declares" it with a gross and disgusting hack like this
+
+$ echo > empty # not actually "empty", objcopy complains about that
+$ grep ath79_pll_base /nix/store/jcc114cd13xa8aa4mil35rlnmxnlmv09-vmlinux-mips-unknown-linux-musl-modulesupport/System.map
+ffffffff807b2094 B ath79_pll_base
+$ mips-unknown-linux-musl-objcopy   -I binary -O elf32-big --add-section .bss=empty  --add-symbol ath79_pll_base=.bss:0x807b2094  empty f.o
+
+I don't claim this is a good idea, just an idea. Thought was that we would not
+have to declare its type this way. Also it might not work with kaslr
+https://stackoverflow.com/a/68903503
+
+
+Backstory: why are we trying to build this as a module? because the
+openwrt fork of it seems to be a bit more advanced than the mainline,
+and I *suspect* that the mainline version doesn't work with our
+openwrt-based device tree which ahs the mdio as a nested node inside
+the ag71xx node - in mainline the driver seems to have all the mdio
+stuff inline. So, could we build the openwrt driver without patching
+the crap out of our kernel
