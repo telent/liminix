@@ -12,6 +12,21 @@
       };
     };
   };
+
+  overlay = final: prev:
+    let inherit (final) fetchFromGitHub;
+    in {
+      sources = {
+        kernel =  fetchFromGitHub {
+          name = "kernel-source";
+          owner = "torvalds";
+          repo = "linux";
+          rev = "3d7cb6b04c3f3115719235cc6866b10326de34cd";  # v5.19
+          hash = "sha256-OVsIRScAnrPleW1vbczRAj5L/SGGht2+GnvZJClMUu4=";
+        };
+      };
+    };
+
   kernel = {
     config = {
       SYSVIPC= "y";

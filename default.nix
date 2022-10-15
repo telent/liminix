@@ -5,7 +5,7 @@
 
 let
   overlay = import ./overlay.nix;
-  nixpkgs = import <nixpkgs> ( device.system // {overlays = [overlay]; });
+  nixpkgs = import <nixpkgs> (device.system // {overlays = [overlay device.overlay]; });
   inherit (nixpkgs.pkgs) callPackage writeText liminix;
   inherit (nixpkgs.lib) concatStringsSep;
   config = (import ./merge-modules.nix) [
@@ -56,16 +56,18 @@ let
           bootm 0x${toHexString uimageStart}
         '';
 
-    directory = nixpkgs.pkgs.runCommand "liminix" {} ''
+    directory = nixpkgs.pkgs.runCommand "liminix" {} (''
       mkdir $out
       cd $out
       ln -s ${squashfs} squashfs
       ln -s ${kernel.vmlinux} vmlinux
       ln -s ${manifest} manifest
+    '' +
+    (if device ? boot then ''
       ln -s ${uimage} uimage
       ${if phram then "ln -s ${boot-scr} boot.scr" else ""}
       ln -s ${boot-scr} flash.scr
-    '';
+    '' else ""));
     # this exists so that you can run "nix-store -q --tree" on it and find
     # out what's in the image, which is nice if it's unexpectedly huge
     manifest = writeText "manifest.json" (builtins.toJSON config.filesystem.contents);

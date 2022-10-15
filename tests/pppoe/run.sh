@@ -14,7 +14,7 @@ fatal(){
 }
 trap fatal ERR
 
-NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build '<liminix>' -I liminix-config=./configuration.nix --arg device "import <liminix/devices/qemu.nix>" -A outputs.default $*
+NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build '<liminix>' -I liminix-config=./configuration.nix --arg device "import <liminix/devices/qemu>" -A outputs.default $*
 
 if ! ( echo "cont" | socat - unix-connect:../support/ppp-server/qemu-monitor); then
     echo "need pppoe server running"

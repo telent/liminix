@@ -1,5 +1,5 @@
 set -e
-NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build '<liminix>' -I liminix-config=./configuration.nix --arg device "import <liminix/devices/$DEVICE.nix>" -A outputs.squashfs -o smoke.img $*
+NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build '<liminix>' -I liminix-config=./configuration.nix --arg device "import <liminix/devices/$DEVICE>" -A outputs.squashfs -o smoke.img $*
 
 TESTS=$(cat <<"EOF"
 test -n "${TMPDIR}"

@@ -20,6 +20,34 @@
       };
     };
   };
+
+  # We need to be able to import default.nix before we import nixpkgs
+  # because it has the system config to tell nixpkgs what arch to build for.
+  # But we also need some way to do things like fetchFromGitHub in the
+  # per-device config and we can only do that once we have a reference to
+  # pkgs
+
+  overlay = final: prev:
+    let inherit (final) fetchFromGitHub;
+    in {
+      sources = {
+        openwrt = fetchFromGitHub {
+          name = "openwrt-source";
+          repo = "openwrt";
+          owner = "openwrt";
+          rev = "a5265497a4f6da158e95d6a450cb2cb6dc085cab";
+          hash = "sha256-YYi4gkpLjbOK7bM2MGQjAyEBuXJ9JNXoz/JEmYf8xE8=";
+        };
+        kernel =  fetchFromGitHub {
+          name = "kernel-source";
+          owner = "torvalds";
+          repo = "linux";
+          rev = "3d7cb6b04c3f3115719235cc6866b10326de34cd";  # v5.19
+          hash = "sha256-OVsIRScAnrPleW1vbczRAj5L/SGGht2+GnvZJClMUu4=";
+        };
+      };
+    };
+
   kernel = rec {
     checkedConfig = {
       "MIPS_ELF_APPENDED_DTB" = "y";
@@ -41,7 +69,6 @@
 
       CONSOLE_LOGLEVEL_DEFAULT = "8";
       CONSOLE_LOGLEVEL_QUIET = "4";
-
 
       # "empty" initramfs source should create an initial
       # filesystem that has a /dev/console node and not much
