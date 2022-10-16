@@ -401,3 +401,15 @@ openwrt-based device tree which ahs the mdio as a nested node inside
 the ag71xx node - in mainline the driver seems to have all the mdio
 stuff inline. So, could we build the openwrt driver without patching
 the crap out of our kernel
+
+Sun Oct 16 15:25:33 BST 2022
+
+Executive decision: let's use the openwrt kernel (at least for
+gl-ar750).  Mainline kernel doesn’t have devicetree support for this
+device or the SoC it’s based on, and the OpenWrt dts for it doesn’t
+have the same "compatible"s, which makes me think that an indefinite
+amount of patching will be necessary to make dts/modules for one of
+them work with a kernel for the other
+
+As a result: now we have eth0 appearing, but not eth1?  Guessing we
+need to add some kconfig for the switch

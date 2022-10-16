@@ -77,12 +77,13 @@
     };
   kernel = rec {
     checkedConfig = {
-      "MIPS_ELF_APPENDED_DTB" = "y";
+      MIPS_ELF_APPENDED_DTB = "y";
       OF = "y";
       USE_OF = "y";
       ATH79 = "y";
-#      SOC_QCA955X = "y";        #  actually QCA9531, is this even right?
+
       LIMINIX = "y";
+
       SERIAL_8250_CONSOLE = "y";
       SERIAL_8250 = "y";
       SERIAL_CORE_CONSOLE = "y";
@@ -109,17 +110,12 @@
       ETHERNET = "y";
       NET_VENDOR_ATHEROS = "y";
       AG71XX = "y";             # ethernet (qca,qca9530-eth)
-
       MFD_SYSCON = "y";         # ethernet (compatible "syscon")
 
     };
     config = {
       CPU_LITTLE_ENDIAN= "n";
       CPU_BIG_ENDIAN= "y";
-      ATH79 = "y";
-      MIPS_ELF_APPENDED_DTB = "y";
-
-#      INITRAMFS_SOURCE = "\"\"";
 
       # this is all copied from nixwrt ath79 config. Clearly not all
       # of it is device config, some of it is wifi config or
