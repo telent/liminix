@@ -62,6 +62,7 @@ let
       ln -s ${squashfs} squashfs
       ln -s ${kernel.vmlinux} vmlinux
       ln -s ${manifest} manifest
+      ln -s ${kernel.vmlinux.modulesupport} build
     '' +
     (if device ? boot then ''
       ln -s ${uimage} uimage

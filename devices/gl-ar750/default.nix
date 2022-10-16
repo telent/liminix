@@ -10,6 +10,9 @@
 # DIY users: the serial port connections have headers preinstalled
 # and don't need soldering
 
+# Mainline linux 5.19 doesn't have device-tree support for this device
+# or even for the SoC, so we use the extensive OpenWrt kernel patches
+
 {
   system = {
     crossSystem = {
@@ -28,33 +31,57 @@
   # pkgs
 
   overlay = final: prev:
-    let inherit (final) fetchFromGitHub;
+    let
+      inherit (final) fetchFromGitHub fetchgit stdenvNoCC;
+      openwrt = fetchFromGitHub {
+        name = "openwrt-source";
+        repo = "openwrt";
+        owner = "openwrt";
+        rev = "a5265497a4f6da158e95d6a450cb2cb6dc085cab";
+        hash = "sha256-YYi4gkpLjbOK7bM2MGQjAyEBuXJ9JNXoz/JEmYf8xE8=";
+      };
+      mainline = fetchFromGitHub {
+        name = "kernel-source";
+        owner = "torvalds";
+        repo = "linux";
+        rev = "90c7e9b400c751dbd73885f494f421f90ca69721";
+        hash = "sha256-pq6QNa0PJVeheaZkuvAPD0rLuEeKrViKk65dz+y4kqo=";
+      };
     in {
       sources = {
-        openwrt = fetchFromGitHub {
-          name = "openwrt-source";
-          repo = "openwrt";
-          owner = "openwrt";
-          rev = "a5265497a4f6da158e95d6a450cb2cb6dc085cab";
-          hash = "sha256-YYi4gkpLjbOK7bM2MGQjAyEBuXJ9JNXoz/JEmYf8xE8=";
-        };
-        kernel =  fetchFromGitHub {
-          name = "kernel-source";
-          owner = "torvalds";
-          repo = "linux";
-          rev = "3d7cb6b04c3f3115719235cc6866b10326de34cd";  # v5.19
-          hash = "sha256-OVsIRScAnrPleW1vbczRAj5L/SGGht2+GnvZJClMUu4=";
+        inherit openwrt;
+        kernel = stdenvNoCC.mkDerivation {
+          name = "spindled-kernel-tree";
+          src = mainline;
+          phases = [
+            "unpackPhase" "patchPhase" "openWrtPatchPhase"
+            "patchScripts" "installPhase"
+          ];
+          patches = [ ../../kernel/random.patch ];
+          patchScripts = ''
+            patchShebangs scripts/
+          '';
+          openWrtPatchPhase = ''
+            cp -av ${openwrt}/target/linux/generic/files/* .
+            chmod -R u+w .
+            cp -av ${openwrt}/target/linux/ath79/files/* .
+            chmod -R u+w .
+            for i in ${openwrt}/target/linux/ath79/patches-5.15/* ; do patch --batch --forward -p1 < $i ;done
+          '';
+          installPhase = ''
+            mkdir -p $out
+            cp -a . $out
+          '';
         };
       };
     };
-
   kernel = rec {
     checkedConfig = {
       "MIPS_ELF_APPENDED_DTB" = "y";
       OF = "y";
       USE_OF = "y";
       ATH79 = "y";
-      SOC_QCA955X = "y";        #  actually QCA9531, is this even right?
+#      SOC_QCA955X = "y";        #  actually QCA9531, is this even right?
       LIMINIX = "y";
       SERIAL_8250_CONSOLE = "y";
       SERIAL_8250 = "y";
@@ -76,6 +103,15 @@
       # filesystem is mounted and it expects /dev/console to
       # be present already
       BLK_DEV_INITRD = "n";
+
+      NET = "y";
+      NETDEVICES = "y";
+      ETHERNET = "y";
+      NET_VENDOR_ATHEROS = "y";
+      AG71XX = "y";             # ethernet (qca,qca9530-eth)
+
+      MFD_SYSCON = "y";         # ethernet (compatible "syscon")
+
     };
     config = {
       CPU_LITTLE_ENDIAN= "n";
