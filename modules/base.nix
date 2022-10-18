@@ -56,6 +56,9 @@ in {
 
         MODULES = "y";
 
+        # not going far without Unix domain sockets
+        UNIX = "y";
+
         # s6-linux-init mounts this on /dev
         DEVTMPFS = "y";
         # some or all of these may be fix for "tmpfs: Unknown parameter 'mode'" error
