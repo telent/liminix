@@ -58,6 +58,8 @@ in {
 
         # not going far without Unix domain sockets
         UNIX = "y";
+        INET = "y";
+        IPV6 = "y";
 
         # s6-linux-init mounts this on /dev
         DEVTMPFS = "y";
