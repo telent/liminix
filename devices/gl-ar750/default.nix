@@ -66,7 +66,13 @@
             chmod -R u+w .
             cp -av ${openwrt}/target/linux/ath79/files/* .
             chmod -R u+w .
-            for i in ${openwrt}/target/linux/ath79/patches-5.15/* ; do patch --batch --forward -p1 < $i ;done
+            patches() {
+              for i in $* ; do patch --batch --forward -p1 < $i ;done
+            }
+            patches ${openwrt}/target/linux/generic/backport-5.15/*.patch
+            patches ${openwrt}/target/linux/generic/pending-5.15/*.patch
+            patches ${openwrt}/target/linux/generic/hack-5.15/*.patch
+            patches ${openwrt}/target/linux/ath79/patches-5.15/*.patch
           '';
           installPhase = ''
             mkdir -p $out
