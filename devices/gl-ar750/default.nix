@@ -117,7 +117,7 @@
       NET_VENDOR_ATHEROS = "y";
       AG71XX = "y";             # ethernet (qca,qca9530-eth)
       MFD_SYSCON = "y";         # ethernet (compatible "syscon")
-
+      AR8216_PHY = "y";         # eth1 is behind a switch
     };
     config = {
       CPU_LITTLE_ENDIAN= "n";
