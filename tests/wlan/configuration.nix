@@ -13,6 +13,13 @@ in rec {
       ];
     };
 
+  imports = [ ../../modules/wlan.nix ];
+
+  kernel.checkedConfig = {
+    MAC80211_HWSIM = "y";
+  };
+
+
   services.wlan = interface { type = "hardware"; device = "wlan0"; };
 
   services.hostap = hostapd (services.wlan) {

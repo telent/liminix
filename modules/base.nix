@@ -56,10 +56,13 @@ in {
 
         MODULES = "y";
 
-        # not going far without Unix domain sockets
+        # basic networking protocols
+        NET = "y";
         UNIX = "y";
         INET = "y";
         IPV6 = "y";
+        PACKET = "y";           # for ppp, tcpdump ...
+        SYSVIPC= "y";
 
         # s6-linux-init mounts this on /dev
         DEVTMPFS = "y";
