@@ -56,7 +56,7 @@ hardware device definition as argument `device`, and to choose an
 appropriate output attribute depending on what your device is and how
 you plan to install onto it. For example:
 
-    NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build -I liminix-config=./tests/smoke/configuration.nix --arg device "import ./devices/qemu.nix" -A outputs.default
+    NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build -I liminix-config=./tests/smoke/configuration.nix --arg device "import ./devices/qemu" -A outputs.default
 
 `outputs.default` is intended to do something appropriate for the
 device, whatever that is. For the qemu device, it creates a directory
@@ -129,7 +129,7 @@ internet or mucking about copying files to `/tftproot`. If the
 permitted device is to be given the IP address 192.168.8.251 you might
 do something like this:
 
-    $ NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build -I liminix-config=./tests/smoke/configuration.nix --arg device "import ./devices/gl-ar750.nix" -A outputs.tftpd -o tftpd
+    $ NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build -I liminix-config=./tests/smoke/configuration.nix --arg device "import ./devices/gl-ar750" -A outputs.tftpd -o tftpd
     $  ./tftpd/bin/tufted -a 192.168.8.251 result
 
 
@@ -142,7 +142,7 @@ because it has dependencies on other things you didn't know about. Build the
 `outputs.manifest` attribute, which is a json representation of the
 filesystem, and you can run `nix-store --query` on it:
 
-    NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build -I liminix-config=path/to/your/configuration.nix --arg device "import ./devices/qemu.nix" -A outputs.manifest -o manifest
+    NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build -I liminix-config=path/to/your/configuration.nix --arg device "import ./devices/qemu" -A outputs.manifest -o manifest
     nix-store -q --tree manifest
 
 
