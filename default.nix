@@ -6,7 +6,7 @@
 let
   overlay = import ./overlay.nix;
   nixpkgs = import <nixpkgs> (device.system // {overlays = [overlay device.overlay]; });
-  inherit (nixpkgs.pkgs) callPackage writeText liminix;
+  inherit (nixpkgs) callPackage writeText liminix fetchFromGitHub;
   inherit (nixpkgs.lib) concatStringsSep;
   config = (import ./merge-modules.nix) [
     ./modules/base.nix
@@ -15,7 +15,7 @@ let
     ./modules/s6
     ./modules/users.nix
     (if phram then  ./modules/phram.nix else (args: {}))
-  ] nixpkgs.pkgs;
+  ] nixpkgs;
   squashfs = liminix.builders.squashfs config.filesystem.contents;
   kernel = callPackage ./kernel {
     inherit (config.kernel) config checkedConfig;
@@ -33,7 +33,7 @@ let
       inherit (kernel) vmlinux;
       inherit dtb;
     };
-    combined-image = nixpkgs.pkgs.runCommand "firmware.bin" {
+    combined-image = nixpkgs.runCommand "firmware.bin" {
       nativeBuildInputs = [ nixpkgs.buildPackages.ubootTools ];
     } ''
       mkdir $out
@@ -48,7 +48,7 @@ let
         squashfsSize = 8;
         cmd = "mtdparts=phram0:${toString squashfsSize}M(nix) phram.phram=phram0,0x${toHexString squashfsStart},${toString squashfsSize}Mi memmap=${toString squashfsSize}M\$0x${toHexString squashfsStart} root=1f00";
       in
-        nixpkgs.pkgs.buildPackages.writeScript "firmware.bin" ''
+        nixpkgs.buildPackages.writeScript "firmware.bin" ''
           setenv serverip 192.168.8.148
           setenv ipaddr 192.168.8.251
           setenv bootargs '${concatStringsSep " " config.boot.commandLine} ${cmd}'
@@ -56,7 +56,7 @@ let
           bootm 0x${toHexString uimageStart}
         '';
 
-    directory = nixpkgs.pkgs.runCommand "liminix" {} (''
+    directory = nixpkgs.runCommand "liminix" {} (''
       mkdir $out
       cd $out
       ln -s ${squashfs} squashfs
@@ -72,7 +72,7 @@ let
     # this exists so that you can run "nix-store -q --tree" on it and find
     # out what's in the image, which is nice if it's unexpectedly huge
     manifest = writeText "manifest.json" (builtins.toJSON config.filesystem.contents);
-    tftpd = nixpkgs.pkgs.buildPackages.tufted;
+    tftpd = nixpkgs.buildPackages.tufted;
   };
 in {
   outputs = outputs // { default = outputs.${device.outputs.default}; };
