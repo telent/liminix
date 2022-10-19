@@ -12,6 +12,7 @@ final: prev: {
   s6-init-bin =  final.callPackage ./pkgs/s6-init-bin {};
   s6-rc-database = final.callPackage ./pkgs/s6-rc-database {};
 
+  kernel = final.callPackage ./pkgs/kernel {};
 
   dnsmasq =
     let d =  prev.dnsmasq.overrideAttrs(o: {

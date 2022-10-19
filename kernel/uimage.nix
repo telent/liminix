@@ -7,7 +7,7 @@
 let
   objcopy = "${stdenv.cc.bintools.targetPrefix}objcopy";
 in {
-  vmlinux
+  kernel
 , commandLine
 , entryPoint
 , extraName ? ""                # e.g. socFamily
@@ -28,7 +28,7 @@ stdenv.mkDerivation {
     ubootTools
   ];
   preparePhase = ''
-    cp ${vmlinux} vmlinux.elf; chmod +w vmlinux.elf
+    cp ${kernel} vmlinux.elf; chmod +w vmlinux.elf
   '';
   dtbPhase = ''
     dtc -I dtb -O dts -o tmp.dts ${dtb}

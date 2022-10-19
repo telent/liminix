@@ -6,7 +6,8 @@
 
  , config
  , checkedConfig ? {}
- , tree
+ , src
+ , extraPatchPhase ? "true"
 } :
 let writeConfig = name : config: writeText name
         (builtins.concatStringsSep
@@ -30,8 +31,8 @@ let writeConfig = name : config: writeText name
     checkedConfigFile = writeConfig "checked_kconfig" checkedConfig ;
     inherit lib; in
 stdenv.mkDerivation rec {
-  name = "vmlinux";
-
+  name = "kernel";
+  inherit src extraPatchPhase;
   hardeningDisable = ["all"];
   nativeBuildInputs = [buildPackages.stdenv.cc] ++
                       (with buildPackages.pkgs;
@@ -44,11 +45,16 @@ stdenv.mkDerivation rec {
   PKG_CONFIG_PATH = "./pkgconfig";
   CROSS_COMPILE = stdenv.cc.bintools.targetPrefix;
   ARCH = "mips";  # kernel uses "mips" here for both mips and mipsel
+  KBUILD_BUILD_HOST = "liminix.builder";
+
   dontStrip = true;
   dontPatchELF = true;
-  outputs = ["out"  "modulesupport"];
+  outputs = ["out" "headers"];
   phases = [
+    "unpackPhase"
     "butcherPkgconfig"
+    "extraPatchPhase"
+    "patchScripts"
     "configurePhase"
     "checkConfigurationPhase"
     "buildPhase"
@@ -67,12 +73,16 @@ stdenv.mkDerivation rec {
     for i in pkgconfig/*.pc; do test -f $i && sed -i 's/^Libs:/Libs: -L''${libdir} /'  $i;done
   '';
 
+  patchScripts = ''
+    patchShebangs scripts/
+  '';
+
   configurePhase = ''
     export KBUILD_OUTPUT=`pwd`
     cp ${kconfigFile} .config
     cp ${kconfigFile} .config.orig
     cp ${kconfigLocal} Kconfig.local
-    ( cd ${tree} && make V=1 olddefconfig )
+    make V=1 olddefconfig
   '';
 
   checkConfigurationPhase = ''
@@ -84,18 +94,15 @@ stdenv.mkDerivation rec {
     echo "OK"
   '';
 
-  KBUILD_BUILD_HOST = "liminix.builder";
   buildPhase = ''
-    make -C ${tree} vmlinux modules_prepare
+    make vmlinux modules_prepare
   '';
 
   installPhase = ''
     ${CROSS_COMPILE}strip -d vmlinux
     cp vmlinux $out
-    mkdir -p $modulesupport
-    cp .config $modulesupport/config
-    make clean
-    cp -a . $modulesupport
+    mkdir -p $headers
+    cp -a include .config $headers/
   '';
 
 }

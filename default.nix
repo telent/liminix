@@ -17,20 +17,31 @@ let
     (if phram then  ./modules/phram.nix else (args: {}))
   ] nixpkgs;
   squashfs = liminix.builders.squashfs config.filesystem.contents;
-  kernel = callPackage ./kernel {
-    inherit (config.kernel) config checkedConfig;
+
+  openwrt = fetchFromGitHub {
+    name = "openwrt-source";
+    repo = "openwrt";
+    owner = "openwrt";
+    rev = "a5265497a4f6da158e95d6a450cb2cb6dc085cab";
+    hash = "sha256-YYi4gkpLjbOK7bM2MGQjAyEBuXJ9JNXoz/JEmYf8xE8=";
   };
 
   outputs = rec {
-    inherit squashfs kernel;
-    dtb =  kernel.dtb {
-      dts = "qca9531_glinet_gl-ar750.dts";
-
+    inherit squashfs;
+    kernel = nixpkgs.kernel.override {
+      inherit (config.kernel) config checkedConfig;
     };
-    uimage = kernel.uimage {
+    dtb =  (callPackage ./kernel/dtb.nix {}) {
+      dts = "${openwrt}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";
+      includes = [
+        "${openwrt}/target/linux/ath79/dts"
+        "${kernel.headers}/include"
+      ];
+    };
+    uimage = (callPackage ./kernel/uimage.nix {}) {
       commandLine = concatStringsSep " " config.boot.commandLine;
       inherit (device.boot) loadAddress entryPoint;
-      inherit (kernel) vmlinux;
+      inherit kernel;
       inherit dtb;
     };
     combined-image = nixpkgs.runCommand "firmware.bin" {
@@ -60,9 +71,9 @@ let
       mkdir $out
       cd $out
       ln -s ${squashfs} squashfs
-      ln -s ${kernel.vmlinux} vmlinux
+      ln -s ${kernel} vmlinux
       ln -s ${manifest} manifest
-      ln -s ${kernel.vmlinux.modulesupport} build
+      ln -s ${kernel.headers} build
     '' +
     (if device ? boot then ''
       ln -s ${uimage} uimage

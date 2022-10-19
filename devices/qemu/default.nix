@@ -16,31 +16,15 @@
   overlay = final: prev:
     let inherit (final) stdenvNoCC fetchFromGitHub;
     in {
-      sources = {
-        kernel =
-          let src = fetchFromGitHub {
-                name = "kernel-source";
-                owner = "torvalds";
-                repo = "linux";
-                rev = "3d7cb6b04c3f3115719235cc6866b10326de34cd";  # v5.19
-                hash = "sha256-OVsIRScAnrPleW1vbczRAj5L/SGGht2+GnvZJClMUu4=";
-              };
-          in  stdenvNoCC.mkDerivation {
-            name = "spindled-kernel-tree";
-            inherit src;
-            phases = [
-              "unpackPhase"
-              "patchScripts" "installPhase"
-            ];
-
-            patchScripts = ''
-              patchShebangs scripts/
-            '';
-            installPhase = ''
-              mkdir -p $out
-              cp -a . $out
-            '';
-          };
+      kernel = prev.kernel.override {
+        # using fetchurl not fetchzip because it doesn't unpack, and
+        # copying 6GB of data from one store location to another
+        # takes an absolute bloody age
+        src = final.fetchurl {
+          name = "linux.tar.gz";
+          url = "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.19.16.tar.gz";
+          hash = "sha256-m4NeoEsCEK0HSIKTZ6zYTgk1fD3W0PSOMXN6fyHpkP8=";
+        };
       };
     };
 

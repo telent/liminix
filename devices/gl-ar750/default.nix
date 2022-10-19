@@ -32,53 +32,33 @@
 
   overlay = final: prev:
     let
-      inherit (final) fetchFromGitHub fetchgit stdenvNoCC;
-      openwrt = fetchFromGitHub {
+      openwrt = final.fetchFromGitHub {
         name = "openwrt-source";
         repo = "openwrt";
         owner = "openwrt";
         rev = "a5265497a4f6da158e95d6a450cb2cb6dc085cab";
         hash = "sha256-YYi4gkpLjbOK7bM2MGQjAyEBuXJ9JNXoz/JEmYf8xE8=";
       };
-      mainline = fetchFromGitHub {
-        name = "kernel-source";
-        owner = "torvalds";
-        repo = "linux";
-        rev = "90c7e9b400c751dbd73885f494f421f90ca69721";
-        hash = "sha256-pq6QNa0PJVeheaZkuvAPD0rLuEeKrViKk65dz+y4kqo=";
-      };
     in {
-      sources = {
-        inherit openwrt;
-        kernel = stdenvNoCC.mkDerivation {
-          name = "spindled-kernel-tree";
-          src = mainline;
-          phases = [
-            "unpackPhase" "patchPhase" "openWrtPatchPhase"
-            "patchScripts" "installPhase"
-          ];
-          patches = [ ../../kernel/random.patch ];
-          patchScripts = ''
-            patchShebangs scripts/
-          '';
-          openWrtPatchPhase = ''
-            cp -av ${openwrt}/target/linux/generic/files/* .
-            chmod -R u+w .
-            cp -av ${openwrt}/target/linux/ath79/files/* .
-            chmod -R u+w .
-            patches() {
-              for i in $* ; do patch --batch --forward -p1 < $i ;done
-            }
-            patches ${openwrt}/target/linux/generic/backport-5.15/*.patch
-            patches ${openwrt}/target/linux/generic/pending-5.15/*.patch
-            patches ${openwrt}/target/linux/generic/hack-5.15/*.patch
-            patches ${openwrt}/target/linux/ath79/patches-5.15/*.patch
-          '';
-          installPhase = ''
-            mkdir -p $out
-            cp -a . $out
-          '';
+      kernel = prev.kernel.override {
+        src = final.fetchurl {
+          name = "linux.tar.gz";
+          url = "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.71.tar.gz";
+          hash = "sha256-yhO2cXIeIgUxkSZf/4aAsF11uxyh+UUZu6D1h92vCD8=";
         };
+        extraPatchPhase = ''
+          cp -av ${openwrt}/target/linux/generic/files/* .
+          chmod -R u+w .
+          cp -av ${openwrt}/target/linux/ath79/files/* .
+          chmod -R u+w .
+          patches() {
+            for i in $* ; do patch --batch --forward -p1 < $i ;done
+          }
+          patches ${openwrt}/target/linux/generic/backport-5.15/*.patch
+          patches ${openwrt}/target/linux/generic/pending-5.15/*.patch
+          patches ${openwrt}/target/linux/generic/hack-5.15/*.patch
+          patches ${openwrt}/target/linux/ath79/patches-5.15/*.patch
+        '';
       };
     };
   kernel = rec {
@@ -87,8 +67,6 @@
       OF = "y";
       USE_OF = "y";
       ATH79 = "y";
-
-      LIMINIX = "y";
 
       SERIAL_8250_CONSOLE = "y";
       SERIAL_8250 = "y";
@@ -118,9 +96,10 @@
       AG71XX = "y";             # ethernet (qca,qca9530-eth)
       MFD_SYSCON = "y";         # ethernet (compatible "syscon")
       AR8216_PHY = "y";         # eth1 is behind a switch
-    };
-    config = {
-      CPU_LITTLE_ENDIAN= "n";
+
+      MTD = "y";
+      MTD_CMDLINE_PARTS = "y";
+      MTD_BLOCK = "y";          # fix undefined ref to register_mtd_blktrans_devs
       CPU_BIG_ENDIAN= "y";
 
       # this is all copied from nixwrt ath79 config. Clearly not all
@@ -128,7 +107,6 @@
       # installation method config or ...
 
       "CMDLINE_PARTITION" = "y";
-      "DEBUG_INFO" = "y";
       "EARLY_PRINTK" = "y";
       "FW_LOADER" = "y";
       # we don't have a user helper, so we get multiple 60s pauses
@@ -136,7 +114,7 @@
       "FW_LOADER_USER_HELPER" = "n";
 
       "MODULE_SIG" = "y";
-      "MTD_CMDLINE_PARTS" = "y";
+
       "PARTITION_ADVANCED" = "y";
       "PRINTK_TIME" = "y";
       "SQUASHFS" = "y";
