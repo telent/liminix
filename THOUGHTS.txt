@@ -413,3 +413,26 @@ them work with a kernel for the other
 
 As a result: now we have eth0 appearing, but not eth1?  Guessing we
 need to add some kconfig for the switch
+
+Mon Oct 17 21:23:37 BST 2022
+
+we are spending ridiculous amounts of cpu/io time copying kernel source
+trees from place to place, because we have kernel tree preparation
+and actual building as two separate derivations.
+
+I think the answer is to have a generic kernel build derivation
+in the overlay, and then have the device overlays override it with
+an additional phase to do openwrt patching or whatever else they
+need to do.
+
+Tue Oct 18 23:02:43 BST 2022
+
+* previous TODO list is Aug 02, need to review
+* dts is hardcoded to gl-ar750, that needs cleaning up
+* figure out persistent addresses for ethernet
+* fix halt/reboot
+* "link" services have a "device" attribute, would much rather
+  have everything referenced using outputs than having two
+  different mechanisms for reading similar things
+* Kconfig.local do we still need it?
+* check all config instead of differentiating config/checkedConfig
