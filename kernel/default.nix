@@ -2,13 +2,12 @@
   callPackage
 
 , config
-, checkedConfig
 , sources
 }:
 {
   vmlinux = callPackage ./vmlinux.nix {
     tree = sources.kernel;
-    inherit config checkedConfig;
+    inherit config;
   };
 
   uimage = callPackage ./uimage.nix { };

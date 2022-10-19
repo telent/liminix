@@ -29,7 +29,7 @@
     };
 
   kernel = {
-    checkedConfig = {
+    config = {
       MIPS_MALTA= "y";
       CPU_LITTLE_ENDIAN= "n";
       CPU_BIG_ENDIAN= "y";

@@ -1,5 +1,5 @@
 set -e
-NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build '<liminix>' -I liminix-config=../smoke/configuration.nix --arg device "import <liminix/devices/$DEVICE>" -A outputs.kernel.vmlinux -o vmlinux $*
+NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build '<liminix>' -I liminix-config=../smoke/configuration.nix --arg device "import <liminix/devices/$DEVICE>" -A outputs.kernel -o vmlinux $*
 
 TESTS=$(cat <<"EOF"
 

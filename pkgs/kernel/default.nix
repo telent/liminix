@@ -5,7 +5,6 @@
  , lib
 
  , config
- , checkedConfig ? {}
  , src
  , extraPatchPhase ? "true"
 } :
@@ -16,8 +15,7 @@ let writeConfig = name : config: writeText name
             (name: value: (if value == "n" then "# CONFIG_${name} is not set" else "CONFIG_${name}=${value}"))
             config
           ));
-    kconfigFile = writeConfig "kconfig" (config // checkedConfig);
-    checkedConfigFile = writeConfig "checked_kconfig" checkedConfig ;
+    kconfigFile = writeConfig "kconfig" config;
     inherit lib; in
 stdenv.mkDerivation rec {
   name = "kernel";
@@ -75,7 +73,7 @@ stdenv.mkDerivation rec {
 
   checkConfigurationPhase = ''
     echo Checking required config items:
-    if comm -2 -3 <(grep 'CONFIG' ${checkedConfigFile} |sort) <(grep 'CONFIG' .config|sort) |grep '.'    ; then
+    if comm -2 -3 <(grep 'CONFIG' ${kconfigFile} |sort) <(grep 'CONFIG' .config|sort) |grep '.'    ; then
       echo -e "^^^ Some configuration lost :-(\nPerhaps you have mutually incompatible settings, or have disabled options on which these depend.\n"
       exit 0
     fi

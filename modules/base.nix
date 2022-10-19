@@ -29,10 +29,6 @@ in {
         # other strings are also used
         type = types.attrsOf types.nonEmptyStr;
       };
-      checkedConfig = mkOption {
-        type = types.attrsOf types.nonEmptyStr;
-        default = {};
-      };
     };
     boot.commandLine = mkOption {
       type = types.listOf types.nonEmptyStr;
@@ -71,7 +67,6 @@ in {
         TMPFS_POSIX_ACL = "y";
         TMPFS_XATTR = "y";
       };
-      checkedConfig = config;
     };
     boot.commandLine = [
       "earlyprintk=serial,ttyS0 console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 rootfstype=squashfs"

@@ -21,6 +21,7 @@ in rec {
     "PPP" = "y";
     "PPPOE" = "y";
     "PPPOL2TP" = "y";
+    "L2TP" = "y";
     "PPP_ASYNC" = "y";
     "PPP_BSDCOMP" = "y";
     "PPP_DEFLATE" = "y";

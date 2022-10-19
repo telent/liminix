@@ -29,7 +29,7 @@ let
   outputs = rec {
     inherit squashfs;
     kernel = nixpkgs.kernel.override {
-      inherit (config.kernel) config checkedConfig;
+      inherit (config.kernel) config;
     };
     dtb =  (callPackage ./kernel/dtb.nix {}) {
       dts = "${openwrt}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";

@@ -5,7 +5,7 @@
 {
   config = {
     kernel = {
-      checkedConfig = {
+      config = {
         MTD = "y";
         MTD_PHRAM = "y";
         MTD_CMDLINE_PARTS = "y";

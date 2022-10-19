@@ -62,7 +62,7 @@
       };
     };
   kernel = rec {
-    checkedConfig = {
+    config = {
       MIPS_ELF_APPENDED_DTB = "y";
       OF = "y";
       USE_OF = "y";

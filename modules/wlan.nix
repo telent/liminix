@@ -7,7 +7,7 @@ let
 in {
   config = {
     kernel = rec {
-      checkedConfig = {
+      config = {
         CFG80211= "y";
         MAC80211= "y";
         MAC80211_MESH= "y";

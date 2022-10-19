@@ -15,7 +15,7 @@ in rec {
 
   imports = [ ../../modules/wlan.nix ];
 
-  kernel.checkedConfig = {
+  kernel.config = {
     MAC80211_HWSIM = "y";
   };
 
