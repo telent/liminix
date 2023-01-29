@@ -1,9 +1,9 @@
 This is the MIT License. It applies to all original Nix code in
 Liminix, and the code which was copied from NixWRT.  Content from
-other projects (e.g the Linux kernel project, OpenWrt) is included.
+other projects (e.g the Linux kernel project, OpenWrt) is included
 under the terms of the licences of those projects.
 
-Copyright (c) 2018-2022 Daniel Barlow and contributors
+Copyright (c) 2018-2023 Daniel Barlow and contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
