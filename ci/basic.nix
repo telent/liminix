@@ -4,8 +4,7 @@ let
   # jobset configuration.
   pkgs = (import <nixpkgs> {});
   device =  import <liminix/devices/qemu>;
-  liminix-config = <liminix/tests/smoke/configuration.nix>;
-  liminix = import <liminix> { inherit device liminix-config; };
+  liminix = import <liminix> { inherit device; };
 in {
   inherit (liminix.outputs) squashfs;
 }
