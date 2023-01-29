@@ -6,7 +6,10 @@
 
 let
   overlay = import ./overlay.nix;
-  nixpkgs = import <nixpkgs> (device.system // {overlays = [overlay device.overlay]; });
+  nixpkgs = import <nixpkgs> (device.system // {
+    overlays = [overlay device.overlay];
+    config = {allowUnsupportedSystem = true; };
+  });
   inherit (nixpkgs) callPackage writeText liminix fetchFromGitHub;
   inherit (nixpkgs.lib) concatStringsSep;
   config = (import ./merge-modules.nix) [
