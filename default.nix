@@ -1,5 +1,6 @@
 {
   device ? (import devices/gl-ar750.nix)
+, liminix-config ? <liminix-config>
 , phram ? false
 }:
 
@@ -11,7 +12,7 @@ let
   config = (import ./merge-modules.nix) [
     ./modules/base.nix
     ({ lib, ... } : { config = { inherit (device) kernel; }; })
-    <liminix-config>
+    liminix-config
     ./modules/s6
     ./modules/users.nix
     (if phram then  ./modules/phram.nix else (args: {}))
