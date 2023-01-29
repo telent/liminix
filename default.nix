@@ -1,5 +1,5 @@
 {
-  device ? (import devices/gl-ar750.nix)
+  device
 , liminix-config ? <liminix-config>
 , phram ? false
 }:
