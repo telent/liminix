@@ -1,47 +1,20 @@
 {
-  pseudofile
-}: let
-  inherit (pseudofile) dir;
-  structure = {
-    service = dir {
-      s6-linux-init-runleveld = dir {
-        notification-fd = { file = "3"; };
-        run = {
-          file = ''
-           hello
-           world
-          '';
-          mode = "0755";
-        };
-      };
-      s6-linux-init-shutdownd = dir {
-        fifo = {
-          type = "i";
-          subtype = "f";
-          mode = "0600";
-        };
-        run = {
-          file = ''
-              s6-linux-init/bin/s6-linux-init-shutdownd -c  "/etc/s6-linux-init/current" -g 3000
-            '';
-          mode = "0755";
-        };
-
-      };
-      s6-svscan-log = dir {
-        fifo = {
-          type = "i";
-          subtype = "f";
-          mode = "0600";
-        };
-        notification-fd = { file = "3"; };
-        run = {
-          file = ''
-              gdsgdfgsdgf
-          '';
-        };
-      };
-    };
-    uncaught-logs = (dir {}) // {mode = "2750";};
-  };
-in pseudofile.write "pseudo.s6-init" structure
+  liminix
+, nixpkgs
+}:
+let
+  overlay = import "${liminix}/overlay.nix";
+  nixpkgs = import <nixpkgs> { overlays = [overlay]; };
+  fixture = nixpkgs.callPackage ./fixture.nix {};
+  check = nixpkgs.runCommand "check" {
+    nativeBuildInputs = with nixpkgs; [ squashfsTools qprint ] ;
+  } ''
+set -e
+diff ${fixture} ${./result.expected}
+test -f  /tmp/out.squashfs && rm /tmp/out.squashfs
+mksquashfs - /tmp/out.squashfs -p '/ d 755 0 0' -pf ${fixture} -quiet -no-progress
+foo="$(unsquashfs -cat /tmp/out.squashfs service/s6-linux-init-runleveld/run)"
+test "$foo" = "$(printf "hello\nworld")"
+date > $out
+'';
+in { inherit check; }
