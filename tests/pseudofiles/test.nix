@@ -6,7 +6,7 @@ let
   overlay = import "${liminix}/overlay.nix";
   nixpkgs = import <nixpkgs> { overlays = [overlay]; };
   fixture = nixpkgs.callPackage ./fixture.nix {};
-  check = nixpkgs.runCommand "check" {
+in nixpkgs.runCommand "check" {
     nativeBuildInputs = with nixpkgs; [ squashfsTools qprint ] ;
   } ''
 set -e
@@ -16,5 +16,4 @@ mksquashfs - /tmp/out.squashfs -p '/ d 755 0 0' -pf ${fixture} -quiet -no-progre
 foo="$(unsquashfs -cat /tmp/out.squashfs service/s6-linux-init-runleveld/run)"
 test "$foo" = "$(printf "hello\nworld")"
 date > $out
-'';
-in { inherit check; }
+''

@@ -7,9 +7,9 @@ let img = (import liminix {
       liminix-config = ./configuration.nix;
     }).outputs.squashfs;
     pkgs = import <nixpkgs> {};
-    check = pkgs.runCommand "check" {
-      nativeBuildInputs = with pkgs; [ squashfsTools s6-rc ] ;
-    } ''
+in pkgs.runCommand "check" {
+  nativeBuildInputs = with pkgs; [ squashfsTools s6-rc ] ;
+} ''
 destpath=$(mktemp -d)/smoke.img
 echo $destpath
 cleanup(){  test -n $destpath && test -d $destpath && chmod -R +w $destpath && rm -rf $destpath;  }
@@ -25,5 +25,4 @@ chmod -R +w $db
 test "$(s6-rc-db -c $db type lo.link)" = "oneshot"
 test "$(s6-rc-db -c $db type ntp)" = "longrun"
 echo OK > $out
-'';
-in { inherit check; }
+''
