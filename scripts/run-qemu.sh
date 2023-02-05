@@ -18,8 +18,8 @@ qemu-system-mips \
     -echr 16 \
     -append "default console=ttyS0,38400n8 panic=10 oops=panic init=$INIT loglevel=8 root=/dev/vda" \
     -drive file=$2,format=raw,readonly=on,if=virtio \
-    -netdev socket,id=access,mcast=230.0.0.1:1234 \
+    -netdev socket,id=access,mcast=230.0.0.1:1234,localaddr=127.0.0.1 \
     -device virtio-net-pci,disable-legacy=on,disable-modern=off,netdev=access,mac=ba:ad:1d:ea:21:02 \
-    -netdev socket,id=lan,mcast=230.0.0.1:1235 \
+    -netdev socket,id=lan,mcast=230.0.0.1:1235,localaddr=127.0.0.1 \
     -device virtio-net-pci,disable-legacy=on,disable-modern=off,netdev=lan,mac=ba:ad:1d:ea:21:01 \
     -kernel $1 -display none $flags     ${QEMU_OPTIONS}

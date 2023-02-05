@@ -66,10 +66,9 @@ sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, MULTICAST_TTL)
 
 sock.bind((MCAST_GRP, MCAST_PORT))
-host = socket.gethostbyname(socket.gethostname())
-sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_IF, socket.inet_aton(host))
+sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_IF, socket.inet_aton('127.0.0.1'))
 sock.setsockopt(socket.SOL_IP, socket.IP_ADD_MEMBERSHIP,
-                socket.inet_aton(MCAST_GRP) + socket.inet_aton(host))
+                socket.inet_aton(MCAST_GRP) + socket.inet_aton('127.0.0.1'))
 
 endtime = time.time() + TIMEOUT
 sock.sendto(payload, (MCAST_GRP, MCAST_PORT))
@@ -77,8 +76,8 @@ sock.sendto(payload, (MCAST_GRP, MCAST_PORT))
 while time.time() < endtime:
   try:
     data, addr = sock.recvfrom(1024)
-  except socket.error:
-    print('Exception')
+  except socket.error as e:
+    print('recv exception: ', e)
   else:
     reply = Ether(data)
     if is_dhcp_offer(reply):
