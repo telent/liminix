@@ -2,16 +2,17 @@
   device
 , liminix-config ? <liminix-config>
 , phram ? false
+, nixpkgs ? <nixpkgs>
 }:
 
 let
   overlay = import ./overlay.nix;
-  nixpkgs = import <nixpkgs> (device.system // {
+  pkgs = import nixpkgs (device.system // {
     overlays = [overlay device.overlay];
     config = {allowUnsupportedSystem = true; };
   });
-  inherit (nixpkgs) callPackage writeText liminix fetchFromGitHub;
-  inherit (nixpkgs.lib) concatStringsSep;
+  inherit (pkgs) callPackage writeText liminix fetchFromGitHub;
+  inherit (pkgs.lib) concatStringsSep;
   config = (import ./merge-modules.nix) [
     ./modules/base.nix
     ({ lib, ... } : { config = { inherit (device) kernel; }; })
@@ -19,7 +20,7 @@ let
     ./modules/s6
     ./modules/users.nix
     (if phram then  ./modules/phram.nix else (args: {}))
-  ] nixpkgs;
+  ] pkgs;
   squashfs = liminix.builders.squashfs config.filesystem.contents;
 
   openwrt = fetchFromGitHub {
@@ -32,7 +33,7 @@ let
 
   outputs = rec {
     inherit squashfs;
-    kernel = nixpkgs.kernel.override {
+    kernel = pkgs.kernel.override {
       inherit (config.kernel) config;
     };
     dtb =  (callPackage ./kernel/dtb.nix {}) {
@@ -48,8 +49,8 @@ let
       inherit kernel;
       inherit dtb;
     };
-    combined-image = nixpkgs.runCommand "firmware.bin" {
-      nativeBuildInputs = [ nixpkgs.buildPackages.ubootTools ];
+    combined-image = pkgs.runCommand "firmware.bin" {
+      nativeBuildInputs = [ pkgs.buildPackages.ubootTools ];
     } ''
       mkdir $out
       dd if=${uimage} of=$out/firmware.bin bs=128k conv=sync
@@ -57,13 +58,13 @@ let
     '';
     boot-scr =
       let
-        inherit (nixpkgs.lib.trivial) toHexString;
+        inherit (pkgs.lib.trivial) toHexString;
         uimageStart = 10485760; # 0xa00000
         squashfsStart = uimageStart + 4 * 1024 * 1024;
         squashfsSize = 8;
         cmd = "mtdparts=phram0:${toString squashfsSize}M(nix) phram.phram=phram0,0x${toHexString squashfsStart},${toString squashfsSize}Mi memmap=${toString squashfsSize}M\$0x${toHexString squashfsStart} root=1f00";
       in
-        nixpkgs.buildPackages.writeScript "firmware.bin" ''
+        pkgs.buildPackages.writeScript "firmware.bin" ''
           setenv serverip 192.168.8.148
           setenv ipaddr 192.168.8.251
           setenv bootargs '${concatStringsSep " " config.boot.commandLine} ${cmd}'
@@ -71,7 +72,7 @@ let
           bootm 0x${toHexString uimageStart}
         '';
 
-    directory = nixpkgs.runCommand "liminix" {} (''
+    directory = pkgs.runCommand "liminix" {} (''
       mkdir $out
       cd $out
       ln -s ${squashfs} squashfs
@@ -87,12 +88,12 @@ let
     # this exists so that you can run "nix-store -q --tree" on it and find
     # out what's in the image, which is nice if it's unexpectedly huge
     manifest = writeText "manifest.json" (builtins.toJSON config.filesystem.contents);
-    tftpd = nixpkgs.buildPackages.tufted;
+    tftpd = pkgs.buildPackages.tufted;
   };
 in {
   outputs = outputs // { default = outputs.${device.outputs.default}; };
 
   # this is just here as a convenience, so that we can get a
   # cross-compiling nix-shell for any package we're customizing
-  inherit (nixpkgs) pkgs;
+  inherit  pkgs;
 }

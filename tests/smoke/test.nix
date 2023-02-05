@@ -4,7 +4,7 @@
 }:
 let img = (import liminix {
       device = import "${liminix}/devices/qemu/";
-      liminix-config = ./configuration.nix;
+      liminix-config = "${liminix}/vanilla-configuration.nix";
     }).outputs.squashfs;
     pkgs = import <nixpkgs> {};
 in pkgs.runCommand "check" {
