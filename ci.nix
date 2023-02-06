@@ -7,7 +7,7 @@ let
   inherit (builtins) map;
   pkgs = (import nixpkgs {});
   inherit (pkgs.lib.attrsets) genAttrs;
-  devices = [ "qemu" "gl-ar750" ];
+  devices = [ "qemu" "gl-ar750" "gl-mt300n-v2" "gl-mt300a" ];
   vanilla = ./vanilla-configuration.nix;
   for-device = name:
     (import liminix {
