@@ -24,6 +24,7 @@ in {
     };
     filesystem = mkOption { type = types.anything; };
     kernel = {
+      dts = mkOption { type = types.functionTo types.string; };
       config = mkOption {
         # mostly the values are y n or m, but sometimes
         # other strings are also used

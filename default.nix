@@ -37,7 +37,7 @@ let
       inherit (config.kernel) config;
     };
     dtb =  (callPackage ./kernel/dtb.nix {}) {
-      dts = "${openwrt}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";
+      dts = config.kernel.dts { inherit openwrt; };
       includes = [
         "${openwrt}/target/linux/ath79/dts"
         "${kernel.headers}/include"
@@ -95,5 +95,5 @@ in {
 
   # this is just here as a convenience, so that we can get a
   # cross-compiling nix-shell for any package we're customizing
-  inherit  pkgs;
+  inherit pkgs;
 }

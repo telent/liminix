@@ -62,6 +62,7 @@
       };
     };
   kernel = rec {
+    dts = { openwrt,... }:"${openwrt}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";
     config = {
       MIPS_ELF_APPENDED_DTB = "y";
       OF = "y";
