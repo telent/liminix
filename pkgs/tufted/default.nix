@@ -1,12 +1,11 @@
 {
   lua5_3
 , stdenv
-, fennel
 , fetchFromGitHub
 , makeWrapper
 } :
 let
-  tufty-lua = lua.pkgs.buildLuaPackage {
+  tufty-lua = lua5_3.pkgs.buildLuaPackage {
     pname = "tufty";
     version = "1";
     src = fetchFromGitHub {
@@ -22,23 +21,26 @@ let
       '';
   };
   lua = lua5_3.withPackages (ps: with ps; [
-    tufty-lua luasocket luaposix
+    tufty-lua luasocket luaposix fennel
   ]);
-  fennel_ = (fennel.override { inherit lua; });
 in stdenv.mkDerivation {
   pname = "tufted";
   version = "1";
   phases =  [ "unpackPhase" "installPhase" ];
-  buildInputs = [ lua fennel_ ];
+  buildInputs = [
+    lua
+  ];
   nativeBuildInputs = [ makeWrapper ];
   src = ./.;
   installPhase = ''
     mkdir -p $out/lib
     cp tufted.fnl $out/lib
-    makeWrapper ${fennel_}/bin/fennel \
+    makeWrapper ${lua.pkgs.fennel}/bin/fennel \
       $out/bin/tufted \
+      --prefix LUA_CPATH \; "${lua}/lib/lua/5.3/?.so" \
       --add-flags "--add-fennel-path $out/lib/?.fnl" \
       --add-flags "--add-package-path $out/lib/?.lua" \
+      --add-flags "--add-package-path ${lua}/share/lua/5.3/?.lua\;${lua}/share/lua/5.3/?/init.lua" \
       --add-flags "$out/lib/tufted.fnl"
   '';
 }
