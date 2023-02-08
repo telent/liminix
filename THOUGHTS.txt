@@ -477,8 +477,6 @@ translate one to t'other on an intermediary/gateway machine?
 https://www.rfc-archive.org/getrfc.php?rfc=3817#gsc.tab=0 exists
 as an RFC but I can't find anything that actually implements it
 
-
-
 Actual Documentation (e.g.  user and developer manuals) should live in
 the liminix repo so it corresponds with the code, and can be rsynced
 from there to the web site, maybe with a deploy hook or something.
