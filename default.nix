@@ -102,6 +102,7 @@ in {
       tufted
       routeros.routeros
       routeros.ros-exec-script
+      mips-vm
     ];
   };
 }

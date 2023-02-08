@@ -25,6 +25,7 @@ final: prev: {
     nettle = null;
   };
 
+  mips-vm = final.callPackage ./pkgs/mips-vm {};
   pppoe = final.callPackage ./pkgs/pppoe {};
   ppp =
     (prev.ppp.override {

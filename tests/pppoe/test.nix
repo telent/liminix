@@ -7,20 +7,15 @@ let img = (import liminix {
       liminix-config = ./configuration.nix;
     }).outputs.default;
     pkgs = import <nixpkgs> { overlays = [(import ../../overlay.nix)]; };
-    ros = pkgs.pkgsBuildBuild.routeros;
-    run-qemu = pkgs.writeShellScriptBin "run-qemu" ''
-      export PATH="${pkgs.lib.makeBinPath [pkgs.qemu]}:$PATH"
-      ${builtins.readFile ../../scripts/run-qemu.sh}
-    '';
-
+    inherit (pkgs.pkgsBuildBuild) routeros mips-vm;
 in pkgs.runCommand "check" {
   nativeBuildInputs = with pkgs; [
     python3Packages.scapy
     expect
     jq
     socat
-    ros.routeros
-    run-qemu
+    routeros.routeros
+    mips-vm
   ] ;
 } ''
 serverstatedir=$(mktemp -d -t routeros-XXXXXX)
@@ -50,8 +45,8 @@ fatal(){
 trap fatal ERR
 
 routeros $serverstatedir
-
-run-qemu --background foo.sock ${img}/vmlinux ${img}/squashfs
+mkdir vm
+mips-vm --background ./vm ${img}/vmlinux ${img}/squashfs
 expect ${./getaddress.expect}
 
 set -o pipefail

@@ -93,23 +93,25 @@ in the right way
 
 ### Running Liminix in Qemu
 
-`./scripts/run-qemu.sh` accepts a kernel vmlinux image and a squashfs
-and runs qemu with appropriate config for two ethernet interfaces
-hooked up to "lan" and "access" respectively. It connects the Liminix serial console
-and the [QEMU monitor](https://www.qemu.org/docs/master/system/monitor.html) to
-stdin/stdout. Use ^P (not ^A) to switch to the monitor.
+In a `buildEnv` nix-shell, you can use the `mips-vm` command
+to run Qemu with appropriate config for two ethernet interfaces
+hooked up to "lan" and "access" respectively. It connects the Liminix
+serial console and the [QEMU monitor](https://www.qemu.org/docs/master/system/monitor.html) to stdin/stdout. Use ^P (not ^A) to switch to the monitor.
 
-If you run with `--background /path/to/unix/socket` it will fork into
-the background and open a Unix socket at that pathname to communicate
-on. Use `./scripts/connect-qemu.sh` to connect to it, and ^O to
-disconnect.
+    nix-shell -A buildEnv --arg device '(import ./devices/qemu)' --run "mips-vm result/vmlinux result/squashfs"
+
+If you run with `--background /path/to/some/directory` as the first
+parameter, it will fork into the background and open Unix sockets in
+that directory for console and monitor.  Use
+`./scripts/connect-qemu.sh` to connect to either of these sockets, and
+^O to disconnect.
 
 ### Emulated upstream connection
 
-In the tests/support/ppp-server directory there is a derivation
-to install and configure [Mikrotik RouterOS](https://mikrotik.com/software) as
-a PPPoE access concentrator connected to the `access` and `world`
-networks, so that Liminix PPPoE client support can be tested.
+In pkgs/routeros there is a derivation to install and configure
+[Mikrotik RouterOS](https://mikrotik.com/software) as a PPPoE access
+concentrator connected to the `access` and `world` networks, so that
+Liminix PPPoE client support can be tested.
 
 This is made available in the `buildEnv`, so you can do something like
 
@@ -132,8 +134,8 @@ you can run all of the tests by evaluating `ci.nix`:
 
     nix-build --argstr liminix `pwd`  --argstr nixpkgs `pwd`/../nixpkgs  --argstr unstable `pwd`/../unstable-nixpkgs/ ci.nix
 
+or to run a named test, use the `-A` flag. For example, `-A pppoe`
 
-Some of the tests require the emulated upstream connection to be running.
 
 ## Hardware
 
