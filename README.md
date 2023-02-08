@@ -115,7 +115,7 @@ This is made available in the `buildEnv`, so you can do something like
 
     mkdir ros-sockets
     nix-shell -A buildEnv --arg device '(import ./devices/qemu)' \
-	 --run ros-sockets
+	 --run "routeros ros-sockets"
 	./scripts/connect-qemu.sh ./ros-sockets/console
 
 to start it and connect to it.
@@ -123,7 +123,7 @@ to start it and connect to it.
 _Liminix does not provide RouterOS licences and it is your own
 responsibility if you use this to ensure you're compliant with the
 terms of Mikrotik's licencing._It may be supplemented or replaced in
-time with configuurations for RP-PPPoE and/or Accel PPP.
+time with configurations for RP-PPPoE and/or Accel PPP.
 
 ## Running tests
 

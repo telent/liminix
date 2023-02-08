@@ -436,3 +436,50 @@ Tue Oct 18 23:02:43 BST 2022
   different mechanisms for reading similar things
 * Kconfig.local do we still need it?
 * check all config instead of differentiating config/checkedConfig
+
+Sun Feb  5 18:14:02 GMT 2023
+
+We have resumed.
+commit eb4efab6a215bf03cf5aab10d4ac909e83e9c148
+Author: Daniel Barlow <dan@telent.net>
+Date:   Sat Jan 28 23:18:28 2023 +0000
+
+
+* find out what works
+* add that stuff to hydra
+* fix the rest
+* add that stuff to hydra
+* convert to flake
+* check if routeros can be run interactively
+* some per-device docs in a form that can be transcluded for website
+
+
+ci builds
+
+* each of the tests has hardcoded device/config/etc
+* build an "empty" configuration for each target device
+* build an unstable configuration for qemu
+
+
+Wed Feb  8 16:52:22 GMT 2023
+
+We have hydra builds for all the previously-working devices, though we
+don't yet know if any of those builds actually boots or does anything
+useful.
+
+Would be nice to clean up the run-qemu and connect-qemu scripts
+and put them in the buildEnv
+
+Some thought needed about how to hook up the gl-ar750 to the internets,
+ideally in a way that mirrors typical real uses. AAISP have an L2TP
+service, but I would prefer to use pppoe on the device, so how to
+translate one to t'other on an intermediary/gateway machine?
+https://www.rfc-archive.org/getrfc.php?rfc=3817#gsc.tab=0 exists
+as an RFC but I can't find anything that actually implements it
+
+
+
+Actual Documentation (e.g.  user and developer manuals) should live in
+the liminix repo so it corresponds with the code, and can be rsynced
+from there to the web site, maybe with a deploy hook or something.
+Haven't decided what a good doc format is yet
