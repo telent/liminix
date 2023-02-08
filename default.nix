@@ -96,4 +96,14 @@ in {
   # this is just here as a convenience, so that we can get a
   # cross-compiling nix-shell for any package we're customizing
   inherit pkgs;
+
+  buildEnv =
+    let routeros = pkgs.pkgsBuildBuild.callPackage ./tests/support/ppp-server {};
+    in pkgs.mkShell {
+      packages = [
+        pkgs.pkgsBuildBuild.tufted
+        routeros.routeros
+        routeros.ros-exec-script
+      ];
+    };
 }

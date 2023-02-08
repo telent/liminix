@@ -46,7 +46,10 @@ Liminix will eventually provide these differentiators over NixWRT:
 Today though, it does approximately none of these things and certainly
 not on real hardware.
 
+
 ## Building
+
+### For the device
 
 These instructions assume you have nixpkgs checked out in a peer
 directory of this one.
@@ -62,17 +65,23 @@ you plan to install onto it. For example:
 device, whatever that is. For the qemu device, it creates a directory
 containing a squashfs root image and a kernel.
 
+### For the build machine
 
-## QEMU
+Liminix also includes some tools intended for the build machine. You can
+run
+
+    nix-shell -A buildEnv --arg device '(import ./devices/qemu)'
+
+to get a shell environment with (currently) a tftp server and
+a script to start a PPPoE server in QEMU for testing against.
+
+
+#### QEMU
 
 QEMU is useful for developing userland without needing to keep
 flashing or messing with U-Boot: it also enables testing against
 emulated network peers using [QEMU socket networking](https://wiki.qemu.org/Documentation/Networking#Socket),
 which may be preferable to letting Liminix loose on your actual LAN.
-
-We have some tooling to make this easier.
-
-### Networks
 
 We observe these conventions for QEMU network sockets, so that we can
 run multiple emulated instances and have them wired up to each other
@@ -82,7 +91,7 @@ in the right way
 * multicast 230.0.0.1:1235  : lan
 * multicast 230.0.0.1:1236  : world (the internet)
 
-### Running instances
+### Running Liminix in Qemu
 
 `./scripts/run-qemu.sh` accepts a kernel vmlinux image and a squashfs
 and runs qemu with appropriate config for two ethernet interfaces
@@ -97,22 +106,32 @@ disconnect.
 
 ### Emulated upstream connection
 
-In the tests/support/ppp-server directory there are instructions and a script
-to configure [Mikrotik RouterOS](https://mikrotik.com/software) as
+In the tests/support/ppp-server directory there is a derivation
+to install and configure [Mikrotik RouterOS](https://mikrotik.com/software) as
 a PPPoE access concentrator connected to the `access` and `world`
 networks, so that Liminix PPPoE client support can be tested.
-_Liminix does not provide RouterOS licences and it is your own
-responsibility if you use this to ensure you're compliant with
-the terms of Mikrotik's licencing._
 
-This may be supplemented or replaced in time with configuurations for
-RP-PPPoE and/or Accel PPP.
+This is made available in the `buildEnv`, so you can do something like
+
+    mkdir ros-sockets
+    nix-shell -A buildEnv --arg device '(import ./devices/qemu)' \
+	 --run ros-sockets
+	./scripts/connect-qemu.sh ./ros-sockets/console
+
+to start it and connect to it.
+
+_Liminix does not provide RouterOS licences and it is your own
+responsibility if you use this to ensure you're compliant with the
+terms of Mikrotik's licencing._It may be supplemented or replaced in
+time with configuurations for RP-PPPoE and/or Accel PPP.
 
 ## Running tests
 
 Assuming you have nixpkgs checked out in a peer directory of this one,
+you can run all of the tests by evaluating `ci.nix`:
 
-    NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH ./run-tests.sh
+    nix-build --argstr liminix `pwd`  --argstr nixpkgs `pwd`/../nixpkgs  --argstr unstable `pwd`/../unstable-nixpkgs/ ci.nix
+
 
 Some of the tests require the emulated upstream connection to be running.
 
@@ -129,8 +148,8 @@ internet or mucking about copying files to `/tftproot`. If the
 permitted device is to be given the IP address 192.168.8.251 you might
 do something like this:
 
-    $ NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build -I liminix-config=./tests/smoke/configuration.nix --arg device "import ./devices/gl-ar750" -A outputs.tftpd -o tftpd
-    $  ./tftpd/bin/tufted -a 192.168.8.251 result
+    nix-shell -A buildEnv --arg device '(import ./devices/qemu)' \
+	 --run "tufted -a 192.168.8.251 result"
 
 
 ## Troubleshooting
@@ -140,9 +159,9 @@ do something like this:
 Sometimes you can add a package and it causes the image size to balloon
 because it has dependencies on other things you didn't know about. Build the
 `outputs.manifest` attribute, which is a json representation of the
-filesystem, and you can run `nix-store --query` on it:
+filesystem, and you can run `nix-store --query` on it.
 
-    NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build -I liminix-config=path/to/your/configuration.nix --arg device "import ./devices/qemu" -A outputs.manifest -o manifest
+    NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH nix-build -I liminix-config=path/to/your/configuration.nix --arg device "import ./devices/qemu" -A outputs.manifest -o manifest
     nix-store -q --tree manifest
 
 
