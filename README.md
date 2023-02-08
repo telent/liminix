@@ -174,11 +174,16 @@ bit of back and forth involved before patches are merged.  Have a read
 of [CONTRIBUTING](CONTRIBUTING.md) and [STYLE](STYLE.md) and try to
 intuit the unarticulated vision :-)
 
-Liminix' primary repo is https://gti.telent.net/dan/liminix. There's a
-[mirror on Github](https://github.com/telent/liminix) for convenience
-and visibility: you can open PRs against that but be aware that the
-process of merging them may be arcane. Some day, we will have
-federated Gitea using ActivityPub.
+Liminix' primary repo is https://gti.telent.net/dan/liminix but that
+doesn't help you much because registrations are closed:
+
+* There's a [mirror on Github](https://github.com/telent/liminix) for
+convenience and visibility: you can open PRs against that
+
+* or, you can send me your patch by email using [`git send-email`](https://git-send-email.io/)
+
+* or in the future, some day, we will have federated Gitea using
+  ActivityPub.
 
 
 ## Articles of interest
