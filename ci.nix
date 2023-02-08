@@ -18,6 +18,11 @@ let
   tests = import ./tests/ci.nix;
   jobs =
     (genAttrs devices (name: for-device name)) // tests // {
+      buildEnv = (import liminix {
+        inherit nixpkgs;
+        device = import (liminix + "/devices/qemu");
+        liminix-config = vanilla;
+      }).buildEnv;
       with-unstable = (import liminix {
         nixpkgs = unstable;
         device = import (liminix + "/devices/qemu");
