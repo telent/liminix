@@ -6,8 +6,8 @@ let img = (import liminix {
       device = import "${liminix}/devices/qemu/";
       liminix-config = ./configuration.nix;
     }).outputs.default;
-    pkgs = import <nixpkgs> {};
-    ros = pkgs.callPackage ../support/ppp-server {};
+    pkgs = import <nixpkgs> { overlays = [(import ../../overlay.nix)]; };
+    ros = pkgs.pkgsBuildBuild.routeros;
     run-qemu = pkgs.writeShellScriptBin "run-qemu" ''
       export PATH="${pkgs.lib.makeBinPath [pkgs.qemu]}:$PATH"
       ${builtins.readFile ../../scripts/run-qemu.sh}

@@ -25,9 +25,6 @@ final: prev: {
     nettle = null;
   };
 
-
-  tufted = final.callPackage ./pkgs/tufted {};
-
   pppoe = final.callPackage ./pkgs/pppoe {};
   ppp =
     (prev.ppp.override {
@@ -83,4 +80,10 @@ final: prev: {
       sha256 = "0b03bdvm388kwlcz97aflpr3ir1zpa3m0bq3s6cd3pp5a667lcwz";
     };
   };
+
+  # these are packages for the build system not the host/target
+
+  tufted = final.callPackage ./pkgs/tufted {};
+  routeros = final.callPackage ./pkgs/routeros {};
+
 }
