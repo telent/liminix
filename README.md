@@ -102,9 +102,9 @@ serial console and the [QEMU monitor](https://www.qemu.org/docs/master/system/mo
 
 If you run with `--background /path/to/some/directory` as the first
 parameter, it will fork into the background and open Unix sockets in
-that directory for console and monitor.  Use
-`./scripts/connect-qemu.sh` to connect to either of these sockets, and
-^O to disconnect.
+that directory for console and monitor.  Use `connect-vm` (also in the
+`buildEnv` environment) to connect to either of these sockets, and ^O
+to disconnect.
 
 ### Emulated upstream connection
 
@@ -116,9 +116,9 @@ Liminix PPPoE client support can be tested.
 This is made available in the `buildEnv`, so you can do something like
 
     mkdir ros-sockets
-    nix-shell -A buildEnv --arg device '(import ./devices/qemu)' \
-	 --run "routeros ros-sockets"
-	./scripts/connect-qemu.sh ./ros-sockets/console
+    nix-shell -A buildEnv --arg device '(import ./devices/qemu)'
+	nix-shell$ routeros ros-sockets
+	nix-shell$ connect-vm ./ros-sockets/console
 
 to start it and connect to it.
 

@@ -468,7 +468,7 @@ don't yet know if any of those builds actually boots or does anything
 useful.
 
 Would be nice to clean up the run-qemu and connect-qemu scripts
-and put them in the buildEnv
+and put them in the buildEnv [DONE]
 
 Some thought needed about how to hook up the gl-ar750 to the internets,
 ideally in a way that mirrors typical real uses. AAISP have an L2TP
