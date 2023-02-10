@@ -481,3 +481,23 @@ Actual Documentation (e.g.  user and developer manuals) should live in
 the liminix repo so it corresponds with the code, and can be rsynced
 from there to the web site, maybe with a deploy hook or something.
 Haven't decided what a good doc format is yet
+
+If we create a flake for Hydra to run on, that _more or less_ means we
+don't have any manual hydra jobset configuration to document.
+
+There are still some tests that need adding to CI
+
+Should the per-device config be a module not an overlay? Given that
+half of what's in it is kernel config (a module could set this)
+and the rest is source tarball download specs (needs nixpkgs,
+a module has this and could set it too) I wonder why it isn't already
+
+Can we make Hydra report output sizes so we can plot closure size
+trends and see if it all goes awful?
+
+Thu Feb  9 08:14:39 GMT 2023
+
+For better developer experience, I am thinking that either (1)
+swap tasks 2 and 3 (writable filesystem before module system)
+or (2) add NBD support so I can iterate on a real device without
+full rebuilds every time
