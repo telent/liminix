@@ -29,7 +29,13 @@ in {
         default = "true";
         type = types.lines;
       } ;
-      dts = mkOption { type = types.path; };
+      dts = {
+        src = mkOption { type = types.path; };
+        includes = mkOption {
+          default = [];
+          type = types.listOf types.path;
+        };
+      };
       config = mkOption {
         # mostly the values are y n or m, but sometimes
         # other strings are also used

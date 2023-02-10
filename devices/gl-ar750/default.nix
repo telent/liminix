@@ -59,7 +59,12 @@
           patches ${openwrt}/target/linux/generic/hack-5.15/*.patch
           patches ${openwrt}/target/linux/ath79/patches-5.15/*.patch
         '';
-        dts = "${openwrt}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";
+        dts = {
+          src = "${openwrt}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";
+          includes =  [
+            "${openwrt}/target/linux/ath79/dts"
+          ];
+        };
         config = {
           MIPS_ELF_APPENDED_DTB = "y";
           OF = "y";

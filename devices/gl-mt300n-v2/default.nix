@@ -46,7 +46,12 @@
           patches ${openwrt}/target/linux/generic/hack-5.15/*.patch
           patches ${openwrt}/target/linux/ramips/patches-5.15/*.patch
         '';
-        dts = "${openwrt}/target/linux/ramips/dts/mt7628an_glinet_gl-mt300n-v2.dts";
+        dts = {
+          src = "${openwrt}/target/linux/ramips/dts/mt7628an_glinet_gl-mt300n-v2.dts";
+          includes = [
+            "${openwrt}/target/linux/ramips/dts"
+          ];
+        };
         config = {
           MIPS_ELF_APPENDED_DTB = "y";
           OF = "y";
