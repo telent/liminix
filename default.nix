@@ -8,14 +8,14 @@
 let
   overlay = import ./overlay.nix;
   pkgs = import nixpkgs (device.system // {
-    overlays = [overlay device.overlay];
+    overlays = [overlay];
     config = {allowUnsupportedSystem = true; };
   });
   inherit (pkgs) callPackage writeText liminix fetchFromGitHub;
   inherit (pkgs.lib) concatStringsSep;
   config = (import ./merge-modules.nix) [
     ./modules/base.nix
-    ({ lib, ... } : { config = { inherit (device) kernel; }; })
+    device.module
     liminix-config
     ./modules/s6
     ./modules/users.nix
@@ -33,11 +33,11 @@ let
 
   outputs = rec {
     inherit squashfs;
-    kernel = pkgs.kernel.override {
-      inherit (config.kernel) config;
+    kernel = liminix.builders.kernel.override {
+      inherit (config.kernel) config src extraPatchPhase;
     };
     dtb =  (callPackage ./kernel/dtb.nix {}) {
-      dts = config.kernel.dts { inherit openwrt; };
+      dts = config.kernel.dts;
       includes = [
         "${openwrt}/target/linux/ath79/dts"
         "${kernel.headers}/include"
@@ -91,7 +91,7 @@ let
     tftpd = pkgs.buildPackages.tufted;
   };
 in {
-  outputs = outputs // { default = outputs.${device.outputs.default}; };
+  outputs = outputs // { default = outputs.${config.device.defaultOutput}; };
 
   # this is just here as a convenience, so that we can get a
   # cross-compiling nix-shell for any package we're customizing

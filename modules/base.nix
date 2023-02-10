@@ -24,7 +24,12 @@ in {
     };
     filesystem = mkOption { type = types.anything; };
     kernel = {
-      dts = mkOption { type = types.functionTo types.string; };
+      src = mkOption { type = types.package; } ;
+      extraPatchPhase = mkOption {
+        default = "true";
+        type = types.lines;
+      } ;
+      dts = mkOption { type = types.string; };
       config = mkOption {
         # mostly the values are y n or m, but sometimes
         # other strings are also used
@@ -39,6 +44,12 @@ in {
     };
     users =  mkOption {
       type = types.attrsOf types.anything;
+    };
+    device = {
+      defaultOutput = mkOption {
+        type = types.nonEmptyStr;
+      };
+      boot = mkOption { type = types.any; };
     };
   };
   config = {

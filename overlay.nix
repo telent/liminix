@@ -6,13 +6,12 @@ final: prev: {
     networking =  final.callPackage ./pkgs/liminix-tools/networking {};
     builders =  {
       squashfs = final.callPackage ./pkgs/liminix-tools/builders/squashfs.nix {};
+      kernel = final.callPackage ./pkgs/kernel {};
     };
   };
   writeAshScript = final.callPackage ./pkgs/write-ash-script {};
   s6-init-bin =  final.callPackage ./pkgs/s6-init-bin {};
   s6-rc-database = final.callPackage ./pkgs/s6-rc-database {};
-
-  kernel = final.callPackage ./pkgs/kernel {};
 
   dnsmasq =
     let d =  prev.dnsmasq.overrideAttrs(o: {

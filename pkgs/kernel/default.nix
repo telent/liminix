@@ -6,7 +6,7 @@
 
  , config
  , src
- , extraPatchPhase ? "true"
+ , extraPatchPhase ? "echo"
 } :
 let writeConfig = name : config: writeText name
         (builtins.concatStringsSep
