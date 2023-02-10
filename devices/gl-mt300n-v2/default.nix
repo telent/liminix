@@ -23,10 +23,8 @@
     in {
       device = {
         defaultOutput = "directory";
-        boot = {
-          loadAddress = "0x80000000";
-          entryPoint  = "0x80000000";
-        };
+        loadAddress = "0x80000000";
+        entryPoint  = "0x80000000";
       };
 
       kernel = {

@@ -45,7 +45,7 @@ let
     };
     uimage = (callPackage ./kernel/uimage.nix {}) {
       commandLine = concatStringsSep " " config.boot.commandLine;
-      inherit (device.boot) loadAddress entryPoint;
+      inherit (config.device) loadAddress entryPoint;
       inherit kernel;
       inherit dtb;
     };
@@ -80,8 +80,9 @@ let
       ln -s ${manifest} manifest
       ln -s ${kernel.headers} build
     '' +
-    (if device ? boot then ''
-      ln -s ${uimage} uimage
+    (if config.device.loadAddress != null  then
+      ''
+      ln -s {uimage} uimage
       ${if phram then "ln -s ${boot-scr} boot.scr" else ""}
       ln -s ${boot-scr} flash.scr
     '' else ""));

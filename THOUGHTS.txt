@@ -501,3 +501,11 @@ For better developer experience, I am thinking that either (1)
 swap tasks 2 and 3 (writable filesystem before module system)
 or (2) add NBD support so I can iterate on a real device without
 full rebuilds every time
+
+
+Fri Feb 10 06:18:25 PM GMT 2023
+
+did the overlay->module thing
+
+Need to fix all the configuration around PHRAM, I can't see how it
+would ever ork

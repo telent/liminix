@@ -34,8 +34,8 @@
         hash = "sha256-YYi4gkpLjbOK7bM2MGQjAyEBuXJ9JNXoz/JEmYf8xE8=";
       };
     in {
-      device.defaultOutput = "directory";
-      device.boot = {
+      device = {
+        defaultOutput = "directory";
         loadAddress = "0x80060000";
         entryPoint  = "0x80060000";
       };

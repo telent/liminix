@@ -29,15 +29,12 @@ in {
         default = "true";
         type = types.lines;
       } ;
-      dts = mkOption { type = types.string; };
+      dts = mkOption { type = types.path; };
       config = mkOption {
         # mostly the values are y n or m, but sometimes
         # other strings are also used
         type = types.attrsOf types.nonEmptyStr;
       };
-    };
-    boot.commandLine = mkOption {
-      type = types.listOf types.nonEmptyStr;
     };
     groups =  mkOption {
       type = types.attrsOf types.anything;
@@ -45,12 +42,15 @@ in {
     users =  mkOption {
       type = types.attrsOf types.anything;
     };
-    device = {
-      defaultOutput = mkOption {
-        type = types.nonEmptyStr;
-      };
-      boot = mkOption { type = types.any; };
+    boot.commandLine = mkOption {
+      type = types.listOf types.nonEmptyStr;
+      default = [];
     };
+    device.defaultOutput = mkOption {
+      type = types.nonEmptyStr;
+    };
+    device.loadAddress = mkOption { default = null; };
+    device.entryPoint = mkOption { };
   };
   config = {
     defaultProfile.packages = with pkgs;
