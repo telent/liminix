@@ -64,5 +64,10 @@ in rec {
     contents = with services; [ loopback ntp defaultroute4 ];
   };
 
+  boot.tftp = {
+    serverip = "192.168.8.148";
+    ipaddr = "192.168.8.251";
+  };
+
   defaultProfile.packages = [ pkgs.hello ] ;
 }

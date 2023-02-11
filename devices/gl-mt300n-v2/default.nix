@@ -26,6 +26,9 @@
         loadAddress = "0x80000000";
         entryPoint  = "0x80000000";
       };
+      boot.tftp = {
+        loadAddress = "0x00A00000";
+      };
 
       kernel = {
         src = pkgs.fetchurl {
