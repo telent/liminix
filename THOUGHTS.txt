@@ -467,8 +467,8 @@ We have hydra builds for all the previously-working devices, though we
 don't yet know if any of those builds actually boots or does anything
 useful.
 
-Would be nice to clean up the run-qemu and connect-qemu scripts
-and put them in the buildEnv [DONE]
+[DONE] Would be nice to clean up the run-qemu and connect-qemu scripts
+and put them in the buildEnv
 
 Some thought needed about how to hook up the gl-ar750 to the internets,
 ideally in a way that mirrors typical real uses. AAISP have an L2TP
@@ -487,12 +487,12 @@ don't have any manual hydra jobset configuration to document.
 
 There are still some tests that need adding to CI
 
-Should the per-device config be a module not an overlay? Given that
+[DONE] Should the per-device config be a module not an overlay? Given that
 half of what's in it is kernel config (a module could set this)
 and the rest is source tarball download specs (needs nixpkgs,
 a module has this and could set it too) I wonder why it isn't already
 
-Can we make Hydra report output sizes so we can plot closure size
+[ALREADY DOES] Can we make Hydra report output sizes so we can plot closure size
 trends and see if it all goes awful?
 
 Thu Feb  9 08:14:39 GMT 2023
@@ -507,5 +507,52 @@ Fri Feb 10 06:18:25 PM GMT 2023
 
 did the overlay->module thing
 
-Need to fix all the configuration around PHRAM, I can't see how it
-would ever ork
+[DONE] Need to fix all the configuration around PHRAM, I can't see how it
+would ever work
+
+Sat Feb 11 14:37:45 GMT 2023
+
+Consolidated TODO
+
+* figure out persistent addresses for ethernet (?)
+* fix halt/reboot
+[DONE, NO] * Kconfig.local do we still need it?
+[DONE] * check all config instead of differentiating config/checkedConfig
+
+Things we can do in qemu
+
+* "link" services have a "device" attribute, would much rather
+  have everything referenced using outputs than having two
+  different mechanisms for reading similar things
+1) make interface address service that depends on dhcp, instead of
+  being set by it directly
+2) check out restart behaviour of dependent services when depended-on
+  service dies
+3) pppd _creates_ an interface, work out how to fit it into this model
+5) add bridge support for lan
+8) upgrade ppp to something with an ipv6-up-script option, move ppp and pppoe derivations into their own files
+9) get ipv6 address from pppoe
+10) get ipv6 delegation from pppoe and add prefix to lan
+11) support dhcp6 in dnsmasq, and advertise prefix on lan
+12) firewalling and nat
+ - default deny or zero trust?
+14) write secrets holder as a service with outputs
+20) should we check that references to outputs actually correspond with
+  those provided by a service
+* Actual Documentation (e.g.  user and developer manuals)
+* make a flake
+* There are still some tests that need adding to CI
+
+Things we probably do on hardware
+
+[DONE] * dts is hardcoded to gl-ar750, that needs cleaning up
+6) writable filesystem (ubifs?)
+7) overlay with squashfs/ubifs - useful? think about workflows for
+how this thing is installed
+16) gl-ar750
+* decide how to hook up the gl-ar750 to the internets
+17) mediatek device - gl-mt300 or whatever I have lying around
+18) some kind of arm (banana pi router?)
+19) should we give routeros a hardware ethernet and maybe an l2tp upstream,
+ then we could dogfood the hardware devices.  we could run an l2tp service
+ at mythic-beasts, got a /48 there
