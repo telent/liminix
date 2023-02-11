@@ -3,6 +3,9 @@ let
   inherit (pkgs.liminix.networking) interface address udhcpc odhcpc route;
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
 in rec {
+  imports = [
+    ./modules/phram.nix
+  ];
   services.loopback =
     let iface = interface { type = "loopback"; device = "lo";};
     in bundle {

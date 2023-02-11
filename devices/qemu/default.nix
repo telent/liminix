@@ -41,6 +41,6 @@
         SERIAL_8250_CONSOLE= "y";
       };
     };
-    device.defaultOutput = "directory";
+    device.defaultOutput = "vmroot";
   };
 }

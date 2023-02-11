@@ -22,7 +22,7 @@
       };
     in {
       device = {
-        defaultOutput = "directory";
+        defaultOutput = "tftproot";
         loadAddress = "0x80000000";
         entryPoint  = "0x80000000";
       };

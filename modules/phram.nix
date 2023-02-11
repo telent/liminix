@@ -1,8 +1,24 @@
 {
   config
+, pkgs
+, lib
 , ...
 }:
-{
+let
+  inherit (lib) mkOption types concatStringsSep;
+  cfg = config.boot.tftp;
+in {
+  options = {
+    boot = {
+      tftp = {
+        loadAddress = mkOption { type = types.str; };
+        # These names match the uboot environment variables. I reserve
+        # the right to change them if I think of better ones.
+        ipaddr =  mkOption { type = types.str; };
+        serverip =  mkOption { type = types.str; };
+      };
+    };
+  };
   config = {
     kernel = {
       config = {
@@ -25,5 +41,37 @@
       };
 
     };
+    outputs.tftproot =
+      let o = config.outputs; in
+      pkgs.runCommand "tftproot" {} ''
+        mkdir $out
+        cd $out
+        ln -s ${o.squashfs} squashfs
+        ln -s ${o.kernel} vmlinux
+        ln -s ${o.manifest} manifest
+        ln -s ${o.kernel.headers} build
+        ln -s ${o.uimage} uimage
+        ln -s ${o.boot-scr} flash.scr
+     '';
+
+    outputs.boot-scr =
+      let
+        inherit (pkgs.lib.trivial) toHexString;
+      in
+        pkgs.buildPackages.runCommand "" {} ''
+          uimageSize=$(($(stat -L -c %s ${config.outputs.uimage}) + 0x1000 &(~0xfff)))
+          squashfsStart=0x$(printf %x $((${cfg.loadAddress} + $uimageSize)))
+          squashfsBytes=$(($(stat -L -c %s ${config.outputs.squashfs}) + 0x100000 &(~0xfffff)))
+          squashfsMb=$(($squashfsBytes >> 20))
+          cmd="mtdparts=phram0:''${squashfsMb}M(nix) phram.phram=phram0,''${squashfsStart},''${squashfsMb}Mi memmap=''${squashfsMb}M\$''${squashfsStart} root=1f00";
+          cat > $out << EOF
+          setenv serverip ${cfg.serverip}
+          setenv ipaddr ${cfg.ipaddr}
+          setenv bootargs '${concatStringsSep " " config.boot.commandLine} $cmd'
+          tftp 0x$(printf %x ${cfg.loadAddress}) result/uimage ; tftp 0x$(printf %x $squashfsStart) result/squashfs
+          bootm 0x$(printf %x ${cfg.loadAddress})
+          EOF
+        '';
+
   };
 }

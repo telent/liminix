@@ -35,11 +35,15 @@
       };
     in {
       device = {
-        defaultOutput = "directory";
+        defaultOutput = "tftproot";
         loadAddress = "0x80060000";
         entryPoint  = "0x80060000";
       };
-
+      boot.tftp = {
+        loadAddress = "0x00A00000";
+        serverip = "192.168.8.148";
+        ipaddr = "192.168.8.251";
+      };
       kernel = {
         src = pkgs.pkgsBuildBuild.fetchurl {
           name = "linux.tar.gz";

@@ -1,7 +1,6 @@
 {
   device
 , liminix-config ? <liminix-config>
-, phram ? false
 , nixpkgs ? <nixpkgs>
 }:
 
@@ -18,7 +17,6 @@ let
     liminix-config
     ./modules/s6
     ./modules/users.nix
-    (if phram then  ./modules/phram.nix else (args: {}))
     ./modules/outputs.nix
   ] pkgs;
 
