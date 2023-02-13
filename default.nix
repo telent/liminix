@@ -11,7 +11,7 @@ let
     config = {allowUnsupportedSystem = true; };
   });
 
-  config = (import ./merge-modules.nix) [
+  config = (import ./lib/merge-modules.nix) [
     ./modules/base.nix
     device.module
     liminix-config
