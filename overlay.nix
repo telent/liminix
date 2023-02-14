@@ -85,5 +85,5 @@ final: prev: {
 
   tufted = final.callPackage ./pkgs/tufted {};
   routeros = final.callPackage ./pkgs/routeros {};
-
+  go-l2tp = final.callPackage ./pkgs/go-l2tp {};
 }

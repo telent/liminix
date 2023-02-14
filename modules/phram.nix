@@ -16,6 +16,7 @@ in {
         # the right to change them if I think of better ones.
         ipaddr =  mkOption { type = types.str; };
         serverip =  mkOption { type = types.str; };
+        enable =  mkOption { type = types.boolean; };
       };
     };
   };

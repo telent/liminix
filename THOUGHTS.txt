@@ -556,3 +556,115 @@ how this thing is installed
 19) should we give routeros a hardware ethernet and maybe an l2tp upstream,
  then we could dogfood the hardware devices.  we could run an l2tp service
  at mythic-beasts, got a /48 there
+
+
+Sat Feb 11 15:57:31 GMT 2023
+
+The reason we would like to run PPPoE instead of L2TP on the "rotuer" device is
+
+- closer to real world scenario
+- means no need to run dhcp client on the wan interface before we
+ even get to start the l2tpd
+
+
+rotuer needs to talk to something (an "access concentrator") that
+speaks pppoe on a lan-adjacent machine, which then needs to put the
+packets into an l2tp tunnel
+
+c->s PADI (discovery initiation, broadcast)
+s->c PADO (discovery offer)
+c->s PADR (discovery request, unicast)
+s->c PADS (discovery confirmation, issues SESSION_ID)
+
+PADT sent at end
+
+once we have a session id we can send PPP packets. These are
+ethernet packets
+
+6 bytes dest_mac
+6 bytes src_mac
+2 bytes ether_type = 0x8864
+1 byte ver=1, type=1  (nybbles)
+1 bytes CODE = 0x00
+2 bytes sesion_id
+2 bytes length
+2 bytes PPP protocol = 0xc021
+... ppp payload ...
+
+pppoe server runs pppd using a pty. it gets input data from an ethernet
+device and communicates by sending packets out of that same device to
+a remote computer, so what is it doing with that pty? I assume stripping the
+ethernet headers and sending the ppp inside it onto pppd
+
+x2ltpd does the same, so can we hook the ptys together somehow?
+
+we can ask xl2tpd to open a session using its control socket, but it
+will (I assume) spawn a pppd, and what we would like to do is pass file
+descriptors to a pppd that already exists.
+
+xl2tpd has a preprocessor symbol PPPD to specify what it runs
+
+could we rp-pppoe  will
+
+
+it gets data from an ethernet
+device with ppp ,  encapsulation crap and sends it to the pty, then
+
+ethernet device
+
+packet with encrap     -> rp-pppoe    -> pty -> pppd
+
+
+------
+
+what if we start from the "other end"? start a l2tp tunnel and session
+so that the peer starts sending ppp negotiation. When we get packets
+from the peer we will strip the encapsulation and send the inner ppp
+payload to pppd as a subprocess on a pty, which will decide how to
+respond. The reply is encapsulated and sent out on a port
+
+for rp-pppoe, the invocation is
+
+       pppd pty 'pppoe [pppoe_options]' [pppd_options]
+
+i.e. it runs pppd and tells it to use a pppoe process as its pty.
+This process accepts ppp packets on stdin/stdout and encapsulates them
+for ethernet.
+
+So, can we use 'pppoe [pppoe_options]' as the pppd argument to xl2tp
+
+what do we need to test this?
+
+
+
+Sun Feb 12 14:57:28 GMT 2023
+
+https://github.com/katalix/go-l2tp#kpppoed
+
+
+Mon Feb 13 04:44:09 PM GMT 2023
+
+if the gl-ar750 is connected to an ethernet card that linux is ignoring,
+we're going to have to set up _some_ qemu thing just to run tftp from.
+
+Tue Feb 14 17:59:34 GMT 2023
+
+We should do a derivation that creates an ISO image and a qemu shell
+script based on a configuration.nix, and put it in buildEnv. We'll
+call it "borderNetVm" :
+
+> A broadband remote access server (BRAS, B-RAS or BBRAS) routes
+  traffic to and from broadband remote access devices such as digital
+  subscriber line access multiplexers (DSLAM) on an Internet service
+  provider's (ISP) network.[1][2] BRAS can also be referred to as a
+  broadband network gateway or border network gateway (BNG).[3]
+
+(for consistency we should rename the "access" qemu socket network to
+match whatever we call this)
+
+nixos iso-image has a grub label
+    # A variant to boot with a serial console enabled
+    LABEL boot-serial
+
+
+ rm border.qcow2 ; nix-shell --argstr liminix `pwd`  --argstr nixpkgs `pwd`/../nixpkgs  --argstr unstable `pwd`/../unstable-nixpkgs/ ci.nix -A buildEnv --run "sudo run-border-vm"
