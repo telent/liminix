@@ -59,7 +59,7 @@ hardware device definition as argument `device`, and to choose an
 appropriate output attribute depending on what your device is and how
 you plan to install onto it. For example:
 
-    NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build -I liminix-config=./tests/smoke/configuration.nix --arg device "import ./devices/qemu" -A outputs.default
+    NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH  nix-build -I liminix-config=./tests/smoke/configuration.nix --arg device "import ./devices/qemu" -A outputs.default
 
 `outputs.default` is intended to do something appropriate for the
 device, whatever that is. For the qemu device, it creates a directory
