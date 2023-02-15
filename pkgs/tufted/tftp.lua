@@ -39,6 +39,8 @@ local ERR_WHO = 7
 --rfc2349 specifies the timeout and tsize extensions
 local SUPPORTED_OPTIONS = {blksize=true, timeout=true, tsize=true}
 
+local luasocket = require("socket")
+
 --Use penlight's prettyprinter if available
 pcall(require, 'pl')
 local log = pretty and pretty.dump or print
@@ -70,7 +72,6 @@ local poll = (function()
         }
     ]]
 
-    local luasocket = require("socket")
     return function(fds, timeout)
         local wantread = {}
         local wantwrite = {}
@@ -102,25 +103,22 @@ local function UDPSocket()
         complete UDP socket implementation.
         see http://w3.impa.br/~diego/software/luasocket/udp.html for the luasocket UDP API
     ]]
-    local okay, luasocket = pcall(require, "socket")
-    if okay then
-        log("using luasocket")
-        return {
-            fd = luasocket.udp(),
-            bind = function(self, address, port)
-                return self.fd:setsockname(address, port)
-            end,
-            sendto = function(self, data, address, port)
-                return self.fd:sendto(data, address, port)
-            end,
-            recvfrom = function(self, length)
-                return self.fd:receivefrom(length)
-            end,
-            close = function(self)
-                return self.fd:close()
-            end,
-        }
-    end
+
+   return {
+      fd = luasocket.udp(),
+      bind = function(self, address, port)
+	 return self.fd:setsockname(address, port)
+      end,
+      sendto = function(self, data, address, port)
+	 return self.fd:sendto(data, address, port)
+      end,
+      recvfrom = function(self, length)
+	 return self.fd:receivefrom(length)
+      end,
+      close = function(self)
+	 return self.fd:close()
+      end
+   }
 end
 
 local function is_netascii(s)
