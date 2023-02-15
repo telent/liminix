@@ -33,15 +33,9 @@
           (values
            (fn handler [reqlen]
              (let [bytes (f:read reqlen)]
-               (if eof?
-                   false
-                   bytes
+               (if bytes
                    (values true bytes)
-                   (do
-                     ;; if the file length is divisible by the block
-                     ;; length, need to send an empty block at eof
-                     (set eof? true)
-                     (values true "")))))
+                   (values false nil))))
            size))
         (error "host not allowed")))
   nil
