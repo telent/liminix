@@ -44,6 +44,12 @@ let
               ExecStart = "${pkgs.pkgsBuildBuild.go-l2tp}/bin/kpppoed -config ${conf}";
             };
           };
+        systemd.services.tufted = {
+            wantedBy = [ "multi-user.target" ];
+            serviceConfig = {
+              ExecStart = "${pkgs.pkgsBuildBuild.tufted}/bin/tufted /home/liminix/liminix";
+            };
+          };
         virtualisation = {
           qemu = {
             networkingOptions = [];
@@ -65,6 +71,10 @@ let
         networking = {
           hostName = "border";
           firewall = { enable = false; };
+          interfaces.eth1 = {
+            useDHCP = false;
+            ipv4.addresses = [ { address = "10.0.0.1"; prefixLength = 24;}];
+          };
         };
         users.users.liminix = {
           isNormalUser = true;
