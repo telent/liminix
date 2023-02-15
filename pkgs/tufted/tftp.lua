@@ -320,7 +320,7 @@ function tftp:listen(rrq_generator_callback, wrq_generator_callback, hosts, port
             If the request is invalid, responds to the client with error and returns `nil`
             otherwise returns the parsed request.
         ]]
-        local msg, host, port = socket:recvfrom(-1)
+        local msg, host, port = socket:recvfrom()
         if msg ~= false then
             local okay, xRQ = pcall(self.parse_XRQ, msg)
             if not okay then
