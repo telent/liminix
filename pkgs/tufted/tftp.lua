@@ -84,12 +84,14 @@ local poll = (function()
         if timedout then return nil end
         local ready = {}
         for _, fd in ipairs(readable) do
-            fds[fd].readable = true
+	   ready[fd] = ready[fd] or { fd = fd }
+	   ready[fd].readable = true
         end
         for _, fd in ipairs(writeable) do
-            fds[fd].writeable = true
+	   ready[fd] = ready[fd] or { fd = fd }
+	   ready[fd].writeable = true
         end
-        return fds
+        return ready
     end
 end)()
 
