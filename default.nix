@@ -66,7 +66,13 @@ let
             };
           };
         };
-        environment.systemPackages = [ pkgs.pkgsBuildBuild.tufted ];
+        environment.systemPackages = with pkgs.pkgsBuildBuild; [
+          tcpdump
+          wireshark
+          socat
+          tufted
+          iptables
+        ];
         security.sudo.wheelNeedsPassword = false;
         networking = {
           hostName = "border";
