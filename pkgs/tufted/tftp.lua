@@ -1,3 +1,10 @@
+-- this code is based on src/tftp.lua from https://github.com/ldrumm/tufty
+-- which is distributed under the MIT License
+-- Starting upstream revision 3cb95c869e2fe74cc61ca303d88af6c5daad6734
+--
+-- Changes made since then are mostly to make it work better with
+-- luasocket
+
 --[[
     This package provides intefaces for handling TFTP requests as specified by
     rfc1350, rfc1782, rfc2347, rfc2348 and (partial support for rfc2349)
@@ -37,16 +44,7 @@ pcall(require, 'pl')
 local log = pretty and pretty.dump or print
 
 local time = (function()
-    local okay, nixio = pcall(require, "nixio")
-    if okay then
-        local gettimeofday = nixio.gettimeofday
-        return function()
-            local secs, usecs = gettimeofday()
-            return secs + (usecs / 1e6)
-        end
-    else
-        return require("socket").gettime
-    end
+      return require("socket").gettime
 end)()
 
 local poll = (function()
@@ -71,35 +69,6 @@ local poll = (function()
         ...
         }
     ]]
-
-    local okay, nixio = pcall(require, "nixio")
-    if okay then
-        return function(fds, timeout)
-            timeout = timeout or -1
-            local query_table = {}
-            local flags  = {}
-            --nixio only looks at integer keys
-            for _, client in pairs(fds) do
-                if client.wantwrite then flags[#flags+1] = 'out' end
-                if client.wantread then flags[#flags+1] = 'in' end
-                query_table[#query_table+1] = {
-                    fd=client.fd,
-                    events=nixio.poll_flags(unpack(flags))
-                }
-            end
-            local count, fds = nixio.poll(query_table, timeout)
-            if count == 0 or fds == nil then return {} end
-            local ready = {}
-            for i, fd  in ipairs(fds) do
-                local revents = nixio.poll_flags(fd.revents)
-                if revents['in'] or revents['out'] then
-                    ready[fd.fd] = {fd=fd.fd, readable=revents['in'] ~= nil, writeable=revents['out'] ~= nil}
-                end
-            end
---           log(p({ready=ready}))
-            return ready
-        end
-    end
 
     local luasocket = require("socket")
     return function(fds, timeout)
@@ -126,11 +95,10 @@ end)()
 
 local function UDPSocket()
     --[[ We want to support the basic functionality required for TFTP operation over
-        UDP with either nixio (OpenWRT LuCI) or luasocket (everywhere else).
+        UDP.
         This wraps only the required functionality and in no way represents a
         complete UDP socket implementation.
         see http://w3.impa.br/~diego/software/luasocket/udp.html for the luasocket UDP API
-        and http://luci.subsignal.org/api/nixio/modules/nixio.Socket.html for nixio.
     ]]
     local okay, luasocket = pcall(require, "socket")
     if okay then
@@ -151,23 +119,6 @@ local function UDPSocket()
             end,
         }
     end
-    local nixio = require("nixio")
-    log("using nixio")
-    return {
-        fd=nixio.socket("inet", "dgram"),
-        bind = function(self, address, port)
-            return self.fd:bind(address, port)
-        end,
-        sendto = function(self, data, address, port)
-            return self.fd:sendto(data, address, port)
-        end,
-        recvfrom = function(self, length)
-            return self.fd:recvfrom(length)
-        end,
-        close = function(self)
-            return self.fd:close()
-        end
-    }
 end
 
 local function is_netascii(s)
