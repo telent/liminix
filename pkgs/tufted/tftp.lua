@@ -301,6 +301,7 @@ function tftp:listen(rrq_generator_callback, wrq_generator_callback, hosts, port
                 if request.opcode == 'WRQ' then requestsocket:sendto(self.ACK(0), host, port) end
             end
             local handlersocket = UDPSocket()
+	    handlersocket:bind("*", 0)
             local handler = self['handle_' .. request.opcode](self, handlersocket, host, port, generator, request.options)
             return {
                 handler=handler,
