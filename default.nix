@@ -11,14 +11,17 @@ let
     config = {allowUnsupportedSystem = true; };
   });
 
-  config = (import ./lib/merge-modules.nix) [
-    ./modules/base.nix
-    device.module
-    liminix-config
-    ./modules/s6
-    ./modules/users.nix
-    ./modules/outputs.nix
-  ] pkgs;
+  config = (pkgs.lib.evalModules {
+    modules = [
+      { _module.args = { inherit pkgs; lib = pkgs.lib; }; }
+      ./modules/base.nix
+      device.module
+      liminix-config
+      ./modules/s6
+      ./modules/users.nix
+      ./modules/outputs.nix
+    ];
+  }).config;
 
   borderVm = ((import <nixpkgs/nixos/lib/eval-config.nix>) {
     system = builtins.currentSystem;
