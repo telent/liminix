@@ -515,7 +515,7 @@ Sat Feb 11 14:37:45 GMT 2023
 Consolidated TODO
 
 * figure out persistent addresses for ethernet (?)
-* fix halt/reboot
+[SEEMS DONE] * fix halt/reboot
 [DONE, NO] * Kconfig.local do we still need it?
 [DONE] * check all config instead of differentiating config/checkedConfig
 
@@ -550,10 +550,10 @@ Things we probably do on hardware
 7) overlay with squashfs/ubifs - useful? think about workflows for
 how this thing is installed
 16) gl-ar750
-* decide how to hook up the gl-ar750 to the internets
+[DONE] * decide how to hook up the gl-ar750 to the internets
 17) mediatek device - gl-mt300 or whatever I have lying around
 18) some kind of arm (banana pi router?)
-19) should we give routeros a hardware ethernet and maybe an l2tp upstream,
+[DONE DIFERENTLY] 19) should we give routeros a hardware ethernet and maybe an l2tp upstream,
  then we could dogfood the hardware devices.  we could run an l2tp service
  at mythic-beasts, got a /48 there
 
@@ -564,77 +564,7 @@ The reason we would like to run PPPoE instead of L2TP on the "rotuer" device is
 
 - closer to real world scenario
 - means no need to run dhcp client on the wan interface before we
- even get to start the l2tpd
-
-
-rotuer needs to talk to something (an "access concentrator") that
-speaks pppoe on a lan-adjacent machine, which then needs to put the
-packets into an l2tp tunnel
-
-c->s PADI (discovery initiation, broadcast)
-s->c PADO (discovery offer)
-c->s PADR (discovery request, unicast)
-s->c PADS (discovery confirmation, issues SESSION_ID)
-
-PADT sent at end
-
-once we have a session id we can send PPP packets. These are
-ethernet packets
-
-6 bytes dest_mac
-6 bytes src_mac
-2 bytes ether_type = 0x8864
-1 byte ver=1, type=1  (nybbles)
-1 bytes CODE = 0x00
-2 bytes sesion_id
-2 bytes length
-2 bytes PPP protocol = 0xc021
-... ppp payload ...
-
-pppoe server runs pppd using a pty. it gets input data from an ethernet
-device and communicates by sending packets out of that same device to
-a remote computer, so what is it doing with that pty? I assume stripping the
-ethernet headers and sending the ppp inside it onto pppd
-
-x2ltpd does the same, so can we hook the ptys together somehow?
-
-we can ask xl2tpd to open a session using its control socket, but it
-will (I assume) spawn a pppd, and what we would like to do is pass file
-descriptors to a pppd that already exists.
-
-xl2tpd has a preprocessor symbol PPPD to specify what it runs
-
-could we rp-pppoe  will
-
-
-it gets data from an ethernet
-device with ppp ,  encapsulation crap and sends it to the pty, then
-
-ethernet device
-
-packet with encrap     -> rp-pppoe    -> pty -> pppd
-
-
-------
-
-what if we start from the "other end"? start a l2tp tunnel and session
-so that the peer starts sending ppp negotiation. When we get packets
-from the peer we will strip the encapsulation and send the inner ppp
-payload to pppd as a subprocess on a pty, which will decide how to
-respond. The reply is encapsulated and sent out on a port
-
-for rp-pppoe, the invocation is
-
-       pppd pty 'pppoe [pppoe_options]' [pppd_options]
-
-i.e. it runs pppd and tells it to use a pppoe process as its pty.
-This process accepts ppp packets on stdin/stdout and encapsulates them
-for ethernet.
-
-So, can we use 'pppoe [pppoe_options]' as the pppd argument to xl2tp
-
-what do we need to test this?
-
+   even get to start the l2tpd
 
 
 Sun Feb 12 14:57:28 GMT 2023
@@ -662,9 +592,94 @@ call it "borderNetVm" :
 (for consistency we should rename the "access" qemu socket network to
 match whatever we call this)
 
-nixos iso-image has a grub label
-    # A variant to boot with a serial console enabled
-    LABEL boot-serial
+ rm border.qcow2 ; nix-shell --argstr liminix `pwd`  --argstr nixpkgs `pwd`/../nixpkgs  --argstr unstable `pwd`/../unstable-nixpkgs/ ci.nix -A buildEnv --run "run-border-vm"
+
+Wed Feb 15 22:56:59 GMT 2023
+
+configuration for border vm needs to come from somewhere so it's good
+for more people than just me
+
+- pci device for setting up the ethernet
+- lns address
+- uid so it can do 9p shares? do we need to map things here?
+
+also need to document the host-side bits so that people can set up
+their spare ethernet as vfio
+
+next step for hacking is to figure out what I was doing with pppoe
+
+Wed Feb 15 22:59:56 GMT 2023
+
+docs ...
+
+* introduction
+
+* user guide
+** how to build it
+** how to flash it on your device
+** what to put in configuration.nix
+** modules
+
+* developer guide
+** building/running with qemu
+*** emulated upstream
+** building/running on hardware
+*** run in place with TFTP
+*** emulated upstream
+** CI
+** Roadmap
+** Contributing
 
 
- rm border.qcow2 ; nix-shell --argstr liminix `pwd`  --argstr nixpkgs `pwd`/../nixpkgs  --argstr unstable `pwd`/../unstable-nixpkgs/ ci.nix -A buildEnv --run "sudo run-border-vm"
+
+ nix-shell -p sphinx --run "make -C doc html"
+
+https://francis.begyn.be/blog/nixos-home-router contains information about avahi reflector
+
+
+Fri Feb 17 00:09:34 GMT 2023
+
+   29 11.282085831 81.187.76.242 → 8.8.8.8      ICMP 106 Echo (ping) request  id=0x0187, seq=2/512, 4
+   30 11.286314642 90.155.53.19 → 81.187.76.242 ICMP 78 Destination unreachable (Communication admin)
+
+We're getting packets over the pppoe-l2tp relay thing. Just have to
+work out now why we're not routing
+
+Fri Feb 17 16:54:41 GMT 2023
+
+Haha.  We weren't routing because we'd used the wrong CHAP password
+
+
+
+Fri Feb 17 16:58:27 GMT 2023
+
+This TODO is for nlnet task 1 and for bits of subsequent tasks that
+are annoying enough that I might poke at them anyway:
+
+
+1) gl-ar750, why do we get "ag71xx 19000000.eth: invalid MAC address, using random address"
+2) gl-ar750, wifi
+3) document services so I can remember how they work. Refer back to Oct 18 for notes that no longer make sense
+4) check out restart behaviour of dependent services when depended-on service dies
+5) pppd _creates_ an interface, work out how to fit it into this model
+6) add bridge support for lan
+7) upgrade ppp to something with an ipv6-up-script option, move ppp and pppoe derivations into their own files
+8) get ipv6 address from pppoe
+9) get ipv6 delegation from pppoe and add prefix to lan
+10) support dhcp6 in dnsmasq, and advertise prefix on lan
+11) firewalling and nat - default deny or zero trust?
+13) should we check that references to outputs actually correspond with
+14) make a flake?
+15) see if there are other tests that need adding to CI
+15a) is bordervm derivation tested?
+18) gl-mt300a
+19) gl-mt300n-v2
+
+
+12) write secrets holder as a service with outputs
+16) writable filesystem (ubifs?)
+17) overlay with squashfs/ubifs - useful? think about workflows for how this thing is installed
+
+
+I could plug tninkpad into the gl-ar750 LAN port to dogfood the wired
+networking
