@@ -26,6 +26,7 @@ final: prev: {
 
   mips-vm = final.callPackage ./pkgs/mips-vm {};
   pppoe = final.callPackage ./pkgs/pppoe {};
+  pppBuild = prev.ppp;
   ppp =
     (prev.ppp.override {
       libpcap = null;

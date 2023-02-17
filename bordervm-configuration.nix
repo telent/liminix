@@ -9,13 +9,14 @@
   systemd.services.pppoe =
     let conf = pkgs.writeText "kpppoed.toml"
     ''
-      interface_name = "eth0"
+      interface_name = "eth1"
       services = [ "myservice" ]
-      lns_ipaddr = "90.155.53.19"
+      lns_ipaddr = "90.155.53.19:1701"
       ac_name = "kpppoed-1.0"
     '';
     in  {
       wantedBy = [ "multi-user.target" ];
+      after = [ "network-online.target" ];
       serviceConfig = {
         ExecStart = "${pkgs.go-l2tp}/bin/kpppoed -config ${conf}";
       };
