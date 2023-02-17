@@ -11,7 +11,7 @@ available in the ``buildEnv`` derivation.
 
 .. code-block:: console
 
-    nix-shell -A buildEnv --arg device '(import ./devices/qemu)'
+    nix-shell -A buildEnv
 
 
 Emulated devices
@@ -27,7 +27,7 @@ To build it,
 
 .. code-block:: console
 
-    NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH nix-build -I liminix-config=path/to/your/configuration.nix --arg device "import ./devices/qemu" -A outputs.default
+    nix-build -I liminix-config=path/to/your/configuration.nix --arg device "import ./devices/qemu" -A outputs.default
 
 In a ``buildEnv`` nix-shell, you can use the ``mips-vm`` command
 to run Qemu with appropriate options. It connects the Liminix
@@ -35,7 +35,7 @@ serial console and the `QEMU monitor  <https://www.qemu.org/docs/master/system/m
 
 .. code-block:: console
 
-    nix-shell -A buildEnv --arg device '(import ./devices/qemu)' --run "mips-vm result/vmlinux result/squashfs"
+    nix-shell -A buildEnv --run "mips-vm result/vmlinux result/squashfs"
 
 If you run with ``--background /path/to/some/directory`` as the first
 parameter, it will fork into the background and open Unix sockets in
@@ -71,7 +71,7 @@ This is made available as the ``routeros`` command in ``buildEnv``, so you
 can do something like::
 
     mkdir ros-sockets
-    nix-shell -A buildEnv --arg device '(import ./devices/qemu)'
+    nix-shell -A buildEnv
     nix-shell$ routeros ros-sockets
     nix-shell$ connect-vm ./ros-sockets/console
 
@@ -104,7 +104,7 @@ do something like this:
 
 .. code-block:: console
 
-    nix-shell -A buildEnv --arg device '(import ./devices/qemu)' \
+    nix-shell -A buildEnv
 	 --run "tufted -a 192.168.8.251 result"
 
 and then issue appropriate U-boot commands to download and flash the
@@ -198,7 +198,7 @@ because it has dependencies on other things you didn't know about. Build the
 ``outputs.manifest`` attribute, which is a JSON representation of the
 filesystem, and you can run ``nix-store --query`` on it.::
 
-    NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH nix-build -I liminix-config=path/to/your/configuration.nix --arg device "import ./devices/qemu" -A outputs.manifest -o manifest
+    nix-build -I liminix-config=path/to/your/configuration.nix --arg device "import ./devices/qemu" -A outputs.manifest -o manifest
     nix-store -q --tree manifest
 
 
@@ -216,8 +216,8 @@ already started on.
 Nix language style
 ==================
 
-In an attempt to keep this more consistent than NixWRT ended up being,
-here is a Nix language style guide for this repo.
+This section describes some Nix language style points that we
+attempt to adhere to in this repo.
 
 * favour ``callPackage`` over raw ``import`` for calling derivations
   or any function that may generate one - any code that might need
@@ -259,6 +259,7 @@ variety of licences.  I have no intention of asking for copyright
 assignment: just like when submitting to the Linux kernel you retain
 the copyright on the code you contribute.
 
+
 Code of Conduct
 ===============
 
@@ -269,8 +270,8 @@ Where to send patches
 =====================
 
 
-Liminix' primary repo is https://gti.telent.net/dan/liminix but that
-doesn't help you much, because it doesn't have open registrations.
+Liminix' primary repo is https://gti.telent.net/dan/liminix but you
+can't send code there directly  because it doesn't have open registrations.
 
 * There's a `mirror on Github <https://github.com/telent/liminix>`_ for
   convenience and visibility: you can open PRs against that

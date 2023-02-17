@@ -23,19 +23,17 @@ it. For example:
 
 .. code-block:: console
 
-    NIX_PATH=nixpkgs=../nixpkgs:$NIX_PATH  nix-build -I liminix-config=./tests/smoke/configuration.nix --arg device "import ./devices/qemu" -A outputs.default
+    nix-build -I liminix-config=./tests/smoke/configuration.nix --arg device "import ./devices/qemu" -A outputs.default
 
 ``outputs.default`` is intended to do something appropriate for the
 device, whatever that is. For the qemu device, it creates a directory
 containing a squashfs root image and a kernel.
 
-As of Feb 2023, flashing devices is not implemented other than by
-taking the covers off and connecting wires to the serial console
-pads - so, check in the Developer Manual.
-
 Future versions of this manual will at this point refer to
 device-specific instructions for installing Liminix using the router's
-Web UI or other non-invasive method.
+Web UI or other non-invasive method. As of Feb 2023, the only way to
+flash a device is to take the cover off and connect wires to the
+serial console pads - so, check in the Developer Manual.
 
 
 Updating a running device
