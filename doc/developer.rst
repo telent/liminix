@@ -110,8 +110,64 @@ do something like this:
 and then issue appropriate U-boot commands to download and flash the
 image.
 
-For quicker development cycle, you can build a TFTP-bootable image
-instead of flashing. [ .... add this bit ....]
+For a faster edit-compile-test cycle, you can build a TFTP-bootable
+image instead of flashing. In your device configuration add
+
+.. code-block:: nix
+
+  imports = [
+    ./modules/phram.nix
+  ];
+
+  boot.tftp = {
+    serverip = "192.168.200.148";
+    ipaddr = "192.168.200.251";
+  };
+
+and then build ``outputs.tftproot``. This creates a file in
+``result/`` called ``boot.scr`` containing commands that you can copy
+and paste into U-Boot which will transfer the kernel and filesystem
+over TFTP and boot the kernel from RAM.
+
+
+Networking
+==========
+
+You probably don't want to be testing a device that might serve DHCP,
+DNS and routing protocols on the same LAN as you (or your colleagues,
+employees, or family) are using for anything else, because it will
+interfere. You also might want to test the device against an
+"upstream" connection without having to unplug your regular home
+router from the internet so you can borrow the cable/fibre/DSL.
+
+``bordervm`` is included for this purpose. You will need
+
+* a Linux machine with a spare PCI ethernet card which you can dedicate to Liminix
+
+* an L2TP service such as https://www.aa.net.uk/broadband/l2tp-service/
+
+You need to configure the Ethernet card for VFIO passthru, then
+you can execute ``run-border-vm`` in a ``buildEnv`` shell,
+which starts up QEMU using the NixOS configuration in
+``bordervm-configuration.nix``
+
+In this VM
+
+* your Liminix checkout is mounted under ``/home/liminix/liminix``
+
+* TFTP is listening on the ethernet device and serving
+  ``/home/liminix/liminix``.  The server IP address is 10.0.0.1
+
+* a PPPOE-L2TP relay is running on the same ethernet card, which
+  spawns L2TPv2 Access Concentrator sessions to your specified
+  L2TP LNS when the connected Liminix device makes PPPoE requests.
+  Note that authentication is expected at the PPP layer not the L2TP
+  layer, so the same PAP/CHAP credentials provided by your L2TP
+  service can be configured into your test device - bordervm
+  doesn't need to know about them.
+
+To configure bordervm, you need a file called ``bordervm.conf.nix``
+which you can create by copying and appropriately editing  ``bordervm.conf-example.nix``
 
 
 Running tests
