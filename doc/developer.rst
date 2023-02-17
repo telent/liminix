@@ -155,13 +155,13 @@ In this VM
 * TFTP is listening on the ethernet device and serving
   :file:`/home/liminix/liminix`.  The server IP address is 10.0.0.1
 
-* a PPPOE-L2TP relay is running on the same ethernet card, which
-  spawns L2TPv2 Access Concentrator sessions to your specified
-  L2TP LNS when the connected Liminix device makes PPPoE requests.
+* a PPPOE-L2TP relay is running on the same ethernet card.  When the
+  connected Liminix device makes PPPoE requests, the relay spawns
+  L2TPv2 Access Concentrator sessions to your specified L2TP LNS.
   Note that authentication is expected at the PPP layer not the L2TP
-  layer, so the same PAP/CHAP credentials provided by your L2TP
-  service can be configured into your test device - bordervm
-  doesn't need to know about them.
+  layer, so the PAP/CHAP credentials provided by your L2TP service can
+  be configured into your test device - bordervm doesn't need to know
+  about them.
 
 To configure bordervm, you need a file called :file:`bordervm.conf.nix`
 which you can create by copying and appropriately editing  :file:`bordervm.conf-example.nix`
