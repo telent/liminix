@@ -7,11 +7,9 @@ than by building and flashing a new image every time. This manual
 documents various affordances for iteration and experiments.
 
 In general, packages and tools that run on the "build" machine are
-available in the ``buildEnv`` derivation.
+available in the ``buildEnv`` derivation and can most easily
+be added to your environment by running ``nix-shell``
 
-.. code-block:: console
-
-    nix-shell -A buildEnv
 
 
 Emulated devices
@@ -35,7 +33,7 @@ serial console and the `QEMU monitor  <https://www.qemu.org/docs/master/system/m
 
 .. code-block:: console
 
-    nix-shell -A buildEnv --run "mips-vm result/vmlinux result/squashfs"
+    nix-shell --run "mips-vm result/vmlinux result/squashfs"
 
 If you run with ``--background /path/to/some/directory`` as the first
 parameter, it will fork into the background and open Unix sockets in
@@ -71,7 +69,7 @@ This is made available as the ``routeros`` command in ``buildEnv``, so you
 can do something like::
 
     mkdir ros-sockets
-    nix-shell -A buildEnv
+    nix-shell
     nix-shell$ routeros ros-sockets
     nix-shell$ connect-vm ./ros-sockets/console
 
@@ -104,8 +102,7 @@ do something like this:
 
 .. code-block:: console
 
-    nix-shell -A buildEnv
-	 --run "tufted -a 192.168.8.251 result"
+    nix-shell --run "tufted -a 192.168.8.251 result"
 
 and then issue appropriate U-boot commands to download and flash the
 image.
@@ -149,7 +146,7 @@ router from the internet so you can borrow the cable/fibre/DSL.
 You need to configure the Ethernet card for VFIO passthru, then
 you can execute ``run-border-vm`` in a ``buildEnv`` shell,
 which starts up QEMU using the NixOS configuration in
-``bordervm-configuration.nix``
+``bordervm-configuration.nix``.
 
 In this VM
 
@@ -168,6 +165,10 @@ In this VM
 
 To configure bordervm, you need a file called ``bordervm.conf.nix``
 which you can create by copying and appropriately editing  ``bordervm.conf-example.nix``
+
+Note: If you make changes to the bordervm configuration after
+executing ``run-border-vm``, you need to remove the ``border.qcow2``
+disk image file otherwise the changes won't get picked up.
 
 
 Running tests

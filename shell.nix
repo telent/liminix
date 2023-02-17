@@ -5,4 +5,9 @@ let
     liminix-config = ./vanilla-configuration.nix;
     inherit nixpkgs;
   });
-in liminix
+in liminix.buildEnv.overrideAttrs (o: {
+  nativeBuildInputs = o.nativeBuildInputs ++ [ (import nixpkgs {}).sphinx ] ;
+  shellHook = ''
+    publish(){  make -C doc html && rsync -azv doc/_build/html/ myhtic.telent.net:/var/www/blogs/www.liminix.org/_site/doc; }
+  '';
+})
