@@ -29,6 +29,12 @@
       boot.tftp = {
         loadAddress = "0x00A00000";
       };
+      boot.dts = {
+        src = "${openwrt}/target/linux/ramips/dts/mt7620a_glinet_gl-mt300a.dts";
+        includes = [
+          "${openwrt}/target/linux/ramips/dts"
+        ];
+      };
 
       kernel = {
         src = pkgs.fetchurl {
@@ -49,12 +55,6 @@
           patches ${openwrt}/target/linux/generic/hack-5.15/*.patch
           patches ${openwrt}/target/linux/ramips/patches-5.15/*.patch
         '';
-        dts = {
-          src = "${openwrt}/target/linux/ramips/dts/mt7620a_glinet_gl-mt300a.dts";
-          includes = [
-            "${openwrt}/target/linux/ramips/dts"
-          ];
-        };
         config = {
           MIPS_ELF_APPENDED_DTB = "y";
           OF = "y";

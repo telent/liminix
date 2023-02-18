@@ -29,13 +29,6 @@ in {
         default = "true";
         type = types.lines;
       } ;
-      dts = {
-        src = mkOption { type = types.path; };
-        includes = mkOption {
-          default = [];
-          type = types.listOf types.path;
-        };
-      };
       config = mkOption {
         # mostly the values are y n or m, but sometimes
         # other strings are also used
@@ -48,9 +41,18 @@ in {
     users =  mkOption {
       type = types.attrsOf types.anything;
     };
-    boot.commandLine = mkOption {
-      type = types.listOf types.nonEmptyStr;
-      default = [];
+    boot = {
+      dts = {
+        src = mkOption { type = types.path; };
+        includes = mkOption {
+          default = [];
+          type = types.listOf types.path;
+        };
+      };
+      commandLine = mkOption {
+        type = types.listOf types.nonEmptyStr;
+        default = [];
+      };
     };
     device.defaultOutput = mkOption {
       type = types.nonEmptyStr;
