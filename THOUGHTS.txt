@@ -674,7 +674,7 @@ are annoying enough that I might poke at them anyway:
 15a) is bordervm derivation tested?
 18) gl-mt300a
 19) gl-mt300n-v2
-
+20) publish the manual using CI
 
 12) write secrets holder as a service with outputs
 16) writable filesystem (ubifs?)
