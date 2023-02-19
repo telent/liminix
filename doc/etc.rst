@@ -47,3 +47,5 @@ Articles of interest
 
 * `PPP IPV6CP vs DHCPv6 at AAISP <https://www.revk.uk/2011/01/ppp-ipv6cp-vs-dhcpv6.html>`_
 
+
+* `Creating a Home IPv6 Network (James Bottomley) <https://blog.hansenpartnership.com/creating-a-home-ipv6-network/>`_
