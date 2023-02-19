@@ -1,10 +1,3 @@
-# GL.INet GL-AR750 "Creta" travel router
-#  - QCA9531 @650Mhz SoC
-#  - dual band wireless: IEEE 802.11a/b/g/n/ac
-#  - two 10/100Mbps LAN ports and one WAN
-#  - 128MB DDR2 RAM / 16MB  NOR Flash
-#  - "ath79" soc family
-# https://www.gl-inet.com/products/gl-ar750/
 
 # I like GL.iNet devices because they're relatively accessible to
 # DIY users: the serial port connections have headers preinstalled
@@ -23,6 +16,27 @@
       };
     };
   };
+
+  description = ''
+    GL.INet GL-AR750 "Creta" travel router
+     - QCA9531 @650Mhz SoC
+     - dual band wireless: IEEE 802.11a/b/g/n/ac
+     - two 10/100Mbps LAN ports and one WAN
+     - 128MB DDR2 RAM / 16MB  NOR Flash
+     - "ath79" soc family
+    https://www.gl-inet.com/products/gl-ar750/
+
+    The GL-AR750 has two distinct sets of wifi hardware. The 2.4GHz
+    radio is part of the QCA9531 SoC, i.e. it's on the same silicon as
+    the CPU, the Ethernet, the USB etc. The device is connected to the
+    host via AHB, the "Advanced High-Performance Bus" and it is
+    supported in Linux using the ath9k driver. The 5GHz support, on the
+    other hand, is provided by a QCA9887 PCIe (PCI embedded) WLAN chip:
+    I haven't looked closely at the router innards to see if this is
+    actually physically a separate board that could be unplugged, but
+    as far as the Linux is concerned it behaves as one. This is
+    supported by the ath10k driver.
+  '';
 
   module = {pkgs, ... }:
     let
