@@ -102,6 +102,15 @@
           MFD_SYSCON = "y";         # ethernet (compatible "syscon")
           AR8216_PHY = "y";         # eth1 is behind a switch
 
+          MTD_SPI_NOR = "y";
+          SPI_ATH79 = "y";      # these are copied from OpenWrt.
+          SPI_MASTER= "y";      # At least one of them is necessary
+          SPI_MEM= "y";
+          SPI_AR934X= "y";
+          SPI_BITBANG= "y";
+          SPI_GPIO= "y";
+
+          SPI = "y";
           MTD = "y";
           MTD_CMDLINE_PARTS = "y";
           MTD_BLOCK = "y";          # fix undefined ref to register_mtd_blktrans_devs
