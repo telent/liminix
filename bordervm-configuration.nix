@@ -35,7 +35,6 @@ in {
   };
   imports = [
     <nixpkgs/nixos/modules/virtualisation/qemu-vm.nix>
-    ./bordervm.conf.nix
   ];
   config = {
     boot.kernelParams = [
