@@ -24,3 +24,13 @@ Documentation is in the [doc](doc/) directory. You can build it
 by running
 
     nix-shell -p sphinx --run "make -C doc html"
+
+
+## Extremely online
+
+There is a #liminix IRC channel on the [OFTC](https://www.oftc.net/)
+network in which you are welcome. You can also connect with a Matrix
+client by joining the room `#_oftc_#liminix:matrix.org`.
+
+In the IRC channel, as in all Liminix project venues, please conduct yourself
+according to the Liminix [Code of Conduct](CODE-OF-CONDUCT.md).
