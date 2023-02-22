@@ -71,6 +71,8 @@ in {
         PROC_FS = "y";
 
         MODULES = "y";
+        MODULE_SIG = "y";
+        DEBUG_FS = "y";
 
         # basic networking protocols
         NET = "y";

@@ -103,7 +103,6 @@
           # at boot time unless we disable trying to call it
           "FW_LOADER_USER_HELPER" = "n";
 
-          "MODULE_SIG" = "y";
 
           "PARTITION_ADVANCED" = "y";
           "PRINTK_TIME" = "y";
