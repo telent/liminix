@@ -36,7 +36,7 @@ stdenv.mkDerivation rec {
 
   dontStrip = true;
   dontPatchELF = true;
-  outputs = ["out" "headers"];
+  outputs = ["out" "headers" "modulesupport"];
   phases = [
     "unpackPhase"
     "butcherPkgconfig"
@@ -89,6 +89,8 @@ stdenv.mkDerivation rec {
     cp vmlinux $out
     mkdir -p $headers
     cp -a include .config $headers/
+    make clean modules_prepare
+    cp -a . $modulesupport
   '';
 
 }
