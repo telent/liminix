@@ -54,11 +54,13 @@ in {
         default = [];
       };
     };
-    device.defaultOutput = mkOption {
-      type = types.nonEmptyStr;
+    device = {
+      defaultOutput = mkOption {
+        type = types.nonEmptyStr;
+      };
+      loadAddress = mkOption { default = null; };
+      entryPoint = mkOption { };
     };
-    device.loadAddress = mkOption { default = null; };
-    device.entryPoint = mkOption { };
   };
   config = {
     defaultProfile.packages = with pkgs;
