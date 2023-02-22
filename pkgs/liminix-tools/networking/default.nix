@@ -4,10 +4,11 @@
 }:
 let inherit (liminix.services) oneshot longrun;
 in {
-  interface = { type, device }  @ args: oneshot {
+  interface = { type, device, dependencies ? [] }  @ args: oneshot {
     name = "${device}.link";
     up = "ip link set up dev ${device}";
     down = "ip link set down dev ${device}";
+    inherit dependencies;
   } // {
     inherit device;
   };
