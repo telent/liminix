@@ -26,6 +26,10 @@ final: prev: {
 
   mips-vm = final.callPackage ./pkgs/mips-vm {};
   pppoe = final.callPackage ./pkgs/pppoe {};
+
+  kernel-backport = final.callPackage ./pkgs/kernel-backport {};
+  mac80211 = final.callPackage ./pkgs/mac80211 {};
+
   pppBuild = prev.ppp;
   ppp =
     (prev.ppp.override {

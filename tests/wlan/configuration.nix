@@ -15,10 +15,6 @@ in rec {
 
   imports = [ ../../modules/wlan.nix ];
 
-  kernel.config = {
-    MAC80211_HWSIM = "y";
-  };
-
 
   services.wlan = interface { type = "hardware"; device = "wlan0"; };
 
@@ -41,9 +37,10 @@ in rec {
 
   services.default = target {
     name = "default";
-    contents = with services; [
+    contents = with config.services; [
       loopback
       hostap
+      wlan_module
     ];
   };
   defaultProfile.packages = with pkgs;  [ tcpdump ] ;

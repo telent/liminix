@@ -60,6 +60,11 @@ in {
       };
       loadAddress = mkOption { default = null; };
       entryPoint = mkOption { };
+      radios = mkOption {
+        type = types.listOf types.str;
+        default = [];
+        example = ["ath9k" "ath10k"];
+      };
     };
   };
   config = {

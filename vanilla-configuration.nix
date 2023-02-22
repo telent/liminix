@@ -5,6 +5,7 @@ let
 in rec {
   imports = [
     ./modules/phram.nix
+    ./modules/wlan.nix
   ];
   services.loopback =
     let iface = interface { type = "loopback"; device = "lo";};
