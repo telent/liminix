@@ -103,21 +103,17 @@
           GPIOLIB="y";
           GPIO_MT7621 = "y";
 
-          # this is all copied from nixwrt ath79 config. Clearly not all
-          # of it is device config, some of it is wifi config or
-          # installation method config or ...
-
-          "CMDLINE_PARTITION" = "y";
-          "EARLY_PRINTK" = "y";
-          "FW_LOADER" = "y";
+          CMDLINE_PARTITION = "y";
+          EARLY_PRINTK = "y";
+          FW_LOADER = "y";
           # we don't have a user helper, so we get multiple 60s pauses
           # at boot time unless we disable trying to call it
-          "FW_LOADER_USER_HELPER" = "n";
+          FW_LOADER_USER_HELPER = "n";
 
-          "PARTITION_ADVANCED" = "y";
-          "PRINTK_TIME" = "y";
-          "SQUASHFS" = "y";
-          "SQUASHFS_XZ" = "y";
+          PARTITION_ADVANCED = "y";
+          PRINTK_TIME = "y";
+          SQUASHFS = "y";
+          SQUASHFS_XZ = "y";
         };
       };
     };
