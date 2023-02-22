@@ -25,6 +25,7 @@
         defaultOutput = "tftproot";
         loadAddress = "0x80000000";
         entryPoint  = "0x80000000";
+        radios = ["rt2800soc"];
       };
       boot.tftp = {
         loadAddress = "0x00A00000";
@@ -61,6 +62,7 @@
           USE_OF = "y";
 
           RALINK = "y";
+          PCI = "y";
           SOC_MT7620 = "y";
 
           SERIAL_8250_CONSOLE = "y";
@@ -81,10 +83,13 @@
           NET = "y";
           NETDEVICES = "y";
           ETHERNET = "y";
-          # NET_VENDOR_ATHEROS = "y";
-          # AG71XX = "y";             # ethernet (qca,qca9530-eth)
-          # MFD_SYSCON = "y";         # ethernet (compatible "syscon")
-          # AR8216_PHY = "y";         # eth1 is behind a switch
+          NET_RALINK_MDIO = "y";
+          NET_RALINK_MDIO_MT7620 = "y";
+          NET_RALINK_MT7620 = "y";
+
+          SWCONFIG = "y";
+          SWPHY = "y";
+          NET_VENDOR_RALINK = "y";
 
           MTD = "y";
           MTD_CMDLINE_PARTS = "y";

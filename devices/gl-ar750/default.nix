@@ -47,11 +47,31 @@
         rev = "a5265497a4f6da158e95d6a450cb2cb6dc085cab";
         hash = "sha256-YYi4gkpLjbOK7bM2MGQjAyEBuXJ9JNXoz/JEmYf8xE8=";
       };
+      firmwareBlobs = pkgs.pkgsBuildBuild.fetchFromGitHub {
+        owner = "kvalo";
+        repo = "ath10k-firmware";
+        rev = "5d63529ffc6e24974bc7c45b28fd1c34573126eb";
+        sha256 = "1bwpifrwl5mvsmbmc81k8l22hmkwk05v7xs8dxag7fgv2kd6lv2r";
+      };
+      firmware = pkgs.stdenv.mkDerivation {
+        name = "regdb";
+        phases = ["installPhase"];
+        installPhase = ''
+          mkdir -p $out/ath10k/QCA9887/hw1.0/
+          cp ${pkgs.wireless-regdb}/lib/firmware/regulatory.db* $out/
+          blobdir=${firmwareBlobs}/QCA9887/hw1.0
+          cp $blobdir/10.2.4-1.0/firmware-5.bin_10.2.4-1.0-00047 $out/ath10k/QCA9887/hw1.0/firmware-5.bin
+          # cp $ {./ar750-ath10k-cal.bin} $out/ath10k/cal-pci-0000:00:00.0.bin
+          cp $blobdir/board.bin  $out/ath10k/QCA9887/hw1.0/
+        '';
+      };
+      inherit (pkgs.pseudofile) dir symlink;
     in {
       device = {
         defaultOutput = "tftproot";
         loadAddress = "0x80060000";
         entryPoint  = "0x80060000";
+        radios = ["ath9k" "ath10k_pci"];
       };
       boot.tftp = {
         loadAddress = "0x00A00000";
@@ -86,6 +106,7 @@
           OF = "y";
           USE_OF = "y";
           ATH79 = "y";
+          PCI = "y";
 
           SERIAL_8250_CONSOLE = "y";
           SERIAL_8250 = "y";

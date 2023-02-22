@@ -25,6 +25,7 @@
         defaultOutput = "tftproot";
         loadAddress = "0x80000000";
         entryPoint  = "0x80000000";
+        radios = ["mt7603e"];
       };
       boot.tftp = {
         loadAddress = "0x00A00000";
@@ -61,6 +62,7 @@
           USE_OF = "y";
 
           RALINK = "y";
+          PCI = "y";
           SOC_MT7620 = "y";
           CPU_LITTLE_ENDIAN= "y";
 
@@ -99,6 +101,7 @@
           NET_RALINK_SOC="y";
 
           SWCONFIG = "y";
+          SWPHY = "y";
 
           GPIOLIB="y";
           GPIO_MT7621 = "y";
