@@ -1,17 +1,28 @@
 {
   callPackage
 , liminix
+, lib
 }:
-let inherit (liminix.services) oneshot longrun;
+let
+  inherit (liminix.services) oneshot longrun;
+  inherit (lib) concatStringsSep optional;
 in {
-  interface = { type, device, dependencies ? [] }  @ args: oneshot {
-    name = "${device}.link";
-    up = "ip link set up dev ${device}";
-    down = "ip link set down dev ${device}";
-    inherit dependencies;
-  } // {
-    inherit device;
-  };
+  interface = { type, device, primary ? null, dependencies ? [] }  @ args:
+    let ups =
+          []
+          ++ optional (type == "bridge")
+            "ip link add name ${device} type bridge"
+          ++ ["ip link set up dev ${device}"]
+          ++ optional (primary != null)
+            "ip link set dev ${device} master ${primary.device}";
+    in oneshot {
+      name = "${device}.link";
+      up = lib.concatStringsSep "\n" ups;
+      down = "ip link set down dev ${device}";
+      dependencies = dependencies ++ lib.optional (primary != null) primary;
+    } // {
+      inherit device;
+    };
   address = interface: { family, prefixLength, address } @ args:
     let inherit (builtins) toString;
     in oneshot {
