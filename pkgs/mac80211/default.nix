@@ -30,7 +30,7 @@ let
       ATH9K = "m";
       ATH9K_AHB = "y";
       # ATH9K_DEBUGFS = "y";
-      ATH_DEBUG = "y";
+      # ATH_DEBUG = "y";
       BACKPORTED_ATH9K_AHB = "y";
     };
     ath10k_pci = {
@@ -162,5 +162,5 @@ let
 in oneshot {
     name = "wlan.module";
     up = "sh ${module}/load.sh";
-    down = "sh {module}/unload.sh";
+    down = "sh ${module}/unload.sh";
   }
