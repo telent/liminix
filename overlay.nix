@@ -86,6 +86,9 @@ final: prev: {
     };
   };
 
+  netlink-lua = final.callPackage ./pkgs/netlink-lua {};
+  waitup = final.callPackage ./pkgs/waitup {};
+
   # these are packages for the build system not the host/target
 
   tufted = final.callPackage ./pkgs/tufted {};
