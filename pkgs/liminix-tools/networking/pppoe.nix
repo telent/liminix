@@ -25,6 +25,8 @@ let
     echo $3 > speed
     echo $4 > address
     echo $5 > peer-address
+    echo $DNS1 > ns1
+    echo $DNS1 > ns2
     )
     echo >/proc/self/fd/10
   '';
@@ -32,6 +34,7 @@ let
     "ip-up-script" ip-up
     "ipparam" name
     "nodetach"
+    "usepeerdns"
     "logfd" "2"
   ];
 
