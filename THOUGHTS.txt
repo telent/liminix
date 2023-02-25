@@ -683,3 +683,91 @@ are annoying enough that I might poke at them anyway:
 
 I could plug tninkpad into the gl-ar750 LAN port to dogfood the wired
 networking
+
+Sat Feb 18 14:26:45 GMT 2023
+
+Apparently we're not currently doing anything special with busybox,
+just using the default nixos build with the default applets.
+
+We'd like to be able to say in modules which applets they need,
+so that we build all necessary applets but don't waste any space.
+But we don't want to build a busybox for each module because that
+would be a big waste of space.
+
+One option:
+- add busybox configuration to `config` so that modules can maul it
+- add a busybox module that builds it with union of all config and
+ adds link in /bin
+- make everything else look in /bin instead of referencing pkgs.busybox
+
+It would be good if services could assert somehow that their required
+config is present
+
+Sat Feb 18 23:45:13 GMT 2023
+
+# lsmod
+
+cd /lib/modules/mac80211
+insmod ./compat/compat.ko
+insmod ./net/wireless/cfg80211.ko
+insmod ./net/mac80211/mac80211.ko
+insmod ./drivers/net/wireless/ath/ath.ko
+insmod ./drivers/net/wireless/ath/ath9k/ath9k_hw.ko
+insmod ./drivers/net/wireless/ath/ath9k/ath9k_common.ko
+insmod ./drivers/net/wireless/ath/ath9k/ath9k.ko
+insmod ./drivers/net/wireless/ath/ath10k/ath10k_core.ko
+insmod ./drivers/net/wireless/ath/ath10k/ath10k_pci.ko
+
+[21.344930] ath9k 18100000.wmac: failed to load calibration data from mtd device
+[21.352728] ath: phy0: parsing configuration from OF node
+[21.362576] ath: phy0: serialize_regmode is 0
+[21.367092] ath: phy0: UNDEFINED -> AWAKE
+[21.372051] ath: phy0: Trying EEPROM access at Address 0x03ff
+[21.377999] ath: phy0: Trying EEPROM access at Address 0x0fff
+[21.383940] ath: phy0: Trying EEPROM access at Address 0x01ff
+[21.389879] ath: phy0: Trying OTP access at Address 0x03ff
+[21.400396] Data bus error, epc == 8027964c, ra == 83125880
+[21.406156] Oops[#1]:
+
+
+Sun Feb 19 18:15:27 GMT 2023
+
+We have ath9k listening for packets. To make this ready to use:
+
+- need to load the modules
+- enable bridging lan with wlan
+- packet forwarding
+- firewall
+
+
+Mon Feb 20 20:41:17 GMT 2023
+
+need to fix all the other broken ci jobs :-(
+
+The wlan test is failing because we moved mac80211 to a module and
+there's nothing running to insmod it
+
+Wed Feb 22 18:17:17 GMT 2023
+
+bridge is e2b3738d0f8c3f2fd76ebcef65612de502a7b121 but it's the wrong
+way around: the master interface needs to be up whether or not all
+of its children are, so members depend on master not vice versa
+
+Next steps:
+- re-implement bridge, enable bridging lan with wlan
+- packet forwarding
+- firewall
+- ath10k
+- ipv6
+
+Fri Feb 24 23:37:56 GMT 2023
+
+bridging wlan was made complex because can't add a device to a bridge
+until it's operational, and wlan0 is not operational until hostapd
+has churned awhile. Therefore, "waitup" listens for netlink messages
+and notifies s6 readiness stuff
+
+we have a firewall nft script but we're not running it on boot
+
+we have forwarding but no dns, maybe because we haven't told
+dnsmasq about any upstream servers
