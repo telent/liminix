@@ -7,6 +7,7 @@
 {
   user ? "dnsmasq"
 , group ? "system"
+, resolvconf ? null
 , interface
 , upstreams ? []
 , ranges
@@ -30,10 +31,12 @@ in longrun {
     ${lib.concatStringsSep " " (builtins.map (r: "--server=${r}") upstreams)} \
     --keep-in-foreground \
     --dhcp-authoritative \
-    --no-resolv \
+    ${if resolvconf != null then "--resolv-file=$(output_path ${resolvconf} resolv.conf)" else "--no-resolv"} \
+    --no-hosts \
     --log-dhcp \
     --enable-ra \
     --log-debug \
+    --log-queries \
     --log-facility=- \
     --dhcp-leasefile=/run/${name}.leases \
     --pid-file=/run/${name}.pid
