@@ -5,13 +5,14 @@
 , busybox
 , callPackage
 , writeScript
+, serviceFns
 }:
 let
   inherit (builtins) concatStringsSep;
   output = service: name: "/run/service-state/${service.name}/${name}";
   serviceScript = commands : ''
     #!${busybox}/bin/sh
-    output() { cat $1/.outputs/$2; }
+    . ${serviceFns}
     ${commands}
   '';
   service = {

@@ -10,33 +10,33 @@ interface: { ... } @ args:
 let
   name = "${interface.device}.udhcp";
   script = writeShellScript "udhcp-notify" ''
-action=$1
+    . ${serviceFns}
+    action=$1
 
-set_address() {
-    ip address replace $ip/$mask dev $interface
-    dir=/run/service-state/${name}/
-    mkdir -p $dir
-    for i in lease mask ip router siaddr dns serverid subnet opt53 interface ; do
-        echo ''${!i} > $dir/$i
-    done
-}
-case $action in
-  deconfig)
-    ip address flush $interface
-    ip link set up dev $interface
-    ;;
-  bound)
-    # this doesn't actually replace, it adds a new address.
-    set_address
-    ;;
-  renew)
-    set_address
-    ;;
-  nak)
-    echo "received NAK on $interface"
-    ;;
-esac
-'';
+    set_address() {
+        ip address replace $ip/$mask dev $interface
+        (cd $(mkoutputs ${name}); umask 0027
+         for i in lease mask ip router siaddr dns serverid subnet opt53 interface ; do
+            echo ''${!i} > $i
+         done)
+    }
+    case $action in
+      deconfig)
+        ip address flush $interface
+        ip link set up dev $interface
+        ;;
+      bound)
+        # this doesn't actually replace, it adds a new address.
+        set_address
+        ;;
+      renew)
+        set_address
+        ;;
+      nak)
+        echo "received NAK on $interface"
+        ;;
+    esac
+  '';
 in longrun {
   inherit name;
   run = "${busybox}/bin/udhcpc -f -i ${interface.device} -s ${script}";

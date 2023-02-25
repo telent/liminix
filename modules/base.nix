@@ -121,6 +121,9 @@ in {
       root = {
         gid = 0; usernames = ["root"];
       };
+      system = {
+        gid = 1; usernames = ["root"];
+      };
     };
 
     filesystem = dir {

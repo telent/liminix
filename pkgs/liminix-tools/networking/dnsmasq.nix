@@ -1,11 +1,12 @@
 {
   liminix
 , dnsmasq
+, serviceFns
 , lib
 }:
 {
   user ? "dnsmasq"
-, group ? "dnsmasq"
+, group ? "system"
 , interface
 , upstreams ? []
 , ranges
@@ -19,6 +20,7 @@ in longrun {
   inherit name;
   dependencies = [ interface ];
   run = ''
+    . ${serviceFns}
     ${dnsmasq}/bin/dnsmasq \
     --user=${user} \
     --domain=${domain} \

@@ -18,6 +18,9 @@ shift
 mount -t proc none /proc
 mount -t sysfs none /sys
 
+mkdir -m 0750 /run/service-state
+chgrp system /run/service-state
+
 ### If your services are managed by s6-rc:
 ### (replace /run/service with your scandir)
 s6-rc-init /run/service -d -c /etc/s6-rc/compiled
