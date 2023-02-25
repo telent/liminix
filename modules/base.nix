@@ -36,7 +36,17 @@ in {
       };
     };
     groups =  mkOption {
-      type = types.attrsOf types.anything;
+      type = types.attrsOf (types.submodule {
+        options = {
+          gid = mkOption {
+            type = types.int;
+          };
+          usernames = mkOption {
+            type = types.listOf types.str;
+            default = [];
+          };
+        };
+      });
     };
     users =  mkOption {
       type = types.attrsOf types.anything;
@@ -107,8 +117,10 @@ in {
       passwd = "";
       shell = "/bin/sh";
     };
-    groups.root = {
-      gid = 0; usernames = ["root"];
+    groups = {
+      root = {
+        gid = 0; usernames = ["root"];
+      };
     };
 
     filesystem = dir {
