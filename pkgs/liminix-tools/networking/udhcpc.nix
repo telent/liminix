@@ -2,6 +2,7 @@
   liminix
 , busybox
 , writeShellScript
+, serviceFns
 } :
 let
   inherit (liminix.services) longrun;
