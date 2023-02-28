@@ -9,8 +9,8 @@ in lua.pkgs.buildLuaPackage {
   src = fetchFromGitHub {
     repo = "lua-netlink";
     owner = "chris2511";
-    rev = "v0.1.1";
-    hash = "sha256:1833naskl4p7rz5kk0byfgngvw1mvf6cnz64sr3ny7i202wv7s52";
+    rev = "ff8d2012ea42291c87150ba47d4cd89860f7872e";
+    hash = "sha256-tnvFKXxLX+/Q4nJcRDrUfK7bAHBWEANFTBR1PjbQsmQ=";
   };
 
   buildPhase = "$CC -shared -l mnl -l lua -o netlink.so src/*.c";
