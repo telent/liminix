@@ -35,5 +35,6 @@ let
         (defaults // params)));
 in longrun {
   inherit name;
-  run = "${hostapd}/bin/hostapd -d -i ${interface.device}  -P /run/hostapd.pid -S ${conf}";
+  dependencies = [ interface ];
+  run = "${hostapd}/bin/hostapd -d -i ${interface.device}  -P /run/${name}.pid -S ${conf}";
 }
