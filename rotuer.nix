@@ -19,7 +19,7 @@ let
     route;
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
   inherit (pkgs)
-    waitup
+    ifwait
     serviceFns
     iptables;
 in rec {
@@ -122,17 +122,13 @@ in rec {
   };
 
   services.bridgewlan =
-    let waitup-wlan = longrun {
-          name = "waitup-wlan0";
-          run = "${waitup}/bin/waitup wlan0 10";
-          notification-fd = 10;
-          dependencies = [ services.wireless services.hostap ];
-        };
+    let dev = services.wireless.device;
     in oneshot {
-      name = "add-wlan-to-bridge";
-      up = "ip link set dev ${services.wireless.device} master ${services.lan.device}";
-      down = "ip link set dev ${services.wireless.device} nomaster";
-      dependencies = [ waitup-wlan  ];
+      name = "add-wlan2-to-bridge";
+      up = "${ifwait}/bin/ifwait -v ${dev} running && ip link set dev ${dev} master ${services.lan.device}";
+      down = "ip link set dev ${dev} nomaster";
+      dependencies = [ services.wireless ];
+    };
     };
 
   users.dnsmasq = {

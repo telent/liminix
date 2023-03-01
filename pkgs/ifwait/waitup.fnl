@@ -10,9 +10,11 @@
 (local stream (io.open (.. "/proc/self/fd/" fd) "w"))
 
 (fn notify-ready []
-  (stream:write "\n")
-  (print (.. (. arg 0) ": received netlink operstate up for " ifname))
-  (stream:close))
+  (when (= "file" (io.type stream))
+    (stream:write "\n")
+    (stream:close))
+  (print (.. (. arg 0) ": received netlink operstate up for " ifname)))
+
 
 (fn run-events [evs]
   (each [_ v (ipairs evs)]

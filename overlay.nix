@@ -87,7 +87,7 @@ final: prev: {
   };
 
   netlink-lua = final.callPackage ./pkgs/netlink-lua {};
-  waitup = final.callPackage ./pkgs/waitup {};
+  ifwait = final.callPackage ./pkgs/ifwait {};
 
   serviceFns = final.writeText "service-fns.sh" ''
     output() { cat $1/.outputs/$2; }

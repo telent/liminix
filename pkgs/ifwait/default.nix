@@ -9,21 +9,22 @@ let
   netlink = netlink-lua.override {inherit lua;};
   fennel = lua.pkgs.fennel;
 in stdenv.mkDerivation rec {
-  pname = "waitup";
+  pname = "ifwait";
   version = "1";
+  phases = [ "installPhase" ];
 
-  buildInputs = [ lua netlink-lua ];
-  nativeBuildInputs = [ makeWrapper  fennel ];
+  buildInputs = [ lua netlink ];
+  nativeBuildInputs = [ makeWrapper fennel ];
 
-  src = ./.;
+  LUA_CPATH = "${netlink}/lib/lua/${lua.luaversion}/\?.so"; # for nix-shell
 
   installPhase = ''
     mkdir -p $out/bin $out/lib
-    fennel --compile  ${./waitup.fnl} > $out/lib/waitup.lua
+    fennel --compile  ${./ifwait.fnl} > $out/lib/${pname}.lua
 
     makeWrapper ${lua}/bin/lua $out/bin/${pname} \
       --prefix LUA_CPATH ";" ${netlink}/lib/lua/${lua.luaversion}/\?.so \
-      --add-flags $out/lib/waitup.lua
+      --add-flags $out/lib/${pname}.lua
   '';
 }
 

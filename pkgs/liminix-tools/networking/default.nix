@@ -1,6 +1,7 @@
 {
   callPackage
 , liminix
+, ifwait
 , lib
 }:
 let
@@ -12,6 +13,7 @@ in {
           []
           ++ optional (type == "bridge")
             "ip link add name ${device} type bridge"
+          ++ ["${ifwait}/bin/ifwait -v ${device} present"]
           ++ ["ip link set up dev ${device}"]
           ++ optional (primary != null)
             "ip link set dev ${device} master ${primary.device}";
