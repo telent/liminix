@@ -54,16 +54,31 @@
         sha256 = "1bwpifrwl5mvsmbmc81k8l22hmkwk05v7xs8dxag7fgv2kd6lv2r";
       };
       firmware = pkgs.stdenv.mkDerivation {
-        name = "regdb";
+        name = "wlan-firmware";
         phases = ["installPhase"];
         installPhase = ''
           mkdir -p $out/ath10k/QCA9887/hw1.0/
           cp ${pkgs.wireless-regdb}/lib/firmware/regulatory.db* $out/
           blobdir=${firmwareBlobs}/QCA9887/hw1.0
           cp $blobdir/10.2.4-1.0/firmware-5.bin_10.2.4-1.0-00047 $out/ath10k/QCA9887/hw1.0/firmware-5.bin
-          # cp $ {./ar750-ath10k-cal.bin} $out/ath10k/cal-pci-0000:00:00.0.bin
           cp $blobdir/board.bin  $out/ath10k/QCA9887/hw1.0/
         '';
+      };
+      ath10k_cal_data =
+        let
+          offset = 1024 * 20; # 0x5000
+          size = 2048 + 68; # 0x844
+        in pkgs.liminix.services.oneshot rec  {
+          name = "ath10k_cal_data";
+          up = ''
+            part=$(basename $(dirname $(grep -l art /sys/class/mtd/*/name)))
+            echo ART partition is ''${part-unset}
+            test -n "$part" || exit 1
+            (cd $(mkoutputs ${name}); umask 0027
+             dd if=/dev/$part of=data iflag=skip_bytes,fullblock bs=${toString size} skip=${toString offset} count=1
+            )
+        '';
+        down = "true";
       };
       inherit (pkgs.pseudofile) dir symlink;
     in {
@@ -72,6 +87,17 @@
         loadAddress = "0x80060000";
         entryPoint  = "0x80060000";
         radios = ["ath9k" "ath10k_pci"];
+      };
+      filesystem = dir {
+        lib = dir {
+          firmware = dir {
+            "regulatory.db" = symlink "${firmware}/regulatory.db";
+            ath10k = dir {
+              QCA9887 = symlink "${firmware}/ath10k/QCA9887";
+              "cal-pci-0000:00:00.0.bin" = symlink "${ath10k_cal_data}/.outputs/data";
+            };
+          };
+        };
       };
       boot.tftp = {
         loadAddress = "0x00A00000";
@@ -107,6 +133,7 @@
           USE_OF = "y";
           ATH79 = "y";
           PCI = "y";
+          PCI_AR724X = "y";
 
           SERIAL_8250_CONSOLE = "y";
           SERIAL_8250 = "y";
