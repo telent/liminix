@@ -157,10 +157,6 @@
 
           CMDLINE_PARTITION = "y";
           EARLY_PRINTK = "y";
-          FW_LOADER = "y";
-          # we don't have a user helper, so we get multiple 60s pauses
-          # at boot time unless we disable trying to call it
-          FW_LOADER_USER_HELPER = "n";
 
           PARTITION_ADVANCED = "y";
           PRINTK_TIME = "y";

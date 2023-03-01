@@ -105,6 +105,13 @@ in {
         TMPFS = "y";
         TMPFS_POSIX_ACL = "y";
         TMPFS_XATTR = "y";
+
+        FW_LOADER = "y";
+        FW_LOADER_COMPRESS = "y";
+        # We don't have a user helper, so we get multiple 60s pauses
+        # at boot time unless we disable trying to call it.
+        # https://lkml.org/lkml/2013/8/5/175
+        FW_LOADER_USER_HELPER = "n";
       };
     };
     boot.commandLine = [
