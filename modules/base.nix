@@ -75,6 +75,9 @@ in {
         default = [];
         example = ["ath9k" "ath10k"];
       };
+      networkInterfaces = mkOption {
+        type = types.attrsOf types.anything;
+      };
     };
   };
   config = {

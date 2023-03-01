@@ -15,8 +15,7 @@ in rec {
 
   imports = [ ../../modules/wlan.nix ];
 
-
-  services.wlan = interface { type = "hardware"; device = "wlan0"; };
+  services.wlan = config.device.networkInterfaces.wlan_24;
 
   services.hostap = hostapd (services.wlan) {
     params = {
@@ -40,7 +39,6 @@ in rec {
     contents = with config.services; [
       loopback
       hostap
-      wlan_module
     ];
   };
   defaultProfile.packages = with pkgs;  [ tcpdump ] ;

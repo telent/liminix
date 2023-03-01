@@ -38,7 +38,7 @@
     supported by the ath10k driver.
   '';
 
-  module = {pkgs, ... }:
+  module = {pkgs, config, ... }:
     let
       openwrt = pkgs.pkgsBuildBuild.fetchFromGitHub {
         name = "openwrt-source";
@@ -64,6 +64,10 @@
           cp $blobdir/board.bin  $out/ath10k/QCA9887/hw1.0/
         '';
       };
+      mac80211 = pkgs.mac80211.override {
+        drivers = ["ath9k" "ath10k_pci"];
+        klibBuild = config.outputs.kernel.modulesupport;
+      };
       ath10k_cal_data =
         let
           offset = 1024 * 20; # 0x5000
@@ -81,12 +85,25 @@
         down = "true";
       };
       inherit (pkgs.pseudofile) dir symlink;
+      inherit (pkgs.liminix.networking) interface;
     in {
       device = {
         defaultOutput = "tftproot";
         loadAddress = "0x80060000";
         entryPoint  = "0x80060000";
-        radios = ["ath9k" "ath10k_pci"];
+        networkInterfaces = {
+          lan = interface { device = "eth0"; };
+          wan = interface { device = "eth1"; };
+
+          wlan_24 = interface {
+            device = "wlan0";
+            dependencies = [ mac80211 ];
+          };
+          wlan_5 = interface {
+            device = "wlan1";
+            dependencies = [ mac80211 ath10k_cal_data ];
+          };
+        };
       };
       filesystem = dir {
         lib = dir {

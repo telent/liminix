@@ -3,15 +3,8 @@ let
   inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs) busybox;
-  mac80211 = pkgs.mac80211.override {
-    drivers = config.device.radios;
-    klibBuild = config.outputs.kernel.modulesupport;
-  };
-
 in {
   config = {
-    services.wlan_module = mac80211;
-
     kernel = rec {
       config = {
         # Most of this is necessary infra to allow wireless stack/

@@ -1,7 +1,6 @@
 # This "device" generates images that can be used with the QEMU
 # emulator. The default output is a directory containing separate
 # kernel (uncompressed vmlinux) and initrd (squashfs) images
-
 {
   system = {
     crossSystem = {
@@ -13,7 +12,7 @@
     };
   };
 
-  module = {pkgs, ... }: {
+  module = {pkgs, config, ... }: {
     kernel = {
       src = pkgs.pkgsBuildBuild.fetchurl {
         name = "linux.tar.gz";
@@ -41,9 +40,25 @@
         SERIAL_8250_CONSOLE= "y";
       };
     };
-    device = {
-      defaultOutput = "vmroot";
-      radios = ["mac80211_hwsim"];
-    };
+    device =
+      let
+        mac80211 =  pkgs.mac80211.override {
+          drivers = ["mac80211_hwsim"];
+          klibBuild = config.outputs.kernel.modulesupport;
+        };
+        inherit (pkgs.liminix.networking) interface;
+      in {
+        defaultOutput = "vmroot";
+        networkInterfaces = {
+          lan = interface { device = "eth0"; };
+          wan = interface { device = "eth1"; };
+
+          wlan_24 = interface {
+            device = "wlan0";
+            dependencies = [ mac80211 ];
+          };
+        };
+      };
+
   };
 }

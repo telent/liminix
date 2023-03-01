@@ -11,7 +11,7 @@ let
   secrets = import ./rotuer-secrets.nix;
   inherit (pkgs.liminix.networking)
     address
-    bridge
+#    bridge
     dnsmasq
     hostapd
     interface
@@ -83,28 +83,7 @@ in rec {
     };
   };
 
-  services.lan =
-    let iface = interface {
-          type = "bridge";
-          device = "lan";
-        };
-    in address iface {
-      family = "inet4"; address ="10.8.0.1"; prefixLength = 16;
-    };
-
-  services.wireless = interface {
-    type = "hardware";
-    device = "wlan0";
-    dependencies = [ config.services.wlan_module ];
-  };
-
-  services.wired = interface {
-    type = "hardware";
-    device = "eth0";
-    primary = services.lan;
-  };
-
-  services.hostap = hostapd (services.wireless) {
+  services.hostap = hostapd (config.device.networkInterfaces.wlan_24) {
     params = {
       ssid = "liminix";
       country_code = "GB";
@@ -121,14 +100,52 @@ in rec {
     };
   };
 
-  services.bridgewlan =
-    let dev = services.wireless.device;
-    in oneshot {
-      name = "add-wlan2-to-bridge";
-      up = "${ifwait}/bin/ifwait -v ${dev} running && ip link set dev ${dev} master ${services.lan.device}";
-      down = "ip link set dev ${dev} nomaster";
-      dependencies = [ services.wireless ];
+  services.hostap5 = hostapd (config.device.networkInterfaces.wlan_5) {
+    params = rec {
+      ssid = "liminix_5";
+      country_code = "GB";
+      hw_mode="a";
+      channel = 36;
+      ht_capab = "[HT40+]";
+      vht_oper_chwidth = 1;
+      vht_oper_centr_freq_seg0_idx = channel + 6;
+      ieee80211ac = 1;
+
+      wmm_enabled = 1;
+      inherit (secrets) wpa_passphrase;
+      auth_algs = 1; # 1=wpa2, 2=wep, 3=both
+      wpa = 2;       # 1=wpa, 2=wpa2, 3=both
+      wpa_key_mgmt = "WPA-PSK";
+      wpa_pairwise = "TKIP CCMP";   # auth for wpa (may not need this?)
+      rsn_pairwise = "CCMP";        # auth for wpa2
     };
+  };
+
+  services.int =
+    let iface = interface {
+          type = "bridge";
+          device = "int";
+        };
+    in address iface {
+      family = "inet4"; address ="10.8.0.1"; prefixLength = 16;
+    };
+
+  services.bridge =
+    let
+      primary = services.int;
+      addif = dev: oneshot {
+        name = "add-${dev.device}-to-bridge";
+        up = "${ifwait}/bin/ifwait -v ${dev.device} running && ip link set dev ${dev.device} master ${primary.device}";
+        down = "ip link set dev ${dev} nomaster";
+        dependencies = [ primary dev ];
+      };
+    in bundle {
+      name = "bridge-members";
+      contents = map addif [
+        config.device.networkInterfaces.wlan_24
+        config.device.networkInterfaces.lan
+        config.device.networkInterfaces.wlan_5
+      ];
     };
 
   users.dnsmasq = {
@@ -144,13 +161,13 @@ in rec {
   services.dns =
     dnsmasq {
       resolvconf = services.resolvconf;
-      interface = services.lan;
+      interface = services.int;
       ranges = ["10.8.0.10,10.8.0.240"];
       domain = "fake.liminix.org";
     };
 
   services.wan =
-    let iface = interface { type = "hardware"; device = "eth1"; };
+    let iface = config.device.networkInterfaces.wan;
     in pppoe iface {
       ppp-options = [
         "debug" "+ipv6" "noauth"
@@ -196,14 +213,14 @@ in rec {
     name = "default";
     contents = with services; [
       loopback
-      wired
-      wireless
-      lan
+      config.device.networkInterfaces.lan
+      int
+      bridge
       hostap
+      hostap5
       defaultroute4
       packet_forwarding
       dns
-      bridgewlan
       resolvconf
     ];
   };

@@ -8,7 +8,7 @@ let
   inherit (liminix.services) oneshot longrun;
   inherit (lib) concatStringsSep optional;
 in {
-  interface = { type, device, primary ? null, dependencies ? [] }  @ args:
+  interface = { type ? "hardware", device, primary ? null, dependencies ? [] }  @ args:
     let ups =
           []
           ++ optional (type == "bridge")
@@ -25,10 +25,10 @@ in {
     } // {
       inherit device;
     };
-  address = interface: { family, prefixLength, address } @ args:
+  address = interface: { family, dependencies ? [], prefixLength, address } @ args:
     let inherit (builtins) toString;
     in oneshot {
-      dependencies = [ interface ];
+      dependencies = [ interface ] ++ dependencies;
       name = "${interface.device}.addr.${address}";
       up = "ip address add ${address}/${toString prefixLength} dev ${interface.device} ";
       down = "ip address del ${address}/${toString prefixLength} dev ${interface.device} ";
