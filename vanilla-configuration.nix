@@ -4,7 +4,7 @@ let
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
 in rec {
   imports = [
-    ./modules/phram.nix
+    ./modules/tftpboot.nix
     ./modules/wlan.nix
   ];
   services.loopback =

@@ -52,7 +52,7 @@ in {
         ln -s ${o.manifest} manifest
         ln -s ${o.kernel.headers} build
         ln -s ${o.uimage} uimage
-        ln -s ${o.boot-scr} flash.scr
+        ln -s ${o.boot-scr} boot.scr
      '';
 
     outputs.boot-scr =

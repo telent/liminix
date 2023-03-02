@@ -43,7 +43,7 @@ in rec {
 
   imports = [
     ./modules/wlan.nix
-    ./modules/phram.nix
+    ./modules/tftpboot.nix
   ];
 
   kernel = {

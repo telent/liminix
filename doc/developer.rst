@@ -113,7 +113,7 @@ image instead of flashing. In your device configuration add
 .. code-block:: nix
 
   imports = [
-    ./modules/phram.nix
+    ./modules/tftpboot.nix
   ];
 
   boot.tftp = {
