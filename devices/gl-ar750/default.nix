@@ -91,6 +91,12 @@
         defaultOutput = "tftproot";
         loadAddress = "0x80060000";
         entryPoint  = "0x80060000";
+        flash = {
+          address = "0x9F060000";
+          size ="0xfa0000";
+        };
+        rootDevice = "1f05";
+
         networkInterfaces = {
           lan = interface { device = "eth0"; };
           wan = interface { device = "eth1"; };

@@ -26,6 +26,7 @@ in {
         MTD = "y";
         MTD_PHRAM = "y";
         MTD_CMDLINE_PARTS = "y";
+        MIPS_CMDLINE_FROM_BOOTLOADER = "y";
 
         # one or more of the following is required to get from
         # VFS: Cannot open root device "1f00" or unknown-block(31,0): error -6

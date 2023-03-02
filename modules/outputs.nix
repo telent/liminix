@@ -23,6 +23,7 @@ in
         inherit (config.kernel) config src extraPatchPhase;
       };
       dtb =  (callPackage ../kernel/dtb.nix {}) {
+        inherit (config.boot) commandLine;
         dts = config.boot.dts.src;
         includes = config.boot.dts.includes ++ [
           "${kernel.headers}/include"
