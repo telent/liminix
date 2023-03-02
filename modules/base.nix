@@ -68,6 +68,10 @@ in {
       defaultOutput = mkOption {
         type = types.nonEmptyStr;
       };
+      flash = {
+        address = mkOption { type = types.str; };
+        size = mkOption { type = types.str; };
+      };
       loadAddress = mkOption { default = null; };
       entryPoint = mkOption { };
       radios = mkOption {

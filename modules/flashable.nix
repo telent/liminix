@@ -9,10 +9,6 @@ let
   inherit (config.boot) tftp;
 in {
   options = {
-    device.flash = {
-      address = mkOption { type = types.str; };
-      size = mkOption { type = types.str; };
-    };
   };
   config = {
     kernel = {
