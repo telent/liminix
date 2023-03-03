@@ -15,7 +15,7 @@ in rec {
 
   imports = [ ../../modules/wlan.nix ];
 
-  services.wlan = config.device.networkInterfaces.wlan_24;
+  services.wlan = config.hardware.networkInterfaces.wlan_24;
 
   services.hostap = hostapd (services.wlan) {
     params = {

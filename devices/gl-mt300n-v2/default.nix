@@ -21,21 +21,22 @@
         hash = "sha256-YYi4gkpLjbOK7bM2MGQjAyEBuXJ9JNXoz/JEmYf8xE8=";
       };
     in {
-      device = {
+      hardware = {
         defaultOutput = "tftproot";
         loadAddress = "0x80000000";
         entryPoint  = "0x80000000";
         radios = ["mt7603e"];
+        dts = {
+          src = "${openwrt}/target/linux/ramips/dts/mt7628an_glinet_gl-mt300n-v2.dts";
+          includes = [
+            "${openwrt}/target/linux/ramips/dts"
+          ];
+        };
       };
       boot.tftp = {
         loadAddress = "0x00A00000";
       };
-      device.dts = {
-        src = "${openwrt}/target/linux/ramips/dts/mt7628an_glinet_gl-mt300n-v2.dts";
-        includes = [
-          "${openwrt}/target/linux/ramips/dts"
-        ];
-      };
+
 
       kernel = {
         src = pkgs.fetchurl {

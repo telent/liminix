@@ -87,7 +87,7 @@
       inherit (pkgs.pseudofile) dir symlink;
       inherit (pkgs.liminix.networking) interface;
     in {
-      device = {
+      hardware = {
         defaultOutput = "tftproot";
         loadAddress = "0x80060000";
         entryPoint  = "0x80060000";
@@ -96,6 +96,12 @@
           size ="0xfa0000";
         };
         rootDevice = "1f05";
+        dts = {
+          src = "${openwrt}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";
+          includes =  [
+            "${openwrt}/target/linux/ath79/dts"
+          ];
+        };
 
         networkInterfaces = {
           lan = interface { device = "eth0"; };
@@ -124,12 +130,6 @@
       };
       boot.tftp = {
         loadAddress = "0x00A00000";
-      };
-      device.dts = {
-        src = "${openwrt}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";
-        includes =  [
-          "${openwrt}/target/linux/ath79/dts"
-        ];
       };
       kernel = {
         src = pkgs.pkgsBuildBuild.fetchurl {

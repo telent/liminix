@@ -24,14 +24,14 @@ in
       };
       dtb =  (callPackage ../kernel/dtb.nix {}) {
         inherit (config.boot) commandLine;
-        dts = config.device.dts.src;
-        includes = config.device.dts.includes ++ [
+        dts = config.hardware.dts.src;
+        includes = config.hardware.dts.includes ++ [
           "${kernel.headers}/include"
         ];
       };
       uimage = (callPackage ../kernel/uimage.nix {}) {
         commandLine = concatStringsSep " " config.boot.commandLine;
-        inherit (config.device) loadAddress entryPoint;
+        inherit (config.hardware) loadAddress entryPoint;
         inherit kernel;
         inherit dtb;
       };

@@ -5,7 +5,7 @@ in {
   options = {
     boot = {
     };
-    device = {
+    hardware = {
       dts = {
         src = mkOption { type = types.path; };
         includes = mkOption {

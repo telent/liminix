@@ -40,7 +40,7 @@ let
   }).config.system;
 in {
   outputs = config.outputs // {
-    default = config.outputs.${config.device.defaultOutput};
+    default = config.outputs.${config.hardware.defaultOutput};
   };
 
   # this is just here as a convenience, so that we can get a

@@ -22,7 +22,7 @@ in {
     };
 
     boot.commandLine = [
-      "root=${config.device.rootDevice}"
+      "root=${config.hardware.rootDevice}"
     ];
     outputs.firmware =
       let o = config.outputs; in
@@ -49,7 +49,7 @@ in {
       let
         inherit (pkgs.lib.trivial) toHexString;
         inherit (pkgs.lib.lists) concatStringsSep;
-        inherit (config.device) flash;
+        inherit (config.hardware) flash;
       in
         pkgs.buildPackages.runCommand "" {} ''
           imageSize=$(stat -L -c %s ${config.outputs.firmware})

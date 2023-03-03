@@ -83,7 +83,7 @@ in rec {
     };
   };
 
-  services.hostap = hostapd (config.device.networkInterfaces.wlan_24) {
+  services.hostap = hostapd (config.hardware.networkInterfaces.wlan_24) {
     params = {
       ssid = "liminix";
       country_code = "GB";
@@ -100,7 +100,7 @@ in rec {
     };
   };
 
-  services.hostap5 = hostapd (config.device.networkInterfaces.wlan_5) {
+  services.hostap5 = hostapd (config.hardware.networkInterfaces.wlan_5) {
     params = rec {
       ssid = "liminix_5";
       country_code = "GB";
@@ -142,9 +142,9 @@ in rec {
     in bundle {
       name = "bridge-members";
       contents = map addif [
-        config.device.networkInterfaces.wlan_24
-        config.device.networkInterfaces.lan
-        config.device.networkInterfaces.wlan_5
+        config.hardware.networkInterfaces.wlan_24
+        config.hardware.networkInterfaces.lan
+        config.hardware.networkInterfaces.wlan_5
       ];
     };
 
@@ -167,7 +167,7 @@ in rec {
     };
 
   services.wan =
-    let iface = config.device.networkInterfaces.wan;
+    let iface = config.hardware.networkInterfaces.wan;
     in pppoe iface {
       ppp-options = [
         "debug" "+ipv6" "noauth"
@@ -213,7 +213,7 @@ in rec {
     name = "default";
     contents = with services; [
       loopback
-      config.device.networkInterfaces.lan
+      config.hardware.networkInterfaces.lan
       int
       bridge
       hostap

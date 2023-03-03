@@ -40,7 +40,7 @@
         SERIAL_8250_CONSOLE= "y";
       };
     };
-    device =
+    hardware =
       let
         mac80211 =  pkgs.mac80211.override {
           drivers = ["mac80211_hwsim"];
