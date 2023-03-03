@@ -56,8 +56,9 @@ in rec {
 
       NETFILTER_XT_MATCH_CONNTRACK = "y";
 
-      IP6_NF_IPTABLES= "y";
-      IP_NF_IPTABLES= "y";
+      IP6_NF_IPTABLES= "y";     # do we still need these
+      IP_NF_IPTABLES= "y";      # if using nftables directly
+
       IP_NF_NAT = "y";
       IP_NF_TARGET_MASQUERADE = "y";
       NETFILTER = "y";
