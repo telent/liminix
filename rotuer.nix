@@ -11,7 +11,6 @@ let
   secrets = import ./rotuer-secrets.nix;
   inherit (pkgs.liminix.networking)
     address
-#    bridge
     dnsmasq
     hostapd
     interface
@@ -20,8 +19,7 @@ let
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
   inherit (pkgs)
     ifwait
-    serviceFns
-    iptables;
+    serviceFns;
 in rec {
   services.loopback =
     let iface = interface { type = "loopback"; device = "lo";};
