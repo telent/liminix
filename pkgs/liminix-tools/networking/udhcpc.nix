@@ -16,7 +16,7 @@ let
 
     set_address() {
         ip address replace $ip/$mask dev $interface
-        (cd $(mkoutputs ${name}); umask 0027
+        (in_outputs ${name}
          for i in lease mask ip router siaddr dns serverid subnet opt53 interface ; do
             echo ''${!i} > $i
          done)

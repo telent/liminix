@@ -7,4 +7,7 @@ writeText "service-fns.sh" ''
     mkdir -m 2750 -p $d && chown root:system $d
     echo $d
   }
+  in_outputs() {
+    cd `mkoutputs $1` && umask 0027
+  }
 ''

@@ -78,7 +78,7 @@
             part=$(basename $(dirname $(grep -l art /sys/class/mtd/*/name)))
             echo ART partition is ''${part-unset}
             test -n "$part" || exit 1
-            (cd $(mkoutputs ${name}); umask 0027
+            (in_outputs ${name}
              dd if=/dev/$part of=data iflag=skip_bytes,fullblock bs=${toString size} skip=${toString offset} count=1
             )
         '';

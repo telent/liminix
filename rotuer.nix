@@ -141,10 +141,8 @@ in rec {
       };
     in bundle {
       name = "bridge-members";
-      contents = map addif [
-        config.hardware.networkInterfaces.wlan_24
-        config.hardware.networkInterfaces.lan
-        config.hardware.networkInterfaces.wlan_5
+      contents = with config.hardware.networkInterfaces; map addif [
+        wlan_24 lan wlan_5
       ];
     };
 
@@ -181,7 +179,7 @@ in rec {
     name = "resolvconf";
     up = ''
       . ${serviceFns}
-      ( cd `mkoutputs ${name}`; umask 0027
+      ( in_outputs ${name}
        echo "nameserver $(output ${services.wan} ns1)" > resolv.conf
        echo "nameserver $(output ${services.wan} ns2)" >> resolv.conf
       )

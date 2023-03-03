@@ -19,7 +19,7 @@ let
   name = "${interface.device}.pppoe";
   ip-up = writeAshScript "ip-up" {} ''
     . ${serviceFns} 
-    (cd $(mkoutputs ${name}); umask 0027
+    (in_outputs ${name}
      echo $1 > ifname
      echo $2 > tty
      echo $3 > speed
