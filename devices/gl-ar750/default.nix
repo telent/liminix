@@ -125,7 +125,7 @@
       boot.tftp = {
         loadAddress = "0x00A00000";
       };
-      boot.dts = {
+      device.dts = {
         src = "${openwrt}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";
         includes =  [
           "${openwrt}/target/linux/ath79/dts"

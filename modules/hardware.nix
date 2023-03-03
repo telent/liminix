@@ -4,6 +4,8 @@ let
 in {
   options = {
     boot = {
+    };
+    device = {
       dts = {
         src = mkOption { type = types.path; };
         includes = mkOption {
@@ -11,8 +13,6 @@ in {
           type = types.listOf types.path;
         };
       };
-    };
-    device = {
       defaultOutput = mkOption {
         type = types.nonEmptyStr;
       };

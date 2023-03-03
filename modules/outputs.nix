@@ -24,8 +24,8 @@ in
       };
       dtb =  (callPackage ../kernel/dtb.nix {}) {
         inherit (config.boot) commandLine;
-        dts = config.boot.dts.src;
-        includes = config.boot.dts.includes ++ [
+        dts = config.device.dts.src;
+        includes = config.device.dts.includes ++ [
           "${kernel.headers}/include"
         ];
       };

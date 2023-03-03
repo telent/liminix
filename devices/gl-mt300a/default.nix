@@ -30,7 +30,7 @@
       boot.tftp = {
         loadAddress = "0x00A00000";
       };
-      boot.dts = {
+      device.dts = {
         src = "${openwrt}/target/linux/ramips/dts/mt7620a_glinet_gl-mt300a.dts";
         includes = [
           "${openwrt}/target/linux/ramips/dts"
