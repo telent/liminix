@@ -20,6 +20,7 @@ let
   config = (pkgs.lib.evalModules {
     modules = [
       { _module.args = { inherit pkgs; lib = pkgs.lib; }; }
+      ./modules/hardware.nix
       ./modules/base.nix
       device.module
       liminix-config
