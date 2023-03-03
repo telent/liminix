@@ -1,17 +1,8 @@
-final: prev: {
-  pseudofile = final.callPackage ./pkgs/pseudofile {};
+final: prev:
+let extraPkgs = import ./pkgs/default.nix { inherit (final) callPackage; };
+in
+extraPkgs // {
   strace = prev.strace.override { libunwind = null; };
-  liminix = {
-    services = final.callPackage ./pkgs/liminix-tools/services {};
-    networking =  final.callPackage ./pkgs/liminix-tools/networking {};
-    builders =  {
-      squashfs = final.callPackage ./pkgs/liminix-tools/builders/squashfs.nix {};
-      kernel = final.callPackage ./pkgs/kernel {};
-    };
-  };
-  writeAshScript = final.callPackage ./pkgs/write-ash-script {};
-  s6-init-bin =  final.callPackage ./pkgs/s6-init-bin {};
-  s6-rc-database = final.callPackage ./pkgs/s6-rc-database {};
 
   dnsmasq =
     let d =  prev.dnsmasq.overrideAttrs(o: {
@@ -20,15 +11,9 @@ final: prev: {
           '';
         });
     in d.override {
-    dbusSupport = false;
-    nettle = null;
-  };
-
-  mips-vm = final.callPackage ./pkgs/mips-vm {};
-  pppoe = final.callPackage ./pkgs/pppoe {};
-
-  kernel-backport = final.callPackage ./pkgs/kernel-backport {};
-  mac80211 = final.callPackage ./pkgs/mac80211 {};
+      dbusSupport = false;
+      nettle = null;
+    };
 
   pppBuild = prev.ppp;
   ppp =
@@ -68,40 +53,4 @@ final: prev: {
       '';
       postFixup = "";
     });
-
-
-  # we need to build real lzma instead of using xz, because the lzma
-  # decoder in u-boot doesn't understand streaming lzma archives
-  # ("Stream with EOS marker is not supported") and xz can't create
-  # non-streaming ones.  See
-  # https://sourceforge.net/p/squashfs/mailman/message/26599379/
-
-  lzma = final.stdenv.mkDerivation {
-    pname = "lzma";
-    version = "4.32.7";
-    configureFlags = [ "--enable-static" "--disable-shared"];
-    src = final.buildPackages.fetchurl {
-      url = "https://tukaani.org/lzma/lzma-4.32.7.tar.gz";
-      sha256 = "0b03bdvm388kwlcz97aflpr3ir1zpa3m0bq3s6cd3pp5a667lcwz";
-    };
-  };
-
-  netlink-lua = final.callPackage ./pkgs/netlink-lua {};
-  ifwait = final.callPackage ./pkgs/ifwait {};
-
-  serviceFns = final.writeText "service-fns.sh" ''
-    output() { cat $1/.outputs/$2; }
-    output_path() { echo $(realpath $1/.outputs)/$2; }
-    mkoutputs() {
-      d=/run/service-state/$1
-      mkdir -m 2750 -p $d && chown root:system $d
-      echo $d
-    }
-  '';
-
-  # these are packages for the build system not the host/target
-
-  tufted = final.callPackage ./pkgs/tufted {};
-  routeros = final.callPackage ./pkgs/routeros {};
-  go-l2tp = final.callPackage ./pkgs/go-l2tp {};
 }
