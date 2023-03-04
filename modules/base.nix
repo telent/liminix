@@ -35,22 +35,6 @@ in {
         type = types.attrsOf types.nonEmptyStr;
       };
     };
-    groups =  mkOption {
-      type = types.attrsOf (types.submodule {
-        options = {
-          gid = mkOption {
-            type = types.int;
-          };
-          usernames = mkOption {
-            type = types.listOf types.str;
-            default = [];
-          };
-        };
-      });
-    };
-    users =  mkOption {
-      type = types.attrsOf types.anything;
-    };
     boot = {
       commandLine = mkOption {
         type = types.listOf types.nonEmptyStr;
@@ -102,7 +86,7 @@ in {
     users.root = {
       uid = 0; gid= 0; gecos = "Root of all evaluation";
       dir = "/";
-      passwd = "";
+      passwd = lib.mkDefault "";
       shell = "/bin/sh";
     };
     groups = {

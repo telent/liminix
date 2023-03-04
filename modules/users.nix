@@ -1,9 +1,9 @@
 { lib, pkgs, config, ...}:
 let
-  inherit (lib) concatStrings concatStringsSep mapAttrsToList; # mkEnableOption mkOption types isDerivation isType hasAttr ;
+  inherit (lib)
+    concatStrings concatStringsSep mapAttrsToList mkOption types;
   inherit (builtins) toString;
   inherit (pkgs.pseudofile) dir symlink;
-#  inherit (pkgs) busybox;
   passwd-file  =
     let lines =  mapAttrsToList (name: u: "${name}:${if u ? passwd  then u.passwd else "!!"}:${toString u.uid}:${toString u.gid}:${u.gecos}:${u.dir}:${u.shell}\n" )
       config.users;
@@ -15,6 +15,50 @@ let
       config.groups;
     in concatStrings lines;
 in {
+  options = {
+    users =  mkOption {
+      type = types.attrsOf (types.submodule {
+        options = {
+          passwd = mkOption {
+            type = types.str;
+            default = "!!";
+          };
+          uid = mkOption {
+            type = types.int;
+          };
+          gid = mkOption {
+            type = types.int;
+          };
+          gecos = mkOption {
+            type = types.str;
+            default = "";
+            example = "Jo Q User";
+          };
+          dir = mkOption {
+            type = types.str;
+            default = "/run";
+          };
+          shell = mkOption {
+            type = types.str;
+            default = "/bin/sh";
+          };
+        };
+      });
+    };
+    groups =  mkOption {
+      type = types.attrsOf (types.submodule {
+        options = {
+          gid = mkOption {
+            type = types.int;
+          };
+          usernames = mkOption {
+            type = types.listOf types.str;
+            default = [];
+          };
+        };
+      });
+    };
+  };
   config = {
     filesystem = dir {
       etc = dir {
