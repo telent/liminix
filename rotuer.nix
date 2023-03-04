@@ -18,6 +18,7 @@ let
     route;
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
   inherit (pkgs)
+    dropbear
     ifwait
     serviceFns;
 in rec {
@@ -146,11 +147,21 @@ in rec {
       ];
     };
 
+  services.sshd = longrun {
+    name = "sshd";
+    run = ''
+      mkdir -p /run/dropbear
+      ${dropbear}/bin/dropbear -E -P /run/dropbear.pid -R -F
+    '';
+  };
+
   users.dnsmasq = {
     uid = 51; gid= 51; gecos = "DNS/DHCP service user";
     dir = "/run/dnsmasq";
     shell = "/bin/false";
   };
+  users.root.passwd = lib.mkForce secrets.root_password;
+
   groups.dnsmasq = {
     gid = 51; usernames = ["dnsmasq"];
   };
@@ -220,6 +231,7 @@ in rec {
       packet_forwarding
       dns
       resolvconf
+      sshd
     ];
   };
   defaultProfile.packages = with pkgs;  [ nftables strace tcpdump ] ;

@@ -15,6 +15,15 @@ extraPkgs // {
       nettle = null;
     };
 
+  dropbear = prev.dropbear.overrideAttrs (o: {
+    postPatch = ''
+     (echo '#define DSS_PRIV_FILENAME "/run/dropbear/dropbear_dss_host_key"'
+      echo '#define RSA_PRIV_FILENAME "/run/dropbear/dropbear_rsa_host_key"'
+      echo '#define ECDSA_PRIV_FILENAME "/run/dropbear/dropbear_ecdsa_host_key"'
+      echo '#define ED25519_PRIV_FILENAME "/run/dropbear/dropbear_ed25519_host_key"') > localoptions.h
+    '';
+  });
+
   pppBuild = prev.ppp;
   ppp =
     (prev.ppp.override {
