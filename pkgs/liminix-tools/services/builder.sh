@@ -10,10 +10,11 @@ test -n "$contents" && for d in $contents; do
     mkdir -p $out/${name}/contents.d
     touch $out/${name}/contents.d/$d
 done
-test -n "$run" && (echo -e "$run" > $out/${name}/run)
-test -n "${notification-fd}" && (echo ${notification-fd} > $out/${name}/notification-fd)
-test -n "$up" && (echo -e "$up" > $out/${name}/up)
-test -n "$down" && (echo -e "$down" > $out/${name}/down)
+
+for i in run notification-fd up down consumer-for producer-for pipeline-name ; do
+    test -n "$(printenv $i)" && (echo "$(printenv $i)" > $out/${name}/$i)
+done
+
 ( cd $out && ln -s /run/service-state/${name} ./.outputs )
 for i in $out/${name}/{down,up,run} ; do test -f $i && chmod +x $i; done
 true

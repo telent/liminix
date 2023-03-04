@@ -1,6 +1,7 @@
 {
   stdenvNoCC
 , s6-rc
+, s6
 , lib
 , busybox
 , callPackage
@@ -12,6 +13,7 @@ let
   output = service: name: "/run/service-state/${service.name}/${name}";
   serviceScript = commands : ''
     #!${busybox}/bin/sh
+    exec 2>&1
     . ${serviceFns}
     ${commands}
   '';
@@ -23,17 +25,23 @@ let
     , down ? null
     , outputs ? []
     , notification-fd ? null
+    , producer-for ? null
+    , consumer-for ? null
+    , pipeline-name ? null
     , dependencies ? []
     , contents ? []
-  } @ args: stdenvNoCC.mkDerivation {
-    # we use stdenvNoCC to avoid generating derivations with names
-    # like foo.service-mips-linux-musl
-    inherit name serviceType up down run notification-fd;
-    buildInputs = dependencies ++ contents;
-    dependencies = builtins.map (d: d.name) dependencies;
-    contents = builtins.map (d: d.name) contents;
-    builder = ./builder.sh;
-  };
+    , buildInputs ? []
+  } @ args:
+    stdenvNoCC.mkDerivation {
+      # we use stdenvNoCC to avoid generating derivations with names
+      # like foo.service-mips-linux-musl
+      inherit name serviceType up down run notification-fd
+        producer-for consumer-for pipeline-name;
+      buildInputs = buildInputs ++ dependencies ++ contents;
+      dependencies = builtins.map (d: d.name) dependencies;
+      contents = builtins.map (d: d.name) contents;
+      builder = ./builder.sh;
+    };
 
   longrun = {
     name
@@ -41,10 +49,23 @@ let
     , outputs ? []
     , notification-fd ? null
     , dependencies ? []
-  } @ args: service (args //{
-    serviceType = "longrun";
-    run = serviceScript run;
-  });
+    , ...
+  } @ args:
+    let logger = service {
+          serviceType = "longrun";
+          name = "${name}-log";
+          run = serviceScript "${s6}/bin/s6-log -d 10 -- p${name} 1";
+          notification-fd = 10;
+          consumer-for = name;
+          pipeline-name = "${name}-pipeline";
+        };
+    in service (args // {
+      buildInputs = [ logger ];
+      serviceType = "longrun";
+      run = serviceScript run;
+      producer-for = "${name}-log";
+    });
+
   oneshot = {
     name
     , up
