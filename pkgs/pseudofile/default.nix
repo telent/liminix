@@ -6,7 +6,8 @@ let
   inherit (lib.attrsets) mapAttrsToList;
   visit = prefix: attrset:
     let
-      qprint = msg : builtins.replaceStrings ["\n" "=" "\""] ["=0A" "=3D" "=22"] msg;
+      qprint = msg : builtins.replaceStrings
+        ["\n" "=" "\"" "$"] ["=0A" "=3D" "=22" "=24"] msg;
       l =
         mapAttrsToList
           (filename: attrs:
