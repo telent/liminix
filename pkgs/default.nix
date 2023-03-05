@@ -37,4 +37,5 @@
   # https://sourceforge.net/p/squashfs/mailman/message/26599379/
   lzma = callPackage ./lzma {};
 
+  swconfig = callPackage ./swconfig {};
 }
