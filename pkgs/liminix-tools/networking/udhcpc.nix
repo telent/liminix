@@ -1,7 +1,7 @@
 {
   liminix
 , busybox
-, writeShellScript
+, writeAshScript
 , serviceFns
 } :
 let
@@ -10,7 +10,9 @@ in
 interface: { ... } @ args:
 let
   name = "${interface.device}.udhcp";
-  script = writeShellScript "udhcp-notify" ''
+  script = writeAshScript "udhcp-notify"  {
+    # runtimeInputs = [ iproute2 ] using busybox version of ip
+  } ''
     . ${serviceFns}
     action=$1
 

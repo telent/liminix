@@ -25,6 +25,8 @@ in stdenv.mkDerivation rec {
     makeWrapper ${lua}/bin/lua $out/bin/${pname} \
       --prefix LUA_CPATH ";" ${netlink}/lib/lua/${lua.luaversion}/\?.so \
       --add-flags $out/lib/${pname}.lua
+    # makeWrapper adds a shebang for bash
+    sed -i -e '1c#!/bin/sh' $out/bin/${pname}
   '';
 }
 
