@@ -4,14 +4,18 @@ in
 extraPkgs // {
   strace = prev.strace.override { libunwind = null; };
 
-  s6 = prev.s6.overrideAttrs(o: {
-    patches =
-      (if o ? patches then o.patches else []) ++ [
-        (final.fetchpatch {
+  s6 = prev.s6.overrideAttrs(o:
+    let patch = final.fetchpatch {
           # add "p" directive in s6-log
           url = "https://github.com/skarnet/s6/commit/ddc76841398dfd5e18b22943727ad74b880236d3.patch";
           hash = "sha256-fBtUinBdp5GqoxgF6fcR44Tu8hakxs/rOShhuZOgokc=";
-        })];
+        };
+        patch_needed = builtins.compareVersions o.version "2.11.1.2" <= 0;
+    in {
+      patches =
+        (if o ? patches then o.patches else []) ++
+        (if patch_needed then [ patch ] else []);
+    });
   });
 
   dnsmasq =
