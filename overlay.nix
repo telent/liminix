@@ -16,6 +16,14 @@ extraPkgs // {
         (if o ? patches then o.patches else []) ++
         (if patch_needed then [ patch ] else []);
     });
+
+  nftables = prev.nftables.overrideAttrs(o: {
+    configureFlags = [
+      "--disable-debug"
+      "--disable-python"
+      "--with-mini-gmp"
+      "--without-cli"
+    ];
   });
 
   dnsmasq =
@@ -28,6 +36,8 @@ extraPkgs // {
       dbusSupport = false;
       nettle = null;
     };
+
+  hostapd = prev.hostapd.override { sqlite = null; };
 
   dropbear = prev.dropbear.overrideAttrs (o: {
     postPatch = ''
