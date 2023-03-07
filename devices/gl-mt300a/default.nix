@@ -114,13 +114,14 @@
           NET = "y";
           NETDEVICES = "y";
           ETHERNET = "y";
+          NET_VENDOR_RALINK = "y";
           NET_RALINK_MDIO = "y";
           NET_RALINK_MDIO_MT7620 = "y";
           NET_RALINK_MT7620 = "y";
 
           SPI = "y";
           MTD_SPI_NOR = "y";
-          SPI_MT7621 = "y"; # } probabyl don't need both of these
+          SPI_MT7621 = "y"; # } probably don't need both of these
           SPI_RT2880 = "y"; # }
           SPI_MASTER= "y";
           SPI_MEM= "y";
@@ -133,9 +134,9 @@
           SWCONFIG = "y";
           SWPHY = "y";
 
+          BRIDGE = "y";
           BRIDGE_VLAN_FILTERING = "y";
           BRIDGE_IGMP_SNOOPING = "y";
-          NET_VENDOR_RALINK = "y";
 
           MTD = "y";
           MTD_CMDLINE_PARTS = "y";

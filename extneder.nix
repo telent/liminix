@@ -40,7 +40,6 @@ in rec {
 
   kernel = {
     config = {
-      BRIDGE = "y";
 
       NETFILTER_XT_MATCH_CONNTRACK = "y";
 
