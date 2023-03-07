@@ -20,7 +20,7 @@ let
         ip address replace $ip/$mask dev $interface
         (in_outputs ${name}
          for i in lease mask ip router siaddr dns serverid subnet opt53 interface ; do
-            echo ''${!i} > $i
+            printenv $i > $i
          done)
     }
     case $action in
