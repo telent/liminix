@@ -935,6 +935,8 @@ untagged)
 
 Mon Mar  6 09:42:33 GMT 2023
 
+Today I plugged in the mt300a.
+
 echo 17 >/sys/class/gpio/export
 echo out >/sys/class/gpio/gpio17/direction
 
@@ -985,3 +987,59 @@ ip link add link eth0 name wan type vlan id 2
 
 figure out how to add these to gl-mt300a device config
 then extedner.nix can add a bridge
+
+Tue Mar  7 20:13:15 GMT 2023
+
+We need NTP or some other way to get accurate time
+
+[done] Need to add regulatory.db somewhere standard, maybe modules/wlan?
+
+Tue Mar  7 21:43:56 GMT 2023
+
+When we get to phase 2, need to review how network interfaces and
+their addresses interplay. It should be possible to have a network
+interface and interrogate the addresses associated with it - esp
+with ipv6 where there are multiple addresses for the device
+
+This thought prompted by looking at the loopback interface, which is
+a bundle of addresses and therefore we can't see what any of them are
+
+
+Tue Mar  7 22:05:44 GMT 2023
+
+[phase 1]
+1) gl-ar750, why do we get "ag71xx 19000000.eth: invalid MAC address, using random address"
+18) gl-mt300a what's left?
+19) gl-mt300n-v2 what works?
+20) publish the manual using CI
+30) document flashing process
+31) go through all the other unexpected dmesg and triage
+
+[phase 1.5]
+8) get ipv6 address from pppoe
+9) get ipv6 delegation from pppoe and add prefix to lan
+10) support dhcp6 in dnsmasq, and advertise prefix on lan
+11) firewalling and nat - default deny or zero trust?
+7) upgrade ppp to something with an ipv6-up-script option, move ppp and pppoe derivations into their own files
+31) set up iperf and do some performance measurement
+
+[phase 2]
+3) document services so I can remember how they work. Refer back to Oct 18 for notes that no longer make sense
+4) check out restart behaviour of dependent services when depended-on service dies
+13) check that references to outputs correspond with declared outputs
+33) network interfaces vs the services that manage their addresses
+34) write a short guide explaining how to use s6-svc
+
+[phase n]
+12) write secrets holder as a service with outputs
+16) writable filesystem (ubifs?)
+17) overlay with squashfs/ubifs - useful? think about workflows for how this thing is installed
+
+
+dmesg lines to investigate for gl-mt300a:
+[    0.467314] OF: Bad cell count for /palmbus@10000000/spi@b00/flash@0/partition
+[    0.539709] mtk_soc_eth 10100000.ethernet: mdio-bus disabled  ?
+[    8.778513] compat: loading out-of-tree module taints kernel.
+[   17.686561] ieee80211 phy0: rt2800_wait_bbp_rf_ready: Error - BBP/RF register access failed, aborting
+[   17.696025] ieee80211 phy0: rt2800_loft_iq_calibration: Warning - RF RX busy in LOFT IQ calibration
+[   17.875147] ieee80211 phy0: rt2800_rxiq_calibration: Warning - Timeout waiting for MAC status in RXIQ calibration
