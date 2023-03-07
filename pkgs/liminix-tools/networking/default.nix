@@ -8,11 +8,13 @@ let
   inherit (liminix.services) oneshot longrun;
   inherit (lib) concatStringsSep optional;
 in {
-  interface = { type ? "hardware", device, primary ? null, dependencies ? [] }  @ args:
+  interface = { type ? "hardware", device, link ? null, primary ? null, id ? null, dependencies ? [] }  @ args:
     let ups =
           []
           ++ optional (type == "bridge")
             "ip link add name ${device} type bridge"
+          ++ optional (type == "vlan")
+            "ip link add link ${link} name ${device} type vlan id ${id}"
           ++ ["${ifwait}/bin/ifwait -v ${device} present"]
           ++ ["ip link set up dev ${device}"]
           ++ optional (primary != null)

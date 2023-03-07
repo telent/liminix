@@ -13,6 +13,7 @@
 
   module = { pkgs, ...}:
     let
+      inherit (pkgs.liminix.networking) interface;
       openwrt = pkgs.fetchFromGitHub {
         name = "openwrt-source";
         repo = "openwrt";
@@ -31,6 +32,22 @@
           includes = [
             "${openwrt}/target/linux/ramips/dts"
           ];
+        };
+        networkInterfaces = {
+          # lan and wan ports are both behind a switch on eth0
+          eth = interface { device = "eth0"; };
+          lan = interface {
+            type = "vlan";
+            device = "eth0.1";
+            link = "eth0";
+            id = "1";
+          };
+          wan = interface {
+            type = "vlan";
+            device = "eth0.2";
+            id = "2";
+            link = "eth0";
+          };
         };
       };
       boot.tftp = {
@@ -87,8 +104,16 @@
           NET_RALINK_MDIO_MT7620 = "y";
           NET_RALINK_MT7620 = "y";
 
+          # both the ethernet ports on this device (lan and wan)
+          # are behind a switch, so we need VLANs to do anything
+          # useful with them
+
+          VLAN_8021Q = "y";
           SWCONFIG = "y";
           SWPHY = "y";
+
+          BRIDGE_VLAN_FILTERING = "y";
+          BRIDGE_IGMP_SNOOPING = "y";
           NET_VENDOR_RALINK = "y";
 
           MTD = "y";
