@@ -3,15 +3,7 @@ let
   inherit (pkgs.liminix.networking) interface address hostapd route dnsmasq;
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
 in rec {
-  services.loopback =
-    let iface = interface { type = "loopback"; device = "lo";};
-    in bundle {
-      name = "loopback";
-      contents = [
-        (address iface { family = "inet4"; address ="127.0.0.1"; prefixLength = 8;})
-        (address iface { family = "inet6"; address ="::1"; prefixLength = 128;})
-      ];
-    };
+  services.loopback = config.hardware.networkInterfaces.lo;
 
   imports = [ ../../modules/wlan.nix ];
 

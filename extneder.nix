@@ -24,28 +24,6 @@
   inherit (pkgs) dropbear ifwait serviceFns
     ;
 in rec {
-  services.loopback = let
-    iface = interface {
-      type = "loopback";
-      device = "lo";
-    };
-  in
-    bundle {
-      name = "loopback";
-      contents = [
-        (address iface {
-          family = "inet4";
-          address = "127.0.0.1";
-          prefixLength = 8;
-        })
-        (address iface {
-          family = "inet6";
-          address = "::1";
-          prefixLength = 128;
-        })
-      ];
-    };
-
   boot = {
     tftp = {
       enable = true;
@@ -177,17 +155,17 @@ in rec {
 
   services.default = target {
     name = "default";
-    contents = with services; [
-      loopback
-      config.hardware.networkInterfaces.eth
-      config.hardware.networkInterfaces.wlan
-      int
-      bridge
-      hostap
-      defaultroute4
-      # resolvconf
-      sshd
-    ];
+    contents =
+      let links = config.hardware.networkInterfaces;
+      in with services; [
+        links.lo links.eth links.wlan
+        int
+        bridge
+        hostap
+        defaultroute4
+        # resolvconf
+        sshd
+      ];
   };
   defaultProfile.packages = with pkgs; [nftables strace tcpdump swconfig];
 }

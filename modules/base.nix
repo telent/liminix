@@ -3,6 +3,8 @@ let
   inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs) busybox;
+  inherit (pkgs.liminix.networking) address interface;
+  inherit (pkgs.liminix.services) bundle;
 
   type_service = types.package // {
     name = "service";
@@ -45,6 +47,18 @@ in {
   config = {
     defaultProfile.packages = with pkgs;
       [ s6 s6-init-bin busybox execline s6-linux-init s6-rc ];
+
+    hardware.networkInterfaces = {
+      lo =
+        let iface = interface { type = "loopback"; device = "lo";};
+        in bundle {
+          name = "loopback";
+          contents = [
+            (address iface { family = "inet4"; address ="127.0.0.1"; prefixLength = 8;})
+            (address iface { family = "inet6"; address ="::1"; prefixLength = 128;})
+          ];
+        };
+    };
 
     kernel = rec {
       config = {

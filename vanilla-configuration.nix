@@ -7,15 +7,8 @@ in rec {
     ./modules/tftpboot.nix
     ./modules/wlan.nix
   ];
-  services.loopback =
-    let iface = interface { type = "loopback"; device = "lo";};
-    in bundle {
-      name = "loopback";
-      contents = [
-        (address iface { family = "inet4"; address ="127.0.0.1"; prefixLength = 8;})
-        (address iface { family = "inet6"; address ="::1"; prefixLength = 128;})
-      ];
-    };
+  services.loopback = config.hardware.networkInterfaces.lo;
+
   services.dhcpv4 =
     let iface = interface { type = "hardware"; device = "eth0"; };
     in udhcpc iface {};
