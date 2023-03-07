@@ -131,7 +131,7 @@ in rec {
     up = ''
       . ${serviceFns}
       ( in_outputs ${name}
-      for i in $(cat $(output ${services.dhcpc} dns)); do
+      for i in $(output ${services.dhcpc} dns); do
         echo "nameserver $i" > resolv.conf
       done
       )
