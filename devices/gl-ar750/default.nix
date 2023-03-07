@@ -58,7 +58,6 @@
         phases = ["installPhase"];
         installPhase = ''
           mkdir -p $out/ath10k/QCA9887/hw1.0/
-          cp ${pkgs.wireless-regdb}/lib/firmware/regulatory.db* $out/
           blobdir=${firmwareBlobs}/QCA9887/hw1.0
           cp $blobdir/10.2.4-1.0/firmware-5.bin_10.2.4-1.0-00047 $out/ath10k/QCA9887/hw1.0/firmware-5.bin
           cp $blobdir/board.bin  $out/ath10k/QCA9887/hw1.0/
@@ -120,7 +119,6 @@
       filesystem = dir {
         lib = dir {
           firmware = dir {
-            "regulatory.db" = symlink "${firmware}/regulatory.db";
             ath10k = dir {
               QCA9887 = symlink "${firmware}/ath10k/QCA9887";
               "cal-pci-0000:00:00.0.bin" = symlink "${ath10k_cal_data}/.outputs/data";

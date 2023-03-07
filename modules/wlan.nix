@@ -2,9 +2,24 @@
 let
   inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;
   inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs) busybox;
+  inherit (pkgs) stdenv busybox wireless-regdb;
+  regulatory = stdenv.mkDerivation {
+    name = "regulatory.db";
+    phases = ["installPhase"];
+    installPhase = ''
+      mkdir -p $out
+      cp ${wireless-regdb}/lib/firmware/regulatory.db $out/
+    '';
+  };
 in {
   config = {
+    filesystem = dir {
+      lib = dir {
+        firmware = dir {
+          "regulatory.db" = symlink "${regulatory}/regulatory.db";
+        };
+      };
+    };
     kernel = rec {
       config = {
         # Most of this is necessary infra to allow wireless stack/

@@ -13,8 +13,8 @@
 
   description = ''
     WiFi on this device is provided by the rt2800soc module. It
-    expects firmware to be present in the "???" MTD partition, so -
-    assuming we want to use the wireless - we need to build MTD
+    expects firmware to be present in the "factory" MTD partition, so
+    - assuming we want to use the wireless - we need to build MTD
     support into the kernel even if we're using TFTP root
   '';
 
