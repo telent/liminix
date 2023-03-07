@@ -31,6 +31,7 @@ let
       bound)
         # this doesn't actually replace, it adds a new address.
         set_address
+        echo  >/proc/self/fd/10
         ;;
       renew)
         set_address
@@ -43,6 +44,7 @@ let
 in longrun {
   inherit name;
   run = "${busybox}/bin/udhcpc -f -i ${interface.device} -s ${script}";
+  notification-fd = 10;
   dependencies = [ interface ];
 }
 
