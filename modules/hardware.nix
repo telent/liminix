@@ -17,6 +17,11 @@ in {
         type = types.nonEmptyStr;
       };
       flash = {
+        # start address and size of whichever partition (often
+        # called "firmware") we're going to overwrite with our
+        # kernel uimage and root fs. Not the entire flash, as
+        # that often also contains the bootloader, data for
+        # for wireless devices, etc
         address = mkOption { type = types.str; };
         size = mkOption { type = types.str; };
       };
