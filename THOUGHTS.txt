@@ -771,3 +771,217 @@ we have a firewall nft script but we're not running it on boot
 
 we have forwarding but no dns, maybe because we haven't told
 dnsmasq about any upstream servers
+
+Sun Feb 26 21:08:47 GMT 2023
+
+to add firmware we need to put files in /lib/firmware, which means
+a module
+
+i guess we should do that in the device module
+
+we can create the firmware files as packages
+
+
+for the cal data we would like to get it from the device MTD "art"
+partition at
+boot time.
+
+f
+====from openwrt
+
+
+
+case "$FIRMWARE" in
+"ath10k/cal-pci-0000:00:00.0.bin")
+        case $board in
+        allnet,all-wap02860ac|\
+        araknis,an-500-ap-i-ac|\
+        araknis,an-700-ap-i-ac|\
+        engenius,eap1200h|\
+        engenius,enstationac-v1|\
+        glinet,gl-x750|\
+        watchguard,ap300)
+                caldata_extract "art" 0x5000 0x844
+                ath10k_patch_mac $(macaddr_add $(mtd_get_mac_binary art 0x0) 2)
+
+
+
+
+caldata_extract part offset count
+      caldata_dd $mtd /lib/firmware/$FIRMWARE $count $offset || \
+                caldata_die "failed to extract calibration data from $mtd"
+        dd if=$source of=$target iflag=skip_bytes,fullblock bs=$count skip=$offset count=1 2>/dev/null
+
+=======
+
+part=$(basename $(dirname $(grep -l art /sys/class/mtd/*/name)))
+dd if=/dev/$part \
+  of=/run/cal-pci-0000:00:00.0.bin iflag=skip_bytes,fullblock \
+  bs=0x844 skip=0x5000 count=1
+
+Mon Feb 27 22:46:37 GMT 2023
+
+Found and fixed a bunchg of things that were stopping ath10k from
+working. The remaining problem is (I think) that insmod is not
+synchronous, so "ip link set up dev wlan1" doesn't work immediately
+after the module is inserted. Maybe we need another netlink thing
+to wait until the interface is present.
+
+
+Wed Mar  1 18:26:44 GMT 2023
+
+ath10k works, but the wlan module loading stuff is quite kludgey
+
+I wonder if wlan0, wlan1, eth0, eth1 etc should be defined per-device
+- how does the aplication config know which devices exist? If we
+decide to switch to some form of persistent device naming, the names
+will differ from one device to the next. Perhaps the device should
+also provide standard names where possible?
+
+services.network.links = {
+  lan = interface { ... };
+  wan = interface { ... };
+  wlan_24 = interface { ... };
+  wlan_5 = interface { ... };
+}
+
+Thu Mar  2 22:45:11 GMT 2023
+
+We have a flashable image!
+
+Now we can use the gl-ar750 for internet access in the shed, we can
+apppropriate the other device that's in there and try Liminix on it
+
+Fri Mar  3 23:08:58 GMT 2023
+
+If we're going to unplug serial console from the gl-ar750 maybe we
+should install an ssh server first.
+
+0) set a root password
+1) allow setting a root password from configuration.nix
+(means defining config.users properly)
+2) allow authorizedKeys per user
+3) dropbear service
+4) see if the wired lan works! :-)
+
+
+Sat Mar  4 12:31:07 GMT 2023
+
+To improve logging, each service should have its own s6-log service
+which prefixes the service name onto the log line and then sends to
+stdout
+
+  https://skarnet.org/software/s6/servicedir.html
+  https://skarnet.org/software/s6/s6-log.html
+
+As far as I can tell, the `log` directory inside the service
+directory should itself be a service directory for the s6-log
+process that does this
+
+.... hahaha no that doesn't work
+
+s6-rc, for some reason, ignores the `log` directory and requires
+that loggers be done with consumer-for and producer-for instead
+
+
+Sat Mar  4 23:27:00 GMT 2023
+
+notes for this week's news update
+
+* ath10k kernel support and and firmware
+
+- 5GHz wifi works
+
+- need to retrieve the firmware from a special - partition on the
+  device itself, so we do that using a service that - the wlan
+  interface depends on
+
+* replace waitup with more generally useful ifwait
+
+to make the ath10k load at boot, we need to insert the module and then
+wait for it to do something or other in the background before we can
+configure the interface. so we need something like waitup but
+for presence not operational state
+
+it turns out that a program that just waits for a particular interface
+state and then exits is quite simple to add into run scripts and
+we don't need all that notification-fd stuff anyway
+
+* move FW_LOADER* config to modules/base
+
+* rejig config a bit.
+- device hardware characteristics are now under
+  the `hardware` key and include the available network interfaces.
+- options for users and groups are now defined a bit more
+  specifically than "attrset", making it possible to e.g. set a
+  root password
+- dts is moved from `boot` to `hardware`
+
+
+* now producing flashable images, so you can generate a liminix config
+and write it to the device instead of having to boot using TFTP and
+a serial console every time
+
+* ssh support
+
+* prefix logs with the service name
+
+Sun Mar  5 22:51:21 GMT 2023
+
+Added swconfig: it was a straight copy from nixwrt and hasn't changed
+upstream since. But don't need it, because the lan port works fine
+without it (I assume both lan ports and the cpu are all connected
+untagged)
+
+Mon Mar  6 09:42:33 GMT 2023
+
+echo 17 >/sys/class/gpio/export
+echo out >/sys/class/gpio/gpio17/direction
+
+
+why are our images getting big
+
+- lua links ncurses
+- hostapd links openssl and sqlite
+- nftables needs
+  - iptables?
+  - jansson? what is that?
+  - libedit/readline
+- ifwait needs bash
+
+
+  File: result/squashfs
+  Size: 10371072        Blocks: 20256      IO Block: 4096   regular file
+
+with smaller nftables:    9617408        Blocks: 18784
+
+hostapd wqithout sqlite   9003008        Blocks: 17584
+
+without bash:             8622080         Blocks: 16840      IO Block: 4096   regular file
+
+without lua readline: bigger?!  8769536         Blocks: 17128      IO Block: 4096   regular file
+
+
+Mon Mar  6 20:57:49 GMT 2023
+
+[    0.539992] mtk_soc_eth 10100000.ethernet: mdio-bus disabled
+[   10.493918] platform regulatory.0: Direct firmware load for regulatory.db fail
+ed with error -2
+[   10.502828] cfg80211: failed to load regulatory.db
+
+Check in morning, but whichever port the ethernet cable is plugged into,
+is considered by the kernel as port 0 - which I think we should treat as
+WAN
+
+VLAN 1:
+        vid: 1
+        ports: 1 2 3 4 5 6t
+VLAN 2:
+        vid: 2
+        ports: 0 6t
+
+ip link add link eth0 name lan type vlan id 1
+ip link add link eth0 name wan type vlan id 2
+
+figure out how to add these to gl-mt300a device config
+then extedner.nix can add a bridge
