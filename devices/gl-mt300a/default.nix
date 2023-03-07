@@ -11,7 +11,14 @@
     };
   };
 
-  module = { pkgs, ...}:
+  description = ''
+    WiFi on this device is provided by the rt2800soc module. It
+    expects firmware to be present in the "???" MTD partition, so -
+    assuming we want to use the wireless - we need to build MTD
+    support into the kernel even if we're using TFTP root
+  '';
+
+  module = { pkgs, config, ...}:
     let
       inherit (pkgs.liminix.networking) interface;
       openwrt = pkgs.fetchFromGitHub {
@@ -21,12 +28,15 @@
         rev = "a5265497a4f6da158e95d6a450cb2cb6dc085cab";
         hash = "sha256-YYi4gkpLjbOK7bM2MGQjAyEBuXJ9JNXoz/JEmYf8xE8=";
       };
-    in {
+      mac80211 = pkgs.mac80211.override {
+        drivers = ["rt2800soc"];
+        klibBuild = config.outputs.kernel.modulesupport;
+      };
+     in {
       hardware = {
         defaultOutput = "tftproot";
         loadAddress = "0x80000000";
         entryPoint  = "0x80000000";
-        radios = ["rt2800soc"];
         dts = {
           src = "${openwrt}/target/linux/ramips/dts/mt7620a_glinet_gl-mt300a.dts";
           includes = [
@@ -47,6 +57,10 @@
             device = "eth0.2";
             id = "2";
             link = "eth0";
+          };
+          wlan = interface {
+            device = "wlan0";
+            dependencies = [ mac80211 ];
           };
         };
       };
@@ -104,6 +118,13 @@
           NET_RALINK_MDIO_MT7620 = "y";
           NET_RALINK_MT7620 = "y";
 
+          SPI = "y";
+          MTD_SPI_NOR = "y";
+          SPI_MT7621 = "y"; # } probabyl don't need both of these
+          SPI_RT2880 = "y"; # }
+          SPI_MASTER= "y";
+          SPI_MEM= "y";
+
           # both the ethernet ports on this device (lan and wan)
           # are behind a switch, so we need VLANs to do anything
           # useful with them
@@ -124,6 +145,9 @@
 
           CMDLINE_PARTITION = "y";
           EARLY_PRINTK = "y";
+
+          NEW_LEDS = "y";
+          LEDS_CLASS = "y";         # required by rt2x00lib
 
           PARTITION_ADVANCED = "y";
           PRINTK_TIME = "y";
