@@ -1008,12 +1008,12 @@ a bundle of addresses and therefore we can't see what any of them are
 Tue Mar  7 22:05:44 GMT 2023
 
 [phase 1]
-1) gl-ar750, why do we get "ag71xx 19000000.eth: invalid MAC address, using random address"
 18) gl-mt300a what's left?
 19) gl-mt300n-v2 what works?
 20) publish the manual using CI
 30) document flashing process
-31) go through all the other unexpected dmesg and triage
+31) go through all the unexpected dmesg and triage
+25) ntp or some other accurate time source
 
 [phase 1.5]
 8) get ipv6 address from pppoe
@@ -1021,7 +1021,7 @@ Tue Mar  7 22:05:44 GMT 2023
 10) support dhcp6 in dnsmasq, and advertise prefix on lan
 11) firewalling and nat - default deny or zero trust?
 7) upgrade ppp to something with an ipv6-up-script option, move ppp and pppoe derivations into their own files
-31) set up iperf and do some performance measurement
+32) set up iperf and do some performance measurement
 
 [phase 2]
 3) document services so I can remember how they work. Refer back to Oct 18 for notes that no longer make sense
@@ -1043,3 +1043,16 @@ dmesg lines to investigate for gl-mt300a:
 [   17.686561] ieee80211 phy0: rt2800_wait_bbp_rf_ready: Error - BBP/RF register access failed, aborting
 [   17.696025] ieee80211 phy0: rt2800_loft_iq_calibration: Warning - RF RX busy in LOFT IQ calibration
 [   17.875147] ieee80211 phy0: rt2800_rxiq_calibration: Warning - Timeout waiting for MAC status in RXIQ calibration
+
+for gl-ar750:
+[    0.000000] Unknown kernel command line parameters "earlyprintk=serial,ttyS0", will be passed to user space.
+[    0.416679] OF: Bad cell count for /ahb/spi@1f000000/flash@0/partitions
+[    0.825495] ag71xx 19000000.eth: Could not connect to PHY device. Deferring probe.
+[    1.632700] pci_bus 0000:00: root bus resource [mem 0x10000000-0x13ffffff]
+[    1.639824] pci_bus 0000:00: root bus resource [io  0x0000]
+[    1.645601] pci_bus 0000:00: No busn resource found for root bus, will use [bus 00-ff]
+[   32.032326] ath10k_pci 0000:00:00.0: pdev param 0 not supported by firmware
+[   36.627844] ath10k_pci 0000:00:00.0: failed to receive initialized event from target: 00000000
+
+also we need to check our wireless country code
+
