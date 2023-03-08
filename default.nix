@@ -22,6 +22,7 @@ let
       { _module.args = { inherit pkgs; lib = pkgs.lib; }; }
       ./modules/hardware.nix
       ./modules/base.nix
+      ./modules/hostname.nix
       device.module
       liminix-config
       ./modules/s6

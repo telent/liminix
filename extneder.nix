@@ -38,6 +38,8 @@ in rec {
     ./modules/flashable.nix
   ];
 
+  hostname = "extneder";
+
   kernel = {
     config = {
 
@@ -90,7 +92,10 @@ in rec {
     type = "bridge";
     device = "int";
   };
-  services.dhcpc = (udhcpc services.int {}) // {device = "int";};
+
+  services.dhcpc = (udhcpc services.int {
+    dependencies = [ config.services.hostname ];
+  }) // { device = "int"; };
 
   services.bridge = let
     primary = services.int;
@@ -154,7 +159,7 @@ in rec {
     name = "default";
     contents =
       let links = config.hardware.networkInterfaces;
-      in with services; [
+      in with config.services; [
         links.lo links.eth links.wlan
         int
         bridge

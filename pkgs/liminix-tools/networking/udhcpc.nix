@@ -7,7 +7,7 @@
 let
   inherit (liminix.services) longrun;
 in
-interface: { ... } @ args:
+interface: { dependencies ? [] } @ args:
 let
   name = "${interface.device}.udhcp";
   script = writeAshScript "udhcp-notify"  {
@@ -43,9 +43,9 @@ let
   '';
 in longrun {
   inherit name;
-  run = "${busybox}/bin/udhcpc -f -i ${interface.device} -s ${script}";
+  run = "${busybox}/bin/udhcpc -f -i ${interface.device} -x hostname:$(cat /proc/sys/kernel/hostname) -s ${script}";
   notification-fd = 10;
-  dependencies = [ interface ];
+  dependencies = [ interface ] ++ dependencies;
 }
 
 # lease=86400
