@@ -43,7 +43,7 @@
             "${openwrt}/target/linux/ramips/dts"
           ];
         };
-        networkInterfaces = {
+        networkInterfaces = rec {
           # lan and wan ports are both behind a switch on eth0
           eth = interface { device = "eth0"; };
           lan = interface {
@@ -51,12 +51,14 @@
             device = "eth0.1";
             link = "eth0";
             id = "1";
+            dependencies = [eth];
           };
           wan = interface {
             type = "vlan";
             device = "eth0.2";
             id = "2";
             link = "eth0";
+            dependencies = [eth];
           };
           wlan = interface {
             device = "wlan0";
