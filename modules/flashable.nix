@@ -48,7 +48,6 @@ in {
     outputs.flash-scr =
       let
         inherit (pkgs.lib.trivial) toHexString;
-        inherit (pkgs.lib.lists) concatStringsSep;
         inherit (config.hardware) flash;
       in
         pkgs.buildPackages.runCommand "" {} ''

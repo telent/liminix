@@ -37,6 +37,23 @@
         defaultOutput = "tftproot";
         loadAddress = "0x80000000";
         entryPoint  = "0x80000000";
+
+        # Creating 5 MTD partitions on "spi0.0":
+        # 0x000000000000-0x000000030000 : "u-boot"
+        # 0x000000030000-0x000000040000 : "u-boot-env"
+        # 0x000000040000-0x000000050000 : "factory"
+        # 0x000000050000-0x000000fd0000 : "firmware"
+        # 2 uimage-fw partitions found on MTD device firmware
+        # Creating 2 MTD partitions on "firmware":
+        # 0x000000000000-0x000000260000 : "kernel"
+        # 0x000000260000-0x000000f80000 : "rootfs"
+
+        flash = {
+          address = "0xbc050000";
+          size ="0xf80000";
+        };
+        rootDevice = "1f05";
+
         dts = {
           src = "${openwrt}/target/linux/ramips/dts/mt7620a_glinet_gl-mt300a.dts";
           includes = [
