@@ -4,4 +4,4 @@ result
 result-*
 *.qcow2
 _build
-rotuer-secrets.nix
+*-secrets.nix

@@ -10,7 +10,7 @@
   lib,
   ...
 }: let
-  secrets = import ./rotuer-secrets.nix;
+  secrets = import ./extneder-secrets.nix;
   inherit
     (pkgs.liminix.networking)
     address
@@ -35,7 +35,7 @@ in rec {
   imports = [
     ./modules/wlan.nix
     ./modules/tftpboot.nix
-    # ./modules/flashable.nix
+    ./modules/flashable.nix
   ];
 
   kernel = {
@@ -73,13 +73,11 @@ in rec {
 
   services.hostap = hostapd (config.hardware.networkInterfaces.wlan) {
     params = {
-      ssid = "liminix.dev";
       country_code = "GB";
       hw_mode = "g";
-      channel = "6";
       wmm_enabled = 1;
       ieee80211n = 1;
-      inherit (secrets) wpa_passphrase;
+      inherit (secrets) ssid channel wpa_passphrase;
       auth_algs = 1; # 1=wpa2, 2=wep, 3=both
       wpa = 2; # 1=wpa, 2=wpa2, 3=both
       wpa_key_mgmt = "WPA-PSK";
@@ -162,9 +160,10 @@ in rec {
         bridge
         hostap
         defaultroute4
-        # resolvconf
+        resolvconf
         sshd
       ];
   };
+  users.root.passwd = lib.mkForce secrets.root_password;
   defaultProfile.packages = with pkgs; [nftables strace tcpdump swconfig];
 }
