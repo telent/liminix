@@ -11,8 +11,10 @@
     };
   };
 
-  module = { pkgs, ...}:
+  module = { pkgs, config, ...}:
     let
+      inherit (pkgs.liminix.networking) interface;
+      inherit (pkgs.liminix.services) oneshot;
       openwrt = pkgs.fetchFromGitHub {
         name = "openwrt-source";
         repo = "openwrt";
@@ -20,23 +22,63 @@
         rev = "a5265497a4f6da158e95d6a450cb2cb6dc085cab";
         hash = "sha256-YYi4gkpLjbOK7bM2MGQjAyEBuXJ9JNXoz/JEmYf8xE8=";
       };
+      mac80211 = pkgs.mac80211.override {
+        drivers = ["mt7603e"];
+        klibBuild = config.outputs.kernel.modulesupport;
+      };
     in {
       hardware = {
         defaultOutput = "tftproot";
         loadAddress = "0x80000000";
         entryPoint  = "0x80000000";
-        radios = ["mt7603e"];
         dts = {
           src = "${openwrt}/target/linux/ramips/dts/mt7628an_glinet_gl-mt300n-v2.dts";
           includes = [
             "${openwrt}/target/linux/ramips/dts"
           ];
         };
+        networkInterfaces = rec {
+          # lan and wan ports are both behind a switch on eth0
+          eth =
+            let swconfig = oneshot {
+                  name = "swconfig";
+                  up = ''
+                    PATH=${pkgs.swconfig}/bin:$PATH
+                    swconfig dev switch0 set reset
+                    swconfig dev switch0 set enable_vlan 1
+                    swconfig dev switch0 vlan 1 set ports '1 2 3 4 6t'
+                    swconfig dev switch0 vlan 2 set ports '0 6t'
+                    swconfig dev switch0 set apply
+                  '';
+                  down = "swconfig dev switch0 set reset";
+                };
+            in interface {
+              device = "eth0";
+              dependencies =  [swconfig];
+            };
+          lan = interface {
+            type = "vlan";
+            device = "eth0.1";
+            link = "eth0";
+            id = "1";
+            dependencies = [eth];
+          };
+          wan = interface {
+            type = "vlan";
+            device = "eth0.2";
+            id = "2";
+            link = "eth0";
+            dependencies = [eth];
+          };
+          wlan = interface {
+            device = "wlan0";
+            dependencies = [ mac80211 ];
+          };
+        };
       };
       boot.tftp = {
         loadAddress = "0x00A00000";
       };
-
 
       kernel = {
         src = pkgs.fetchurl {
@@ -101,8 +143,17 @@
           NET_RALINK_RT3050 = "y";
           NET_RALINK_SOC="y";
 
+          # both the ethernet ports on this device (lan and wan)
+          # are behind a switch, so we need VLANs to do anything
+          # useful with them
+
+          VLAN_8021Q = "y";
           SWCONFIG = "y";
           SWPHY = "y";
+
+          BRIDGE = "y";
+          BRIDGE_VLAN_FILTERING = "y";
+          BRIDGE_IGMP_SNOOPING = "y";
 
           GPIOLIB="y";
           GPIO_MT7621 = "y";
