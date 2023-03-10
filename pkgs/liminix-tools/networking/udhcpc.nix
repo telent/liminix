@@ -1,6 +1,5 @@
 {
   liminix
-, busybox
 , writeAshScript
 , serviceFns
 } :
@@ -43,7 +42,7 @@ let
   '';
 in longrun {
   inherit name;
-  run = "${busybox}/bin/udhcpc -f -i ${interface.device} -x hostname:$(cat /proc/sys/kernel/hostname) -s ${script}";
+  run = "/bin/udhcpc -f -i ${interface.device} -x hostname:$(cat /proc/sys/kernel/hostname) -s ${script}";
   notification-fd = 10;
   dependencies = [ interface ] ++ dependencies;
 }

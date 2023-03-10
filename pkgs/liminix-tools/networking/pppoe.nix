@@ -1,7 +1,6 @@
 {
   liminix
 , lib
-, busybox
 , ppp
 , pppoe
 , writeAshScript

@@ -3,7 +3,6 @@
 , s6-rc
 , s6
 , lib
-, busybox
 , callPackage
 , writeScript
 , serviceFns
@@ -12,7 +11,7 @@ let
   inherit (builtins) concatStringsSep;
   output = service: name: "/run/service-state/${service.name}/${name}";
   serviceScript = commands : ''
-    #!${busybox}/bin/sh
+    #!/bin/sh
     exec 2>&1
     . ${serviceFns}
     ${commands}

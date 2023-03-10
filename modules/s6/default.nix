@@ -73,7 +73,7 @@ let
       run = {
         file = ''
               #!${execline}/bin/execlineb -P
-              ${busybox}/bin/getty -l ${busybox}/bin/login 115200 /dev/console
+              /bin/getty -l /bin/login 115200 /dev/console
           '';
         mode = "0755";
       };
@@ -134,6 +134,7 @@ let
   };
 in {
   config = {
+    programs.busybox.applets = [ "login" "getty" ];
     filesystem = dir {
       etc = dir {
         s6-rc = dir {

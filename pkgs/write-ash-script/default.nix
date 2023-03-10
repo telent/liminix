@@ -1,14 +1,13 @@
 {
-  busybox
-, writeScript
+  writeScript
 , lib
 }
 : name : { runtimeInputs ? [] } : text : writeScript name ''
-#!${busybox}/bin/sh
+#!/bin/sh
 set -o errexit
 set -o nounset
 set -o pipefail
 
-export PATH="${lib.makeBinPath ([ busybox ] ++ runtimeInputs)}:$PATH"
+export PATH="${lib.makeBinPath runtimeInputs}:$PATH"
 ${text}
 ''

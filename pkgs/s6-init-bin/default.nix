@@ -4,7 +4,6 @@
 , writeScript
 , stdenvNoCC
 , lib
-, busybox
 , s6-rc
 }:
 let
@@ -14,7 +13,7 @@ let
   '';
   init = writeScript "init" ''
     #!${execline}/bin/execlineb -S0
-    ${s6-linux-init}/bin/s6-linux-init -c /etc/s6-linux-init/current -m 0022 -p ${lib.makeBinPath [busybox execline s6-linux-init s6-rc]}:/usr/bin:/bin -d /dev -- "\$@"
+    ${s6-linux-init}/bin/s6-linux-init -c /etc/s6-linux-init/current -m 0022 -p ${lib.makeBinPath [execline s6-linux-init s6-rc]}:/usr/bin:/bin -d /dev -- "\$@"
   '';
 in stdenvNoCC.mkDerivation {
   name = "s6-init-bin";

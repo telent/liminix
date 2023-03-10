@@ -2,7 +2,7 @@
 let
   inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;
   inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs) stdenv busybox wireless-regdb;
+  inherit (pkgs) stdenv wireless-regdb;
   regulatory = stdenv.mkDerivation {
     name = "regulatory.db";
     phases = ["installPhase"];
@@ -20,6 +20,9 @@ in {
         };
       };
     };
+    programs.busybox.applets = [
+      "insmod" "rmmod"
+    ];
     kernel = rec {
       config = {
         # Most of this is necessary infra to allow wireless stack/

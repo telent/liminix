@@ -2,7 +2,7 @@
 let
   inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;
   inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs) busybox;
+#  inherit (pkgs) busybox;
   inherit (pkgs.liminix.networking) address interface;
   inherit (pkgs.liminix.services) bundle;
 
@@ -46,7 +46,7 @@ in {
   };
   config = {
     defaultProfile.packages = with pkgs;
-      [ s6 s6-init-bin busybox execline s6-linux-init s6-rc ];
+      [ s6 s6-init-bin execline s6-linux-init s6-rc ];
 
     hardware.networkInterfaces = {
       lo =
@@ -113,10 +113,6 @@ in {
     };
 
     filesystem = dir {
-      bin = dir {
-        sh = symlink "${busybox}/bin/sh";
-        busybox = symlink "${busybox}/bin/busybox";
-      };
       dev =
         let node = type: major: minor: mode : { inherit type major minor mode; };
         in dir {
@@ -129,7 +125,7 @@ in {
       etc = dir {
         profile = symlink
           (pkgs.writeScript ".profile" ''
-            PATH=${lib.makeBinPath config.defaultProfile.packages}
+            PATH=${lib.makeBinPath config.defaultProfile.packages}:/bin
             export PATH
           '');
       };
