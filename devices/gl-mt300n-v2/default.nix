@@ -173,6 +173,8 @@
           GPIOLIB="y";
           GPIO_MT7621 = "y";
 
+          PHY_RALINK_USB = "y";
+
           CMDLINE_PARTITION = "y";
           EARLY_PRINTK = "y";
 
