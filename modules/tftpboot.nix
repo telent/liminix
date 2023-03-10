@@ -62,7 +62,7 @@ in {
       in
         pkgs.buildPackages.runCommand "" {} ''
           uimageSize=$(($(stat -L -c %s ${config.outputs.uimage}) + 0x1000 &(~0xfff)))
-          squashfsStart=0x$(printf %x $((${cfg.loadAddress} + $uimageSize)))
+          squashfsStart=0x$(printf %x $((${cfg.loadAddress} + 0x100000 + $uimageSize)))
           squashfsBytes=$(($(stat -L -c %s ${config.outputs.squashfs}) + 0x100000 &(~0xfffff)))
           squashfsMb=$(($squashfsBytes >> 20))
           cmd="mtdparts=phram0:''${squashfsMb}M(nix) phram.phram=phram0,''${squashfsStart},''${squashfsMb}Mi memmap=''${squashfsMb}M\$''${squashfsStart} root=1f00";

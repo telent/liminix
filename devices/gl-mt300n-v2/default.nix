@@ -15,6 +15,8 @@
     let
       inherit (pkgs.liminix.networking) interface;
       inherit (pkgs.liminix.services) oneshot;
+      inherit (pkgs.pseudofile) dir symlink;
+
       openwrt = pkgs.fetchFromGitHub {
         name = "openwrt-source";
         repo = "openwrt";
@@ -26,7 +28,18 @@
         drivers = ["mt7603e"];
         klibBuild = config.outputs.kernel.modulesupport;
       };
+      wlan_firmware = builtins.fetchurl {
+        url = "https://github.com/openwrt/mt76/raw/f24b56f935392ca1d35fae5fd6e56ef9deda4aad/firmware/mt7628_e2.bin";
+        sha256 = "sha256:1dkhfznmdz6s50kwc841x3wj0h6zg6icg5g2bim9pvg66as2vmh9";
+      };
     in {
+      filesystem = dir {
+        lib = dir {
+          firmware = dir {
+            "mt7628_e2.bin" = symlink wlan_firmware;
+          };
+        };
+      };
       hardware = {
         defaultOutput = "tftproot";
         loadAddress = "0x80000000";
@@ -77,7 +90,9 @@
         };
       };
       boot.tftp = {
-        loadAddress = "0x00A00000";
+        # 20MB seems to give enough room to uncompress the kernel
+        # without anything getting trodden on. 10MB was too small
+        loadAddress = "0x1400000";
       };
 
       kernel = {
