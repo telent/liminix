@@ -64,9 +64,11 @@ in rec {
     };
   };
 
-  services.dhcpc = (udhcpc config.hardware.networkInterfaces.lan {
-    dependencies = [ config.services.hostname ];
-  }) // { inherit (config.hardware.networkInterfaces.lan) device; };
+  services.dhcpc =
+    let iface =  config.hardware.networkInterfaces.lan;
+    in (udhcpc iface {
+      dependencies = [ config.services.hostname ];
+    }) // { inherit (iface) device; };
 
   services.sshd = longrun {
     name = "sshd";
