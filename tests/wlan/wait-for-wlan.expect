@@ -3,11 +3,11 @@ set timeout 60
 spawn socat unix-connect:vm/console -
 send "\r\n"
 expect "login:" {  send "root\r\n" }
-expect "/ #"
+expect "#"
 set FINISHED 0
 set EXIT "1"
 send "ls -l /run/uncaught-logs/current\r\n"
-expect "/ #"
+expect "#"
 while { $FINISHED < 10 } {
   send "grep AP-ENABLED /run/uncaught-logs/current || echo not\r\n"
   

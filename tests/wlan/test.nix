@@ -35,5 +35,5 @@ trap fatal ERR
 
 mkdir vm
 mips-vm --background ./vm ${img}/vmlinux ${img}/squashfs
-expect ${./wait-for-wlan.expect} > output && mv output $out
+expect ${./wait-for-wlan.expect} |tee output && mv output $out
 ''

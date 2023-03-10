@@ -31,4 +31,4 @@ let
         liminix-config = vanilla;
       }).outputs.default;
     };
-in builtins.trace jobs jobs
+in jobs
