@@ -13,6 +13,7 @@ let
     # runtimeInputs = [ iproute2 ] using busybox version of ip
   } ''
     . ${serviceFns}
+    exec 2>&1
     action=$1
 
     set_address() {
