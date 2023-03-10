@@ -42,6 +42,10 @@ in {
             type = types.str;
             default = "/bin/sh";
           };
+          openssh.authorizedKeys.keys = mkOption {
+            type = types.listOf types.str;
+            default = [];
+          };
         };
       });
     };
@@ -59,12 +63,27 @@ in {
       });
     };
   };
-  config = {
-    filesystem = dir {
-      etc = dir {
-        passwd = { file = passwd-file; };
-        group = { file = group-file; };
+  config =
+    let authorized_key_files =
+          lib.attrsets.mapAttrs
+            (name: val: dir {
+              ".ssh" = dir {
+                authorized_keys = {
+                  type = "f";
+                  mode = "0400";
+                  file = lib.concatStringsSep
+                    "\n" val.openssh.authorizedKeys.keys;
+                };
+              };
+            })
+            config.users;
+    in {
+      filesystem = dir {
+        etc = dir {
+          passwd = { file = passwd-file; };
+          group = { file = group-file; };
+        };
+        home = dir authorized_key_files;
       };
     };
-  };
 }
