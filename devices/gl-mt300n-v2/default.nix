@@ -44,6 +44,13 @@
         defaultOutput = "tftproot";
         loadAddress = "0x80000000";
         entryPoint  = "0x80000000";
+
+        flash = {
+          address = "0xbc050000";
+          size = "0xfb0000";
+        };
+        rootDevice = "1f05";
+
         dts = {
           src = "${openwrt}/target/linux/ramips/dts/mt7628an_glinet_gl-mt300n-v2.dts";
           includes = [
@@ -142,6 +149,12 @@
           MTD = "y";
           MTD_CMDLINE_PARTS = "y";
           MTD_BLOCK = "y";          # fix undefined ref to register_mtd_blktrans_dev
+
+          SPI = "y";
+          MTD_SPI_NOR = "y";
+          SPI_MT7621 = "y";
+          SPI_MASTER= "y";
+          SPI_MEM= "y";
 
           REGULATOR = "y";
           REGULATOR_FIXED_VOLTAGE = "y";
