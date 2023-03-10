@@ -94,7 +94,7 @@ in {
       };
     };
     boot.commandLine = [
-      "earlyprintk=serial,ttyS0 console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 rootfstype=squashfs"
+      "console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 rootfstype=squashfs"
       "fw_devlink=off"
     ];
     users.root = {
