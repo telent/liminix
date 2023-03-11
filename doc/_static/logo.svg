@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+    version="1.1"
+    style = "background-color: #xddffff"
+   id="svg2"
+   width="920"
+   height="440"
+   viewBox="0 0 920 440"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs6" />
+
+  <g
+     inkscape:groupmode="layer"
+     inkscape:label="Image"
+     id="g8" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer1"
+     style="fill:none;stroke:#000000;stroke-width:40;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+     inkscape:label="Image 1">
+
+    <path
+	id="letter-l"
+	d="m 55,140 l 0,220 l 40,0"
+	sodipodi:nodetypes="csc" />
+
+    <path
+	id="letter-n"
+	d="m 540,360 0,-100 c 0,-60 90,-60 90,0 l -0,100"
+       sodipodi:nodetypes="cssc" />
+    <use href="#letter-n" x="-320" />
+    <use href="#letter-n" x="-230" />
+
+    <g id="letter-i"
+       >
+      <path
+	  d="M 475,360 v -140"
+	  sodipodi:nodetypes="cc" />
+      <path
+	  d="m 475,150 v 15"
+	  />
+    </g>
+    <use href="#letter-i" x="220" />
+    <use href="#letter-i" x="-320" />
+
+    <g class="letter-x"
+       	style="fill:none;stroke:#ff0077">
+      <path
+	  d="m 765,360 l 0,-30 c 0,-52 90,-52 90,0 l 0,30"
+	  sodipodi:nodetypes="cssc" />
+      <path
+	  d="m 765,220 l 0,30   c 0,52 90,52 90,0    l 0,-30"
+	  sodipodi:nodetypes="cssc" />
+    </g>
+
+  </g>
+</svg>
