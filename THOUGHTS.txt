@@ -1008,20 +1008,21 @@ a bundle of addresses and therefore we can't see what any of them are
 Tue Mar  7 22:05:44 GMT 2023
 
 [phase 1]
-18) gl-mt300a what's left?
-19) gl-mt300n-v2 what works?
 20) publish the manual using CI
 30) document flashing process
-31) go through all the unexpected dmesg and triage
+31) go through all the unexpected dmesg and triage it
 25) ntp or some other accurate time source
 
 [phase 1.5]
+26) ssh keys
 8) get ipv6 address from pppoe
 9) get ipv6 delegation from pppoe and add prefix to lan
 10) support dhcp6 in dnsmasq, and advertise prefix on lan
 11) firewalling and nat - default deny or zero trust?
 7) upgrade ppp to something with an ipv6-up-script option, move ppp and pppoe derivations into their own files
 32) set up iperf and do some performance measurement
+35) also we need to check our wireless country code
+
 
 [phase 2]
 3) document services so I can remember how they work. Refer back to Oct 18 for notes that no longer make sense
@@ -1054,5 +1055,156 @@ for gl-ar750:
 [   32.032326] ath10k_pci 0000:00:00.0: pdev param 0 not supported by firmware
 [   36.627844] ath10k_pci 0000:00:00.0: failed to receive initialized event from target: 00000000
 
-also we need to check our wireless country code
 
+Fri Mar 10 13:17:56 GMT 2023
+
+Lunchtime notes on images for real devices, vs ci.nix
+
+* successfully building an image doesn't mean that the image boots
+or does anything useful
+
+* don't want to faff with serial wires on every device every time
+to test it. so
+
+* ideally, build ram-based images of rotuer, extneder, arhcive in CI
+with a watchdog timer that will reboot if it can't see the network
+
+* figure out how to boot into the new image from an ssh connection.  I
+assume the challenging bit here is grabbing x MB of contiguous phys
+mem after boot: I think we'd have to reserve it at _first_ boot and
+then somehow copy into it before rebooting
+
+An easier first goal might be a tool to flash from the shell command line,
+but that runs a greater risk of bricking
+
+
+Fri Mar 10 14:35:40 GMT 2023
+
+programs.busybox = {
+  enable = true;
+  applets = [... ];
+  config = {
+  };
+}
+
+Fri Mar 10 23:49:04 GMT 2023
+
+Well, we have the backup host config up and running - though haven't
+plugged it back into its disk yet.
+
+For task 1 what remains is
+
+1) ntp sync
+2) write up the flashing procedure
+3) a video?
+
+
+Sat Mar 11 13:58:20 GMT 2023
+
+================== for video
+
+what is liminix
+- nix-based system for creating OS images for routers
+- not "nixos on your router"
+  - nixos-like module system,
+  - musl for libc
+  - s6/s6-rc for services
+  - entirely cross-compiled
+
+why am i making a video?
+- unless you have a suitable spare device to install on,
+  and you want to take it apart, it's currently hard to
+  take liminix for a spin
+- I have these things, so I can give you a tour
+
+let's have a look at how the hardware's hooked up
+
+web site & manual
+
+a config file:
+- observe the comments:
+  - not going to spend ages on this because it's not in its final form.
+  - as we get more configs for more use cases, we will
+    get a better feel for what can be abstracted
+  - that will come later: work so far has been on the
+    hardware support side
+
+to show that it builds, we're going to add a package. otherwise,
+everything from this build is probably already cached
+
+build the config
+
+tftpboot on hardware
+
+flash on hardware
+
+show ci
+
+show a qemu target
+
+Mon Mar 13 22:46:46 GMT 2023
+
+1) rsync on arhcive is failing because no nogroup group
+
+  "/nix/store/gfzzl157r8xyp38lpcfxydkiiy6zrs3c-rsync-3.2.6/bin/rsync" "--verbose" "--stats" "--password-file" "/etc/nixos/secrets/arhcive-rsync" "-rltgoDz" "/var/spool/backup" "backup@arhcive.lan::srv/"
+@ERROR: invalid gid nogroup
+rsync error: error starting client-server protocol (code 5) at main.c(1837) [sender=3.2.6]
+
+2) we can run findfs in a loop until the disk appears
+
+3) still haven't decided how to do ntp but maybe we should just use
+the busybox one
+
+4) some way to do upgrades over the wire
+
+- boot with reserved mem and a phram device at 110-128MB even in the
+  flashable version
+
+- watchdog timer in kernel
+
+- kexec in kernel
+
+- userland service to feed the dog as long as local network is up
+ (may need to start it a couple of minutes after boot, how do we
+  do that?)
+
+- can we use flashcp on a phram mtd?
+
+5) maybe setup a vhost for hydra or something
+
+[nix-shell:~/t]$ wget --reject-regex '\?' -D localhost -N -r --exclude-directories=/api --level=2 --convert-links -e robots=off http://localhost:3003/jobset/liminix/build/
+
+is almost a mirror
+
+Tue Mar 14 20:17:35 GMT 2023
+
+- do we have a phram mtd? need config for size and location
+
+- how do we set the boot device
+ - for first boot need to boot real flash, use  dtb, ignore bootloader args
+ - for kexec, boot phram, specify args somehow (could rewrite dtb)
+
+ => can use same kernel for both if we can give kexec a dtb with
+    different params, which seems to be possible
+
+so we need a module for the initial kernel to say
+- create phram mtd
+- boot from real mtd (will be index + 1)
+- enable KEXEC in kernel
+- add kexec-tools
+
+and for the kernel we boot into
+- most of the above
+- except for the boot device
+- create an output with objects that kexec(8) can parse
+
+Could be same module for both with different outputs
+
+what do we call this thing? "revertable"
+
+Wed Mar 15 19:11:09 GMT 2023
+
+"revertable" implies mtd support for the rootfs and a ramdisk at
+defined location
+
+"tftpboot" implies "revertable", because it will use the same ramdisk
