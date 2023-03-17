@@ -192,7 +192,12 @@
           SPI_AR934X= "y";
           SPI_BITBANG= "y";
           SPI_GPIO= "y";
-
+          GPIO_ATH79 = "y";
+          GPIOLIB = "y";
+          EXPERT="y";
+          GPIO_SYSFS = "y"; # required by patches-5.15/0004-phy-add-ath79-usb-phys.patch
+          OF_GPIO = "y";
+          SYSFS = "y";
           SPI = "y";
           MTD = "y";
           MTD_CMDLINE_PARTS = "y";
