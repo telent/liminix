@@ -108,7 +108,7 @@ in rec {
   };
 
   programs.busybox  = {
-    applets = ["blkid" "lsusb" "tar"];
+    applets = ["blkid" "lsusb" "findfs" "tar"];
     options = {
       FEATURE_LS_TIMESTAMPS = "y";
       FEATURE_LS_SORTFILES = "y";
@@ -121,7 +121,13 @@ in rec {
 
   services.mount_external_disk = oneshot {
     name = "mount_external_disk";
-    up = "mount -t ext4 LABEL=backup-disk /srv";
+    up = ''
+      while ! findfs LABEL=backup-disk; do
+        echo waiting for backup-disk
+        sleep 1
+      done
+      mount -t ext4 LABEL=backup-disk /srv
+    '';
     down = "umount /srv";
   };
 
