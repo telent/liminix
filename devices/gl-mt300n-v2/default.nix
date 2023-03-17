@@ -41,7 +41,7 @@
         };
       };
       hardware = {
-        defaultOutput = "tftproot";
+        defaultOutput = "tftpboot";
         loadAddress = "0x80000000";
         entryPoint  = "0x80000000";
 

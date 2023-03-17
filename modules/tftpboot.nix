@@ -20,32 +20,14 @@ in {
       };
     };
   };
+  imports = [ ./ramdisk.nix ];
   config = {
-    kernel = {
-      config = {
-        MTD = "y";
-        MTD_PHRAM = "y";
-        MTD_CMDLINE_PARTS = "y";
-        MIPS_CMDLINE_FROM_BOOTLOADER = "y";
+    boot.ramdisk.enable = true;
+    kernel.config.MIPS_CMDLINE_FROM_BOOTLOADER = "y";
 
-        # one or more of the following is required to get from
-        # VFS: Cannot open root device "1f00" or unknown-block(31,0): error -6
-        # to
-        # VFS: Mounted root (squashfs filesystem) readonly on device 31:0.
-        MTD_OF_PARTS = "y";
-        PARTITION_ADVANCED = "y";
-        MSDOS_PARTITION = "y";
-        EFI_PARTITION = "y";
-        MTD_BLKDEVS = "y";
-        MTD_BLOCK = "y";
-
-        # CONFIG_MTD_MTDRAM=m         c'est quoi?
-      };
-
-    };
-    outputs.tftproot =
+    outputs.tftpboot =
       let o = config.outputs; in
-      pkgs.runCommand "tftproot" {} ''
+      pkgs.runCommand "tftpboot" {} ''
         mkdir $out
         cd $out
         ln -s ${o.squashfs} squashfs
@@ -60,12 +42,13 @@ in {
       let
         inherit (pkgs.lib.trivial) toHexString;
       in
-        pkgs.buildPackages.runCommand "" {} ''
+        pkgs.buildPackages.runCommand "boot-scr" {} ''
           uimageSize=$(($(stat -L -c %s ${config.outputs.uimage}) + 0x1000 &(~0xfff)))
           squashfsStart=0x$(printf %x $((${cfg.loadAddress} + 0x100000 + $uimageSize)))
           squashfsBytes=$(($(stat -L -c %s ${config.outputs.squashfs}) + 0x100000 &(~0xfffff)))
           squashfsMb=$(($squashfsBytes >> 20))
           cmd="mtdparts=phram0:''${squashfsMb}M(nix) phram.phram=phram0,''${squashfsStart},''${squashfsMb}Mi memmap=''${squashfsMb}M\$''${squashfsStart} root=1f00";
+
           cat > $out << EOF
           setenv serverip ${cfg.serverip}
           setenv ipaddr ${cfg.ipaddr}
@@ -74,6 +57,5 @@ in {
           bootm 0x$(printf %x ${cfg.loadAddress})
           EOF
         '';
-
   };
 }

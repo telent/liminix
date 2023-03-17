@@ -121,7 +121,7 @@ image instead of flashing. In your device configuration add
     ipaddr = "192.168.200.251";
   };
 
-and then build ``outputs.tftproot``. This creates a file in
+and then build ``outputs.tftpboot``. This creates a file in
 ``result/`` called ``boot.scr``, which you can copy and paste into
 U-Boot to transfer the kernel and filesystem over TFTP and boot the
 kernel from RAM.

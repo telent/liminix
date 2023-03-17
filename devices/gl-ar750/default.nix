@@ -87,7 +87,7 @@
       inherit (pkgs.liminix.networking) interface;
     in {
       hardware = {
-        defaultOutput = "tftproot";
+        defaultOutput = "tftpboot";
         loadAddress = "0x80060000";
         entryPoint  = "0x80060000";
         flash = {
