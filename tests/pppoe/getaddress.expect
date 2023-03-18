@@ -3,7 +3,7 @@ set timeout 60
 spawn socat unix-connect:vm/console -
 send "\r\n"
 expect "login:" {  send "root\r\n" }
-expect "/ #"
+expect "#"
 set FINISHED 0
 set EXIT "1" 
 while { $FINISHED < 5 } {
