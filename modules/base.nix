@@ -42,6 +42,14 @@ in {
         type = types.listOf types.nonEmptyStr;
         default = [];
       };
+      tftp = {
+        loadAddress = mkOption { type = types.str; };
+        # These names match the uboot environment variables. I reserve
+        # the right to change them if I think of better ones.
+        ipaddr =  mkOption { type = types.str; };
+        serverip =  mkOption { type = types.str; };
+        enable =  mkOption { type = types.boolean; };
+      };
     };
   };
   config = {
