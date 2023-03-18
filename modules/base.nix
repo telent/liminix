@@ -107,7 +107,7 @@ in {
     ];
     users.root = {
       uid = 0; gid= 0; gecos = "Root of all evaluation";
-      dir = "/";
+      dir = "/home/root/";
       passwd = lib.mkDefault "";
       shell = "/bin/sh";
     };
