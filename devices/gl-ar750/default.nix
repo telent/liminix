@@ -40,13 +40,7 @@
 
   module = {pkgs, config, ... }:
     let
-      openwrt = pkgs.pkgsBuildBuild.fetchFromGitHub {
-        name = "openwrt-source";
-        repo = "openwrt";
-        owner = "openwrt";
-        rev = "a5265497a4f6da158e95d6a450cb2cb6dc085cab";
-        hash = "sha256-YYi4gkpLjbOK7bM2MGQjAyEBuXJ9JNXoz/JEmYf8xE8=";
-      };
+      openwrt = pkgs.openwrt;
       firmwareBlobs = pkgs.pkgsBuildBuild.fetchFromGitHub {
         owner = "kvalo";
         repo = "ath10k-firmware";
@@ -96,9 +90,9 @@
         };
         rootDevice = "1f05";
         dts = {
-          src = "${openwrt}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";
+          src = "${openwrt.src}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";
           includes =  [
-            "${openwrt}/target/linux/ath79/dts"
+            "${openwrt.src}/target/linux/ath79/dts"
           ];
         };
 
@@ -136,17 +130,7 @@
           hash = "sha256-yhO2cXIeIgUxkSZf/4aAsF11uxyh+UUZu6D1h92vCD8=";
         };
         extraPatchPhase = ''
-          cp -av ${openwrt}/target/linux/generic/files/* .
-          chmod -R u+w .
-          cp -av ${openwrt}/target/linux/ath79/files/* .
-          chmod -R u+w .
-          patches() {
-            for i in $* ; do patch --batch --forward -p1 < $i ;done
-          }
-          patches ${openwrt}/target/linux/generic/backport-5.15/*.patch
-          patches ${openwrt}/target/linux/generic/pending-5.15/*.patch
-          patches ${openwrt}/target/linux/generic/hack-5.15/*.patch
-          patches ${openwrt}/target/linux/ath79/patches-5.15/*.patch
+          ${openwrt.applyPatches.ath79}
         '';
         config = {
           MIPS_ELF_APPENDED_DTB = "y";

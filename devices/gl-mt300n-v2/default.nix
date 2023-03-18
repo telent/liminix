@@ -16,14 +16,8 @@
       inherit (pkgs.liminix.networking) interface;
       inherit (pkgs.liminix.services) oneshot;
       inherit (pkgs.pseudofile) dir symlink;
+      inherit (pkgs) openwrt;
 
-      openwrt = pkgs.fetchFromGitHub {
-        name = "openwrt-source";
-        repo = "openwrt";
-        owner = "openwrt";
-        rev = "a5265497a4f6da158e95d6a450cb2cb6dc085cab";
-        hash = "sha256-YYi4gkpLjbOK7bM2MGQjAyEBuXJ9JNXoz/JEmYf8xE8=";
-      };
       mac80211 = pkgs.mac80211.override {
         drivers = ["mt7603e"];
         klibBuild = config.outputs.kernel.modulesupport;
@@ -52,9 +46,9 @@
         rootDevice = "1f05";
 
         dts = {
-          src = "${openwrt}/target/linux/ramips/dts/mt7628an_glinet_gl-mt300n-v2.dts";
+          src = "${openwrt.src}/target/linux/ramips/dts/mt7628an_glinet_gl-mt300n-v2.dts";
           includes = [
-            "${openwrt}/target/linux/ramips/dts"
+            "${openwrt.src}/target/linux/ramips/dts"
           ];
         };
         networkInterfaces = rec {
@@ -109,17 +103,7 @@
           hash = "sha256-yhO2cXIeIgUxkSZf/4aAsF11uxyh+UUZu6D1h92vCD8=";
         };
         extraPatchPhase = ''
-          cp -av ${openwrt}/target/linux/generic/files/* .
-          chmod -R u+w .
-          cp -av ${openwrt}/target/linux/ramips/files/* .
-          chmod -R u+w .
-          patches() {
-            for i in $* ; do patch --batch --forward -p1 < $i ;done
-          }
-          patches ${openwrt}/target/linux/generic/backport-5.15/*.patch
-          patches ${openwrt}/target/linux/generic/pending-5.15/*.patch
-          patches ${openwrt}/target/linux/generic/hack-5.15/*.patch
-          patches ${openwrt}/target/linux/ramips/patches-5.15/*.patch
+          ${openwrt.applyPatches.ramips}
         '';
         config = {
           MIPS_ELF_APPENDED_DTB = "y";

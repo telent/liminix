@@ -38,4 +38,6 @@
   lzma = callPackage ./lzma {};
 
   swconfig = callPackage ./swconfig {};
+
+  openwrt = callPackage ./openwrt {};
 }
