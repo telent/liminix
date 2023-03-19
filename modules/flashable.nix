@@ -21,9 +21,6 @@ in {
       };
     };
 
-    boot.commandLine = [
-      "root=${config.hardware.rootDevice}"
-    ];
     outputs.firmware =
       let o = config.outputs; in
       pkgs.runCommand "firmware" {} ''
