@@ -1,0 +1,172 @@
+From 35b8bad0343a4afd9ad914e377e64bd02667c563 Mon Sep 17 00:00:00 2001
+From: Daniel Barlow <dan@telent.net>
+Date: Sun, 19 Mar 2023 17:30:30 +0000
+Subject: [PATCH] add --map-file option to map arbitrary files into physmem
+
+This is useful e.g. in conjunction with the MTD PHRAM device on
+embedded devices: a kernel can be booted with kexec and a root
+filesystem entirely in RAM to see if it works before writing it
+to flash.
+---
+ kexec/kexec.8 | 14 ++++++++++++-
+ kexec/kexec.c | 57 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ kexec/kexec.h |  4 +++-
+ 3 files changed, 73 insertions(+), 2 deletions(-)
+
+diff --git a/kexec/kexec.8 b/kexec/kexec.8
+index 3a344c5..3140ccb 100644
+--- a/kexec/kexec.8
++++ b/kexec/kexec.8
+@@ -143,10 +143,17 @@ into the current kernel.
+ .B \-p\ (\-\-load\-panic)
+ Load the new kernel for use on panic.
+ .TP
+-.BI \-t\ (\-\-type= type )
++.BI \-m\ (\-\-type= type )
+ Specify that the new kernel is of this
+ .I type.
+ .TP
++.BI \-t\ (\-\-map-file= filename@addr )
++Read
++.I filename
++and arrange for it to be mapped into physical memory at the address
++.I addr.
++This option may be repeated if there are multiple files to map.
++.TP
+ .BI \-s\ (\-\-kexec-file-syscall)
+ Specify that the new KEXEC_FILE_LOAD syscall should be used exclusively.
+ .TP
+@@ -206,6 +213,11 @@ Reuse initrd from first boot.
+ .BI \-\-print-ckr-size
+ Print crash kernel region size, if available.
+ 
++.PP
++Options taking an
++.I addr
++parameter will accept a memory address written in hexadecimal (with leading
++0x), or octal (leading 0), or decimal (no leading sigil).
+ 
+ .SH SUPPORTED KERNEL FILE TYPES AND OPTIONS
+ .B Beoboot-x86
+diff --git a/kexec/kexec.c b/kexec/kexec.c
+index 36bb2ad..c3b40a4 100644
+--- a/kexec/kexec.c
++++ b/kexec/kexec.c
+@@ -63,6 +63,13 @@ static unsigned long kexec_flags = 0;
+ static unsigned long kexec_file_flags = 0;
+ int kexec_debug = 0;
+ 
++#define MAPPED_FILES_MAX 10 	/* arbitrary number */
++struct mapped_file {
++	const char *filename;
++	unsigned long long phys_address;
++} mapped_files[MAPPED_FILES_MAX] = { { .filename = NULL } };
++
++
+ void dbgprint_mem_range(const char *prefix, struct memory_range *mr, int nr_mr)
+ {
+ 	int i;
+@@ -771,6 +778,19 @@ static int my_load(const char *type, int fileind, int argc, char **argv,
+ 	}
+ 	info.kexec_flags |= native_arch;
+ 
++	for(struct mapped_file *m = mapped_files; m->filename; m++) {
++		off_t file_size = 0;
++		char *buf = slurp_file(m->filename, &file_size);
++		add_buffer(&info,
++			   buf, file_size, file_size, sizeof (void *),
++			   m->phys_address,
++			   mem_max, 1);
++		free(m->filename);
++		/* do we free() memory returned by slurp_file()?
++		 * we don't know if it was mmaped, so maybe not
++		 */
++	};
++
+ 	result = file_type[i].load(argc, argv, kernel_buf, kernel_size, &info);
+ 	if (result < 0) {
+ 		switch (result) {
+@@ -1035,6 +1055,8 @@ void usage(void)
+ 	       "                      load code into.\n"
+ 	       "     --mem-max=<addr> Specify the highest memory address to\n"
+ 	       "                      load code into.\n"
++	       "     --map-file=<filename@addr> Map a file into memory for the\n"
++	       "                      new kernel before kexec.\n"
+ 	       "     --reuseinitrd    Reuse initrd from first boot.\n"
+ 	       "     --print-ckr-size Print crash kernel region size.\n"
+ 	       "     --load-preserve-context Load the new kernel and preserve\n"
+@@ -1396,6 +1418,33 @@ static void print_crashkernel_region_size(void)
+ 	printf("%" PRIu64 "\n", (start != end) ? (end - start + 1) : 0UL);
+ }
+ 
++static int add_mapped_file(char * optarg)
++{
++	char *at = strchr(optarg, '@');
++	if(!at)
++		return 1;
++
++	struct mapped_file *m = mapped_files;
++	struct mapped_file *m_end = mapped_files +
++	    ((sizeof mapped_files) / (sizeof mapped_files[0]));
++
++	while(m->filename && m < m_end)
++		m++;
++
++	if(m >= m_end)
++		return 1;
++
++	m->phys_address = strtoull(at + 1, NULL, 0);
++	if(m->phys_address == 0)
++		return 1;
++
++	m->filename = strndup(optarg, at - optarg);
++
++	(m+1)->filename = NULL;
++	return 0;
++}
++
++
+ int main(int argc, char *argv[])
+ {
+ 	int has_opt_load = 0;
+@@ -1521,6 +1570,14 @@ int main(int argc, char *argv[])
+ 			kexec_file_flags |= KEXEC_FILE_ON_CRASH;
+ 			kexec_flags = KEXEC_ON_CRASH;
+ 			break;
++		case OPT_MAP_FILE:
++			if(add_mapped_file(optarg)) {
++				fprintf(stderr,
++					"Bad option value or too many mapped files in --mapped-file=%s\n",
++					optarg);
++				return 1;
++			}
++			break;
+ 		case OPT_MEM_MIN:
+ 			mem_min = strtoul(optarg, &endptr, 0);
+ 			if (*endptr) {
+diff --git a/kexec/kexec.h b/kexec/kexec.h
+index 0d820ad..78022b6 100644
+--- a/kexec/kexec.h
++++ b/kexec/kexec.h
+@@ -224,6 +224,7 @@ extern int file_types;
+ #define OPT_STATUS		'S'
+ #define OPT_MEM_MIN             256
+ #define OPT_MEM_MAX             257
++#define OPT_MAP_FILE		'm'
+ #define OPT_REUSE_INITRD	258
+ #define OPT_LOAD_PRESERVE_CONTEXT 259
+ #define OPT_LOAD_JUMP_BACK_HELPER 260
+@@ -258,8 +259,9 @@ extern int file_types;
+ 	{ "debug",		0, 0, OPT_DEBUG }, \
+ 	{ "status",		0, 0, OPT_STATUS }, \
+ 	{ "print-ckr-size",     0, 0, OPT_PRINT_CKR_SIZE }, \
++	{ "map-file",		1, 0, OPT_MAP_FILE }, \
+ 
+-#define KEXEC_OPT_STR "h?vdfixyluet:pscaS"
++#define KEXEC_OPT_STR "h?vdfixyluet:pscaSm"
+ 
+ extern void dbgprint_mem_range(const char *prefix, struct memory_range *mr, int nr_mr);
+ extern void die(const char *fmt, ...)
+-- 
+2.38.1
+

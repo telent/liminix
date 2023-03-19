@@ -74,6 +74,7 @@ in {
         IKCONFIG_PROC = "y";
         PROC_FS = "y";
 
+        KEXEC = "y";
         MODULES = "y";
         MODULE_SIG = "y";
         DEBUG_FS = "y";

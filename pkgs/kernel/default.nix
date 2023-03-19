@@ -61,6 +61,11 @@ stdenv.mkDerivation rec {
   '';
 
   patchScripts = ''
+    # Make kexec pass dtb in register when invoking new kernel. The
+    # code to do this is already present, but bracketed by UHI_BOOT
+    # which we can't enable.
+    sed -i arch/mips/kernel/machine_kexec.c -e 's/CONFIG_UHI_BOOT/CONFIG_MIPS/g'
+
     patchShebangs scripts/
   '';
 

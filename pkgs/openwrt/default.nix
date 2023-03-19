@@ -20,6 +20,10 @@ let
     }
     patches ${src}/target/linux/generic/backport-5.15/*.patch
     patches ${src}/target/linux/generic/pending-5.15/*.patch
+    # This patch breaks passing the DTB to kexeced kernel, so let's
+    # get rid of it. It's not needed anyway as we pass the cmdline
+    # in the dtb
+    patch --batch -p1 --reverse <  ${src}/target/linux/generic/pending-5.15/330-MIPS-kexec-Accept-command-line-parameters-from-users.patch
     patches ${src}/target/linux/generic/hack-5.15/*.patch
     patches ${src}/target/linux/${family}/patches-5.15/*.patch
   '';

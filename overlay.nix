@@ -6,6 +6,17 @@ in
 extraPkgs // {
   strace = prev.strace.override { libunwind = null; };
 
+  kexec-tools = prev.kexec-tools.overrideAttrs(o: {
+    patches = o.patches ++ [
+      (fetchpatch {
+        # merge user command line options into DTB chosen
+        url = "https://patch-diff.githubusercontent.com/raw/horms/kexec-tools/pull/3.patch";
+        hash = "sha256-MvlJhuex9dlawwNZJ1sJ33YPWn1/q4uKotqkC/4d2tk=";
+      })
+      pkgs/kexec-map-file.patch
+    ];
+  });
+
   s6 = prev.s6.overrideAttrs(o:
     let patch = fetchpatch {
           # add "p" directive in s6-log
