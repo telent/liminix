@@ -1208,3 +1208,28 @@ Wed Mar 15 19:11:09 GMT 2023
 defined location
 
 "tftpboot" implies "revertable", because it will use the same ramdisk
+
+
+Fri Mar 17 11:44:40 GMT 2023
+
+- patch the kernel kexec code to pass DTB to new kernel unconditionally
+- unpatch pernel to pass command line to kexec (breaks DTB passing)
+- decide how we specify rootfs. doing it by number is awkward
+  - may be phram
+  - may be real mtd root
+  - may be real mtd root but renumbered becuase phram exists
+
+Wild idea: we could probably get rid of the need for declaring a phram
+device in the first kernel, if we can use kexec to copy the squashfs into
+physical ram. As far as I can see this is a simple(sic) matter of
+specifying it as a segment, but we would have to extend kexec-tools
+to do this and it's quite a niche option if we make it do all the
+mtd setup.
+
+kexec --dtb=foo.dtb --map-file=squashfs@0x120000
+
+
+Sat Mar 18 18:02:26 GMT 2023
+What if: we added derivations for "apply openwrt changes" as packages,
+which could then be called from the kernel derivation's extraPatchPhase?
+There could be one for generic and one for each openwrt targetop
