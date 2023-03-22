@@ -2,6 +2,16 @@ final: prev:
 let
   extraPkgs = import ./pkgs/default.nix { inherit (final) callPackage; };
   inherit (final) fetchpatch;
+  lua = prev.lua5_3.overrideAttrs(o: {
+    name = "lua-tty";
+    preBuild = ''
+      makeFlagsArray+=(PLAT="posix" SYSLIBS="-Wl,-E -ldl"  CFLAGS="-O2 -fPIC -DLUA_USE_POSIX -DLUA_USE_DLOPEN")
+    '';
+
+    makeFlags =
+      builtins.filter (x: (builtins.match "(PLAT|MYLIBS).*" x) == null)
+        o.makeFlags;
+  });
 in
 extraPkgs // {
   strace = prev.strace.override { libunwind = null; };
@@ -16,6 +26,8 @@ extraPkgs // {
       pkgs/kexec-map-file.patch
     ];
   });
+
+  lua5_3 = let s = lua.override { self = s; }; in s;
 
   s6 = prev.s6.overrideAttrs(o:
     let patch = fetchpatch {
