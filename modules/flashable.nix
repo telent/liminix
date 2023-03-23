@@ -14,10 +14,6 @@ in {
     kernel = {
       config = {
         MTD_SPLIT_UIMAGE_FW = "y";
-        # ignore the commandline provided by U-Boot because it's most
-        # likely wrong
-        MIPS_CMDLINE_FROM_BOOTLOADER = lib.mkForce "n";
-        MIPS_CMDLINE_FROM_DTB = "y";
       };
     };
 

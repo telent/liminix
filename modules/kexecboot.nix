@@ -11,9 +11,6 @@ in {
   config = {
     boot.ramdisk.enable = true;
 
-    kernel.config.MIPS_CMDLINE_FROM_DTB = "y";
-    kernel.config.MIPS_CMDLINE_FROM_BOOTLOADER = mkForce "n";
-
     outputs.kexecboot =
       let o = config.outputs; in
       pkgs.runCommand "kexecboot" {} ''

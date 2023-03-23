@@ -1,0 +1,63 @@
+diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
+index 393eb2133243..f61bfbaa4001 100644
+--- a/arch/mips/Kconfig
++++ b/arch/mips/Kconfig
+@@ -3157,6 +3157,24 @@ choice
+ 		  if you don't intend to always append a DTB.
+ endchoice
+ 
++config MIPS_BOOTLOADER_CMDLINE_REQUIRE_COOKIE
++	bool "Ignore bootloader command-line unless cookie present"
++	default n
++
++config MIPS_BOOTLOADER_CMDLINE_COOKIE
++	string "Bootloader kernel argument cookie string"
++	depends on MIPS_BOOTLOADER_CMDLINE_REQUIRE_COOKIE
++	help
++	  Use bootloader command line if and only if it contains
++	  this string. Some bootloaders allow setting the command line
++	  for interactive boots but provide an incorrect (and
++	  unchangeable) default when booting unattended.
++
++	  This option can be combined with e.g. MIPS_CMDLINE_DTB_EXTEND
++	  or MIPS_CMDLINE_BUILTIN_EXTEND: it doesn't affect
++	  where else your command line comes from, just whether
++	  the bootloader-provided command line is used as part of it.
++
+ choice
+ 	prompt "Kernel command line type" if !CMDLINE_OVERRIDE
+ 	default MIPS_CMDLINE_FROM_DTB if USE_OF && !ATH79 && !MACH_INGENIC && \
+diff --git a/arch/mips/kernel/setup.c b/arch/mips/kernel/setup.c
+index ef73ba1e0ec1..52a836c43630 100644
+--- a/arch/mips/kernel/setup.c
++++ b/arch/mips/kernel/setup.c
+@@ -72,6 +72,12 @@ static const char builtin_cmdline[] __initconst = CONFIG_CMDLINE;
+ static const char builtin_cmdline[] __initconst = "";
+ #endif
+ 
++#ifdef CONFIG_MIPS_BOOTLOADER_CMDLINE_REQUIRE_COOKIE
++static const char cmdline_cookie[] __initconst = CONFIG_MIPS_BOOTLOADER_CMDLINE_COOKIE;
++#else
++static const char cmdline_cookie[] __initconst = NULL;
++#endif
++
+ /*
+  * mips_io_port_base is the begin of the address space to which x86 style
+  * I/O ports are mapped.
+@@ -558,6 +564,16 @@ static void __init bootcmdline_init(void)
+ 		return;
+ 	}
+ 
++	/* If CMDLINE_REQUIRE_COOKIE is set to a string, we require that
++	 * string to be present in the bootloader command line, otherwise
++	 * we ignore it. This is to accommodate bootloaders that allow
++	 * the command line to be specified for interactive boots but
++	 * hardcode an incorrect command line for unattended boots */
++#ifdef CONFIG_MIPS_BOOTLOADER_CMDLINE_REQUIRE_COOKIE
++	if(strstr(arcs_cmdline, cmdline_cookie) == NULL) {
++	    arcs_cmdline[0] = '\0';
++	}
++#endif
+ 	/*
+ 	 * If the user specified a built-in command line &
+ 	 * MIPS_CMDLINE_BUILTIN_EXTEND, then the built-in command line is

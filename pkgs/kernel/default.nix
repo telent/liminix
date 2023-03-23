@@ -41,11 +41,16 @@ stdenv.mkDerivation rec {
     "unpackPhase"
     "butcherPkgconfig"
     "extraPatchPhase"
+    "patchPhase"
     "patchScripts"
     "configurePhase"
     "checkConfigurationPhase"
     "buildPhase"
     "installPhase"
+  ];
+
+  patches = [
+    ./cmdline-cookie.patch
   ];
 
   # this is here to work around what I think is a bug in nixpkgs

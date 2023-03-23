@@ -79,6 +79,10 @@ in {
         MODULE_SIG = "y";
         DEBUG_FS = "y";
 
+        MIPS_BOOTLOADER_CMDLINE_REQUIRE_COOKIE = "y";
+        MIPS_BOOTLOADER_CMDLINE_COOKIE = "\"liminix\"";
+        MIPS_CMDLINE_DTB_EXTEND = "y";
+
         # basic networking protocols
         NET = "y";
         UNIX = "y";

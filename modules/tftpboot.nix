@@ -11,7 +11,6 @@ in {
   imports = [ ./ramdisk.nix ];
   config = {
     boot.ramdisk.enable = true;
-    kernel.config.MIPS_CMDLINE_FROM_BOOTLOADER = "y";
 
     outputs.tftpboot =
       let o = config.outputs; in
@@ -35,12 +34,12 @@ in {
           squashfsStart=0x$(printf %x $((${cfg.loadAddress} + 0x100000 + $uimageSize)))
           squashfsBytes=$(($(stat -L -c %s ${config.outputs.squashfs}) + 0x100000 &(~0xfffff)))
           squashfsMb=$(($squashfsBytes >> 20))
-          cmd="mtdparts=phram0:''${squashfsMb}M(nix) phram.phram=phram0,''${squashfsStart},''${squashfsMb}Mi memmap=''${squashfsMb}M\$''${squashfsStart} root=1f00";
+          cmd="mtdparts=phram0:''${squashfsMb}M(rootfs) phram.phram=phram0,''${squashfsStart},''${squashfsMb}Mi memmap=''${squashfsMb}M\$''${squashfsStart} root=1f00";
 
           cat > $out << EOF
           setenv serverip ${cfg.serverip}
           setenv ipaddr ${cfg.ipaddr}
-          setenv bootargs '${concatStringsSep " " config.boot.commandLine} $cmd'
+          setenv bootargs 'liminix $cmd'
           tftp 0x$(printf %x ${cfg.loadAddress}) result/uimage ; tftp 0x$(printf %x $squashfsStart) result/squashfs
           bootm 0x$(printf %x ${cfg.loadAddress})
           EOF
