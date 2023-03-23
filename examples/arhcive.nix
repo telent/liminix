@@ -214,7 +214,13 @@ in rec {
         watchdog
       ];
   };
-  users.root.passwd = lib.mkForce secrets.root_password;
+
+  users.root = {
+    passwd = lib.mkForce secrets.root_password;
+    # openssh.authorizedKeys.keys = [
+    #   (builtins.readFile "/home/dan/.ssh/id_rsa.pub")
+    # ];
+  };
 
   users.store = {
     uid=500; gid=500; gecos="Storage owner"; dir="/srv";
