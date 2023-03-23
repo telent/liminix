@@ -78,6 +78,43 @@ in rec {
     '';
   };
 
+  services.watchdog =
+    let
+      watched = with config.services ; [ sshd dhcpc ];
+      spinupGrace = 60;
+      script = pkgs.writeAshScript "gaspode" {
+        runtimeInputs = [ pkgs.s6 ];
+      } ''
+      deadline=$(expr $(date +%s) + ${toString spinupGrace})
+      services=$@
+      echo started feeding the dog
+      exec 3> ''${WATCHDOG-/dev/watchdog}
+
+      healthy(){
+          test $(date +%s) -le $deadline && return 0
+
+          for i in $services; do
+              if test "$(s6-svstat -o up /run/service/$i)" != "true" ; then
+                 echo "service $i is down"
+                 return 1
+              fi
+          done
+      }
+
+      while healthy ;do
+          sleep 10
+          echo >&3
+      done
+      echo "stopped feeding the dog"
+      sleep 6000  # don't want s6-rc to restart
+    '';
+    in longrun {
+      name = "watchdog";
+      run =
+        "${script} ${lib.concatStringsSep " " (builtins.map (s: s.name) watched)}";
+    };
+
+
   services.resolvconf = oneshot rec {
     dependencies = [ services.dhcpc ];
     name = "resolvconf";
@@ -174,6 +211,7 @@ in rec {
         resolvconf
         sshd
         rsync
+        watchdog
       ];
   };
   users.root.passwd = lib.mkForce secrets.root_password;

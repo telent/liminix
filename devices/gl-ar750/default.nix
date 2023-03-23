@@ -186,6 +186,10 @@
           MTD = "y";
           MTD_CMDLINE_PARTS = "y";
           MTD_BLOCK = "y";          # fix undefined ref to register_mtd_blktrans_devs
+
+          WATCHDOG = "y";
+          ATH79_WDT = "y";  # watchdog timer
+
           CPU_BIG_ENDIAN= "y";
 
           # this is all copied from nixwrt ath79 config. Clearly not all
