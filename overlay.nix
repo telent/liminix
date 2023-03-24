@@ -16,7 +16,7 @@ in
 extraPkgs // {
   strace = prev.strace.override { libunwind = null; };
 
-  kexec-tools = prev.kexec-tools.overrideAttrs(o: {
+  kexec-tools-static = prev.kexec-tools.overrideAttrs(o: {
     # For kexecboot we copy kexec into a ramdisk on the system being
     # upgraded from. This is more likely to work if kexec is
     # statically linked so doesn't have dependencies on store paths that

@@ -20,7 +20,7 @@ in {
         ln -s ${o.kernel} kernel
         ln -s ${o.manifest} manifest
         ln -s ${o.boot-sh} boot.sh
-        ln -s ${pkgs.kexec-tools}/bin/kexec ./kexec
+        ln -s ${pkgs.kexec-tools-static}/bin/kexec ./kexec
         ln -s ${o.dtb} dtb
      '';
 
