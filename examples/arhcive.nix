@@ -181,12 +181,13 @@ in rec {
       };
       configFile = writeText "rsync.conf" ''
         pid file = /run/rsyncd.pid
-        uid = store
+        uid = backup
         [srv]
           path = /srv
           use chroot = yes
           auth users = backup
           read only = false
+          gid = backup
           secrets file = ${secrets_file}/.outputs/secrets
       '';
     in longrun {
@@ -222,9 +223,12 @@ in rec {
     # ];
   };
 
-  users.store = {
+  users.backup = {
     uid=500; gid=500; gecos="Storage owner"; dir="/srv";
-    shell="/dev/null"; # authorizedKeys = [];
+    shell="/dev/null";
+  };
+  groups.backup = {
+    gid=500; usernames = ["backup"];
   };
 
   defaultProfile.packages = with pkgs; [e2fsprogs strace tcpdump ];
