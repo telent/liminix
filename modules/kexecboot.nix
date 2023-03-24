@@ -26,7 +26,6 @@ in {
 
     outputs.boot-sh =
       let
-        inherit (pkgs) kexec-tools;
         inherit (pkgs.lib.trivial) toHexString;
         inherit (config.outputs) squashfs kernel;
         cmdline = concatStringsSep " " config.boot.commandLine;

@@ -17,6 +17,13 @@ extraPkgs // {
   strace = prev.strace.override { libunwind = null; };
 
   kexec-tools = prev.kexec-tools.overrideAttrs(o: {
+    # For kexecboot we copy kexec into a ramdisk on the system being
+    # upgraded from. This is more likely to work if kexec is
+    # statically linked so doesn't have dependencies on store paths that
+    # may not exist on that machine. (We can't nix-copy-closure as
+    # the store may not be on a writable filesystem)
+    LDFLAGS = "-static";
+
     patches = o.patches ++ [
       (fetchpatch {
         # merge user command line options into DTB chosen
