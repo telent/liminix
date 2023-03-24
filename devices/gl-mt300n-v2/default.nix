@@ -167,6 +167,10 @@
           BRIDGE_VLAN_FILTERING = "y";
           BRIDGE_IGMP_SNOOPING = "y";
 
+          WATCHDOG = "y";
+          RALINK_WDT = "y";  # watchdog
+          MT7621_WDT = "y";  # or it might be this one
+
           GPIOLIB="y";
           GPIO_MT7621 = "y";
 
