@@ -17,6 +17,10 @@ in {
       };
     };
 
+    programs.busybox.applets = [
+      "flashcp"
+    ];
+
     outputs.firmware =
       let o = config.outputs; in
       pkgs.runCommand "firmware" {} ''
