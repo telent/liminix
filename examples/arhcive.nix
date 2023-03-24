@@ -34,7 +34,8 @@ in rec {
   imports = [
     ../modules/tftpboot.nix
     ../modules/wlan.nix
-    # ./modules/flashable.nix
+    ../modules/flashable.nix
+    ../modules/kexecboot.nix
   ];
 
   hostname = "arhcive";
@@ -202,12 +203,12 @@ in rec {
       ] ;
     };
 
-    services.default = target {
+  services.default = target {
     name = "default";
     contents =
       let links = config.hardware.networkInterfaces;
       in with config.services; [
-        links.lo links.eth links.wlan
+        links.lo
         defaultroute4
         resolvconf
         sshd
