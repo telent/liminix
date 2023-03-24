@@ -1,11 +1,11 @@
 {
-  lua5_3
+  luaSmall
 , netlink-lua
 , stdenv
 , makeWrapper
 }:
 let
-  lua = lua5_3;
+  lua = luaSmall;
   netlink = netlink-lua.override {inherit lua;};
   fennel = lua.pkgs.fennel;
 in stdenv.mkDerivation rec {

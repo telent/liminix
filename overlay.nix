@@ -2,7 +2,7 @@ final: prev:
 let
   extraPkgs = import ./pkgs/default.nix { inherit (final) callPackage; };
   inherit (final) fetchpatch;
-  lua = prev.lua5_3.overrideAttrs(o: {
+  lua_no_readline = prev.lua5_3.overrideAttrs(o: {
     name = "lua-tty";
     preBuild = ''
       makeFlagsArray+=(PLAT="posix" SYSLIBS="-Wl,-E -ldl"  CFLAGS="-O2 -fPIC -DLUA_USE_POSIX -DLUA_USE_DLOPEN")
@@ -34,7 +34,7 @@ extraPkgs // {
     ];
   });
 
-  lua5_3 = let s = lua.override { self = s; }; in s;
+  luaSmall = let s = lua_no_readline.override { self = s; }; in s;
 
   s6 = prev.s6.overrideAttrs(o:
     let patch = fetchpatch {
