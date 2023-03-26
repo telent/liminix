@@ -58,6 +58,12 @@ command. You need to locate the "firmware" partition, which you can do
 with a combination of :command:`dmesg` output and the contents of
 :file:`/proc/mtd`
 
+**Don't do this on a device that's running on the same flash partition
+as you're about to overwrite, otherwise you're likely to crash it. Use
+kexecboot (see "Updates to running devices" below) first to reboot
+into a RAM-based system.**
+
+
 .. code-block:: console
 
    <5>[    0.469841] Creating 4 MTD partitions on "spi0.0":
@@ -87,7 +93,7 @@ and then connect to the device and run
 
 .. code-block:: console
 
-   flashcp firmware.bin /dev/mtd3
+   flashcp -v firmware.bin /dev/mtd3
 
 
 
@@ -108,7 +114,7 @@ Flashing from the boot monitor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you are prepared to open the device and have a TTL serial adaptor
-or some kind to connect it to, you can probably flash it using U-Boot.
+of some kind to connect it to, you can probably flash it using U-Boot.
 This is quite hardware-specific: please refer to the Developer Manual.
 
 
