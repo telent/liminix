@@ -1233,3 +1233,142 @@ Sat Mar 18 18:02:26 GMT 2023
 What if: we added derivations for "apply openwrt changes" as packages,
 which could then be called from the kernel derivation's extraPatchPhase?
 There could be one for generic and one for each openwrt targetop
+
+Mon Mar 20 18:40:53 GMT 2023
+
+- kexec patch is sent to mailing list, keep an eye for replies
+- watchdog
+- ntp
+- rebuild images for live devices
+- can we build a static busybox with flashcp applet and scp it
+ to arhcive etc?
+- [DONE] install mailman and hyperkitty on myhtic, create mailing list
+
+Tue Mar 21 22:59:54 GMT 2023
+
+I haven't found a way to arm the watchdog before userland runs, which
+would be really nice: although there's WATCHDOG_HANDLE_BOOT_ENABLED
+and WATCHDOG_OPEN_TIMEOUT it doesn't seem to be sufficient, Maybe
+those options work only when the hardware watchdog is already
+armed. It might not be completely awful insofar as any failure to
+mount root usually results in panic anyway, so provided we start
+watching early in boot then there's not a big window for anything
+to go wrong
+
+What should the watchdog service do?  Ideally we want something that
+"ratchets" : can be started in early boot and signals health as long
+as the system is starting up, then once the system is in "steady
+state" it stops pinging as soon as any part of that steady state
+becomes unhealthy. This feels like a refinement for a much later
+phase though.
+
+Maybe the health criteria might be
+(sshd and lan services are running) or (time since boot < 120s)
+
+Thu Mar 23 00:11:23 GMT 2023
+
+tftpboot and (kexecboot || flashable) have incompatible DTB-finding
+strategies which is painful if you add both modules and then
+expect tftp booting to still work
+
+Maybe we could patch the kernel to use some better strategy for when
+to use/ignore the bootloader command line: e.g "only if it
+contains the string 'liminix'". Could do this by patching
+arch/mips/kernel/setup.c bootcmdline_init to
+
+if(strstr(arcs_cmdline, "liminix") == NULL) arcs_cmdline[0] = '\0'
+and then defining CONFIG_MIPS_CMDLINE_DTB_EXTEND. The
+bootloader command line then needs to specify only the
+_additional_ parameters that weren't in the DTB
+
+(later: that turned out to be quite straighforward)
+
+Fri Mar 24 23:45:12 GMT 2023
+
+- add ntp support
+- [DONE] expose hydra to internet
+- check MAC address weirdness?
+- call Task 1 "done"
+
+Sun Mar 26 00:19:15 GMT 2023
+
+Would be nice to have a flash.sh built in outputs.flashable
+
+Sun Mar 26 15:27:14 BST 2023
+
+Let's think about services and modules.
+
+Module
++ can change global config
+  * add users, groups etc
+  * change kernel config
+  * change busybox config
++ well-typed parameters
+- is a "singleton": can't have the same module included twice
+  with different config. e.g. can't have two hostap modules running on
+  different wlan radios.
+- can't express dependencies: a depends on b
+
+suppose:
+
+* modules add service functions to the config? then there's no
+way to define a service while forgetting to import the module
+
+* we use the lib.types stuff for service function arguments
+
+* maybe we stop naming services.foo for every damn thing
+
+* but remember, s6 services do need unique names
+
+
+imports = [ ../modules/dhcp4 ];
+
+services.dhcp4 = config.services.udhcp {
+  interface = lan.device;
+  options = {
+    foo = true;
+    bar = 42;
+  };
+  depends = [ services.some_other_thing ];
+}
+
+modules/dhcp4 udhcp fn needs to define a type for its argument, then
+use something like
+
+  if arg_type.check def.value then res
+            else throw "The option value `${showOption loc}' in `${def.file}' is not a ${arg_type.name}.")
+
+(where def comes from I don't know yet)
+
+Tue Mar 28 10:44:40 BST 2023
+
+we should reserve the name "service" for actual instantiated
+services. This means we need a name for the functions that
+make services. "class", "template", "fn", "maker", "factory"?
+And a namespace name so they're not interleaved with real
+services, which sort of suggests they are packages
+
+if we want to do services = {
+ foo = longrun { ... };
+ bar = longrun { ... };
+}
+
+without repeating the `name` as an attribute of the longrun,
+then longrun can't return a derivation: it has to return some
+function that accepts `name` as a parameter.
+
+where services.a depends on services.b, at the time its builder is run
+it needs to know what name s6-rc will use for service b
+
+maybe an s6 service definition should be an attrset not a derivation.
+
+maybe this is outside scope for phase 2
+
+Tue Mar 28 13:22:06 BST 2023
+
+Reading nixos/doc/manual/development/building-parts.chapter.md it
+suggests to me that we should rename config.outputs to
+config.system.outputs. The more general question here is whether it's
+good to be augmenting a variable called "config" with all this
+generated stuff that is patently not configuration - perhaps putting
+it under a "system" key will keep it all in one place
