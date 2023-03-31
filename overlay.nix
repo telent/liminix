@@ -14,6 +14,12 @@ let
   });
 in
 extraPkgs // {
+  mtdutils = prev.mtdutils.overrideAttrs(o: {
+    patches = (if o ? patches then o.patches else []) ++ [
+      ./pkgs/mtdutils/0001-mkfs.jffs2-add-graft-option.patch
+    ];
+  });
+
   strace = prev.strace.override { libunwind = null; };
 
   kexec-tools-static = prev.kexec-tools.overrideAttrs(o: {

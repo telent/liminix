@@ -1,0 +1,147 @@
+From e01c82f9f405dd24d333ffd1aadd772835706e26 Mon Sep 17 00:00:00 2001
+From: Daniel Barlow <dan@telent.net>
+Date: Fri, 31 Mar 2023 23:33:04 +0100
+Subject: [PATCH] mkfs.jffs2: add --graft option
+
+Allows creation of image from more than one source directory tree,
+using --graft src:dest to graft new subtrees into the output. For
+example
+
+mkfs.jffs2 -r ./rootfs --graft $HOME/Pictures:/pictures
+
+to add your photo collection into the filesystem at /pictures
+without first copying it to rootfs
+---
+ jffsX-utils/mkfs.jffs2.c | 61 ++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 59 insertions(+), 2 deletions(-)
+
+diff --git a/jffsX-utils/mkfs.jffs2.c b/jffsX-utils/mkfs.jffs2.c
+index bd67634..c54bcb8 100644
+--- a/jffsX-utils/mkfs.jffs2.c
++++ b/jffsX-utils/mkfs.jffs2.c
+@@ -112,6 +112,13 @@ static int squash_perms = 0;
+ static int fake_times = 0;
+ int target_endian = __BYTE_ORDER;
+ 
++struct graft {
++	struct graft *next;
++	const char * source;
++	const char * dest;
++} * grafts = 0;
++
++
+ static uint32_t find_hardlink(struct filesystem_entry *e)
+ {
+ 	struct filesystem_entry *f;
+@@ -597,6 +604,14 @@ static void cleanup(struct filesystem_entry *dir)
+ 	}
+ }
+ 
++static void free_grafts(struct graft *graft)
++{
++	if(graft->next) free_grafts(graft->next);
++	free((char *)graft->source);
++	free((char *)graft);
++}
++
++
+ /* Here is where we do the actual creation of the file system */
+ #include "mtd/jffs2-user.h"
+ 
+@@ -1359,6 +1374,7 @@ static void create_target_filesystem(struct filesystem_entry *root)
+ static struct option long_options[] = {
+ 	{"pad", 2, NULL, 'p'},
+ 	{"root", 1, NULL, 'r'},
++	{"graft", 1, NULL, 'G'},
+ 	{"pagesize", 1, NULL, 's'},
+ 	{"eraseblock", 1, NULL, 'e'},
+ 	{"output", 1, NULL, 'o'},
+@@ -1396,6 +1412,9 @@ static const char helptext[] =
+ "                          not specified, the output is padded to the end of\n"
+ "                          the final erase block\n"
+ "  -r, -d, --root=DIR      Build file system from directory DIR (default: cwd)\n"
++"  -G, --graft=SOURCE:DEST Add contents of SOURCE directory at DEST in image.\n"
++"                          May be given more than once. DEST must exist in\n"
++"                          root DIR or a previous graft. \n"
+ "  -s, --pagesize=SIZE     Use page size (max data node size) SIZE.\n"
+ "                          Set according to target system's memory management\n"
+ "                          page size (default: 4KiB)\n"
+@@ -1430,6 +1449,24 @@ static const char helptext[] =
+ "  -V, --version           Display version information\n"
+ "  -i, --incremental=FILE  Parse FILE and generate appendage output for it\n\n";
+ 
++static int add_graft(const char * source, const char *dest)
++{
++	struct graft * graft;
++	struct stat st;
++
++	if (stat(source, &st)) {
++		errmsg_die("bad graft source '%s'", source);
++	}
++
++	if(!grafts) grafts = calloc(sizeof (struct graft), 1);
++	for(graft = grafts; graft->next; graft = graft->next)
++		;
++	graft->source = source;
++	graft->dest = dest;
++	graft->next = calloc(sizeof (struct graft), 1);
++	return 0;
++}
++
+ static int load_next_block(void) {
+ 
+ 	int ret;
+@@ -1579,7 +1616,7 @@ int main(int argc, char **argv)
+ 	jffs2_compressors_init();
+ 
+ 	while ((opt = getopt_long(argc, argv,
+-					"D:d:r:s:o:qUPfh?vVe:lbp::nc:m:x:X:Lty:i:", long_options, &c)) >= 0)
++					"D:d:r:G:s:o:qUPfh?vVe:lbp::nc:m:x:X:Lty:i:", long_options, &c)) >= 0)
+ 	{
+ 		switch (opt) {
+ 			case 'D':
+@@ -1598,6 +1635,18 @@ int main(int argc, char **argv)
+ 				rootdir = xstrdup(optarg);
+ 				break;
+ 
++			case 'G':
++				if(strchr(optarg, ':')) {
++					char * src_name, * dest_name;
++					src_name = xstrdup(optarg);
++					dest_name = strchr(src_name, ':');
++					*dest_name = '\0';
++					dest_name++;
++					add_graft(src_name, dest_name);
++				} else
++					errmsg_die("bad graft specification '%s', expecting source:dest",
++						   optarg);
++				break;
+ 			case 's':
+ 				page_size = strtol(optarg, NULL, 0);
+ 				warn_page_size = 0; /* set by user, so don't need to warn */
+@@ -1784,13 +1833,21 @@ int main(int argc, char **argv)
+ 		parse_image();
+ 
+ 	root = recursive_add_host_directory(NULL, "/", cwd);
+-
++	for(struct graft *g = grafts; g->source; g=g->next) {
++		struct filesystem_entry * entry =
++			find_filesystem_entry(root, (char *) g->dest, S_IFDIR);
++		if(!entry)
++			errmsg_die("missing directory %s for graft point %s",
++				   g->dest, g->source);
++		recursive_add_host_directory(entry, g->dest, g->source);
++	}
+ 	if (devtable)
+ 		parse_device_table(root, devtable);
+ 
+ 	create_target_filesystem(root);
+ 
+ 	cleanup(root);
++	free_grafts(grafts);
+ 
+ 	if (rootdir != default_rootdir)
+ 		free(rootdir);
+-- 
+2.38.1
+
