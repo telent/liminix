@@ -1372,3 +1372,63 @@ config.system.outputs. The more general question here is whether it's
 good to be augmenting a variable called "config" with all this
 generated stuff that is patently not configuration - perhaps putting
 it under a "system" key will keep it all in one place
+
+Tue Mar 28 13:32:30 BST 2023
+
+how should we handle filesystem state? e.g. resolvconf service
+
+if a service provides a file at a known global pathname, it can't be
+parametrised - it must be a singleton.
+
+Tue Mar 28 20:25:20 BST 2023
+
+wondering if we should swap phases 2 and 3. We can't really address
+modules without addressing services, which is phase +n, whereas we
+can tackle overlay/ubi whenever
+
+nand flash may have bad blocks
+nor flash (supposedly) doesn't
+
+ubi provides erase counts and bad block remapping on top of the mtd
+interface. this means we should avoid flashcp of a ubi image straight
+onto (nand) mtd as we will lose the erase counts and bad block information
+that UBI tracks.
+
+overlayfs works on a filename basis, so might not be very effective :
+any change that results in a new store path will mean the entire package
+appears in two places. I think it's reasonable to offer squashfs or
+ubifs without overlay.
+
+open questions:
+
+1) if uboot doesn't support UBI, we can't boot a kernel on a ubifs
+so we need reserved space for the kernel.
+
+- unless we add some padding after the kernel, every new kernel
+that's bigger than its predecessor will trash the start of the
+ubi space (and wipe out its erase count)
+- This suggests we should build more stuff as modules and less as
+compiled-in
+
+2) once a device has had a ubi volume created on it, probably we want
+to use ubi-aware tools to update that volume in future instead of a
+whole new flash, because we wish to preserve erase counts. This means
+running ubiformat --image-file=foo.ubi on the device instead of flashcp
+
+we can add a "ubi-flashable" output that creates a .ubi image and
+a flashcp image that wraps it, with instructions on which to use.
+
+Fri Mar 31 22:13:54 BST 2023
+
+Error: too small LEB size 3968, minimum is 15360
+
+> This error means that you are trying to mount too small UBI
+volume. Probably because your flash is too small? Try to use JFFS2,
+then, because it suits small flashes better since it has much lower
+space overhead. Indeed, UBIFS stores much more indexing information on
+the flash media than JFFS2, so it has much higher overhead. Also, UBI
+has some overhead (see here). Thus, if you have a small flash device
+(e.g., about 64MiB), it makes sense to consider using JFFS2.
+
+
+Argh. Oh well,
