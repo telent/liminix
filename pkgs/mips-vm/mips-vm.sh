@@ -29,7 +29,7 @@ echo $QEMU_OPTIONS
 qemu-system-mips \
     -M malta -m 256 \
     -echr 16 \
-    -append "liminix default console=ttyS0,38400n8 panic=10 oops=panic init=$INIT loglevel=8 root=/dev/vda" \
+    -append "liminix default console=ttyS0,38400n8 panic=10 oops=panic init=$INIT loglevel=8 root=/dev/mtdblock0 block2mtd.block2mtd=/dev/vda,4096" \
     -drive file=$2,format=raw,readonly=on,if=virtio \
     -netdev socket,id=access,mcast=230.0.0.1:1234,localaddr=127.0.0.1 \
     -device virtio-net-pci,disable-legacy=on,disable-modern=off,netdev=access,mac=ba:ad:1d:ea:21:02 \

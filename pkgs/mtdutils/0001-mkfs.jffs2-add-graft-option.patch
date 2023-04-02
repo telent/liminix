@@ -1,4 +1,4 @@
-From 21c84f244520f3656ffff3cc9b213d70480dc36d Mon Sep 17 00:00:00 2001
+From 65cefb4cffadbd3b7adb9ff4a80db2914b0da4fd Mon Sep 17 00:00:00 2001
 From: Daniel Barlow <dan@telent.net>
 Date: Fri, 31 Mar 2023 23:33:04 +0100
 Subject: [PATCH] mkfs.jffs2: add --graft option
@@ -12,14 +12,14 @@ mkfs.jffs2 -r ./rootfs --graft $HOME/Pictures:/pictures
 to add your photo collection into the filesystem at /pictures
 without first copying it to rootfs
 ---
- jffsX-utils/mkfs.jffs2.c | 63 ++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 61 insertions(+), 2 deletions(-)
+ jffsX-utils/mkfs.jffs2.c | 76 +++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 75 insertions(+), 1 deletion(-)
 
 diff --git a/jffsX-utils/mkfs.jffs2.c b/jffsX-utils/mkfs.jffs2.c
-index bd67634..ebf2d98 100644
+index bd67634..a33f4b4 100644
 --- a/jffsX-utils/mkfs.jffs2.c
 +++ b/jffsX-utils/mkfs.jffs2.c
-@@ -112,6 +112,13 @@ static int squash_perms = 0;
+@@ -112,6 +112,14 @@ static int squash_perms = 0;
  static int fake_times = 0;
  int target_endian = __BYTE_ORDER;
  
@@ -27,13 +27,14 @@ index bd67634..ebf2d98 100644
 +	struct graft *next;
 +	const char * source;
 +	const char * dest;
++	struct stat st;
 +} * grafts = 0;
 +
 +
  static uint32_t find_hardlink(struct filesystem_entry *e)
  {
  	struct filesystem_entry *f;
-@@ -597,6 +604,16 @@ static void cleanup(struct filesystem_entry *dir)
+@@ -597,6 +605,16 @@ static void cleanup(struct filesystem_entry *dir)
  	}
  }
  
@@ -50,7 +51,7 @@ index bd67634..ebf2d98 100644
  /* Here is where we do the actual creation of the file system */
  #include "mtd/jffs2-user.h"
  
-@@ -1359,6 +1376,7 @@ static void create_target_filesystem(struct filesystem_entry *root)
+@@ -1359,6 +1377,7 @@ static void create_target_filesystem(struct filesystem_entry *root)
  static struct option long_options[] = {
  	{"pad", 2, NULL, 'p'},
  	{"root", 1, NULL, 'r'},
@@ -58,7 +59,7 @@ index bd67634..ebf2d98 100644
  	{"pagesize", 1, NULL, 's'},
  	{"eraseblock", 1, NULL, 'e'},
  	{"output", 1, NULL, 'o'},
-@@ -1396,6 +1414,9 @@ static const char helptext[] =
+@@ -1396,6 +1415,9 @@ static const char helptext[] =
  "                          not specified, the output is padded to the end of\n"
  "                          the final erase block\n"
  "  -r, -d, --root=DIR      Build file system from directory DIR (default: cwd)\n"
@@ -68,7 +69,7 @@ index bd67634..ebf2d98 100644
  "  -s, --pagesize=SIZE     Use page size (max data node size) SIZE.\n"
  "                          Set according to target system's memory management\n"
  "                          page size (default: 4KiB)\n"
-@@ -1430,6 +1451,24 @@ static const char helptext[] =
+@@ -1430,6 +1452,25 @@ static const char helptext[] =
  "  -V, --version           Display version information\n"
  "  -i, --incremental=FILE  Parse FILE and generate appendage output for it\n\n";
  
@@ -86,6 +87,7 @@ index bd67634..ebf2d98 100644
 +		;
 +	graft->source = source;
 +	graft->dest = dest;
++	memcpy((void *) &(graft->st), (void *) &st, sizeof st);
 +	graft->next = calloc(sizeof (struct graft), 1);
 +	return 0;
 +}
@@ -93,7 +95,7 @@ index bd67634..ebf2d98 100644
  static int load_next_block(void) {
  
  	int ret;
-@@ -1579,7 +1618,7 @@ int main(int argc, char **argv)
+@@ -1579,7 +1620,7 @@ int main(int argc, char **argv)
  	jffs2_compressors_init();
  
  	while ((opt = getopt_long(argc, argv,
@@ -102,7 +104,7 @@ index bd67634..ebf2d98 100644
  	{
  		switch (opt) {
  			case 'D':
-@@ -1598,6 +1637,18 @@ int main(int argc, char **argv)
+@@ -1598,6 +1639,18 @@ int main(int argc, char **argv)
  				rootdir = xstrdup(optarg);
  				break;
  
@@ -121,18 +123,30 @@ index bd67634..ebf2d98 100644
  			case 's':
  				page_size = strtol(optarg, NULL, 0);
  				warn_page_size = 0; /* set by user, so don't need to warn */
-@@ -1784,13 +1835,21 @@ int main(int argc, char **argv)
+@@ -1784,13 +1837,34 @@ int main(int argc, char **argv)
  		parse_image();
  
  	root = recursive_add_host_directory(NULL, "/", cwd);
--
 +	for(struct graft *g = grafts; g && g->source; g=g->next) {
++		char *tmp = xstrdup(g->dest);
 +		struct filesystem_entry * entry =
-+			find_filesystem_entry(root, (char *) g->dest, S_IFDIR);
++			find_filesystem_entry(root, dirname(tmp), S_IFDIR);
++		free(tmp);
 +		if(!entry)
 +			errmsg_die("missing directory %s for graft point %s",
 +				   g->dest, g->source);
-+		recursive_add_host_directory(entry, g->dest, g->source);
+ 
++		if (S_ISDIR(g->st.st_mode)) {
++			recursive_add_host_directory(entry, g->dest, g->source);
++		} else {
++			add_host_filesystem_entry(g->dest,
++						  g->source,
++						  g->st.st_uid,
++						  g->st.st_gid,
++						  g->st.st_mode,
++						  g->st.st_rdev,
++						  entry);
++		}
 +	}
  	if (devtable)
  		parse_device_table(root, devtable);

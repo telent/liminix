@@ -25,6 +25,11 @@
         CPU_BIG_ENDIAN= "y";
         CPU_MIPS32_R2= "y";
 
+        MTD = "y";
+        MTD_BLOCK2MTD = "y";
+        MTD_BLKDEVS = "y";
+        MTD_BLOCK = "y";
+
         SQUASHFS = "y";
         SQUASHFS_XZ = "y";
 
