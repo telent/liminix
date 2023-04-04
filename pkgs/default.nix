@@ -12,6 +12,7 @@
     };
   };
   writeAshScript = callPackage ./write-ash-script {};
+  systemconfig = callPackage ./systemconfig {};
   s6-init-bin =  callPackage ./s6-init-bin {};
   s6-rc-database = callPackage ./s6-rc-database {};
   mips-vm = callPackage ./mips-vm {};

@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 
+cleanup(){
+    test -n "$rootfs" && test -f $rootfs && rm $rootfs
+}
+trap 'exit 1' INT HUP QUIT TERM ALRM USR1
+trap 'cleanup' EXIT
+
 usage(){
-    echo "usage: $(basename $0) [--background /path/to/state_directory] kernel rootimg"
+    echo "usage: $(basename $0) [--background /path/to/state_directory] kernel rootimg [initramfs]"
     echo -e "\nWithout --background, use C-p c (not C-a c) to switch to the monitor"
     exit 1
 }
@@ -23,14 +29,22 @@ fi
 
 test -n "$2" || usage
 
+rootfs=$(mktemp mips-vm-fs-XXXXXX)
+dd if=$2 of=$rootfs bs=65536 conv=sync
+
+if test -n "$3"; then
+    initramfs="-initrd $3"
+fi
+
 
 INIT=${INIT-/bin/init}
 echo $QEMU_OPTIONS
 qemu-system-mips \
     -M malta -m 256 \
     -echr 16 \
-    -append "liminix default console=ttyS0,38400n8 panic=10 oops=panic init=$INIT loglevel=8 root=/dev/mtdblock0 block2mtd.block2mtd=/dev/vda,4096" \
-    -drive file=$2,format=raw,readonly=on,if=virtio \
+    -append "liminix default console=ttyS0,38400n8 panic=10 oops=panic init=$INIT loglevel=8 root=/dev/mtdblock0 block2mtd.block2mtd=/dev/vda,65536" \
+    -drive file=$rootfs,format=raw,readonly=on,if=virtio \
+    ${initramfs} \
     -netdev socket,id=access,mcast=230.0.0.1:1234,localaddr=127.0.0.1 \
     -device virtio-net-pci,disable-legacy=on,disable-modern=off,netdev=access,mac=ba:ad:1d:ea:21:02 \
     -netdev socket,id=lan,mcast=230.0.0.1:1235,localaddr=127.0.0.1 \
