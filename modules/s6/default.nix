@@ -41,7 +41,6 @@ let
     s6-linux-init-shutdownd = dir {
       fifo = {
         type = "i";
-        subtype = "f";
         mode = "0600";
       };
       run = {
@@ -55,7 +54,6 @@ let
     s6-svscan-log = dir {
       fifo = {
         type = "i";
-        subtype = "f";
         mode = "0600";
       };
       notification-fd = { file = "3"; };

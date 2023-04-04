@@ -20,7 +20,6 @@ let
             , file ? null
             , major ? null
             , minor ? null
-            , subtype ? null
           }:
             let
               mode' = if mode != null then mode else
@@ -36,7 +35,7 @@ let
               else if type == "b" then "${line} ${major} ${minor}"
               else if type == "s" then "${line} ${target}"
               else if type == "l" then "${pathname} l ${target}"
-              else if type == "i" then "${line} ${subtype}"
+              else if type == "i" then "${line} f"
               else line)
           attrset;
     in builtins.concatStringsSep "\n" l;
