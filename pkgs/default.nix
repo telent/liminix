@@ -22,6 +22,8 @@
   netlink-lua = callPackage ./netlink-lua {};
   ifwait = callPackage ./ifwait {};
 
+  gen_init_cpio = callPackage ./gen_init_cpio {};
+
   serviceFns = callPackage ./service-fns {};
 
   # these are packages for the build system not the host/target
