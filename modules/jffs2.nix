@@ -1,12 +1,10 @@
 {
   config
 , pkgs
-, lib
 , ...
 }:
 let
-  inherit (lib) mkOption types concatStringsSep;
-  inherit (pkgs) liminix callPackage writeText closureInfo;
+  inherit (pkgs) closureInfo;
 in
 {
   imports = [
@@ -16,21 +14,23 @@ in
     kernel.config.JFFS2_FS = "y";
     outputs = rec {
       systemConfiguration =
-        let inherit (pkgs.pkgsBuildBuild) systemconfig;
-        in systemconfig config.filesystem.contents;
+        pkgs.pkgsBuildBuild.systemconfig config.filesystem.contents;
       jffs2fs =
         let
-          inherit (pkgs.pkgsBuildBuild) runCommand systemconfig mtdutils;
-          sysconf = systemConfiguration;
+          inherit (pkgs.pkgsBuildBuild) runCommand mtdutils;
+          endian = if pkgs.stdenv.isBigEndian
+                   then "--big-endian" else "--little-endian";
         in runCommand "make-jffs2" {
           depsBuildBuild = [ mtdutils ];
         } ''
           mkdir -p $TMPDIR/empty/nix/store/
-          cp ${sysconf}/activate  $TMPDIR/empty/activate
-          pkgClosure=${closureInfo { rootPaths = [ sysconf ]; }}
+          cp ${systemConfiguration}/activate  $TMPDIR/empty/activate
+          pkgClosure=${closureInfo {
+             rootPaths = [ systemConfiguration ];
+           }}
           cp $pkgClosure/registration nix-path-registration
           grafts=$(sed < $pkgClosure/store-paths 's/^\(.*\)$/--graft \1:\1/g')
-          mkfs.jffs2 --pad  --big-endian --root $TMPDIR/empty --output $out  $grafts  --verbose
+          mkfs.jffs2 ${endian} --pad --root $TMPDIR/empty --output $out  $grafts
         '';
       jffs2boot =
         let o = config.outputs; in
@@ -42,8 +42,6 @@ in
           ln -s ${o.manifest} manifest
           ln -s ${o.initramfs} initramfs
        '';
-
-
     };
   };
 }
