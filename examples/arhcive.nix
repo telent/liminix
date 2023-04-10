@@ -193,7 +193,7 @@ in rec {
     in longrun {
       name = "rsync";
       run = ''
-        ${pkgs.rsync}/bin/rsync --no-detach --daemon  --config=${configFile}
+        ${pkgs.rsyncSmall}/bin/rsync --no-detach --daemon  --config=${configFile}
       '';
       dependencies = [
         secrets_file

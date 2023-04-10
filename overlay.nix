@@ -20,6 +20,12 @@ extraPkgs // {
     ];
   });
 
+  rsyncSmall = prev.rsync.overrideAttrs(o: {
+    configureFlags = o.configureFlags ++ [
+      "--disable-openssl"
+    ];
+  });
+
   strace = prev.strace.override { libunwind = null; };
 
   kexec-tools-static = prev.kexec-tools.overrideAttrs(o: {
