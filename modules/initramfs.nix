@@ -17,6 +17,7 @@ in
   };
   config = mkIf config.boot.initramfs.enable {
     kernel.config.BLK_DEV_INITRD = "y";
+    kernel.config.INITRAMFS_SOURCE = builtins.toJSON "${config.outputs.initramfs}";
 
     outputs = {
       initramfs =
@@ -57,7 +58,7 @@ in
           '';
           refs = pkgs.writeReferencesToFile bb;
           gen_init_cpio = pkgs.pkgsBuildBuild.gen_init_cpio;
-        in runCommand "initramfs" {} ''
+        in runCommand "initramfs.cpio" {} ''
           cat << SPECIALS | ${gen_init_cpio}/bin/gen_init_cpio /dev/stdin > $out
           dir /proc 0755 0 0
           dir /dev 0755 0 0
