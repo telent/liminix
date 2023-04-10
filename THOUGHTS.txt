@@ -1432,3 +1432,67 @@ has some overhead (see here). Thus, if you have a small flash device
 
 
 Argh. Oh well,
+
+Sat Apr  1 15:27:39 BST 2023
+
+There's limited value in recreating pseudofiles for jffs2 because
+the system is writable - changes made to /bin, /dev etc in config.filesystem
+should take effect on a running system.
+
+Can we take inspiration from https://grahamc.com/blog/erase-your-darlings/ ?
+
+in early boot:
+ mount ramfs on /
+ mount the writeable filesystem on /persist/
+ bind mount /persist/nix on /nix
+ run script to populate rootfs from pseudofiles
+
+on a router, do we need _anything_ persistent that's outside the store?
+
+ - state for dhcp leases and stuff
+ - secrets
+ - maybe, files that the user has downloaded
+
+this will probably require initramfs. if just use jffs2 as the rootfs and
+don't worry about /persist, we can skip that step.
+
+
+
+
+[ aside: I think we may be putting two busyboxes in the image:
+see modules/s6/default.nix s6-init-scripts has buildInputs = [busybox];  ]
+
+Mon Apr  3 18:34:26 BST 2023
+
+suppose
+- we boot the system with systemConfig=/nix/store/eeeeee-system
+- the early-init script runs /target/$systemConfig/create-root /target
+  after mounting /target
+- then it runs chroot /target $systemConfig/bin/init "$@"
+
+or maybe we could combine those steps?
+or maybe it doesn't matter too much ...
+
+Thu Apr  6 21:25:41 BST 2023
+
+what now?
+
+- put a jffs2 onto some hardware device
+  - what do we do with uboot?
+  - should we pad the kernel?
+  - maybe kernel module support would be good if we're making it
+    hard to do kernel updates
+- try the nix-copy-closure thing and work out what else we don't know
+- [done] detect endian correctly
+
+
+to ask a different question, what else do we need to dogfood a router?
+
+Sun Apr  9 10:06:08 BST 2023
+
+- rename outputs.flashable to outputs.flashimage
+- rename modules/flashable to modules/flashable_ro
+- create outputs.flashable in modules/jffs2
+- rename modules/jffs2 to modules/flashable_rw
+- add enable config to both?
+- enable kernel module compilation
