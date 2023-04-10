@@ -20,8 +20,7 @@
   ;
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
   inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs) writeText dropbear ifwait serviceFns
-    ;
+  inherit (pkgs) writeText dropbear ifwait serviceFns;
 in rec {
   boot = {
     tftp = {
