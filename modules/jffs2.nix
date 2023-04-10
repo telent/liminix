@@ -12,6 +12,7 @@ in
   ];
   config = {
     kernel.config.JFFS2_FS = "y";
+    boot.initramfs.enable = true;
     outputs = rec {
       systemConfiguration =
         pkgs.pkgsBuildBuild.systemconfig config.filesystem.contents;

@@ -5,11 +5,17 @@
 , ...
 }:
 let
-#  inherit (lib) mkOption types concatStringsSep;
+  inherit (lib) mkEnableOption mkIf;
   inherit (pkgs) runCommand callPackage writeText;
 in
 {
-  config = {
+  options = {
+    boot.initramfs = {
+      enable = mkEnableOption "enable initramfs";
+      default = false;
+    };
+  };
+  config = mkIf config.boot.initramfs.enable {
     kernel.config.BLK_DEV_INITRD = "y";
 
     outputs = {
