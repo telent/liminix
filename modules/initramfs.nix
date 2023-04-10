@@ -47,9 +47,18 @@ in
           slashinit = pkgs.writeScript "init" ''
             #!/bin/sh
             exec >/dev/console
-            echo IT MOVES
+            echo Running in initramfs
             mount -t proc none /proc
-            mount -t jffs2 mtd0 /target/persist
+            set -- $(cat /proc/cmdline)
+            for i in "$@" ; do
+              case "''${i}" in
+                root=*)
+                  rootdevice="''${i#root=}"
+                  ;;
+              esac
+            done
+            echo mount -t jffs2 ''${rootdevice} /target/persist
+            mount -t jffs2 ''${rootdevice} /target/persist
             mount -o bind /target/persist/nix /target/nix
             sh /target/persist/activate /target
             cd /target
