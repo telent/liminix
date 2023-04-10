@@ -5,7 +5,7 @@
 let img = (import liminix {
       device = import "${liminix}/devices/qemu/";
       liminix-config = "${liminix}/vanilla-configuration.nix";
-    }).outputs.squashfs;
+    }).outputs.rootfs;
     pkgs = import <nixpkgs> {};
 in pkgs.runCommand "check" {
   nativeBuildInputs = with pkgs; [ squashfsTools s6-rc ] ;

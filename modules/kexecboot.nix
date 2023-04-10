@@ -16,7 +16,7 @@ in {
       pkgs.runCommand "kexecboot" {} ''
         mkdir $out
         cd $out
-        ln -s ${o.squashfs} squashfs
+        ln -s ${o.rootfs} rootfs
         ln -s ${o.kernel} kernel
         ln -s ${o.manifest} manifest
         ln -s ${o.boot-sh} boot.sh
@@ -27,19 +27,19 @@ in {
     outputs.boot-sh =
       let
         inherit (pkgs.lib.trivial) toHexString;
-        inherit (config.outputs) squashfs kernel;
+        inherit (config.outputs) rootfs kernel;
         cmdline = concatStringsSep " " config.boot.commandLine;
       in
         pkgs.buildPackages.runCommand "boot.sh.sh" {
         } ''
-          squashfsStart=${toString (100 * 1024 * 1024)}
-          squashfsBytes=$(stat -L -c %s ${squashfs})
-          append_cmd="mtdparts=phram0:''${squashfsBytes}(rootfs) phram.phram=phram0,''${squashfsStart},''${squashfsBytes} memmap=''${squashfsBytes}\$''${squashfsStart}";
+          rootfsStart=${toString (100 * 1024 * 1024)}
+          rootfsBytes=$(stat -L -c %s ${rootfs})
+          append_cmd="mtdparts=phram0:''${rootfsBytes}(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsBytes} memmap=''${rootfsBytes}\$''${rootfsStart}";
           cat > $out <<EOF
           #!/bin/sh
           test -d \$1
           cd \$1
-          ./kexec -f -d --map-file squashfs@$squashfsStart --dtb dtb --command-line '${cmdline} $append_cmd' kernel
+          ./kexec -f -d --map-file rootfs@$rootfsStart --dtb dtb --command-line '${cmdline} $append_cmd' kernel
           EOF
         '';
   };

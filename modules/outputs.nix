@@ -17,7 +17,7 @@ in
   };
   config = {
     outputs = rec {
-      squashfs = liminix.builders.squashfs config.filesystem.contents;
+      rootfs = liminix.builders.squashfs config.filesystem.contents;
       tftpd = pkgs.buildPackages.tufted;
       kernel = liminix.builders.kernel.override {
         inherit (config.kernel) config src extraPatchPhase;
@@ -40,13 +40,13 @@ in
       } ''
         mkdir $out
         dd if=${uimage} of=$out/firmware.bin bs=128k conv=sync
-        dd if=${squashfs} of=$out/firmware.bin bs=128k conv=sync,nocreat,notrunc oflag=append
+        dd if=${rootfs} of=$out/firmware.bin bs=128k conv=sync,nocreat,notrunc oflag=append
       '';
 
       vmroot = pkgs.runCommand "qemu" {} ''
         mkdir $out
         cd $out
-        ln -s ${squashfs} squashfs
+        ln -s ${rootfs} rootfs
         ln -s ${kernel} vmlinux
         ln -s ${manifest} manifest
         ln -s ${kernel.headers} build

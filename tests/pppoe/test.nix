@@ -46,7 +46,7 @@ trap fatal ERR
 
 routeros $serverstatedir
 mkdir vm
-mips-vm --background ./vm ${img}/vmlinux ${img}/squashfs
+mips-vm --background ./vm ${img}/vmlinux ${img}/rootfs
 expect ${./getaddress.expect}
 
 set -o pipefail

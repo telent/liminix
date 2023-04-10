@@ -33,7 +33,7 @@ in rec {
   imports = [
     ../modules/tftpboot.nix
     ../modules/wlan.nix
-    ../modules/flashable.nix
+    ../modules/flashimage.nix
     ../modules/kexecboot.nix
   ];
 

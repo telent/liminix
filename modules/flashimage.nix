@@ -25,15 +25,15 @@ in {
       let o = config.outputs; in
       pkgs.runCommand "firmware" {} ''
         dd if=${o.uimage} of=$out bs=128k conv=sync
-        dd if=${o.squashfs} of=$out bs=128k conv=sync,nocreat,notrunc oflag=append
+        dd if=${o.rootfs} of=$out bs=128k conv=sync,nocreat,notrunc oflag=append
       '';
-    outputs.flashable =
+    outputs.flashimage =
       let o = config.outputs; in
-      pkgs.runCommand "flashable" {} ''
+      pkgs.runCommand "flashimage" {} ''
         mkdir $out
         cd $out
         ln -s ${o.firmware} firmware.bin
-        ln -s ${o.squashfs} squashfs
+        ln -s ${o.rootfs} rootfs
         ln -s ${o.kernel} vmlinux
         ln -s ${o.manifest} manifest
         ln -s ${o.kernel.headers} build

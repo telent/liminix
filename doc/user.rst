@@ -13,12 +13,12 @@ and the services that you want to run on it. Start by copying
 directory for some pre-written configurations.
 
 If you want to create a configuration that can be installed on
-a hardware device, be sure to include the "flashable" module.
+a hardware device, be sure to include the "flashimage" module.
 
 .. code-block: nix
 
   imports = [
-    ./modules/flashable.nix
+    ./modules/flashimage.nix
   ]
 
 
