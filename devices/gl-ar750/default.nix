@@ -87,6 +87,7 @@
         flash = {
           address = "0x9F060000";
           size ="0xfa0000";
+          eraseBlockSize = "65536";
         };
         rootDevice = "1f05";
         dts = {
@@ -163,12 +164,15 @@
           AR8216_PHY = "y";         # eth1 is behind a switch
 
           MTD_SPI_NOR = "y";
+          MTD_SPI_NOR_USE_4K_SECTORS = "n";  # jffs2 needs min 8k erase block
+
           SPI_ATH79 = "y";      # these are copied from OpenWrt.
           SPI_MASTER= "y";      # At least one of them is necessary
           SPI_MEM= "y";
           SPI_AR934X= "y";
           SPI_BITBANG= "y";
           SPI_GPIO= "y";
+
           GPIO_ATH79 = "y";
           GPIOLIB = "y";
           EXPERT="y";

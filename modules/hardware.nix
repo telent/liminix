@@ -24,6 +24,7 @@ in {
         # for wireless devices, etc
         address = mkOption { type = types.str; };
         size = mkOption { type = types.str; };
+        eraseBlockSize = mkOption { type = types.str; };
       };
       loadAddress = mkOption { default = null; };
       entryPoint = mkOption { };

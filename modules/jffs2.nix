@@ -33,7 +33,7 @@ in
            }}
           cp $pkgClosure/registration nix-path-registration
           grafts=$(sed < $pkgClosure/store-paths 's/^\(.*\)$/--graft \1:\1/g')
-          mkfs.jffs2 ${endian} --pad --root $TMPDIR/empty --output $out  $grafts
+          mkfs.jffs2 ${endian} -e ${config.hardware.flash.eraseBlockSize} --pad --root $TMPDIR/empty --output $out  $grafts
         '';
       jffs2boot =
         let o = config.outputs; in
