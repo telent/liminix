@@ -54,6 +54,7 @@
         inherit (pkgs.liminix.networking) interface;
       in {
         defaultOutput = "vmroot";
+        flash.eraseBlockSize = "65536"; # c.f. pkgs/mips-vm/mips-vm.sh
         networkInterfaces = {
           lan = interface { device = "eth0"; };
           wan = interface { device = "eth1"; };
