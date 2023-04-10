@@ -35,14 +35,6 @@ in
         inherit kernel;
         inherit dtb;
       };
-      combined-image = pkgs.runCommand "firmware.bin" {
-        nativeBuildInputs = [ pkgs.buildPackages.ubootTools ];
-      } ''
-        mkdir $out
-        dd if=${uimage} of=$out/firmware.bin bs=128k conv=sync
-        dd if=${rootfs} of=$out/firmware.bin bs=128k conv=sync,nocreat,notrunc oflag=append
-      '';
-
       vmroot = pkgs.runCommand "qemu" {} ''
         mkdir $out
         cd $out
