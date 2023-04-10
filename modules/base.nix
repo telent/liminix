@@ -95,6 +95,13 @@ in {
         PACKET = "y";           # for ppp, tcpdump ...
         SYSVIPC= "y";
 
+        # disabling this option causes the kernel to use an "empty"
+        # initramfs instead: it has a /dev/console node and not much
+        # else.  Note that pid 1 is started *before* the root
+        # filesystem is mounted and it expects /dev/console to be
+        # present already
+        BLK_DEV_INITRD = lib.mkDefault "n"; # overriden by initramfs module
+
         # s6-linux-init mounts this on /dev
         DEVTMPFS = "y";
         # some or all of these may be fix for "tmpfs: Unknown parameter 'mode'" error

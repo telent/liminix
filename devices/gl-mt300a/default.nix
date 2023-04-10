@@ -107,13 +107,6 @@
           CONSOLE_LOGLEVEL_DEFAULT = "8";
           CONSOLE_LOGLEVEL_QUIET = "4";
 
-          # "empty" initramfs source should create an initial
-          # filesystem that has a /dev/console node and not much
-          # else.  Note that pid 1 is started *before* the root
-          # filesystem is mounted and it expects /dev/console to
-          # be present already
-          BLK_DEV_INITRD = "n";
-
           NET = "y";
           NETDEVICES = "y";
           ETHERNET = "y";
