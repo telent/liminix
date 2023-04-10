@@ -42,6 +42,8 @@ in
               CONFIG_MKNOD y
               CONFIG_SH_IS_ASH y
               CONFIG_BASH_IS_NONE y
+              CONFIG_FEATURE_SH_STANDALONE y
+              CONFIG_FEATURE_PREFER_APPLETS y
             '';
           };
           slashinit = pkgs.writeScript "init" ''
@@ -79,14 +81,6 @@ in
           dir /bin 0755 0 0
           file /bin/busybox ${bb}/bin/busybox 0755 0 0
           slink /bin/sh /bin/busybox 0755 0 0
-          slink /bin/echo /bin/busybox 0755 0 0
-          slink /bin/mount /bin/busybox 0755 0 0
-          slink /bin/chroot /bin/busybox 0755 0 0
-          slink /bin/chmod /bin/busybox 0755 0 0
-          slink /bin/ln /bin/busybox 0755 0 0
-          slink /bin/mkdir /bin/busybox 0755 0 0
-          slink /bin/mknod /bin/busybox 0755 0 0
-          slink /bin/printf /bin/busybox 0755 0 0
           file /init ${slashinit} 0755 0 0
           SPECIALS
         '';
