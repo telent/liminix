@@ -9,6 +9,9 @@ let
   inherit (pkgs) liminix callPackage writeText;
 in
 {
+  imports = [
+    ./squashfs.nix
+  ];
   options = {
     outputs = mkOption {
       type = types.attrsOf types.package;
@@ -17,7 +20,6 @@ in
   };
   config = {
     outputs = rec {
-      rootfs = liminix.builders.squashfs config.filesystem.contents;
       tftpd = pkgs.buildPackages.tufted;
       kernel = liminix.builders.kernel.override {
         inherit (config.kernel) config src extraPatchPhase;
@@ -38,7 +40,7 @@ in
       vmroot = pkgs.runCommand "qemu" {} ''
         mkdir $out
         cd $out
-        ln -s ${rootfs} rootfs
+        ln -s ${config.outputs.rootfs} rootfs
         ln -s ${kernel} vmlinux
         ln -s ${manifest} manifest
         ln -s ${kernel.headers} build

@@ -1,22 +1,24 @@
 {
   config
 , pkgs
+, lib
 , ...
 }:
 let
   inherit (pkgs) closureInfo;
+  inherit (lib) mkIf;
 in
 {
   imports = [
     ./initramfs.nix
   ];
-  config = {
+  config = mkIf (config.rootfsType == "jffs2") {
     kernel.config.JFFS2_FS = "y";
     boot.initramfs.enable = true;
     outputs = rec {
       systemConfiguration =
         pkgs.pkgsBuildBuild.systemconfig config.filesystem.contents;
-      jffs2fs =
+      rootfs =
         let
           inherit (pkgs.pkgsBuildBuild) runCommand mtdutils;
           endian = if pkgs.stdenv.isBigEndian
@@ -38,7 +40,7 @@ in
         pkgs.runCommand "jffs2boot" {} ''
           mkdir $out
           cd $out
-          ln -s ${o.jffs2fs} rootfs
+          ln -s ${o.rootfs} rootfs
           ln -s ${o.kernel} vmlinux
           ln -s ${o.manifest} manifest
           ln -s ${o.initramfs} initramfs

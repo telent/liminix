@@ -25,6 +25,10 @@ in {
       type = types.attrsOf type_service;
     };
     filesystem = mkOption { type = types.anything; };
+    rootfsType =  mkOption {
+      default = "squashfs";
+      type = types.str;
+    };
     kernel = {
       src = mkOption { type = types.package; } ;
       extraPatchPhase = mkOption {
@@ -107,7 +111,8 @@ in {
       };
     };
     boot.commandLine = [
-      "console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 rootfstype=squashfs"
+      "console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8"
+      "rootfstype=${config.rootfsType}"
       "fw_devlink=off"
     ];
     users.root = {
