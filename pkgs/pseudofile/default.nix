@@ -20,12 +20,14 @@ let
             , file ? null
             , major ? null
             , minor ? null
+            , uid ? 0
+            , gid ? 0
           }:
             let
               mode' = if mode != null then mode else
                 (if type == "d" then "0755" else "0644");
               pathname = "${prefix}/${filename}";
-              line = "${pathname} ${type} ${mode'} 0 0";
+              line = "${pathname} ${type} ${mode'} ${toString uid} ${toString gid}";
             in
               if type == "f" then
                 "${line} echo -n \"${qprint file}\" |qprint -d"

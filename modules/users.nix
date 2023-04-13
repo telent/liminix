@@ -69,6 +69,7 @@ in {
             (name: val: dir {
               ".ssh" = dir {
                 authorized_keys = {
+                  inherit (val) uid gid;
                   type = "f";
                   mode = "0400";
                   file = lib.concatStringsSep
