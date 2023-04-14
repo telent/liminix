@@ -25,7 +25,11 @@ let
           , file ? null
           , major ? null
           , minor ? null
+          , uid ? 0
+          , gid ? 0
         }:
+          assert uid == 0;
+          assert gid == 0;
           let
             pathname = "${prefix}/${filename}";
             chmod =
