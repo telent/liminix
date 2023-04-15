@@ -30,7 +30,8 @@ fi
 test -n "$2" || usage
 
 rootfs=$(mktemp mips-vm-fs-XXXXXX)
-dd if=$2 of=$rootfs bs=65536 conv=sync
+dd if=/dev/zero of=$rootfs bs=1M count=16 conv=sync
+dd if=$2 of=$rootfs bs=65536 conv=sync,nocreat,notrunc
 
 if test -n "$3"; then
     initramfs="-initrd $3"
@@ -43,7 +44,7 @@ qemu-system-mips \
     -M malta -m 256 \
     -echr 16 \
     -append "liminix default console=ttyS0,38400n8 panic=10 oops=panic init=$INIT loglevel=8 root=/dev/mtdblock0 block2mtd.block2mtd=/dev/vda,65536" \
-    -drive file=$rootfs,format=raw,readonly=on,if=virtio \
+    -drive file=$rootfs,format=raw,readonly=off,if=virtio,index=0 \
     ${initramfs} \
     -netdev socket,id=access,mcast=230.0.0.1:1234,localaddr=127.0.0.1 \
     -device virtio-net-pci,disable-legacy=on,disable-modern=off,netdev=access,mac=ba:ad:1d:ea:21:02 \
