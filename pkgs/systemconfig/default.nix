@@ -28,8 +28,6 @@ let
           , uid ? 0
           , gid ? 0
         }:
-          assert uid == 0;
-          assert gid == 0;
           let
             pathname = "${prefix}/${filename}";
             qpathname = builtins.toJSON pathname;
@@ -49,7 +47,10 @@ let
               "i" = "MKNOD_P(${qpathname}, ${mode'});";
             };
             cmd = cmds.${type};
-          in "${cmd}";
+            chown = if uid>0 || gid>0
+                    then "\nCHOWN(${qpathname},${toString uid},${toString gid});\n"
+                    else "";
+          in "${cmd} ${chown}";
     in mapAttrsToList (makeFile prefix) attrset;
   activateScript = attrset: writeText "makedevs.c" ''
     #include "defs.h"
@@ -72,6 +73,6 @@ in attrset:
     makeFlags = ["makedevs"];
     installPhase = ''
       mkdir -p $out/bin
-      $STRIP --remove-section=.note --remove-section=.comment --strip-all makedevs -o $out/bin/activate
+      $STRIP --remove-section=.note  --remove-section=.comment --strip-all makedevs -o $out/bin/activate
     '';
   }

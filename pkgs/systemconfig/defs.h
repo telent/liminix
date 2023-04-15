@@ -35,3 +35,4 @@ void print_file(char * path, mode_t mode, char * text) {
 #define LN_S(target, path) (void)symlink(target, path)
 #define LN(target, path) link(target, path)
 #define MKNOD_P(path, mode) mkfifo(path, mode)
+#define CHOWN(path, uid, gid) chown(path, uid, gid)
