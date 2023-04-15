@@ -13,7 +13,14 @@ in
     ./initramfs.nix
   ];
   config = mkIf (config.rootfsType == "jffs2") {
-    kernel.config.JFFS2_FS = "y";
+    kernel.config = {
+      JFFS2_FS = "y";
+      JFFS2_LZO = "y";
+      JFFS2_RTIME = "y";
+      JFFS2_COMPRESSION_OPTIONS = "y";
+      JFFS2_ZLIB = "y";
+      JFFS2_CMODE_SIZE = "y";
+    };
     boot.initramfs.enable = true;
     outputs = rec {
       systemConfiguration =
@@ -34,7 +41,7 @@ in
            }}
           cp $pkgClosure/registration nix-path-registration
           grafts=$(sed < $pkgClosure/store-paths 's/^\(.*\)$/--graft \1:\1/g')
-          mkfs.jffs2 ${endian} -e ${config.hardware.flash.eraseBlockSize} --pad --root $TMPDIR/empty --output $out  $grafts
+          mkfs.jffs2 --compression-mode=size ${endian} -e ${config.hardware.flash.eraseBlockSize} --enable-compressor=lzo --pad --root $TMPDIR/empty --output $out  $grafts --squash --faketime
         '';
       jffs2boot =
         let o = config.outputs; in
