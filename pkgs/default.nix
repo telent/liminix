@@ -40,6 +40,7 @@
   # https://sourceforge.net/p/squashfs/mailman/message/26599379/
   lzma = callPackage ./lzma {};
 
+  preinit = callPackage ./preinit {};
   swconfig = callPackage ./swconfig {};
 
   openwrt = callPackage ./openwrt {};
