@@ -17,7 +17,7 @@ in
     boot.initramfs.enable = true;
     outputs = rec {
       systemConfiguration =
-        pkgs.pkgsBuildBuild.systemconfig config.filesystem.contents;
+        pkgs.systemconfig config.filesystem.contents;
       rootfs =
         let
           inherit (pkgs.pkgsBuildBuild) runCommand mtdutils;
@@ -27,7 +27,8 @@ in
           depsBuildBuild = [ mtdutils ];
         } ''
           mkdir -p $TMPDIR/empty/nix/store/
-          cp ${systemConfiguration}/activate  $TMPDIR/empty/activate
+          cp ${systemConfiguration}/bin/activate $TMPDIR/empty/activate
+          ln -s ${pkgs.s6-init-bin}/bin/init $TMPDIR/empty/init
           pkgClosure=${closureInfo {
              rootPaths = [ systemConfiguration ];
            }}

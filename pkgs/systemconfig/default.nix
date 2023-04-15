@@ -1,13 +1,13 @@
 # The ideal is that a Liminix system can boot with only the files in
-# /nix/store.  This package generates a script that is run at early
+# /nix/store.  This package generates a small program that is run at early
 # boot (from the initramfs) to populate directories such as /etc,
 # /bin, /home according to whatever the configuration says
 # they should contain
 
 {
   writeText
-, runCommand
 , lib
+, stdenv
 }:
 let
   inherit (lib.attrsets) mapAttrsToList;
@@ -32,33 +32,46 @@ let
           assert gid == 0;
           let
             pathname = "${prefix}/${filename}";
-            chmod =
-              let m = if mode != null then mode else
-                    (if type == "d" then "0755" else "0644");
-              in (if type == "s"
-                  then ""
-                  else "\nchmod ${m} ${pathname}");
+            qpathname = builtins.toJSON pathname;
+            mode' = if mode != null
+                    then mode
+                    else
+                      (if type == "d" then "0755" else "0644");
             cmds = {
-              "f" = "printf \"${escaped file}\" > ${pathname}";
-              "d" = "mkdir ${pathname}\n"  +
+              "f" = "PRINTFILE(${qpathname}, ${mode'}, ${builtins.toJSON (escaped file)});";
+              "d" = "MKDIR(${qpathname}, ${mode'});\n"  +
                     (builtins.concatStringsSep "\n"
                       (visit pathname contents));
-              "c" = "mknod ${pathname} c ${major} ${minor}";
-              "b" = "mknod ${pathname} b ${major} ${minor}";
-              "s" = "ln -s ${target} ${pathname}";
-              "l" = "ln ${target} ${pathname}";
-              "i" = "mknod ${pathname} p";
+              "c" = "MKNOD_C(${qpathname}, ${mode'}, ${major}, ${minor});";
+              "b" = "MKNOD_B(${qpathname}, ${mode'}, ${major}, ${minor});";
+              "s" = "LN_S(${builtins.toJSON target}, ${qpathname});";
+              "l" = "LN(${builtins.toJSON target}, ${qpathname})";
+              "i" = "MKNOD_P(${qpathname}, ${mode'});";
             };
             cmd = cmds.${type};
-          in "${cmd}${chmod}";
+          in "${cmd}";
     in mapAttrsToList (makeFile prefix) attrset;
-  activateScript = attrset: writeText "systemConfig" ''
-    #!/bin/sh
-    t=$1
-    ${(builtins.concatStringsSep "\n" (visit "$t" attrset))}
+  activateScript = attrset: writeText "makedevs.c" ''
+    #include "defs.h"
+    int main(int argc, char* argv[]) {
+      chdir(argv[1]);
+      ${(builtins.concatStringsSep "\n" (visit "." attrset))}
+    }
   '';
 in attrset:
-  runCommand "make-stuff" {} ''
-    mkdir -p $out
-    ln -s ${activateScript attrset} $out/activate
-  ''
+  stdenv.mkDerivation {
+    name="make-stuff";
+    src = ./.;
+
+    CFLAGS = "-Os";
+    LDFLAGS  = "-static";
+
+    postConfigure = ''
+      cp ${activateScript attrset} makedevs.c
+    '';
+    makeFlags = ["makedevs"];
+    installPhase = ''
+      mkdir -p $out/bin
+      $STRIP --remove-section=.note --remove-section=.comment --strip-all makedevs -o $out/bin/activate
+    '';
+  }
