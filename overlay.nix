@@ -26,6 +26,20 @@ extraPkgs // {
     ];
   });
 
+  ntp = prev.ntp.overrideAttrs(o: {
+    outputs = [
+      "out"
+      "man"
+      "perllib"
+      "doc"
+    ];
+    postInstall = ''
+      mkdir -p $perllib
+      moveToOutput "share/ntp" $perllib
+    '';
+
+  });
+
   strace = prev.strace.override { libunwind = null; };
 
   kexec-tools-static = prev.kexec-tools.overrideAttrs(o: {
