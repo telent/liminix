@@ -12,6 +12,27 @@ let
       builtins.filter (x: (builtins.match "(PLAT|MYLIBS).*" x) == null)
         o.makeFlags;
   });
+  s6 = prev.s6.overrideAttrs(o:
+    let patch = fetchpatch {
+          # add "p" directive in s6-log
+          url = "https://github.com/skarnet/s6/commit/ddc76841398dfd5e18b22943727ad74b880236d3.patch";
+          hash = "sha256-fBtUinBdp5GqoxgF6fcR44Tu8hakxs/rOShhuZOgokc=";
+        };
+        config = builtins.filter
+          (x: (builtins.match ".*shared.*" x) == null)
+          o.configureFlags;
+        patch_needed = builtins.compareVersions o.version "2.11.1.2" <= 0;
+    in {
+      configureFlags = config ++ [
+        "--disable-allstatic"
+        "--disable-static"
+        "--enable-shared"
+      ];
+      stripAllList = [ "sbin" "bin" ];
+      patches =
+        (if o ? patches then o.patches else []) ++
+        (if patch_needed then [ patch ] else []);
+    });
 in
 extraPkgs // {
   mtdutils = prev.mtdutils.overrideAttrs(o: {
@@ -62,18 +83,17 @@ extraPkgs // {
 
   luaSmall = let s = lua_no_readline.override { self = s; }; in s;
 
-  s6 = prev.s6.overrideAttrs(o:
-    let patch = fetchpatch {
-          # add "p" directive in s6-log
-          url = "https://github.com/skarnet/s6/commit/ddc76841398dfd5e18b22943727ad74b880236d3.patch";
-          hash = "sha256-fBtUinBdp5GqoxgF6fcR44Tu8hakxs/rOShhuZOgokc=";
-        };
-        patch_needed = builtins.compareVersions o.version "2.11.1.2" <= 0;
-    in {
-      patches =
-        (if o ? patches then o.patches else []) ++
-        (if patch_needed then [ patch ] else []);
-    });
+  inherit s6;
+  s6-linux-init = prev.s6-linux-init.override {
+    skawarePackages = prev.skawarePackages // {
+      inherit s6;
+    };
+  };
+  s6-rc = prev.s6-rc.override {
+    skawarePackages = prev.skawarePackages // {
+      inherit s6;
+    };
+  };
 
   nftables = prev.nftables.overrideAttrs(o: {
     configureFlags = [
