@@ -7,7 +7,10 @@ let
     preBuild = ''
       makeFlagsArray+=(PLAT="posix" SYSLIBS="-Wl,-E -ldl"  CFLAGS="-O2 -fPIC -DLUA_USE_POSIX -DLUA_USE_DLOPEN")
     '';
-
+    # lua in nixpkgs has a postInstall stanza that assumes only
+    # one output, we need to override that if we're going to
+    # convert to multi-output
+    # outputs = ["bin" "man" "out"];
     makeFlags =
       builtins.filter (x: (builtins.match "(PLAT|MYLIBS).*" x) == null)
         o.makeFlags;
@@ -40,6 +43,9 @@ extraPkgs // {
       ./pkgs/mtdutils/0001-mkfs.jffs2-add-graft-option.patch
     ];
   });
+
+  # openssl is reqired by ntp
+
 
   rsyncSmall = prev.rsync.overrideAttrs(o: {
     configureFlags = o.configureFlags ++ [
