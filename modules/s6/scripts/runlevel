@@ -1,4 +1,4 @@
-#!/usr/bin/env sh -e
+#!/bin/sh -e
 
 ### This script is called once at boot time by rc.init, and is
 ### also called by the runleveld service every time the user

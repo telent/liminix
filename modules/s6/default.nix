@@ -1,7 +1,6 @@
 { config, pkgs, ... }:
 let
   inherit (pkgs)
-    busybox
     execline
     s6
     s6-init-bin
@@ -16,12 +15,11 @@ let
     name = "s6-scripts";
     src = ./scripts;
     phases = ["unpackPhase" "installPhase" ];
-    buildInputs = [busybox];
+    buildInputs = [];
     installPhase = ''
       mkdir $out
       cp -r $src $out/scripts
       chmod -R +w $out
-      patchShebangs $out/scripts
     '';
   };
   service = dir  {

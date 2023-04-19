@@ -1,4 +1,4 @@
-#!/nix/store/xbdqbi2mscmhl5wcpbgpjdwxbsrvpkil-bash-5.1-p16/bin/sh -e
+#!/bin/sh -e
 
 ### Things to do *right before* the machine gets rebooted or
 ### powered off, at the very end of the shutdown sequence,

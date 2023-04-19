@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 rl="$1"
 shift
