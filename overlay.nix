@@ -121,7 +121,32 @@ extraPkgs // {
       nettle = null;
     };
 
-  hostapd = prev.hostapd.override { sqlite = null; };
+  hostapd =
+    let
+      config =  [
+        "CONFIG_DRIVER_NL80211=y"
+        "CONFIG_IAPP=y"
+        "CONFIG_IEEE80211AC=y"
+        "CONFIG_IEEE80211N=y"
+        "CONFIG_IEEE80211W=y"
+        "CONFIG_INTERNAL_LIBTOMMATH=y"
+        "CONFIG_INTERNAL_LIBTOMMATH_FAST=y"
+        "CONFIG_IPV6=y"
+        "CONFIG_LIBNL32=y"
+        "CONFIG_PKCS12=y"
+        "CONFIG_RSN_PREAUTH=y"
+        "CONFIG_TLS=internal"
+      ];
+      h = prev.hostapd.overrideAttrs(o: {
+        extraConfig = "";
+        configurePhase = ''
+          cat > hostapd/defconfig <<EOF
+          ${builtins.concatStringsSep "\n" config}
+          EOF
+          ${o.configurePhase}
+        '';
+      });
+    in h.override { openssl = null; sqlite = null; };
 
   dropbear = prev.dropbear.overrideAttrs (o: {
     postPatch = ''
