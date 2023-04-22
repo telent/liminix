@@ -15,18 +15,20 @@ let
       builtins.filter (x: (builtins.match "(PLAT|MYLIBS).*" x) == null)
         o.makeFlags;
   });
+
   s6 = prev.s6.overrideAttrs(o:
-    let patch = fetchpatch {
-          # add "p" directive in s6-log
-          url = "https://github.com/skarnet/s6/commit/ddc76841398dfd5e18b22943727ad74b880236d3.patch";
-          hash = "sha256-fBtUinBdp5GqoxgF6fcR44Tu8hakxs/rOShhuZOgokc=";
-        };
-        config = builtins.filter
-          (x: (builtins.match ".*shared.*" x) == null)
-          o.configureFlags;
-        patch_needed = builtins.compareVersions o.version "2.11.1.2" <= 0;
+    let
+      patch = fetchpatch {
+        # add "p" directive in s6-log
+        url = "https://github.com/skarnet/s6/commit/ddc76841398dfd5e18b22943727ad74b880236d3.patch";
+        hash = "sha256-fBtUinBdp5GqoxgF6fcR44Tu8hakxs/rOShhuZOgokc=";
+      };
+      patch_needed = builtins.compareVersions o.version "2.11.1.2" <= 0;
     in {
-      configureFlags = config ++ [
+      configureFlags = (builtins.filter
+        (x: (builtins.match ".*shared.*" x) == null)
+        o.configureFlags) ++
+      [
         "--disable-allstatic"
         "--disable-static"
         "--enable-shared"
