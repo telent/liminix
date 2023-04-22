@@ -33,6 +33,7 @@ let
         "--disable-static"
         "--enable-shared"
       ];
+      hardeningDisable = ["all"];
       stripAllList = [ "sbin" "bin" ];
       patches =
         (if o ? patches then o.patches else []) ++
