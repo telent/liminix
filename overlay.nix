@@ -55,19 +55,33 @@ extraPkgs // {
     ];
   });
 
-  ntp = prev.ntp.overrideAttrs(o: {
-    outputs = [
-      "out"
-      "man"
-      "perllib"
-      "doc"
-    ];
-    postInstall = ''
-      mkdir -p $perllib
-      moveToOutput "share/ntp" $perllib
-    '';
+  chrony = prev.chrony.override {
+    gnutls = null;
+    nss = null;
+    nspr = null;
+  };
 
-  });
+  ntp =
+    let
+      openssl = prev.openssl.overrideAttrs(o: {
+        preInstall = ''
+          find . -name libcrypto.so.3 -ls
+          $STRIP lib*.so.*
+        '';
+      });
+      ntp_ = prev.ntp.overrideAttrs(o: {
+        outputs = [
+          "out"
+          "man"
+          "perllib"
+          "doc"
+        ];
+        postInstall = ''
+          mkdir -p $perllib
+          moveToOutput "share/ntp" $perllib
+        '';
+      });
+    in ntp_.override { inherit openssl; };
 
   strace = prev.strace.override { libunwind = null; };
 

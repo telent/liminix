@@ -20,6 +20,7 @@ let
   inherit (pkgs)
     dropbear
     ifwait
+    writeText
     serviceFns;
 in rec {
   boot = {
@@ -139,6 +140,18 @@ in rec {
       ];
     };
 
+  services.ntp =
+    let config = writeText "chrony.conf" ''
+      pool pool.ntp.org iburst
+      dumpdir /run/chrony
+      makestep 1.0 3
+    '';
+    in longrun {
+      name = "ntp";
+      run = "${pkgs.chrony}/bin/chronyd -f ${config} -d";
+    };
+
+
   services.sshd = longrun {
     name = "sshd";
     run = ''
@@ -219,6 +232,7 @@ in rec {
       bridge
       hostap
       hostap5
+      ntp
       defaultroute4
       packet_forwarding
       dns
