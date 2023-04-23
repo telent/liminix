@@ -49,7 +49,6 @@ extraPkgs // {
 
   # openssl is reqired by ntp
 
-
   rsyncSmall = prev.rsync.overrideAttrs(o: {
     configureFlags = o.configureFlags ++ [
       "--disable-openssl"

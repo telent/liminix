@@ -44,4 +44,6 @@
   swconfig = callPackage ./swconfig {};
 
   openwrt = callPackage ./openwrt {};
+
+  hi = callPackage ./hi {};
 }
