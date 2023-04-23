@@ -42,6 +42,7 @@
         flash = {
           address = "0xbc050000";
           size = "0xfb0000";
+          eraseBlockSize = "65536";
         };
         rootDevice = "1f05";
 

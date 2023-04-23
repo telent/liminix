@@ -34,7 +34,7 @@ in {
           rootfsStart=0x$(printf %x $((${cfg.loadAddress} + 0x100000 + $uimageSize)))
           rootfsBytes=$(($(stat -L -c %s ${config.outputs.rootfs}) + 0x100000 &(~0xfffff)))
           rootfsMb=$(($rootfsBytes >> 20))
-          cmd="mtdparts=phram0:''${rootfsMb}M(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsMb}Mi memmap=''${rootfsMb}M\$''${rootfsStart} root=1f00";
+          cmd="mtdparts=phram0:''${rootfsMb}M(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsMb}Mi,${config.hardware.flash.eraseBlockSize} memmap=''${rootfsMb}M\$''${rootfsStart} root=/dev/mtdblock0";
 
           cat > $out << EOF
           setenv serverip ${cfg.serverip}
