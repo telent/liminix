@@ -1496,3 +1496,40 @@ Sun Apr  9 10:06:08 BST 2023
 - rename modules/jffs2 to modules/flashable_rw
 - add enable config to both?
 - enable kernel module compilation
+
+
+Mon Apr 10 23:50:41 BST 2023
+
+- initramfs parses /proc/cmdline to find root fs, might not play
+nice with defaulting
+
+- how to build kernel modules
+
+- look at closure size, is it this big because we've broken it
+or is jffs2 usually this much bigger than squashfs
+
+- maybe squashfs with overlay might be better if we could
+ensure hardlinks?
+
+- maybe there's something like overlayfs but content-addressable?
+
+Sat Apr 15 18:57:46 BST 2023
+
+for the same configuration:
+
+-r--r--r-- 1 root root 6066176 Jan  1  1970 /nix/store/0x271rg45mcjjgbma9wi31h1yd109fpy-frob-squashfs
+-r--r--r-- 1 root root 12255232 Jan  1  1970 /nix/store/zx11adagcbzqsnqkyz5kgvr392vhlrpr-make-jffs2
+
+may want to reconsider not using squashfs with overlay
+
+Wed Apr 19 22:22:48 BST 2023
+
+Where next?
+
+Sun Apr 23 18:24:34 BST 2023
+
+- we are down to ~ 11MB image for a barely functional (IPV4) router
+  this is by avoiding all dependencies on openssl or gnutls
+- rotuer is not recognising when  I set the hostname
+- I may have forgotten the root password :-(
+- why is hello world 70K unless hardeningDisable?
