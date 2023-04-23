@@ -25,7 +25,7 @@ let
 in rec {
   boot = {
     tftp = {
-      enable = true;
+      freeSpaceBytes = 3 * 1024 * 1024;
       serverip = "10.0.0.1";
       ipaddr = "10.0.0.8";
     };

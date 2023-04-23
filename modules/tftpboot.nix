@@ -9,6 +9,10 @@ let
   cfg = config.boot.tftp;
 in {
   imports = [ ./ramdisk.nix ];
+  options.boot.tftp.freeSpaceBytes = mkOption {
+    type = types.int;
+    default = 0;
+  };
   config = {
     boot.ramdisk.enable = true;
 
@@ -33,8 +37,8 @@ in {
           uimageSize=$(($(stat -L -c %s ${config.outputs.uimage}) + 0x1000 &(~0xfff)))
           rootfsStart=0x$(printf %x $((${cfg.loadAddress} + 0x100000 + $uimageSize)))
           rootfsBytes=$(($(stat -L -c %s ${config.outputs.rootfs}) + 0x100000 &(~0xfffff)))
-          rootfsMb=$(($rootfsBytes >> 20))
-          cmd="mtdparts=phram0:''${rootfsMb}M(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsMb}Mi,${config.hardware.flash.eraseBlockSize} memmap=''${rootfsMb}M\$''${rootfsStart} root=/dev/mtdblock0";
+          rootfsBytes=$(($rootfsBytes + ${toString cfg.freeSpaceBytes} ))
+          cmd="mtdparts=phram0:''${rootfsMb}M(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsBytes},${config.hardware.flash.eraseBlockSize} memmap=''${rootfsBytes}\$''${rootfsStart} root=/dev/mtdblock0";
 
           cat > $out << EOF
           setenv serverip ${cfg.serverip}
