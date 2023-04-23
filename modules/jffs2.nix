@@ -43,16 +43,6 @@ in
           grafts=$(sed < $pkgClosure/store-paths 's/^\(.*\)$/--graft \1:\1/g')
           mkfs.jffs2 --compression-mode=size ${endian} -e ${config.hardware.flash.eraseBlockSize} --enable-compressor=lzo --pad --root $TMPDIR/empty --output $out  $grafts --squash --faketime
         '';
-      jffs2boot =
-        let o = config.outputs; in
-        pkgs.runCommand "jffs2boot" {} ''
-          mkdir $out
-          cd $out
-          ln -s ${o.rootfs} rootfs
-          ln -s ${o.kernel} vmlinux
-          ln -s ${o.manifest} manifest
-          ln -s ${o.initramfs} initramfs
-       '';
     };
   };
 }

@@ -5,7 +5,7 @@
 let img = (import liminix {
       device = import "${liminix}/devices/qemu/";
       liminix-config = ./configuration.nix;
-    }).outputs.jffs2boot;
+    }).outputs.vmroot;
     pkgs = import <nixpkgs> { overlays = [(import ../../overlay.nix)]; };
     inherit (pkgs.pkgsBuildBuild) routeros mips-vm;
 in pkgs.runCommand "check" {
@@ -39,6 +39,6 @@ fatal(){
 trap fatal ERR
 
 mkdir vm
-mips-vm --background ./vm ${img}/vmlinux ${img}/rootfs ${img}/initramfs
+mips-vm --background ./vm ${img}/vmlinux ${img}/rootfs
 expect ${./script.expect} >$out
 ''
