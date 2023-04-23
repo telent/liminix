@@ -31,10 +31,12 @@ in rec {
   };
 
   imports = [
-    ./modules/wlan.nix
-    ./modules/tftpboot.nix
-#    ./modules/flashimage.nix
+    ../modules/wlan.nix
+    ../modules/tftpboot.nix
+    ../modules/flashimage.nix
+    ../modules/jffs2.nix
   ];
+  rootfsType = "jffs2";
 
   kernel = {
     config = {
@@ -202,7 +204,7 @@ in rec {
     in oneshot {
       name = "let-the-ip-flow";
       up = ''
-        ${pkgs.nftables}/bin/nft -f ${./nat.nft}
+        ${pkgs.nftables}/bin/nft -f ${../nat.nft}
         echo 1 > ${filename}
       '';
       down = "echo 0 > ${filename}";
@@ -224,5 +226,5 @@ in rec {
       sshd
     ];
   };
-  defaultProfile.packages = with pkgs;  [ nftables strace tcpdump ] ;
+  defaultProfile.packages = with pkgs;  [ nftables tcpdump ] ;
 }
