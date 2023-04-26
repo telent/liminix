@@ -2,7 +2,6 @@
 let
   inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;
   inherit (pkgs.pseudofile) dir symlink;
-#  inherit (pkgs) busybox;
   inherit (pkgs.liminix.networking) address interface;
   inherit (pkgs.liminix.services) bundle;
 
@@ -52,7 +51,6 @@ in {
         # the right to change them if I think of better ones.
         ipaddr =  mkOption { type = types.str; };
         serverip =  mkOption { type = types.str; };
-        enable =  mkOption { type = types.boolean; };
       };
     };
   };
