@@ -119,6 +119,7 @@ in {
     };
     boot.commandLine = [
       "console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8"
+      "root=${config.hardware.rootDevice}"
       "rootfstype=${config.rootfsType}"
       "fw_devlink=off"
     ];

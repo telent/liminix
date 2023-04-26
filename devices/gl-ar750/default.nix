@@ -89,7 +89,7 @@
           size ="0xfa0000";
           eraseBlockSize = "65536";
         };
-        rootDevice = "1f05";
+        rootDevice = "/dev/mtdblock5";
         dts = {
           src = "${openwrt.src}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";
           includes =  [

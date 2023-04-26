@@ -44,7 +44,7 @@
           size = "0xfb0000";
           eraseBlockSize = "65536";
         };
-        rootDevice = "1f05";
+        rootDevice = "/dev/mtdblock5";
 
         dts = {
           src = "${openwrt.src}/target/linux/ramips/dts/mt7628an_glinet_gl-mt300n-v2.dts";
