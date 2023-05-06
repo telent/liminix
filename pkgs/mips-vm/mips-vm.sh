@@ -29,6 +29,8 @@ fi
 
 test -n "$2" || usage
 
+lan=${LAN-"socket,mcast=230.0.0.1:1235,localaddr=127.0.0.1"}
+
 rootfs=$(mktemp mips-vm-fs-XXXXXX)
 dd if=/dev/zero of=$rootfs bs=1M count=16 conv=sync
 dd if=$2 of=$rootfs bs=65536 conv=sync,nocreat,notrunc
@@ -47,7 +49,7 @@ qemu-system-mips \
     -drive file=$rootfs,format=raw,readonly=off,if=virtio,index=0 \
     ${initramfs} \
     -netdev socket,id=access,mcast=230.0.0.1:1234,localaddr=127.0.0.1 \
-    -device virtio-net-pci,disable-legacy=on,disable-modern=off,netdev=access,mac=ba:ad:1d:ea:21:02 \
-    -netdev socket,id=lan,mcast=230.0.0.1:1235,localaddr=127.0.0.1 \
-    -device virtio-net-pci,disable-legacy=on,disable-modern=off,netdev=lan,mac=ba:ad:1d:ea:21:01 \
+    -device virtio-net,disable-legacy=on,disable-modern=off,netdev=access,mac=ba:ad:1d:ea:21:02 \
+    -netdev ${lan},id=lan \
+    -device virtio-net,disable-legacy=on,disable-modern=off,netdev=lan,mac=ba:ad:1d:ea:21:01 \
     -kernel $1 -display none $flags ${QEMU_OPTIONS}
