@@ -45,5 +45,6 @@
 
   openwrt = callPackage ./openwrt {};
 
+  min-copy-closure = callPackage ./min-copy-closure {};
   hi = callPackage ./hi {};
 }
