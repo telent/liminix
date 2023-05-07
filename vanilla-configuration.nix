@@ -10,17 +10,17 @@ in rec {
   services.loopback = config.hardware.networkInterfaces.lo;
 
   services.dhcpv4 =
-    let iface = interface { type = "hardware"; device = "eth0"; };
+    let iface = interface { type = "hardware"; device = "eth1"; };
     in udhcpc iface {};
 
   services.dhcpv6 =
-    let iface = interface { type = "hardware"; device = "eth0"; };
+    let iface = interface { type = "hardware"; device = "eth1"; };
     in odhcpc iface { uid = "e7"; };
 
   services.ntp = longrun {
     name = "ntp";
     run = let inherit (services) dhcpv4 dhcpv6;
-          in "${pkgs.ntp}/bin/ntpd $(output ${dhcpv4} ntp_servers) $(output ${dhcpv6} NTP_IP})";
+          in "${pkgs.ntp}/bin/ntpd $(output ${dhcpv4} ntp_servers) $(output ${dhcpv6} NTP_IP)";
 
     # I don't think it's possible to standardise the file names
     # generally, as different services have different outputs, but it
