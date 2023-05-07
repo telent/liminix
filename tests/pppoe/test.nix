@@ -23,26 +23,7 @@ serverstatedir=$(mktemp -d -t routeros-XXXXXX)
 # a sandbox with no $HOME, hence this environment variable
 export MPLCONFIGDIR=$(mktemp -d -t routeros-XXXXXX)
 
-killpid(){
-  if test -e $1 && test -d /proc/`cat $1` ; then
-    pid=$(cat $1)
-    kill $pid
-  fi
-}
-
-cleanup(){
-  killpid $serverstatedir/pid
-  test -n "$MPLCONFIGDIR" && test -d "$MPLCONFIGDIR" && rm -rf "$MPLCONFIGDIR"
-  killpid foo.pid
-}
-trap cleanup EXIT
-
-fatal(){
-  err=$?
-  echo "FAIL: command $(eval echo $BASH_COMMAND) exited with code $err"
-  exit $err
-}
-trap fatal ERR
+. ${../test-helpers.sh}
 
 routeros $serverstatedir
 mkdir vm

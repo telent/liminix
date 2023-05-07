@@ -19,24 +19,7 @@ in pkgs.runCommand "check" {
     rogue
   ] ;
 } ''
-killpid(){
-  if test -e $1 && test -d /proc/`cat $1` ; then
-    pid=$(cat $1)
-    kill $pid
-  fi
-}
-
-cleanup(){
-  killpid ./vm/pid
-}
-
-trap cleanup EXIT
-fatal(){
-    err=$?
-    echo "FAIL: command $(eval echo $BASH_COMMAND) exited with code $err"
-    exit $err
-}
-trap fatal ERR
+. ${../test-helpers.sh}
 
 mkdir vm
 LAN=user,hostfwd=tcp::2022-:22 mips-vm --background ./vm ${img}/vmlinux ${img}/rootfs
