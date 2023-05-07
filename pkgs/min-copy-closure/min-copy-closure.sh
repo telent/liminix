@@ -1,13 +1,25 @@
 #!/usr/bin/env bash
 
+ssh_command=${SSH_COMMAND-ssh}
 target_host=$1
 shift
 
-paths=$(nix-store -q --requisites "$@")
+if [ -z "$target_host" ] ; then
+    echo Usage: min-copy-closure target-host paths
+    exit 1
+fi
+
+if [ -n "$IN_NIX_BUILD" ] ; then
+    # can't run nix-store in a derivation, so we have to
+    # skip the requisites when running tests in hydra
+    paths=$@
+else
+    paths=$(nix-store -q --requisites "$@")
+fi
 needed=""
 
 coproc remote {
-    ssh -C ${target_host}
+    ${ssh_command} -C -T ${target_host}
 }
 
 exec 10>&${remote[1]}
