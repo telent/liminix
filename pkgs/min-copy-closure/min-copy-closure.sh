@@ -13,15 +13,16 @@ coproc remote {
 exec 10>&${remote[1]}
 
 for p in $paths; do
+    echo -n Checking $(basename $p) ...
     echo "test -e $p && echo skip || echo $p"  >&10
     read n <&${remote[0]}
     case $n in
 	skip)
-	    :
+	    echo skip
 	    ;;
 	*)
 	    needed="${needed} $n"
-	    echo Will copy $n
+	    echo will copy
 	    ;;
     esac
 done
