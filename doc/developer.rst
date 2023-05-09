@@ -139,11 +139,13 @@ router from the internet so you can borrow the cable/fibre/DSL.
 
 ``bordervm`` is included for this purpose. You will need
 
-* a Linux machine with a spare PCI ethernet card which you can dedicate to Liminix
+* a Linux machine with a spare (PCI or USB) ethernet device which you can dedicate to Liminix
 
 * an L2TP service such as https://www.aa.net.uk/broadband/l2tp-service/
 
-You need to configure the Ethernet card for VFIO passthru, then
+You need to "hide" the Ethernet device from the host - for PCI this
+means configuring it for VFIO passthru; for USB you need to
+unload the module(s) it uses. Then
 you can execute :command:`run-border-vm` in a ``buildEnv`` shell,
 which starts up QEMU using the NixOS configuration in
 :file:`bordervm-configuration.nix`.

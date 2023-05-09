@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 let
   cfg = config.bordervm;
-  inherit (lib) mkOption mdDoc types;
+  inherit (lib) mkOption mkEnableOption mdDoc types optional optionals;
 in {
   options.bordervm = {
     l2tp = {
@@ -22,14 +22,28 @@ in {
       };
     };
     ethernet = {
-      pciId = mkOption {
-        description = ''
-          Host PCI ID (as shown by `lspci`) of the ethernet adaptor
-          to be used by the VM. This uses VFIO and requires setup
-          on the emulation host before it will work!
-        '';
-        type = types.str;
-        example = "04:00.0";
+      pci = {
+        enable = mkEnableOption "passthru PCI ethernet";
+        id = mkOption {
+          description = ''
+            Host PCI ID (as shown by `lspci`) of the ethernet adaptor
+            to be used by the VM. This uses VFIO and requires setup
+            on the emulation host before it will work!
+          '';
+          type = types.str;
+          example = "04:00.0";
+        };
+      };
+      usb = {
+        enable = mkEnableOption "passthru USB ethernet";
+        vendor = mkOption {
+          type = types.str;
+          example = "0x0bda";
+        };
+        product = mkOption {
+          type = types.str;
+          example = "0x8153";
+        };
       };
     };
   };
@@ -66,11 +80,16 @@ in {
     virtualisation = {
       qemu = {
         networkingOptions = [];
-        options = [
-          "-device vfio-pci,host=${cfg.ethernet.pciId}"
-          "-nographic"
-          "-serial mon:stdio"
-        ];
+        options = [] ++
+          optional cfg.ethernet.pci.enable
+            "-device vfio-pci,host=${cfg.ethernet.pci.id}" ++
+          optionals cfg.ethernet.usb.enable [
+            "-device usb-ehci,id=ehci"
+            "-device usb-host,bus=ehci.0,vendorid=${cfg.ethernet.usb.vendor},productid=${cfg.ethernet.usb.product}"
+          ] ++ [
+            "-nographic"
+            "-serial mon:stdio"
+          ];
       };
       sharedDirectories = {
         liminix = {
