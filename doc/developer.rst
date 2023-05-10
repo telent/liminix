@@ -144,8 +144,30 @@ router from the internet so you can borrow the cable/fibre/DSL.
 * an L2TP service such as https://www.aa.net.uk/broadband/l2tp-service/
 
 You need to "hide" the Ethernet device from the host - for PCI this
-means configuring it for VFIO passthru; for USB you need to
-unload the module(s) it uses. Then
+means configuring it for VFIO passthru; for USB you need to unload the
+module(s) it uses. I have this segment in configuration.nix which you
+may be able to adapt:
+
+.. code-block:: nix
+  boot = {
+    kernelParams = [ "intel_iommu=on" ];
+    kernelModules = [
+      "kvm-intel" "vfio_virqfd" "vfio_pci" "vfio_iommu_type1" "vfio"
+    ];
+
+    postBootCommands = ''
+      # modprobe -i vfio-pci
+      # echo vfio-pci > /sys/bus/pci/devices/0000:01:00.0/driver_override
+    '';
+    blacklistedKernelModules = [
+      "r8153_ecm" "cdc_ether"
+    ];
+  };
+  services.udev.extraRules = ''
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="8153", OWNER="dan"
+  '';
+
+Then
 you can execute :command:`run-border-vm` in a ``buildEnv`` shell,
 which starts up QEMU using the NixOS configuration in
 :file:`bordervm-configuration.nix`.
