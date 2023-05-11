@@ -57,6 +57,7 @@ in {
       mips-vm
       borderVm.build.vm
       go-l2tp
+      min-copy-closure
     ];
   };
 }
