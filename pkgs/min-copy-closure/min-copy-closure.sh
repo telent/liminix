@@ -44,7 +44,7 @@ if test -z "$needed" ; then
     exit 1
 fi
 
-echo "cd / && cpio -v -i >/dev/console"  >&10
+echo "cd / && cpio -i >/dev/console"  >&10
 
 find $needed | cpio -H newc -o  >&10
 
