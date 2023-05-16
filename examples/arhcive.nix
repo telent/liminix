@@ -31,10 +31,8 @@ in rec {
   };
 
   imports = [
-    ../modules/tftpboot.nix
+    ../modules/standard.nix
     ../modules/wlan.nix
-    ../modules/flashimage.nix
-    ../modules/kexecboot.nix
   ];
 
   hostname = "arhcive";

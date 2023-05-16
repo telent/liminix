@@ -4,7 +4,7 @@ let
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
 in rec {
   imports = [
-    ./modules/tftpboot.nix
+    ./modules/standard.nix
     ./modules/wlan.nix
   ];
   services.loopback = config.hardware.networkInterfaces.lo;

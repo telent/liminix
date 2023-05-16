@@ -12,13 +12,14 @@ and the services that you want to run on it. Start by copying
 ``vanilla-configuration.nix`` and adjusting it, or look in the `examples`
 directory for some pre-written configurations.
 
-If you want to create a configuration that can be installed on
-a hardware device, be sure to include the "flashimage" module.
+Your configuration may include modules and probably _should_
+include the ``standard`` module unless you understand what it
+does and what happens if you leave it out.
 
 .. code-block: nix
 
   imports = [
-    ./modules/flashimage.nix
+    ./modules/standard.nix
   ]
 
 

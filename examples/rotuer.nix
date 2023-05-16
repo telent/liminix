@@ -33,9 +33,7 @@ in rec {
 
   imports = [
     ../modules/wlan.nix
-    ../modules/tftpboot.nix
-    ../modules/flashimage.nix
-    ../modules/jffs2.nix
+    ../modules/standard.nix
   ];
   rootfsType = "jffs2";
 

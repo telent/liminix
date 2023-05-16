@@ -34,8 +34,7 @@ in rec {
 
   imports = [
     ../modules/wlan.nix
-    ../modules/tftpboot.nix
-    ../modules/flashimage.nix
+    ../modules/standard.nix
   ];
 
   hostname = "extneder";
