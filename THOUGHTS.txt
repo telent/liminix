@@ -1533,3 +1533,148 @@ Sun Apr 23 18:24:34 BST 2023
 - rotuer is not recognising when  I set the hostname
 - I may have forgotten the root password :-(
 - why is hello world 70K unless hardeningDisable?
+
+Fri Apr 28 20:51:52 BST 2023
+
+To do nix-copy-closure we need nix-store, which is a symlink to nix,
+which is
+
+-rwxr-xr-x 1 dan users 2.3M Apr 28 21:08 nix
+
+(stripped). This is a lot bigger than, say, a simple script to
+loop through the closure of a derivation and copy only the store
+folders that don't exist already.
+
+* we'd like to only transmit the packages that aren't already present
+
+* we'd like to use a single ssh connection
+
+
+S: here is a list of package names
+C: these are the names of the packages I want
+S: here are the packages
+
+while read $f ; do
+  test -d $f || echo $f
+end
+
+Tue May  2 21:53:08 BST 2023
+
+1) we have a script that runs on the receiver, which
+
+ - accepts a list of store paths
+ - prints the missing store paths
+ - runs cpio -i < stdio
+
+2) we need a script for the sender that
+
+ - refs=$(nix-store -q --references $1 && echo end)
+ - opens ssh connection
+ - print ssh $refs
+ - needed= capture result until "end" received
+ - find needed | cpio -o  > ssh-connection
+ - close connection
+
+3) to have a reasonable hope of testing this we should do it with qemu. It would be nice
+if we could connect without faff to the qemu lan interface : either we do this by bringing up
+another qemu vm (preferably with the host store shared, otherwise it has to build a mips cross
+compiler/libc) or maybe we could do something unholy with ssh ProxyCommand
+
+ssh -o ProxyCommand "socat - UDP4-DATAGRAM:230.0.0.1:1234,sourceport=1234,reuseaddr,ip-add-membership=230.0.0.1:127.0.0.1"
+
+
+
+4) we haven't solved garbage collection, though I think "remove everything not in
+nix-path-registration" might be what's needed there
+
+Wed May  3 22:01:19 BST 2023
+
+Something weird is going on with qemu net device enumeration: when I
+run it interactively I'm getting the access network (mac ending :02)
+on eth0 and the lan (mac ending :01) on eth1, and if it's behaving the
+same in CI then how come any of the tests work? vanilla-confinguration.nix
+definitely assumes lan=eth0
+
+By switching from  -device virtio-net-pci to     -device virtio-net then
+I get the desired behaviour back
+
+Sat May  6 18:42:28 BST 2023
+
+Next:
+
+- package min-copy-closure
+- see if we can use it on some output to copy the whole system closure
+- post-copying symlink munging
+- try it on a real device, see if it works for config file updates
+- collect-garbage/delete-old-generation
+
+
+Sun May  7 23:03:03 BST 2023
+
+Shortly after all the work to reduce system closure size last time, I
+tried adding the necessary packages to support nix-copy-closure and
+saw it start building a complete C++ system with Boost. My fears that
+this would lead to quite a large increase in the system size were, it
+turned out, entirely founded.
+
+So I wrote my own - or at least, a quite minimal substitute. The core
+logic is simple - on the sender, we get the list of required packages,
+then we check for the existence of `/nix/store/eeeeeee-foo` for
+each of them on the target, and whatever's missing we send across the
+link using cpio.
+
+It sounds simple, and it should be simple, and in retrospect it _was_
+simple. Along the way I went on a bit of a Qemu networking tangent and
+learned quite a lot about the bash `coproc` command
+
+Tue May  9 21:06:53 BST 2023
+
+General direction of my thoughts:
+
+- get a baseline working rotuer system
+- prove that min-copy-closure works with it
+- refactor the crap out of it
+- configurablise the bordervm usb ethernet setup
+- when we have a good idea of how/whether min-copy-closure *actually*
+ works, declare "writeable filesystem" to be done
+- start to get more of a feel for how the services/config hang together
+
+? why does rotuer not have a hostname?
+
+? how can we get a device hooked up to rotuer's lan port that we can
+control remotely
+
+Sun May 14 23:25:46 BST 2023
+
+the outputs.systemConfiguration attribute builds a derivation
+containing a single file bin/activate
+
+_Presumably_, copying its closure will copy all the things, as
+we already use it as the roots for jffs2 creation. However, there
+is also a symlink created from /init at jffs2 creation
+
+Mon May 15 21:32:38 BST 2023
+
+Had a neat idea about uing an overlayfs combining jffs2 and ramfs
+to do upgrades that would otherwise be larger than the flash.
+Could use "overlay merge" from https://github.com/kmxz/overlayfs-tools
+
+Wed May 17 15:18:55 BST 2023
+
+liminix-rebuild doesn't collect garbage (this is a mising feature, not
+a bug). We think we can fix this using nix-path-registration: specifically,
+by deleting anything not in it.
+
+What we're going to do: build a fresh system image for rotuer, then
+dogfood liminix-rebuild until we've succeeded in getting it to
+change its hostname
+
+Also wondering if we should drop outputs.default, but maybe not
+
+* systemConfiguration: used for updates
+* vmroot: used for qemu
+* flashimage: used for flashing
+* tftproot: used for dev/test
+
+As long as we're consistently setting the default output to whichever
+is the appropriate "full production image" I think we're good.
