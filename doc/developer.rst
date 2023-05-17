@@ -149,6 +149,7 @@ module(s) it uses. I have this segment in configuration.nix which you
 may be able to adapt:
 
 .. code-block:: nix
+
   boot = {
     kernelParams = [ "intel_iommu=on" ];
     kernelModules = [
