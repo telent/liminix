@@ -7,6 +7,7 @@
 {
   writeText
 , lib
+, s6-init-bin
 , stdenv
 }:
 let
@@ -74,5 +75,6 @@ in attrset:
     installPhase = ''
       mkdir -p $out/bin
       $STRIP --remove-section=.note  --remove-section=.comment --strip-all makedevs -o $out/bin/activate
+      ln -s ${s6-init-bin}/bin/init $out/bin/init
     '';
   }

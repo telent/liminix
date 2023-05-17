@@ -11,5 +11,6 @@
   installPhase = ''
     mkdir -p $out/bin
     cp min-copy-closure.sh $out/bin/min-copy-closure
+    cp liminix-rebuild.sh $out/bin/liminix-rebuild
   '';
 }
