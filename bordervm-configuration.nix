@@ -75,6 +75,7 @@ in {
         ExecStart = "${pkgs.tufted}/bin/tufted /home/liminix/liminix";
       };
     };
+    services.openssh.enable = true;
     systemd.services.sshd.wantedBy = pkgs.lib.mkForce [ "multi-user.target" ];
 
     virtualisation = {
@@ -104,6 +105,7 @@ in {
       socat
       tufted
       iptables
+      usbutils
     ];
     security.sudo.wheelNeedsPassword = false;
     networking = {
