@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+ssh_command=${SSH_COMMAND-ssh}
 target_host=$1
 shift
 
@@ -10,5 +11,5 @@ fi
 
 toplevel=$(nix-build "$@" -A outputs.systemConfiguration --no-out-link)
 min-copy-closure $target_host $toplevel
-ssh $target_host cp -P $toplevel/bin/\* /
-ssh $target_host reboot
+$ssh_command $target_host cp -v -fP $toplevel/bin/* /persist
+$ssh_command $target_host "sync; reboot"
