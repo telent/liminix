@@ -12,4 +12,4 @@ fi
 toplevel=$(nix-build "$@" -A outputs.systemConfiguration --no-out-link)
 min-copy-closure $target_host $toplevel
 $ssh_command $target_host cp -v -fP $toplevel/bin/* /persist
-$ssh_command $target_host "sync; reboot"
+$ssh_command  $target_host "sync; source /etc/profile; reboot"
