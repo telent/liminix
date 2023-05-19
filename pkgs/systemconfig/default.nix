@@ -8,6 +8,7 @@
   writeText
 , lib
 , s6-init-bin
+, closureInfo
 , stdenv
 }:
 let
@@ -61,7 +62,8 @@ let
     }
   '';
 in attrset:
-  stdenv.mkDerivation {
+  let makedevs = activateScript attrset;
+  in stdenv.mkDerivation {
     name="make-stuff";
     src = ./.;
 
@@ -69,11 +71,13 @@ in attrset:
     LDFLAGS  = "-static";
 
     postConfigure = ''
-      cp ${activateScript attrset} makedevs.c
+      cp ${makedevs} makedevs.c
     '';
     makeFlags = ["makedevs"];
     installPhase = ''
-      mkdir -p $out/bin
+      closure=${closureInfo { rootPaths = [ makedevs ]; }}
+      mkdir -p $out/bin $out/etc
+      cp $closure/store-paths $out/etc/nix-store-paths
       $STRIP --remove-section=.note  --remove-section=.comment --strip-all makedevs -o $out/bin/activate
       ln -s ${s6-init-bin}/bin/init $out/bin/init
     '';

@@ -5,7 +5,6 @@
 , ...
 }:
 let
-  inherit (pkgs) closureInfo;
   inherit (lib) mkIf;
 in
 {
@@ -36,11 +35,7 @@ in
           mkdir -p $TMPDIR/empty/nix/store/
           cp ${systemConfiguration}/bin/activate $TMPDIR/empty/activate
           ln -s ${pkgs.s6-init-bin}/bin/init $TMPDIR/empty/init
-          pkgClosure=${closureInfo {
-             rootPaths = [ systemConfiguration ];
-           }}
-          cp $pkgClosure/registration nix-path-registration
-          grafts=$(sed < $pkgClosure/store-paths 's/^\(.*\)$/--graft \1:\1/g')
+          grafts=$(sed < ${systemConfiguration}/etc/nix-store-paths 's/^\(.*\)$/--graft \1:\1/g')
           mkfs.jffs2 --compression-mode=size ${endian} -e ${config.hardware.flash.eraseBlockSize} --enable-compressor=lzo --pad --root $TMPDIR/empty --output $out  $grafts --squash --faketime
         '';
     };
