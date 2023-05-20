@@ -19,7 +19,6 @@ int add_list_entry(char *name)
 	hash_list = realloc(hash_list, hash_list_size * sizeof(hash_t));
     }
     strncpy(hash_list[hash_list_entries++], name, 32);
-    printf("%d %d\n", hash_list_entries, hash_list_size);
 }
 
 int read_list(char *filename)

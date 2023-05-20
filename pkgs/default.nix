@@ -46,6 +46,7 @@
   openwrt = callPackage ./openwrt {};
 
   initramfs-peek = callPackage ./initramfs-peek {};
+  min-collect-garbage = callPackage ./min-collect-garbage {};
   min-copy-closure = callPackage ./min-copy-closure {};
   hi = callPackage ./hi {};
 }
