@@ -163,7 +163,7 @@ in rec {
     dir = "/run/dnsmasq";
     shell = "/bin/false";
   };
-  users.root.passwd = lib.mkForce secrets.root_password;
+  users.root = secrets.root;
 
   groups.dnsmasq = {
     gid = 51; usernames = ["dnsmasq"];

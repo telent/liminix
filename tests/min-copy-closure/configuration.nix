@@ -31,12 +31,6 @@ in {
       ];
     };
 
-    # services.dhcpc =
-    #   let iface =  config.hardware.networkInterfaces.lan;
-    #   in (udhcpc iface {
-    #     dependencies = [ config.services.hostname ];
-    #   }) // { inherit (iface) device; };
-
     rootfsType = "jffs2";
     services.default = lib.mkForce (target {
       name = "default";
