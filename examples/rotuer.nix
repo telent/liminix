@@ -36,7 +36,7 @@ in rec {
     ../modules/standard.nix
   ];
   rootfsType = "jffs2";
-
+  hostname = "rotuer";
   kernel = {
     config = {
       PPP = "y";
@@ -223,7 +223,7 @@ in rec {
 
   services.default = target {
     name = "default";
-    contents = with services; [
+    contents = with config.services; [
       config.hardware.networkInterfaces.lo
       config.hardware.networkInterfaces.lan
       int
@@ -236,7 +236,8 @@ in rec {
       dns
       resolvconf
       sshd
+      config.services.hostname
     ];
   };
-  defaultProfile.packages = with pkgs;  [ nftables tcpdump ] ;
+  defaultProfile.packages = with pkgs;  [min-collect-garbage nftables tcpdump] ;
 }
