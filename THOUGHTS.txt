@@ -1678,3 +1678,53 @@ Also wondering if we should drop outputs.default, but maybe not
 
 As long as we're consistently setting the default output to whichever
 is the appropriate "full production image" I think we're good.
+
+Wed May 17 22:45:40 BST 2023
+
+Random thought: when we bind mount /target/persist/nix to /target/nix
+we could make it read-only. worth doing?
+
+Thu May 18 10:59:39 BST 2023
+
+- liminix-rebuild can't find reboot: probably the PATH is just
+  generally wrong for ssh sessions (maybe all non-login sessions?)
+
+- need to copy path registration file somewhere useful and
+  delete stuff not in it at the appropriate time. Would be safest
+  to do that either late in the shutdown process before rebooting,
+  or during boot.
+
+Fri May 19 15:18:13 BST 2023
+
+If we make min-collect-garbage - just a command you can run whenever -
+that will be fine for current capabilities.  It won't work with the
+theoretical overlayfs system, though: we need to copy-down from the
+ramfs to real flash before rebooting, and that can't happen until
+there's disk space to do it
+
+Sat May 20 22:35:25 BST 2023
+
+We have a working min-collect-garbage (seems to, anyway ...)
+
+- having ssh host key wiped on reboot is sucky. maybe we can have
+/persist/secrets and a service that looks there?
+
+- find out what files ash sources on non-login shell startup
+
+- services.default is suboptimal as there is no way to add to it
+without wiping it
+
+- decide whether to use liminix- or min- as our prefix for nixy
+  commands
+
+- should we move config.outputs  -> config.system.outputs ? see Mar 28
+
+- less crap firewall
+
+- add ipv6 support to rotuer
+
+- create an l2tp configuration
+
+- iperf and tuning
+
+- wlan country code
