@@ -146,13 +146,17 @@ in {
           console = node "c" "5" "1" "0600";
           pts =     dir {};
         };
-      etc = dir {
+      etc = let
         profile = symlink
           (pkgs.writeScript ".profile" ''
-            PATH=${lib.makeBinPath config.defaultProfile.packages}:/bin
+           PATH=${lib.makeBinPath config.defaultProfile.packages}:/bin
             export PATH
-          '');
+            '');
+      in dir {
+        inherit profile;
+        ashrc = profile;
       };
+
       proc = dir {};
       run = dir {};
       sys = dir {};
