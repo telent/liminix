@@ -192,7 +192,6 @@ to the old configuration it finds in flash.
 Building the second (permanent) image
 .....................................
 
-
 While running in the kexecboot system, you can copy the permanent
 image to the device with :command:`ssh`
 
@@ -204,7 +203,6 @@ image to the device with :command:`ssh`
 Next you need to connect to the device and locate the "firmware"
 partition, which you can do with a combination of :command:`dmesg`
 output and the contents of :file:`/proc/mtd`
-
 
 .. code-block:: console
 
@@ -273,6 +271,19 @@ Rebuilding the system
 
      liminix-rebuild root@the-device  -I liminix-config=./examples/rotuer.nix --arg device "import ./devices/gl-ar750"
 
+This will
+
+* build anything that needs building
+* copy new or changed packages to the device
+* reboot the device
+
+It doesn't delete old packages automatically: to do that run
+:command:`min-collect-garbage`, which will delete any packages not in
+the current system closure. Note that Liminix does not have the NixOS
+concept of environments or generations, and there is no way back from
+this except for building the previous configuration again.
+
+
 
 Caveats
 ~~~~~~~
@@ -283,8 +294,6 @@ Caveats
   nixpkgs).
 
 * it cannot upgrade the kernel, only userland
-
-* it reboots the device!
 
 
 
