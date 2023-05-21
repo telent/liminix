@@ -68,12 +68,12 @@ Creating configuration.nix
 ==========================
 
 
-You need to create a ``configuration.nix`` that describes your device
+You need to create a :file:`configuration.nix` that describes your device
 and the services that you want to run on it. Start by copying
-``vanilla-configuration.nix`` and adjusting it, or look in the `examples`
+:file:`vanilla-configuration.nix` and adjusting it, or look in the `examples`
 directory for some pre-written configurations.
 
-``configuration.nix`` conventionally describes the packages, services,
+:file:`configuration.nix` conventionally describes the packages, services,
 user accounts etc of the device. It does not describe the hardware
 itself, which is specified separately in the build command (as you
 will see below).
@@ -104,13 +104,13 @@ example:
      --arg device "import ./devices/qemu" -A outputs.default
 
 In this command ``<liminix-config>`` points to your
-``configuration.nix``, ``device`` is the file for your hardware device
+:file:`configuration.nix`, ``device`` is the file for your hardware device
 definition, and ``outputs.default`` will generate some kind of
 Liminix image output appropriate to that device.
 
 For the qemu device in this example, ``outputs.default`` is an alias
 for ``outputs.vmbuild``, which creates a directory containing a
-squashfs root image and a kernel. You can use the `mips-vm` command to
+squashfs root image and a kernel. You can use the :command:`mips-vm` command to
 run this.
 
 For the currently supported hardware devices, ``outputs.default``
