@@ -90,7 +90,9 @@ Hardware devices
 How you get your image onto hardware will vary according to the
 device, but is likely to involve taking it apart to add wires to
 serial console pads/headers, then using U-Boot to fetch images over
-TFTP.
+TFTP.  The OpenWrt documentation has a `good explanation <https://openwrt.org/docs/techref/hardware/port.serial>`_ of what you may expect to find on
+the device.
+
 
 There is a rudimentary TFTP server bundled with the system which runs
 from the command line, has an allowlist for client connections, and
