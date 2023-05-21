@@ -32,7 +32,7 @@ in
         in runCommand "make-jffs2" {
           depsBuildBuild = [ mtdutils ];
         } ''
-          mkdir -p $TMPDIR/empty/nix/store/
+          mkdir -p $TMPDIR/empty/nix/store/ $TMPDIR/empty/secrets
           cp ${systemConfiguration}/bin/activate $TMPDIR/empty/activate
           ln -s ${pkgs.s6-init-bin}/bin/init $TMPDIR/empty/init
           grafts=$(sed < ${systemConfiguration}/etc/nix-store-paths 's/^\(.*\)$/--graft \1:\1/g')

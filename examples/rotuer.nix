@@ -149,12 +149,14 @@ in rec {
       run = "${pkgs.chrony}/bin/chronyd -f ${config} -d";
     };
 
-
   services.sshd = longrun {
     name = "sshd";
     run = ''
-      mkdir -p /run/dropbear
-      ${dropbear}/bin/dropbear -E -P /run/dropbear.pid -R -F
+      if test -d /persist; then
+        mkdir -p /persist/secrets/dropbear
+        ln -s /persist/secrets/dropbear /run
+      fi
+      ${dropbear}/bin/dropbear -E -R -P /run/dropbear.pid  -F
     '';
   };
 
