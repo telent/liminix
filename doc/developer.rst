@@ -295,7 +295,8 @@ the copyright on the code you contribute.
 Code of Conduct
 ===============
 
-Please govern yourself in Liminix project venues according to the guidance in the `geekfeminism "Community Anti-harassment Policy" <https://geekfeminism.wikia.org/wiki/Community_anti-harassment/Policy>`_.
+Please govern yourself in Liminix project venues according to the
+`Code of Conduct <https://gti.telent.net/dan/liminix/src/commit/7bcf6b15c3fdddafeda13f65b3cd4a422dc52cd3/CODE-OF-CONDUCT.md>`_
 
 
 Where to send patches
