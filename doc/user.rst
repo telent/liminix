@@ -145,7 +145,6 @@ This is quite hardware-specific, and sometimes involves soldering:
 please refer to the Developer Manual.
 
 
-
 Flashing from an existing Liminix system with :command:`flashcp`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -159,8 +158,7 @@ the device again and it will boot from the old image.
 Building the RAM-based image
 ............................
 
-
-To creatr the ephemeral image, build ``outputs.kexecboot`` instead of
+To create the ephemeral image, build ``outputs.kexecboot`` instead of
 ``outputs.default``.  This generates a directory containing the root
 filesystem image and kernel, along with an executable called `kexec`
 and a `boot.sh` script that runs it with appropriate arguments.
