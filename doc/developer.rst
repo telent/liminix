@@ -212,7 +212,7 @@ as inputs, because it builds the qemu device against both.
     nix-build --argstr liminix `pwd`  --arg  nixpkgs "<nixpkgs>" \
      --argstr unstable `pwd`/../unstable-nixpkgs/ ci.nix
 
-or to run a named test, use the ``-A`` flag. For example, ``-A pppoe``
+To run a single named test, use the ``-A`` flag. For example, ``-A pppoe``
 
 
 
