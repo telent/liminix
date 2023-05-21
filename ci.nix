@@ -29,12 +29,14 @@ let
         nativeBuildInputs = with pkgs; [ gnumake sphinx ];
         src = ./doc;
         buildPhase = ''
-          make  html
+          make html
         '';
         installPhase = ''
-          dest=$out/share/doc/liminix
-          mkdir -p $dest
-          cp -a _build/html/* $dest
+          mkdir -p $out/nix-support $out/share/doc/
+          # (cd _build && tar cf $out/share/doc/liminix_manual.tar html)
+          cp -a _build/html $out/share/doc/liminix
+          echo "file source-dist \"$out/share/doc/liminix\"" \
+              > $out/nix-support/hydra-build-products
         '';
       };
       with-unstable = (import liminix {
