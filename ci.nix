@@ -24,6 +24,19 @@ let
         device = import (liminix + "/devices/qemu");
         liminix-config = vanilla;
       }).buildEnv;
+      doc = pkgs.stdenv.mkDerivation {
+        name = "liminix-doc";
+        nativeBuildInputs = with pkgs; [ gnumake sphinx ];
+        src = ./doc;
+        buildPhase = ''
+          make  html
+        '';
+        installPhase = ''
+          dest=$out/share/doc/liminix
+          mkdir -p $dest
+          cp -a _build/html/* $dest
+        '';
+      };
       with-unstable = (import liminix {
         nixpkgs = unstable;
         inherit borderVmConf;
