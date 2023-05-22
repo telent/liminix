@@ -174,7 +174,7 @@ extraPkgs // {
   });
 
   pppBuild = prev.ppp;
-  ppp =
+  pppOld =
     (prev.ppp.override {
       libpcap = null;
     }).overrideAttrs (o : {
