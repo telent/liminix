@@ -29,8 +29,17 @@ let
     )
     echo >/proc/self/fd/10
   '';
+  ip6-up = writeAshScript "ip6-up" {} ''
+    . ${serviceFns} 
+    (in_outputs ${name}
+     echo $4 > ipv6-address
+     echo $5 > ipv6-peer-address
+    )
+    echo >/proc/self/fd/10
+  '';
   ppp-options' = ppp-options ++ [
     "ip-up-script" ip-up
+    "ipv6-up-script" ip6-up
     "ipparam" name
     "nodetach"
     "usepeerdns"

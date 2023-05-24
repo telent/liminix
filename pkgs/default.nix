@@ -43,6 +43,7 @@
 
   preinit = callPackage ./preinit {};
   swconfig = callPackage ./swconfig {};
+  odhcp6c = callPackage ./odhcp6c {};
 
   openwrt = callPackage ./openwrt {};
 

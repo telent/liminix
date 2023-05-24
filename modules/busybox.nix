@@ -38,7 +38,7 @@ let
     "seq" "setsid" "sha1sum" "sha256sum" "sha512sum" "sleep" "sort"
     "stat" "strings" "stty" "su" "sum" "swapoff" "swapon" "sync"
     "tail" "tee" "test" "time" "touch" "tr" "traceroute" "traceroute6"
-    "true" "truncate" "tty" "udhcpc" "udhcpc6" "umount" "uname"
+    "true" "truncate" "tty" "udhcpc" "umount" "uname"
     "unexpand" "uniq" "unlink" "unlzma" "unxz" "unzip" "uptime"
     "watch" "wc" "whoami" "xargs" "xxd" "xz" "xzcat" "yes" "zcat"
   ];

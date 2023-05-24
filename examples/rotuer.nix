@@ -232,6 +232,25 @@ in rec {
       down = "echo 0 > ${filename}";
     };
 
+  services.dhcp6 =
+    let
+      name = "dhcp6c.wan";
+      luafile = pkgs.runCommand "udhcpc-script" {} ''
+        ${pkgs.luaSmall.pkgs.fennel}/bin/fennel --compile  ${./udhcp6-script.fnl} > $out
+      '';
+      script = pkgs.writeAshScript "dhcp6-notify" {} ''
+        . ${serviceFns}
+        (in_outputs ${name}; ${pkgs.luaSmall}/bin/lua ${luafile} "$@")
+      '';
+    in longrun {
+      inherit name;
+      run = ''
+        ${pkgs.odhcp6c}/bin/odhcp6c -s ${script} -e -v -p /run/${name}.pid -P 48 $(output ${services.wan} ifname)
+        )
+      '';
+      dependencies = [ services.wan ];
+    };
+
   services.default = target {
     name = "default";
     contents = with config.services; [
@@ -248,6 +267,7 @@ in rec {
       resolvconf
       sshd
       config.services.hostname
+      dhcp6
     ];
   };
   defaultProfile.packages = with pkgs;  [min-collect-garbage nftables tcpdump] ;
