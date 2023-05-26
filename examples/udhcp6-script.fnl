@@ -45,3 +45,11 @@
        ]]
   (each [_ n (ipairs wanted)]
     (write-value-from-env n)))
+
+(let [ready (match state
+              "started" false
+              "unbound" false
+              "stopped" false
+              _ true)]
+  (and ready
+       (with-open [fd (io.open "/proc/self/fd/10" :w)] (fd:write "\n"))))

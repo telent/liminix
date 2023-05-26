@@ -244,6 +244,7 @@ in rec {
       '';
     in longrun {
       inherit name;
+      notification-fd = 10;
       run = ''
         ${pkgs.odhcp6c}/bin/odhcp6c -s ${script} -e -v -p /run/${name}.pid -P 48 $(output ${services.wan} ifname)
         )
