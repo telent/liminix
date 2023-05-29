@@ -5,4 +5,5 @@
   pppoe = import ./pppoe/test.nix;
   jffs2 =  import ./jffs2/test.nix;
   min-copy-closure =  import ./min-copy-closure/test.nix;
+  fennel = import ./fennel/test.nix;
 }

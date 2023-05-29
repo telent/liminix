@@ -11,6 +11,7 @@
       kernel = callPackage ./kernel {};
     };
   };
+  writeFennelScript = callPackage ./write-fennel-script {};
   writeAshScript = callPackage ./write-ash-script {};
   systemconfig = callPackage ./systemconfig {};
   s6-init-bin =  callPackage ./s6-init-bin {};
