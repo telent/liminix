@@ -21,6 +21,7 @@ let
     dropbear
     ifwait
     writeText
+    writeFennelScript
     serviceFns;
 in rec {
   boot = {
@@ -235,18 +236,13 @@ in rec {
   services.dhcp6 =
     let
       name = "dhcp6c.wan";
-      luafile = pkgs.runCommand "udhcpc-script" {} ''
-        ${pkgs.luaSmall.pkgs.fennel}/bin/fennel --compile  ${./udhcp6-script.fnl} > $out
-      '';
-      script = pkgs.writeAshScript "dhcp6-notify" {} ''
-        . ${serviceFns}
-        (in_outputs ${name}; ${pkgs.luaSmall}/bin/lua ${luafile} "$@")
-      '';
+      luafile = writeFennelScript "odhcpc-script" [] ./odhcp6-script.fnl;
     in longrun {
       inherit name;
       notification-fd = 10;
       run = ''
-        ${pkgs.odhcp6c}/bin/odhcp6c -s ${script} -e -v -p /run/${name}.pid -P 48 $(output ${services.wan} ifname)
+        export SERVICE_STATE=/run/service-state/${name}
+        ${pkgs.odhcp6c}/bin/odhcp6c -s ${luafile} -e -v -p /run/${name}.pid -P 48 $(output ${services.wan} ifname)
         )
       '';
       dependencies = [ services.wan ];

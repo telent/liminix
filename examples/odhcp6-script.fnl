@@ -1,4 +1,5 @@
 
+(os.chdir (os.getenv "SERVICE_STATE"))
 
 (fn write-value [name value]
   (with-open [fout (io.open name :w)]
