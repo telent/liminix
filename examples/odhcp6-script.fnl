@@ -1,12 +1,11 @@
 
-(os.chdir (os.getenv "SERVICE_STATE"))
+(local state-directory (assert (os.getenv "SERVICE_STATE")))
+(os.execute (.. "mkdir -p " state-directory))
 
 (fn write-value [name value]
-  (with-open [fout (io.open name :w)]
-    (when value (fout:write value))))
-
-(write-value "state" (. arg 2))
-(write-value "ifname" (. arg 1))
+  (let [path (.. state-directory "/" name)]
+    (with-open [fout (io.open path :w)]
+      (when value (fout:write value)))))
 
 (fn write-value-from-env [name]
   (write-value name (os.getenv (string.upper name))))
@@ -47,10 +46,13 @@
   (each [_ n (ipairs wanted)]
     (write-value-from-env n)))
 
-(let [ready (match state
+(let [[ifname state] arg
+      ready (match state
               "started" false
               "unbound" false
               "stopped" false
               _ true)]
-  (and ready
-       (with-open [fd (io.open "/proc/self/fd/10" :w)] (fd:write "\n"))))
+  (write-value "state" state)
+  (write-value "ifname" ifname)
+  (when ready
+    (with-open [fd (io.open "/proc/self/fd/10" :w)] (fd:write "\n"))))
