@@ -80,6 +80,9 @@
       inherit (pkgs.pseudofile) dir symlink;
       inherit (pkgs.liminix.networking) interface;
     in {
+      programs.busybox.options = {
+        FEATURE_DD_IBS_OBS = "y"; # ath10k_cal_data needs skip_bytes,fullblock
+      };
       hardware = {
         defaultOutput = "tftpboot";
         loadAddress = "0x80060000";
