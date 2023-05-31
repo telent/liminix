@@ -10,6 +10,10 @@
 (fn write-value-from-env [name]
   (write-value name (os.getenv (string.upper name))))
 
+;; we remove state before updating to ensure that consumers don't get
+;; a half-updated snapshot
+(os.remove (.. state-directory "/state"))
+
 (let [wanted
       [
        :addresses
@@ -52,7 +56,8 @@
               "unbound" false
               "stopped" false
               _ true)]
-  (write-value "state" state)
+  (write-value "last-update" (tostring (os.time)))
   (write-value "ifname" ifname)
+  (write-value "state" state)
   (when ready
     (with-open [fd (io.open "/proc/self/fd/10" :w)] (fd:write "\n"))))

@@ -23,6 +23,7 @@
   kernel-backport = callPackage ./kernel-backport {};
   mac80211 = callPackage ./mac80211 {};
   netlink-lua = callPackage ./netlink-lua {};
+  linotify = callPackage ./linotify {};
   ifwait = callPackage ./ifwait {};
 
   gen_init_cpio = callPackage ./gen_init_cpio {};

@@ -183,10 +183,14 @@ in rec {
   groups.system.usernames = ["dnsmasq"];
 
   services.dns =
-    dnsmasq {
+    let interface = services.int;
+    in dnsmasq {
       resolvconf = services.resolvconf;
-      interface = services.int;
-      ranges = ["10.8.0.10,10.8.0.240"];
+      inherit interface;
+      ranges = [
+        "10.8.0.10,10.8.0.240"
+        "::,constructor:${interface.device},ra-stateless"
+      ];
       domain = "fake.liminix.org";
     };
 
@@ -248,6 +252,14 @@ in rec {
       dependencies = [ services.wan ];
     };
 
+  services.acquire-lan-prefix =
+    let script = pkgs.callPackage ./acquire-delegated-prefix.nix {  };
+    in longrun {
+      name = "acquire-lan-prefix";
+      run = "${script} /run/service-state/dhcp6c.wan ${services.int.device}";
+      dependencies = [ services.dhcp6 ];
+    };
+
   services.default = target {
     name = "default";
     contents = with config.services; [
@@ -265,6 +277,7 @@ in rec {
       sshd
       config.services.hostname
       dhcp6
+      acquire-lan-prefix
     ];
   };
   defaultProfile.packages = with pkgs;  [min-collect-garbage nftables tcpdump] ;

@@ -15,7 +15,7 @@ in name : packages : source :
       echo "#!${lua}/bin/lua"
       echo "package.path = ${lib.strings.escapeShellArg luapath} .. package.path"
       echo "package.cpath = ${lib.strings.escapeShellArg luacpath} .. package.cpath"
-      ${lua.pkgs.fennel}/bin/fennel --compile  ${source}
+      ${lua.pkgs.fennel}/bin/fennel --correlate --compile ${source}
       ) > $out
       chmod a+x $out
     ''
