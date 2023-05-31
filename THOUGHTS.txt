@@ -1710,6 +1710,7 @@ We have a working min-collect-garbage (seems to, anyway ...)
 /persist/secrets and a service that looks there?
 
 - find out what files ash sources on non-login shell startup
+  [ set ENV=/etc/ashrc in parent process env ]
 
 - services.default is suboptimal as there is no way to add to it
 without wiping it
@@ -1728,3 +1729,84 @@ without wiping it
 - iperf and tuning
 
 - wlan country code
+
+
+dropbear weak hashes? https://github.com/mkj/dropbear/issues/138
+
+Sun May 21 11:48:07 BST 2023
+
+dropbear will generate host keys on first connection. It's (probably) good that the
+key is generated on-device and also that we wait until there's some randomness.
+It's not so good that it will only write the key to DSS_PRIV_FILENAME which is
+hardcoded to /run
+
+Sun May 21 17:27:31 BST 2023
+
+What do we need for ipv6?
+
+-  upgrade ppp to something with an ipv6-up-script option, move ppp and pppoe derivations into their own files
+-  get ipv6 address from pppoe
+-  get ipv6 delegation from DHCPv6
+-  support dhcp6 in dnsmasq, and advertise prefix on lan
+-  firewall settings
+
+Sun May 21 21:30:17 BST 2023
+
+Making hydra build the docs is straightforward, but making it
+_publish_ the docs is outside scope, really. It can serve the files
+but they're all text/plain
+
+Should hydra push the docs to www.liminix.org or should www.liminix.org
+pull?
+
+TODO-at-some-point: assign uids and gids dynamically, somehow
+
+Tue May 23 22:56:33 BST 2023
+
+following the guidance at https://support.aa.net.uk/IPv6:
+
+we run odhcp6c to do router solicitation/advertisement dance
+
+
+odhcp6c environment variables:
+
+RA_ADDRESSES=
+RA_REACHABLE=0
+CER=
+PASSTHRU=00170020200108b0000000000000000000002020200108b0000000000000000000002021
+SERVER=fe80::203:97ff:fed6:0
+RA_MTU=0
+RA_ROUTES=::/0,fe80::203:97ff:fed6:0,65535,512
+OPTION_1=00030001e4956e4ef2fa
+NTP_FQDN=
+OPTION_2=00030001000397d60000
+RA_DOMAINS=
+DOMAINS=
+AFTR=
+SIP_IP=
+NTP_IP=
+PREFIXES=2001:8b0:de3a:40dc::/64,7198,7198
+RA_HOPLIMIT=64
+RA_DNS=
+RDNSS=2001:8b0::2020 2001:8b0::2021
+SNTP_IP=
+RA_RETRANSMIT=0
+SIP_DOMAIN=
+ADDRESSES=2001:8b0:1111:1111:0:ffff:51bb:4cf2/128,3598,7198
+
+# ip -6 route |grep default
+default via fe80::203:97ff:fed6:0 dev ppp0  metric 1024  expires 65211sec
+
+presumably from RA_ROUTES but why is the metric appaently doubled?
+
+Tue May 30 21:25:37 BST 2023
+
+We have an odhcpc script that preserves the prefix delegation from the
+ISP.  We need a service that notices whenever the state is
+available/has changed, and updates the LAN IPv6 address.
+
+The service can depend on odhcp
+
+add inotify to packages
+use writeFennelScript with that dep
+see if it works
