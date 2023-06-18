@@ -13,12 +13,13 @@ stdenv.mkDerivation {
   name = "preinit";
   src = ./.;
 
-  #  NIX_DEBUG=2;
+#  NIX_DEBUG=2;
   hardeningDisable = [ "all" ];
-  CFLAGS = "-Os  -nostartfiles -nostdlib  -fno-stack-protector -fpic -fPIC  -I ./ -I ${kernel}/tools/include/nolibc";
+  CFLAGS = "-Os -static -DPREINIT_USE_LIBC  -fno-stack-protector -fpic -fPIC -I ./ -I ${kernel}/tools/include/nolibc";
 
   postBuild = ''
     $STRIP  --remove-section=.note --remove-section=.comment preinit
+    ls -l preinit
   '';
 
   makeFlags = ["preinit"];

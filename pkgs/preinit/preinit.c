@@ -1,6 +1,7 @@
-#ifdef USE_LIBC
+#ifdef PREINIT_USE_LIBC
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/mount.h>
 #include <sys/wait.h>
 #include <string.h>
