@@ -37,10 +37,10 @@
 
 
 (fn file-exists? [name]
-  (let [f (io.open name :r)]
-    (match f
-      non-nil (or (f:close) true)
-      (nil err) false)))
+  (match (io.open name :r)
+    f (do (f:close) true)
+    _ false))
+
 
 (fn read-line [name]
   (with-open [f (assert (io.open name :r) (.. "can't open file " name))]
