@@ -31,17 +31,20 @@ let
 
   indent = text : indentLines 0 (splitString "\n" text);
 
-  dochain = { name, type, family, rules, policy ? null, hook ? null } : ''
+  dochain = { name, type, family, rules,
+              policy ? null,
+              priority ? "filter",
+              hook ? null } : ''
     chain ${name} {
     ${if hook != null
-    then "type ${type} hook ${hook}; policy ${policy};"
+      then "type ${type} hook ${hook} priority ${priority}; policy ${policy};"
     else ""
     }
     ${concatStringsSep "\n" rules}
     }
   '';
   dotable = family : chains : ''
-    table ${family} ${family} {
+    table ${family} table-${family} {
     ${concatStringsSep "\n" (map dochain chains)}
     }
   '';

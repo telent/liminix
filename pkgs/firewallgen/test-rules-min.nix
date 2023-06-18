@@ -2,17 +2,17 @@ let
   drop = expr : "${expr} drop";
   accept = expr : "${expr} accept";
   mcast-scope = 8;
-  allow-incoming = true;
+  allow-incoming = false;
   bogons-ip6 = {
     type = "filter";
     family = "ip6";
     rules = [
-      (drop "saddr ff00::/8") # multicast saddr is illegal
+      (drop "ip6 saddr ff00::/8") # multicast saddr is illegal
 
-      (drop "saddr ::/128") # unspecified address
-      (drop "daddr ::/128")
-      (drop "saddr 2001:db8::/32") # documentation addresses
-      (drop "daddr 2001:db8::/32")
+      (drop "ip6 saddr ::/128") # unspecified address
+      (drop "ip6 daddr ::/128")
+      (drop "ip6 saddr 2001:db8::/32") # documentation addresses
+      (drop "ip6 daddr 2001:db8::/32")
 
       # I think this means "check FIB for (saddr, iif) to see if we
       # could route a packet to that address using that interface",
@@ -39,33 +39,36 @@ let
     hook = "forward";
     rules = [
       "jump bogons-ip6"
-      (drop "saddr ::1/128") # loopback address [RFC4291]
-      (drop "daddr ::1/128")
-      (drop "saddr ::FFFF:0:0/96")# IPv4-mapped addresses
-      (drop "daddr ::FFFF:0:0/96")
-      (drop "saddr fe80::/10") # link-local unicast
-      (drop "daddr fe80::/10")
-      (drop "saddr fc00::/7") # unique-local addresses
-      (drop "daddr fc00::/7")
-      (drop "saddr 2001:10::/28") # ORCHID [RFC4843].
-      (drop "daddr 2001:10::/28")
+      (drop "ip6 saddr ::1/128") # loopback address [RFC4291]
+      (drop "ip6 daddr ::1/128")
+      (drop "ip6 saddr ::FFFF:0:0/96")# IPv4-mapped addresses
+      (drop "ip6 daddr ::FFFF:0:0/96")
+      (drop "ip6 saddr fe80::/10") # link-local unicast
+      (drop "ip6 daddr fe80::/10")
+      (drop "ip6 saddr fc00::/7") # unique-local addresses
+      (drop "ip6 daddr fc00::/7")
+      (drop "ip6 saddr 2001:10::/28") # ORCHID [RFC4843].
+      (drop "ip6 daddr 2001:10::/28")
 
-      (drop "saddr fc00::/7") # unique local source
-      (drop "daddr fc00::/7") # and/or dst addresses [RFC4193]
+      (drop "ip6 saddr fc00::/7") # unique local source
+      (drop "ip6 daddr fc00::/7") # and/or dst addresses [RFC4193]
 
       # multicast with wrong scopes
       (drop
         # dest addr first byte 0xff, low nibble of second byte <= scope
         # https://www.mankier.com/8/nft#Payload_Expressions-Raw_Payload_Expression
-        "@nh,192,8 eq 0xff @nh,204,4 le ${toString mcast-scope})")
+        "@nh,192,8 eq 0xff @nh,204,4 le ${toString mcast-scope}")
 
       (accept "oifname \"int\" iifname \"ppp0\" meta l4proto udp ct state established,related")
       (accept "iifname \"int\" oifname \"ppp0\" meta l4proto udp")
 
-      (accept "icmpv6")
-      (accept "ah")
-      (accept "esp")
-      (accept "udp port 500") # IKE Protocol [RFC5996]. haha zyxel
+      (accept "meta l4proto icmpv6")
+      (accept "meta l4proto ah")
+      (accept "meta l4proto esp")
+
+      # does this ever get used or does the preceding general udp accept
+      # already grab anything that might get here?
+      (accept "oifname \"ppp0\" udp dport 500") # IKE Protocol [RFC5996]. haha zyxel
       (accept "ip6 nexthdr hip")
 
       ## FIXME no support yet for recs 27-30 Mobility Header
@@ -84,11 +87,11 @@ let
       # accept inbound from the WAN
       (if allow-incoming
        then accept "oifname \"int\" iifname \"ppp0\""
-       else { rule = "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip6"; }
+       else "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip6"
       )
       # allow all outbound and any inbound that's part of a
       # recognised (outbound-initiated) flow
-      (accept "oifname \"int\" iifname \"ppp0\"  ct state established,related")
+      (accept "oifname \"int\" iifname \"ppp0\" ct state established,related")
       (accept "iifname \"int\" oifname \"ppp0\" ")
     ];
   };
@@ -99,10 +102,10 @@ let
     hook = "input";
     rules = [
       "jump bogons-ip6"
-      (accept "icmpv6")
+      (accept "meta l4proto icmpv6")
       (if allow-incoming
        then accept "oifname \"int\" iifname \"ppp0\""
-       else { rule = "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip6"; }
+       else "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip6"
       )
       (accept "oifname \"int\" iifname \"ppp0\"  ct state established,related")
       (accept "iifname \"int\" oifname \"ppp0\" ")
@@ -113,7 +116,7 @@ let
     type = "filter";
     family = "ip6";
     rules = [
-      "oifname \"int\" tcp port 22 daddr loaclhost.lan"
+      "oifname \"int\" ip6 daddr 2001:8b0:de3a:40de::e9d tcp dport 22"
     ];
   };
 in {
