@@ -55,11 +55,21 @@ extraPkgs // {
     ];
   });
 
-  chrony = prev.chrony.override {
-    gnutls = null;
-    nss = null;
-    nspr = null;
-  };
+  chrony =
+    let chrony' = prev.chrony.overrideAttrs(o: {
+          configureFlags = [
+            "--chronyvardir=$(out)/var/lib/chrony"
+            "--disable-readline"
+            "--disable-editline"
+          ];
+        });
+    in chrony'.override {
+      gnutls = null;
+      nss = null;
+      nspr = null;
+      readline = null;
+      libseccomp = null;
+    };
 
   ntp =
     let
