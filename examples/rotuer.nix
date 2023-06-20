@@ -226,15 +226,23 @@ in rec {
     dependencies = [ services.wan ];
   };
 
+  services.firewall =
+    let config = pkgs.firewallgen "firewall.nft" (import ./rotuer-firewall.nix);
+    in oneshot {
+      name = "firewall";
+      up = config;
+      down = "${pkgs.nftables}/bin/nft flush ruleset";
+    };
+
   services.packet_forwarding =
     let filename = "/proc/sys/net/ipv4/conf/all/forwarding";
     in oneshot {
       name = "let-the-ip-flow";
       up = ''
-        ${pkgs.nftables}/bin/nft -f ${../nat.nft}
         echo 1 > ${filename}
       '';
       down = "echo 0 > ${filename}";
+      dependencies = [ services.firewall ];
     };
 
   services.dhcp6 =
