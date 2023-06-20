@@ -66,9 +66,14 @@ extraPkgs // {
       nss = null;
       nspr = null;
       readline = null;
+      libedit = null;
+      libcap = null;
       libseccomp = null;
-    };
+      # should texinfo be in nativeBuildInputs instead of
+      # buildInputs?
+      texinfo = null;
 
+    };
 
   strace = prev.strace.override { libunwind = null; };
 
