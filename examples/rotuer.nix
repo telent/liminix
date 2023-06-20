@@ -280,5 +280,7 @@ in rec {
       acquire-lan-prefix
     ];
   };
-  defaultProfile.packages = with pkgs;  [min-collect-garbage nftables tcpdump] ;
+  defaultProfile.packages = with pkgs; [
+    min-collect-garbage
+  ];
 }
