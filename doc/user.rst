@@ -22,6 +22,21 @@ helpful in understanding it.  The steps are as follows:
 
 * Flash it to the device
 
+Supported devices
+=================
+
+For a list of devices that Liminix (present or previous versions)
+has run on, refer to `devices/ in the source repo <https://gti.telent.net/dan/liminix/src/branch/main/devices>`_. For devices that _currently_ build,
+cross-reference it with `the CI status <https://build.liminix.org/jobset/liminix/build#tabs-jobs>`_. Everything that builds is (usually) expected
+to run, so if you end up with an image that builds but doesn't
+boot, please report it as a bug.
+
+As of June 2023 the device list is a little thin. Adding devices based
+on the Atheros or Mediatek (Ralink) platform should be quite
+straightforward if you have some C/Linux kernel experience and are
+prepared to open it up and attach serial wires: please refer to the
+Developer Manual.
+
 
 Choosing a flavour (read-only or updatable)
 ===========================================
