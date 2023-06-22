@@ -24,7 +24,6 @@
 in rec {
   boot = {
     tftp = {
-      enable = true;
       serverip = "192.168.8.148";
       ipaddr = "192.168.8.251";
     };
