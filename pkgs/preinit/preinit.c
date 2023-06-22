@@ -39,7 +39,9 @@ char buf[COMMAND_LINE_SIZE];
 
 int main(int argc, char *argv[], char *envp[])
 {
+#ifndef PREINIT_USE_LIBC
         asm("la $gp, _gp\nsw $gp,16($sp)");
+#endif	
 	char *rootdevice = 0;
 	char *p = buf;
 	write(1, banner, strlen(banner));
@@ -74,7 +76,7 @@ int main(int argc, char *argv[], char *envp[])
 		AVER(mount("/target/persist/nix", "/target/nix",
 			   "bind", MS_BIND, NULL));
 
-		char *exec_args[] = { "activate",  "/target" };
+		char *exec_args[] = { "activate",  "/target", NULL };
 		fork_exec("/target/persist/activate", exec_args);
 		AVER(chdir("/target"));
 
