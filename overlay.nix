@@ -47,11 +47,13 @@ extraPkgs // {
     ];
   });
 
-  rsyncSmall = prev.rsync.overrideAttrs(o: {
-    configureFlags = o.configureFlags ++ [
-      "--disable-openssl"
-    ];
-  });
+  rsyncSmall =
+    let r = prev.rsync.overrideAttrs(o: {
+          configureFlags = o.configureFlags ++ [
+            "--disable-openssl"
+          ];
+        });
+    in r.override { openssl = null; };
 
   chrony =
     let chrony' = prev.chrony.overrideAttrs(o: {
