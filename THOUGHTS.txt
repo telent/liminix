@@ -1810,3 +1810,72 @@ The service can depend on odhcp
 add inotify to packages
 use writeFennelScript with that dep
 see if it works
+
+Wed May 31 23:33:00 BST 2023
+
+We have a thing that sets ipv6 address on lan interface, yay us
+
+A firewall would be a very good idea
+
+Thu Jun  1 18:46:59 BST 2023
+
+TODO for now:
+
+- services.default is suboptimal as there is no way to add to it
+without wiping it
+
+- decide whether to use liminix- or min- as our prefix for nixy
+  commands
+
+- should we move config.outputs  -> config.system.outputs ? see Mar 28
+
+- less crap firewall
+
+- create an l2tp configuration
+
+- iperf and tuning
+
+- wlan country code
+
+Thu Jun  1 21:26:37 BST 2023
+
+how can a client machine "opt out" of using the firewall, to allow
+incoming connections?  Most convenient would be to have a separate SSID
+for grownups. Assuming it shows up as a separate wlan device, we can
+write firewall rules to allow incoming connections on that interface
+(can we? only if the packet is identifiable as destined for that interface)
+
+https://www.rfc-editor.org/rfc/rfc6092.html
+https://emailstuff.org/rfc/rfc7084
+
+We could block incoming for slaac and dhcp addresses and permit it for
+stable private addresses. If we were fairly sure that devices won't
+ask for stable private addresses just for funsies.
+
+https://wiki.archlinux.org/title/IPv6_#Stable_private_addresses
+
+
+
+Fri Jun  2 14:42:43 BST 2023
+
+I found a handy guide to nftables at https://ww.telent.net/2023/6/2/turning_the_nftables
+
+Mon Jun  5 16:56:44 BST 2023
+
+
+How are we going to do this firewall thing then?
+I can see no reason to have more than one table per family, so lets
+just name the tables after families
+
+There is nothing in nftables for functionally grouping rules by
+requirement that may touch multiple hooks/chains, so we need our own
+abstraction - and we can't call it any name that nftables uses already
+(so, not "ruleset"). rulegroup?
+
+"policy" would be a good name except that it's already taken
+
+"concern"? "requirement"? "feature"?
+
+Mon Jun 19 20:45:48 BST 2023
+
+why is chrony using libedit?
