@@ -1879,3 +1879,25 @@ abstraction - and we can't call it any name that nftables uses already
 Mon Jun 19 20:45:48 BST 2023
 
 why is chrony using libedit?
+
+Thu Jun 22 09:52:57 BST 2023
+
+- There is a lot more lua being installed (luac, docs, static
+  libraries etc) than we really need.
+
+- update User docs to include a list of supported  targets
+
+Thu Jun 22 23:43:06 BST 2023
+
+- is there a sysfs to enable ipv6 forwarding?
+- we haven't an ipv4 firewall yet
+
+
+PATH=`echo /nix/store/*nftables*/bin`:$PATH
+nft list ruleset
+
+Thu Jun 22 23:58:58 BST 2023
+
+Looks like we're missing at least one kernel config setting for
+nftables. Would this be a good time to do a derivation for building
+kernel modules?
