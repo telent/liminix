@@ -8,15 +8,10 @@
  , src
  , extraPatchPhase ? "echo"
 } :
-let writeConfig = name : config: writeText name
-        (builtins.concatStringsSep
-          "\n"
-          (lib.mapAttrsToList
-            (name: value: (if value == "n" then "# CONFIG_${name} is not set" else "CONFIG_${name}=${value}"))
-            config
-          ));
-    kconfigFile = writeConfig "kconfig" config;
-    inherit lib; in
+let
+  writeConfig = import ./write-kconfig.nix { inherit lib writeText; };
+  kconfigFile = writeConfig "kconfig" config;
+  inherit lib; in
 stdenv.mkDerivation rec {
   name = "kernel";
   inherit src extraPatchPhase;
