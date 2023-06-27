@@ -96,6 +96,8 @@ stdenv.mkDerivation rec {
     cp vmlinux $out
     mkdir -p $headers
     cp -a include .config $headers/
+    mkdir -p $modulesupport
+    cp modules.* $modulesupport
     make clean modules_prepare
     cp -a . $modulesupport
   '';

@@ -227,10 +227,32 @@ in rec {
   };
 
   services.firewall =
-    let config = pkgs.firewallgen "firewall.nft" (import ./rotuer-firewall.nix);
+    let
+      script= pkgs.firewallgen "firewall.nft" (import ./rotuer-firewall.nix);
+      kmodules = pkgs.kernel-modules.override {
+        kernelSrc  = config.outputs.kernel.src;
+        modulesoupport = config.outputs.kernel.modulesupport;
+        kconfig = {
+          NFT_FIB_IPV4 = "m";
+          NFT_FIB_IPV6 = "m";
+          NF_TABLES = "m";
+          NF_CT_PROTO_DCCP = "y";
+          NF_CT_PROTO_SCTP = "y";
+          NF_CT_PROTO_UDPLITE = "y";
+          #          NF_CONNTRACK_FTP = "m";
+          NFT_CT = "m";
+        };
+        targets = [
+          "nft_fib_ipv4"
+          "nft_fib_ipv6"
+        ];
+      };
     in oneshot {
       name = "firewall";
-      up = config;
+      up = ''
+        sh ${kmodules}/load.sh
+        ${script};
+      '';
       down = "${pkgs.nftables}/bin/nft flush ruleset";
     };
 

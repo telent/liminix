@@ -54,4 +54,5 @@
   min-copy-closure = callPackage ./min-copy-closure {};
   hi = callPackage ./hi {};
   firewallgen  = callPackage ./firewallgen {};
+  kernel-modules  = callPackage ./kernel-modules {};
 }
