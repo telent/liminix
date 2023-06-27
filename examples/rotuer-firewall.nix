@@ -116,7 +116,8 @@ let
     type = "filter";
     family = "ip6";
     rules = [
-      "oifname \"int\" ip6 daddr 2001:8b0:de3a:40de::e9d tcp dport 22"
+      # this is where you put permitted incoming connections
+      # "oifname \"int\" ip6 daddr 2001:8b0:de3a:40de::e9d tcp dport 22"
     ];
   };
 in {
