@@ -6,6 +6,8 @@ let
   bogons-ip6 = {
     type = "filter";
     family = "ip6";
+    policy = "accept";
+    hook = "prerouting";
     rules = [
       (drop "ip6 saddr ff00::/8") # multicast saddr is illegal
 
@@ -38,7 +40,6 @@ let
     policy = "drop";
     hook = "forward";
     rules = [
-      "jump bogons-ip6"
       (drop "ip6 saddr ::1/128") # loopback address [RFC4291]
       (drop "ip6 daddr ::1/128")
       (drop "ip6 saddr ::FFFF:0:0/96")# IPv4-mapped addresses
@@ -101,7 +102,6 @@ let
     policy = "drop";
     hook = "input";
     rules = [
-      "jump bogons-ip6"
       (accept "meta l4proto icmpv6")
       (if allow-incoming
        then accept "oifname \"int\" iifname \"ppp0\""
