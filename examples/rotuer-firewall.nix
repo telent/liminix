@@ -70,7 +70,7 @@ let
       # does this ever get used or does the preceding general udp accept
       # already grab anything that might get here?
       (accept "oifname \"ppp0\" udp dport 500") # IKE Protocol [RFC5996]. haha zyxel
-      (accept "ip6 nexthdr hip")
+      (accept "ip6 nexthdr 139") #  Host Identity Protocol
 
       ## FIXME no support yet for recs 27-30 Mobility Header
 
