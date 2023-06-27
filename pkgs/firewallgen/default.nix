@@ -53,7 +53,7 @@ let
       ({ family, ... } : family)
       (mapAttrsToList (n : v : v // { name = n; }) chains);
 in writeScript name ''
-#!${nftables}/sbin/nft -cf
+#!${nftables}/sbin/nft -f
 
 flush ruleset
 
