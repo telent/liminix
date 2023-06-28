@@ -231,7 +231,7 @@ in rec {
       script= pkgs.firewallgen "firewall.nft" (import ./rotuer-firewall.nix);
       kmodules = pkgs.kernel-modules.override {
         kernelSrc  = config.outputs.kernel.src;
-        modulesoupport = config.outputs.kernel.modulesupport;
+        modulesupport = config.outputs.kernel.modulesupport;
         kconfig = {
           NFT_FIB_IPV4 = "m";
           NFT_FIB_IPV6 = "m";
