@@ -3,6 +3,7 @@ let
   accept = expr : "${expr} accept";
   mcast-scope = 8;
   allow-incoming = false;
+in {
   bogons-ip6 = {
     type = "filter";
     family = "ip6";
@@ -96,6 +97,15 @@ let
       (accept "iifname \"int\" oifname \"ppp0\" ")
     ];
   };
+  input-lan = {
+    type = "filter";
+    family = "ip6";
+
+    rules = [
+      (accept "udp dport 547") # dhcp, could restrict to daddr ff02::1:2
+      (accept "tcp dport 22")
+    ];
+  };
   input-ip6 = {
     type = "filter";
     family = "ip6";
@@ -103,10 +113,12 @@ let
     hook = "input";
     rules = [
       (accept "meta l4proto icmpv6")
+      "iifname int jump input-lan"
       (if allow-incoming
        then accept "oifname \"int\" iifname \"ppp0\""
        else "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip6"
       )
+      # how does this even make sense in an input chain?
       (accept "oifname \"int\" iifname \"ppp0\"  ct state established,related")
       (accept "iifname \"int\" oifname \"ppp0\" ")
     ];
@@ -120,6 +132,4 @@ let
       # "oifname \"int\" ip6 daddr 2001:8b0:de3a:40de::e9d tcp dport 22"
     ];
   };
-in {
-  inherit input-ip6 forward-ip6 bogons-ip6 incoming-allowed-ip6;
 }
