@@ -106,6 +106,16 @@ in {
       (accept "tcp dport 22")
     ];
   };
+
+  input-wan = {
+    type = "filter";
+    family = "ip6";
+
+    rules = [
+      (accept "udp dport 546") # dhcp client, needed for prefix delegation
+    ];
+  };
+
   input-ip6 = {
     type = "filter";
     family = "ip6";
@@ -114,6 +124,7 @@ in {
     rules = [
       (accept "meta l4proto icmpv6")
       "iifname int jump input-lan"
+      "iifname ppp0 jump input-wan"
       (if allow-incoming
        then accept "oifname \"int\" iifname \"ppp0\""
        else "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip6"
