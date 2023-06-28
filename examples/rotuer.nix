@@ -257,13 +257,19 @@ in rec {
     };
 
   services.packet_forwarding =
-    let filename = "/proc/sys/net/ipv4/conf/all/forwarding";
+    let
+      ip4 = "/proc/sys/net/ipv4/conf/all/forwarding";
+      ip6 = "/proc/sys/net/ipv6/conf/all/forwarding";
     in oneshot {
       name = "let-the-ip-flow";
       up = ''
-        echo 1 > ${filename}
+        echo 1 > ${ip4}
+        echo 1 > ${ip6}
       '';
-      down = "echo 0 > ${filename}";
+      down = ''
+        echo 0 > ${ip4};
+        echo 0 > ${ip6};
+      '';
       dependencies = [ services.firewall ];
     };
 
