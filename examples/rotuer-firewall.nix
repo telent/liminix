@@ -143,4 +143,28 @@ in {
       # "oifname \"int\" ip6 daddr 2001:8b0:de3a:40de::e9d tcp dport 22"
     ];
   };
+
+  nat-tx = {
+    type = "nat";
+    hook = "postrouting";
+    priority = "100";
+    policy = "accept";
+    family = "ip";
+    rules = [
+      "oifname \"ppp0\" masquerade"
+    ];
+  };
+  nat-rx = {
+    type = "nat";
+    hook = "prerouting";
+    priority = "-100";
+    family = "ip";
+    policy = "accept";
+    rules = [
+      # per https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-configuring_nat_using_nftables:
+      # "Even if you do not add a rule to the prerouting chain, the
+      # nftables framework requires this chain to match incoming
+      # packet replies. "
+    ];
+  };
 }
