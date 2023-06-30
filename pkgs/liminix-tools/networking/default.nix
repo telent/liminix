@@ -45,14 +45,15 @@ in {
   pppoe = callPackage ./pppoe.nix {};
   dnsmasq = callPackage ./dnsmasq.nix {};
   hostapd = callPackage ./hostapd.nix {};
-  route = { name, target, via, dependencies }:
-    oneshot {
+  route = { name, target, via, dependencies, dev ? null }:
+    let with_dev = if dev != null then "dev ${dev}" else "";
+    in oneshot {
       inherit name;
       up = ''
-        ip route add ${target} via ${via}
+        ip route add ${target} via ${via} ${with_dev}
       '';
       down = ''
-        ip route del ${target} via ${via}
+        ip route del ${target} via ${via} ${with_dev}
       '';
       inherit dependencies;
     };

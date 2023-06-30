@@ -72,6 +72,7 @@ in {
         FEATURE_EDITING_MAX_LEN = "1024";
         FEATURE_TAB_COMPLETION = "y";
         FEATURE_EDITING_WINCH = "y";
+        FEATURE_IPV6 = "y";
       };
     };
     filesystem = dir {

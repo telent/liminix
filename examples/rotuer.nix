@@ -220,9 +220,17 @@ in rec {
   };
 
   services.defaultroute4 = route {
-    name = "defaultroute";
+    name = "defaultroute4";
     via = "$(output ${services.wan} address)";
     target = "default";
+    dependencies = [ services.wan ];
+  };
+
+  services.defaultroute6 = route {
+    name = "defaultroute6";
+    via = "$(output ${services.wan} ipv6-peer-address)";
+    target = "default";
+    dev = "$(output ${services.wan} ifname)";
     dependencies = [ services.wan ];
   };
 
@@ -307,6 +315,7 @@ in rec {
       hostap5
       ntp
       defaultroute4
+      defaultroute6
       packet_forwarding
       dns
       resolvconf
