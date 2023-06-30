@@ -284,13 +284,12 @@ in rec {
   services.dhcp6 =
     let
       name = "dhcp6c.wan";
-      luafile = writeFennelScript "odhcpc-script" [] ./odhcp6-script.fnl;
     in longrun {
       inherit name;
       notification-fd = 10;
       run = ''
         export SERVICE_STATE=/run/service-state/${name}
-        ${pkgs.odhcp6c}/bin/odhcp6c -s ${luafile} -e -v -p /run/${name}.pid -P 48 $(output ${services.wan} ifname)
+        ${pkgs.odhcp6c}/bin/odhcp6c -s ${pkgs.odhcp-script} -e -v -p /run/${name}.pid -P 48 $(output ${services.wan} ifname)
         )
       '';
       dependencies = [ services.wan ];
