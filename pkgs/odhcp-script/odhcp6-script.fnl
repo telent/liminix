@@ -56,8 +56,9 @@
               "unbound" false
               "stopped" false
               _ true)]
-  (write-value "last-update" (tostring (os.time)))
+  (write-value ".lock" (tostring (os.time)))
   (write-value "ifname" ifname)
   (write-value "state" state)
+  (os.remove (.. state-directory "/.lock"))
   (when ready
     (with-open [fd (io.open "/proc/self/fd/10" :w)] (fd:write "\n"))))
