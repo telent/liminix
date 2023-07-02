@@ -6,8 +6,8 @@ let
   overlay = import "${liminix}/overlay.nix";
   pkgs = import <nixpkgs> { overlays = [overlay]; };
   script = pkgs.writeFennelScript "foo" [] ./hello.fnl;
-  inherit (pkgs.luaSmall.pkgs) fifo;
-  netlink = pkgs.netlink-lua.override { lua = pkgs.luaSmall; };
+  inherit (pkgs.lua.pkgs) fifo;
+  netlink = pkgs.netlink-lua;
   script2 = pkgs.writeFennelScript "foo2" [fifo netlink] ./hello.fnl;
 in pkgs.runCommand "check" {
   } ''

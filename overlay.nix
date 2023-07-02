@@ -39,6 +39,7 @@ let
         (if o ? patches then o.patches else []) ++
         (if patch_needed then [ patch ] else []);
     });
+  lua = let s = lua_no_readline.override { self = s; }; in s;
 in
 extraPkgs // {
   mtdutils = prev.mtdutils.overrideAttrs(o: {
@@ -97,7 +98,8 @@ extraPkgs // {
     ];
   });
 
-  luaSmall = let s = lua_no_readline.override { self = s; }; in s;
+  luaFull = prev.lua;
+  inherit lua;
 
   inherit s6;
   s6-linux-init = prev.s6-linux-init.override {

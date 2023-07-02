@@ -1,6 +1,6 @@
 {
   runCommand
-, luaSmall
+, lua
 , runtimeShell
 , fetchurl
 , lib
@@ -14,15 +14,15 @@ in name : packages : source :
       hash = "sha256-hYSD3rBYF8iTjBOA1m+TvUu8BSp8q6uIMUXi0xwo/dU=";
     };
 
-    luapath = builtins.map (f: "${f}/share/lua/${luaSmall.luaversion}/?.lua;") packages;
-    luacpath = builtins.map (f: "${f}/lib/lua/${luaSmall.luaversion}/?.so;") packages;
+    luapath = builtins.map (f: "${f}/share/lua/${lua.luaversion}/?.lua;") packages;
+    luacpath = builtins.map (f: "${f}/lib/lua/${lua.luaversion}/?.so;") packages;
   in runCommand name {
     nativeBuildInputs =  [ lua ];
   } ''
      echo $PATH
       #!${runtimeShell}
       (
-      echo "#!${luaSmall}/bin/lua"
+      echo "#!${lua}/bin/lua"
       echo "package.path = ${lib.strings.escapeShellArg luapath} .. package.path"
       echo "package.cpath = ${lib.strings.escapeShellArg luacpath} .. package.cpath"
       lua ${fennel} --correlate --compile ${source}

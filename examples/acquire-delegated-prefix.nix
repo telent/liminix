@@ -1,10 +1,7 @@
 {
   writeFennelScript
-, luaSmall
 , linotify
 }:
 writeFennelScript "acquire-delegated-prefix"
-  [
-    (linotify.override { lua = luaSmall; })
-  ]
+  [ linotify ]
   ./acquire-delegated-prefix.fnl
