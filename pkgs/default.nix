@@ -56,4 +56,5 @@
   firewallgen  = callPackage ./firewallgen {};
   kernel-modules  = callPackage ./kernel-modules {};
   odhcp-script = callPackage ./odhcp-script {};
+  fennel = callPackage ./fennel {};
 }
