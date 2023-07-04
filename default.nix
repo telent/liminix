@@ -58,6 +58,7 @@ in {
       borderVm.build.vm
       go-l2tp
       min-copy-closure
+      fennelrepl
     ];
   };
 }
