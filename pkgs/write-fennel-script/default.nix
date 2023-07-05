@@ -6,7 +6,11 @@
 }:
 name : packages : source :
   let
-    luapath = builtins.map (f: "${f}/share/lua/${lua.luaversion}/?.lua;") packages;
+    luapath = builtins.map
+      (f:
+        "${f}/share/lua/${lua.luaversion}/?.lua;" +
+        "${f}/share/lua/${lua.luaversion}/?/init.lua;")
+      packages;
     luacpath = builtins.map (f: "${f}/lib/lua/${lua.luaversion}/?.so;") packages;
   in stdenv.mkDerivation {
     inherit name;

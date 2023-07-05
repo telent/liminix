@@ -1,0 +1,14 @@
+
+In Terry Pratchett's Discworld novels, Anoi is a minor goddess of Things That Stick In Drawers
+
+> Often, but not uniquely, a ladle, but sometimes a metal spatula or,
+> rarely, a mechanical egg-whisk that nobody in the house admits to
+> ever buying. The desperate mad rattling and cries of ‘How can it
+> close on the damn thing but not open with it? Who bought this? Do we
+> ever use it?’ is as praise unto Anoia. She also eats corkscrews.
+
+This is a library of miscellaneous Fennel code used in Liminix that is
+shared between various scripts but doesn't really fit together. It is
+not a public stable interface - while any Liminix code is welcome to
+use it, it's suject to reshuffle, rearrangement, refactor or rejection
+without notice.

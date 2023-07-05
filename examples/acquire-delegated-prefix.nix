@@ -1,7 +1,8 @@
 {
   writeFennelScript
 , linotify
+, anoia
 }:
 writeFennelScript "acquire-delegated-prefix"
-  [ linotify ]
+  [ linotify anoia ]
   ./acquire-delegated-prefix.fnl

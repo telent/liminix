@@ -1,12 +1,5 @@
 (local inotify (require :inotify))
-
-(fn merge [table1 table2]
-  (collect [k v (pairs table2) &into table1]
-    k v))
-
-(fn split [sep string]
-  (icollect [v (string.gmatch string (.. "([^" sep "]+)"))]
-    v))
+(local { : merge : split : file-exists? : system } (require :anoia))
 
 (fn parse-prefix [str]
   (fn parse-extra [s]
@@ -23,12 +16,6 @@
 
 ;;(parse-prefix "2001:8b0:de3a:40dc::/64,7198,7198")
 ;;(parse-prefix "2001:8b0:de3a:1001::/64,7198,7188,excluded=1/2,thi=10")
-
-
-(fn file-exists? [name]
-  (match (io.open name :r)
-    f (do (f:close) true)
-    _ false))
 
 (fn read-line [name]
   (with-open [f (assert (io.open name :r) (.. "can't open file " name))]
@@ -80,9 +67,6 @@
           (table.insert deleted (parse-prefix prefix))))
     (values added deleted)))
 
-;;(fn execute [s] (do (print s) true))
-(fn execute [s] (assert (os.execute s)))
-
 (let [[state-directory lan-device] arg
       dir (watch-directory state-directory)]
   (var prefixes [])
@@ -92,10 +76,10 @@
         (let [new-prefixes (split " " (dir:read-line "/prefixes"))
               (added deleted) (changes prefixes new-prefixes)]
           (each [_ p (ipairs added)]
-            (execute
+            (system
              (.. "ip address add " p.prefix "::1/" p.len " dev " lan-device)))
           (each [_ p (ipairs deleted)]
-            (execute
+            (system
              (.. "ip address del " p.prefix "::1/" p.len " dev " lan-device)))
     	  (set prefixes new-prefixes)))
     (dir:wait-events)))

@@ -58,4 +58,5 @@
   odhcp-script = callPackage ./odhcp-script {};
   fennel = callPackage ./fennel {};
   fennelrepl = callPackage ./fennelrepl {};
+  anoia = callPackage ./anoia {};
 }
