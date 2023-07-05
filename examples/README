@@ -1,0 +1,13 @@
+These files are not part of Liminix per se. They are "scratchpad"
+configuration for devices I'm testing with or running on my local
+network.
+
+Over time, some of the code in this folder will be tidied up,
+rewritten, rearchitected or simply moved into Liminix itself.
+This is a folder of first drafts.
+
+Q: Why are all the filenames misspelled?
+
+A: The filenames correspond to actual hostnames in my network, and
+the naming theme for telent.net is typographical errors.
+
