@@ -29,6 +29,10 @@ in writeScriptBin "fennelrepl" ''
     if more_fennel then
         fennel.path = more_fennel .. ";" .. fennel.path
     end
-    print("path", fennel.path)
-    fennel.repl()
+    if #arg > 0 then
+       script = table.remove(arg, 1)
+       fennel.dofile(script, {},  arg)
+    else
+        fennel.repl()
+    end
   ''
