@@ -16,7 +16,10 @@ let packages = [
       fennel
     ];
     join = ps: builtins.concatStringsSep ";" ps;
-    luapath = join (builtins.map (f: "${f}/share/lua/${lua.luaversion}/?.lua") packages);
+    luapath = join (builtins.map (f:
+      "${f}/share/lua/${lua.luaversion}/?.lua;" +
+      "${f}/share/lua/${lua.luaversion}/?/init.lua"
+    ) packages);
     luacpath = join (builtins.map (f: "${f}/lib/lua/${lua.luaversion}/?.so") packages);
 
 in writeScriptBin "fennelrepl" ''
