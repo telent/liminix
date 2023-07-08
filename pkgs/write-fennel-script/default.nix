@@ -19,8 +19,8 @@ name : packages : source :
     buildPhase = ''
       (
        echo "#!${lua}/bin/lua"
-       echo "package.path = ${lib.strings.escapeShellArg luapath} .. package.path"
-       echo "package.cpath = ${lib.strings.escapeShellArg luacpath} .. package.cpath"
+       echo "package.path = ${lib.strings.escapeShellArg (builtins.concatStringsSep "" luapath)} .. package.path"
+       echo "package.cpath = ${lib.strings.escapeShellArg (builtins.concatStringsSep "" luacpath)} .. package.cpath"
        fennel --correlate --compile ${source}
       ) >  ${name}.lua
     '';
