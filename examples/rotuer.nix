@@ -295,20 +295,19 @@ in rec {
       dependencies = [ services.wan ];
     };
 
-  # services.set-wan-address =
-  #   oneshot {
-  #     name = "set-wan-address";
-  #     # FIXME nasty bit of hardcoding - should get this from  dhcp6c
-  #     up = "ip address add 2001:8b0:1111:1111:0:ffff:51bb:4cf2/128 dev ppp0";
-  #     down = "ip address del 2001:8b0:1111:1111:0:ffff:51bb:4cf2/128 dev ppp0";
-  #     dependencies = [ services.dhcp6 ];
-  #   };
-
   services.acquire-lan-prefix =
     let script = pkgs.callPackage ./acquire-delegated-prefix.nix {  };
     in longrun {
       name = "acquire-lan-prefix";
       run = "${script} /run/service-state/dhcp6c.wan ${services.int.device}";
+      dependencies = [ services.dhcp6 ];
+    };
+
+  services.acquire-wan-address =
+    let script = pkgs.callPackage ./acquire-wan-address.nix {  };
+    in longrun {
+      name = "acquire-wan-address";
+      run = "${script} /run/service-state/dhcp6c.wan $(output ${services.wan} ifname)";
       dependencies = [ services.dhcp6 ];
     };
 
@@ -331,7 +330,7 @@ in rec {
       config.services.hostname
       dhcp6
       acquire-lan-prefix
-#      set-wan-address
+      acquire-wan-address
     ];
   };
   defaultProfile.packages = with pkgs; [
