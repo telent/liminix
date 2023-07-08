@@ -10,7 +10,9 @@ in stdenv.mkDerivation {
   src = ./.;
   nativeBuildInputs = [ fennel ];
   buildPhase = ''
-    fennel --compile init.fnl > init.lua
+    for f in *.fnl ; do
+      fennel --compile $f > `basename $f .fnl`.lua
+    done
   '';
   installPhase = ''
     mkdir -p "$out/share/lua/${lua.luaversion}/${pname}"
