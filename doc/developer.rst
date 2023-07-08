@@ -93,7 +93,6 @@ serial console pads/headers, then using U-Boot to fetch images over
 TFTP.  The OpenWrt documentation has a `good explanation <https://openwrt.org/docs/techref/hardware/port.serial>`_ of what you may expect to find on
 the device.
 
-
 There is a rudimentary TFTP server bundled with the system which runs
 from the command line, has an allowlist for client connections, and
 follows symlinks, so you can have your device download images direct
@@ -106,8 +105,33 @@ do something like this:
 
     nix-shell --run "tufted -a 192.168.8.251 result"
 
-and then issue appropriate U-boot commands to download and flash the
-image.
+Now add the device and server IP addresses to your configuration:
+
+.. code-block:: nix
+
+  boot.tftp = {
+    serverip = "192.168.8.111";
+    ipaddr = "192.168.8.251";
+  };
+
+and then build the derivation for ``outputs.default`` or
+``outputs.flashimage`` (for which it will be an alias on any device
+where this is applicable). You should find it has created
+
+* :file:`result/firmware.bin` which is the file you are going to flash
+* :file:`result/flash.scr` which is a set of instructions to U-Boot to
+  download the image and write it to flash after erasing the appropriate
+  flash partition.
+
+.. NOTE::
+
+   TTL serial connections typically have no form of flow control and
+   so don't always like having massive chunks of text pasted into
+   them - and U-Boot may drop characters while it's busy. So don't
+   necessarily expect to copy-paste the whole of :file:`boot.scr` into
+   a terminal emulator and have it work just like that. You may need
+   to paste each line one at a time, or even retype it.
+
 
 For a faster edit-compile-test cycle, you can build a TFTP-bootable
 image instead of flashing. In your device configuration add
@@ -117,11 +141,6 @@ image instead of flashing. In your device configuration add
   imports = [
     ./modules/tftpboot.nix
   ];
-
-  boot.tftp = {
-    serverip = "192.168.200.148";
-    ipaddr = "192.168.200.251";
-  };
 
 and then build ``outputs.tftpboot``. This creates a file in
 ``result/`` called ``boot.scr``, which you can copy and paste into
