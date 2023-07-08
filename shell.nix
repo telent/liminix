@@ -10,4 +10,5 @@ in liminix.buildEnv.overrideAttrs (o: {
   shellHook = ''
     publish(){  make -C doc html && rsync -azv doc/_build/html/ myhtic.telent.net:/var/www/blogs/www.liminix.org/_site/doc; }
   '';
+  FENNEL_PATH = "pkgs/?/init.fnl;pkgs/?.fnl";
 })
