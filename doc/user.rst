@@ -138,19 +138,6 @@ Flashing
 ========
 
 
-Flashing from OpenWrt (untested)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-If your device is running OpenWrt then it probably has the
-:command:`mtd` command installed and you can use it as follows:
-
-.. code-block:: console
-
-   mtd -r write /tmp/firmware_image.bin firmware
-
-For more information, please see the `OpenWrt manual <https://openwrt.org/docs/guide-user/installation/sysupgrade.cli>`_ which may also contain (hardware-dependent) instructions on how to flash an image using the vendor firmware - perhaps even from a web interface.
-
-
 Flashing from the boot monitor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -168,6 +155,24 @@ First we reboot the device (using "kexec") into an "ephemeral"
 RAM-based version of the new configuration, then when we're happy it
 works we can flash the image - and if it doesn't work we can reboot
 the device again and it will boot from the old image.
+
+
+Flashing from OpenWrt (not currently advised!)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. CAUTION:: At your own risk! This may in some circumstances lead to
+             bricking the device: we think this flash method is currently
+	     incompatible with use of a writeable (jffs2) filesystem.
+
+If your device is running OpenWrt then it probably has the
+:command:`mtd` command installed. After transferring the image onto the
+device using e.g. :command:`ssh`,  you can run it as follows:
+
+.. code-block:: console
+
+   mtd -r write /tmp/firmware.bin firmware
+
+For more information, please see the `OpenWrt manual <https://openwrt.org/docs/guide-user/installation/sysupgrade.cli>`_ which may also contain (hardware-dependent) instructions on how to flash an image using the vendor firmware - perhaps even from a web interface.
 
 
 Building the RAM-based image
