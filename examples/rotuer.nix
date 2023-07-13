@@ -14,7 +14,6 @@ let
     dnsmasq
     hostapd
     interface
-    pppoe
     route;
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
   inherit (pkgs)
@@ -35,16 +34,12 @@ in rec {
   imports = [
     ../modules/wlan.nix
     ../modules/standard.nix
+    ../modules/ppp.nix
   ];
   rootfsType = "jffs2";
   hostname = "rotuer";
   kernel = {
     config = {
-      PPP = "y";
-      PPP_BSDCOMP = "y";
-      PPP_DEFLATE = "y";
-      PPP_ASYNC = "y";
-      PPP_SYNC_TTY = "y";
       BRIDGE = "y";
 
       NETFILTER_XT_MATCH_CONNTRACK = "y";
@@ -196,7 +191,7 @@ in rec {
 
   services.wan =
     let iface = config.hardware.networkInterfaces.wan;
-    in pppoe iface {
+    in config.system.service.pppoe iface {
       ppp-options = [
         "debug" "+ipv6" "noauth"
         "name" secrets.l2tp.name
