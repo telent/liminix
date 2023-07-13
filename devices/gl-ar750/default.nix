@@ -59,7 +59,7 @@
       };
       mac80211 = pkgs.mac80211.override {
         drivers = ["ath9k" "ath10k_pci"];
-        klibBuild = config.outputs.kernel.modulesupport;
+        klibBuild = config.system.outputs.kernel.modulesupport;
       };
       ath10k_cal_data =
         let

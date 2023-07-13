@@ -13,14 +13,52 @@ in
     ./squashfs.nix
   ];
   options = {
-    outputs = mkOption {
-      type = types.attrsOf types.package;
-      default = {};
+    system.outputs = {
+      kernel = mkOption {
+        type = types.package;
+        description = ''
+          Kernel vmlinux file (usually ELF)
+        '';
+      };
+      dtb = mkOption {
+        type = types.package;
+        description = ''
+          Compiled device tree (FDT) for the target device
+        '';
+      };
+      uimage = mkOption {
+        type = types.package;
+        description = ''
+          Combined kernel and FDT in uImage (U-Boot compatible) format
+        '';
+      };
+      vmroot = mkOption {
+        type = types.package;
+        description = ''
+          Directory containing separate kernel and rootfs image for
+          use with qemu (see mips-vm)
+        '';
+      };
+      manifest = mkOption {
+        type = types.package;
+        description = ''
+          Debugging aid. JSON rendition of config.filesystem, on
+          which can run "nix-store -q --tree" on it and find
+          out what's in the image, which is nice if it's unexpectedly huge
+        '';
+      };
+      rootfs = mkOption {
+        type = types.package;
+        description = ''
+          root filesystem (squashfs or jffs2) image
+        '';
+        internal = true;
+      };
     };
   };
   config = {
-    outputs = rec {
-      tftpd = pkgs.buildPackages.tufted;
+    system.outputs = rec {
+      # tftpd = pkgs.buildPackages.tufted;
       kernel = liminix.builders.kernel.override {
         inherit (config.kernel) config src extraPatchPhase;
       };
@@ -40,14 +78,12 @@ in
       vmroot = pkgs.runCommand "qemu" {} ''
         mkdir $out
         cd $out
-        ln -s ${config.outputs.rootfs} rootfs
+        ln -s ${config.system.outputs.rootfs} rootfs
         ln -s ${kernel} vmlinux
         ln -s ${manifest} manifest
         ln -s ${kernel.headers} build
       '';
 
-      # this exists so that you can run "nix-store -q --tree" on it and find
-      # out what's in the image, which is nice if it's unexpectedly huge
       manifest = writeText "manifest.json" (builtins.toJSON config.filesystem.contents);
     };
   };

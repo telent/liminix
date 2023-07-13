@@ -24,7 +24,7 @@
       inherit (pkgs) openwrt;
       mac80211 = pkgs.mac80211.override {
         drivers = ["rt2800soc"];
-        klibBuild = config.outputs.kernel.modulesupport;
+        klibBuild = config.system.outputs.kernel.modulesupport;
       };
      in {
       hardware = {

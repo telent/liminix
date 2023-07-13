@@ -20,7 +20,7 @@
 
       mac80211 = pkgs.mac80211.override {
         drivers = ["mt7603e"];
-        klibBuild = config.outputs.kernel.modulesupport;
+        klibBuild = config.system.outputs.kernel.modulesupport;
       };
       wlan_firmware = pkgs.fetchurl {
         url = "https://github.com/openwrt/mt76/raw/f24b56f935392ca1d35fae5fd6e56ef9deda4aad/firmware/mt7628_e2.bin";

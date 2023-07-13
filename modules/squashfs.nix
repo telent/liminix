@@ -10,8 +10,7 @@ let
 in
 {
   config = mkIf (config.rootfsType == "squashfs") {
-    outputs = rec {
-      rootfs = liminix.builders.squashfs config.filesystem.contents;
-    };
+    system.outputs.rootfs =
+      liminix.builders.squashfs config.filesystem.contents;
   };
 }

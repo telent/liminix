@@ -49,7 +49,7 @@
       let
         mac80211 =  pkgs.mac80211.override {
           drivers = ["mac80211_hwsim"];
-          klibBuild = config.outputs.kernel.modulesupport;
+          klibBuild = config.system.outputs.kernel.modulesupport;
         };
         inherit (pkgs.liminix.networking) interface;
       in {

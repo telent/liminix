@@ -5,12 +5,23 @@
 , ...
 }:
 let
-  inherit (lib) mkIf;
+  inherit (lib) mkIf mkOption types;
 in
 {
   imports = [
     ./initramfs.nix
   ];
+  options.system.outputs = {
+    systemConfiguration = mkOption {
+      type = types.package;
+      description = ''
+        pkgs.systemconfig for the configured filesystem,
+        contains 'activate' and 'init' commands
+      '';
+      internal = true;
+    };
+  };
+
   config = mkIf (config.rootfsType == "jffs2") {
     kernel.config = {
       JFFS2_FS = "y";
@@ -21,7 +32,7 @@ in
       JFFS2_CMODE_SIZE = "y";
     };
     boot.initramfs.enable = true;
-    outputs = rec {
+    system.outputs = rec {
       systemConfiguration =
         pkgs.systemconfig config.filesystem.contents;
       rootfs =

@@ -5,7 +5,7 @@
 , ...
 }:
 let
-  inherit (lib) mkEnableOption mkIf;
+  inherit (lib) mkEnableOption mkOption mkIf types;
   inherit (pkgs) runCommand callPackage writeText;
 in
 {
@@ -14,15 +14,23 @@ in
       enable = mkEnableOption "enable initramfs";
       default = false;
     };
+    system.outputs.initramfs = mkOption {
+      type = types.package;
+      internal = true;
+      description = ''
+        Initramfs image capable of mounting the jffs2 root
+        filesystem
+      '';
+    };
   };
   config = mkIf config.boot.initramfs.enable {
     kernel.config = {
       BLK_DEV_INITRD = "y";
-      INITRAMFS_SOURCE = builtins.toJSON "${config.outputs.initramfs}";
+      INITRAMFS_SOURCE = builtins.toJSON "${config.system.outputs.initramfs}";
 #      INITRAMFS_COMPRESSION_LZO = "y";
     };
 
-    outputs = {
+    system.outputs = {
       initramfs =
         let inherit (pkgs.pkgsBuildBuild) gen_init_cpio;
         in runCommand "initramfs.cpio" {} ''
