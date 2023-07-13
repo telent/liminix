@@ -1901,3 +1901,106 @@ Thu Jun 22 23:58:58 BST 2023
 Looks like we're missing at least one kernel config setting for
 nftables. Would this be a good time to do a derivation for building
 kernel modules?
+
+
+Sun Jul  9 21:21:17 BST 2023
+
+
+Tue Jul 11 22:10:17 BST 2023
+
+- s6 cheatsheet, find or write
+- could we have > 1 module add to services.default?
+- odhcp should parse values from environ and write more files, to save readers
+ from parsing it
+- pkgs.liminix, who knows what thats for any more?
+- interface.device, as a  general rule, doesn't work because the
+  device name may be known only at runtime (e.g. for ppp)
+- iperf
+- figure out wifi regdomain
+
+Tue Jul 11 23:01:59 BST 2023
+
+We can make services depend on kernel modules, however not on bakedin
+kernel config
+
+[from March: "Let's think about services and modules."]
+
+Module
++ can change global config
+  * add users, groups etc
+  * change kernel config
+  * change busybox config
++ well-typed parameters
+- is a "singleton": can't have the same module included twice
+  with different config. e.g. can't have two hostap modules running on
+  different wlan radios.
+- can't express dependencies: a depends on b
+
+thought I had then was: modules provide services. requiring the
+ppp module causes config.services.ppp to exist, so you can
+
+services.default = [
+  (config.services.ppp {
+    tty = "17";
+    baud = "57600";
+    secrets = blah;
+    })
+  ...
+]
+
+this might work. also though we should find out how to do type checking on
+service params
+
+Wed Jul 12 23:23:02 BST 2023
+
+https://github.com/NixOS/mobile-nixos/pull/406 // why mobile nixos uses
+mobile.outputs instead of system.build
+
+  suggests that system.build may not be a thing to blindly emulate
+
+if a service is a derivation should we expect to want to be able to call
+it with .override? maybe we want to override the package containing the
+daemon it runs. How do we best pass service config as well?
+
+Maybe a service template is a function that returns a derivation
+
+
+imports = [ ./modules/pqmud.nix ];
+services.mud = system.services.pqmud {
+  realm = "A deep cavern";
+  port = 4067;
+  users = import ./allowed-users.nix;
+  # etc etc
+};
+services.mudBeta = let mud =
+  system.services.pqmud {
+    realm = "A very deep cavern";
+    port = 4068;
+    users = import ./allowed-users.nix;
+  };
+  in mud.overrideAttrs { pqmud = pkgs.pkmudLatest; };
+
+so we have
+
+config.system.services # services provided by modules
+config.system.outputs  # build artefacts of various types
+
+the services provided by a module must be introspectable in some way
+so that we can compile a list of service options per module
+
+service parameters are defined using the module type system.
+Something like this?
+
+# mud.nix
+
+system.services.pqmud = args :
+  let t = {
+    name = mkOption { type = types.str; };
+    realm = mkOption { type = types.str; };
+    port = mkOption { type = types.port; default = 12345; };
+    users = mkOption { type = types.any; };
+  };
+  in assert isType (submodule { options = t; }) args; longrun {
+     inherit (args) name;
+     run = "${pkgs.pqmud}/bin/pqmud --port ${port} ....."
+  };
