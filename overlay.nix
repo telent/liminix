@@ -1,6 +1,8 @@
 final: prev:
 let
-  extraPkgs = import ./pkgs/default.nix { inherit (final) callPackage; };
+  extraPkgs = import ./pkgs/default.nix {
+    inherit (final) lib callPackage;
+  };
   inherit (final) fetchpatch;
   lua_no_readline = prev.lua5_3.overrideAttrs(o: {
     name = "lua-tty";

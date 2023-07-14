@@ -1,5 +1,6 @@
 {
   callPackage
+, lib
 }:
 {
   pseudofile = callPackage ./pseudofile {};
@@ -9,6 +10,23 @@
     builders =  {
       squashfs = callPackage ./liminix-tools/builders/squashfs.nix {};
       kernel = callPackage ./kernel {};
+    };
+    lib = {
+      types = {
+        service =
+          let inherit (lib) types isDerivation hasAttr;
+          in types.package // {
+            name = "service";
+            description = "s6-rc service";
+            check = x: isDerivation x && hasAttr "serviceType" x;
+          };
+      };
+      typeChecked = caller: type: value:
+        let
+          inherit (lib) types mergeDefinitions;
+          defs = [{ file = caller; inherit value; }];
+          type' = types.submodule { options = type; };
+        in (mergeDefinitions [] type' defs).mergedValue;
     };
   };
   writeFennelScript = callPackage ./write-fennel-script {};

@@ -5,11 +5,7 @@ let
   inherit (pkgs.liminix.networking) address interface;
   inherit (pkgs.liminix.services) bundle;
 
-  type_service = types.package // {
-    name = "service";
-    description = "s6-rc service";
-    check = x: isDerivation x && hasAttr "serviceType" x;
-  };
+  type_service = pkgs.liminix.lib.types.service;
 
 in {
   options = {
