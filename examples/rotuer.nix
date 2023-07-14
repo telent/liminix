@@ -191,7 +191,8 @@ in rec {
 
   services.wan =
     let iface = config.hardware.networkInterfaces.wan;
-    in config.system.service.pppoe iface {
+    in config.system.service.pppoe {
+      interface = iface;
       ppp-options = [
         "debug" "+ipv6" "noauth"
         "name" secrets.l2tp.name

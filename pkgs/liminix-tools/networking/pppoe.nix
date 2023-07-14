@@ -8,13 +8,26 @@
 } :
 let
   inherit (liminix.services) longrun;
+  inherit (lib)
+    mergeDefinitions
+    mkEnableOption mkOption isType types isDerivation hasAttr;
+  t = {
+    interface = mkOption {
+      type = types.package;     # actually a service
+      description = "ethernet interface to run PPPoE over";
+    };
+    ppp-options = mkOption {
+      type = types.listOf types.str;
+    };
+  };
+  t' = types.submodule { options = t; };
+  typeChecked = type: value:
+    let defs = [{ file = "pppoe.nix"; inherit value; }];
+    in (lib.mergeDefinitions [ ] type defs).mergedValue;
 in
-interface: {
-  synchronous ? false
-, ppp-options ? []
-, ...
-} @ args:
+params:
 let
+  inherit (typeChecked t' params) ppp-options interface;
   name = "${interface.device}.pppoe";
   ip-up = writeAshScript "ip-up" {} ''
     . ${serviceFns} 

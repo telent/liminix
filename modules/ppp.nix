@@ -6,7 +6,7 @@ let
 in {
   options = {
     system.service.pppoe = mkOption {
-      type = types.functionTo (types.functionTo types.package);
+      type = types.functionTo types.package;
     };
   };
   config = {
