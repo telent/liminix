@@ -1,8 +1,6 @@
 { lib, pkgs, config, ...}:
 let
-  inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;
-  inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs) stdenv wireless-regdb;
+  inherit (lib) mkOption types;
 in {
   options = {
     system.service.pppoe = mkOption {

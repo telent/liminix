@@ -34,7 +34,7 @@ in rec {
   imports = [
     ../modules/wlan.nix
     ../modules/standard.nix
-    ../modules/ppp.nix
+    ../modules/ppp
   ];
   rootfsType = "jffs2";
   hostname = "rotuer";
