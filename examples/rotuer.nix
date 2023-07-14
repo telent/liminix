@@ -11,7 +11,6 @@ let
   secrets = import ./rotuer-secrets.nix;
   inherit (pkgs.liminix.networking)
     address
-    dnsmasq
     hostapd
     interface
     route;
@@ -35,6 +34,7 @@ in rec {
     ../modules/wlan.nix
     ../modules/standard.nix
     ../modules/ppp
+    ../modules/dnsmasq
   ];
   rootfsType = "jffs2";
   hostname = "rotuer";
@@ -165,21 +165,11 @@ in rec {
     '';
   };
 
-  users.dnsmasq = {
-    uid = 51; gid= 51; gecos = "DNS/DHCP service user";
-    dir = "/run/dnsmasq";
-    shell = "/bin/false";
-  };
   users.root = secrets.root;
-
-  groups.dnsmasq = {
-    gid = 51; usernames = ["dnsmasq"];
-  };
-  groups.system.usernames = ["dnsmasq"];
 
   services.dns =
     let interface = services.int;
-    in dnsmasq {
+    in config.system.service.dnsmasq {
       resolvconf = services.resolvconf;
       inherit interface;
       ranges = [

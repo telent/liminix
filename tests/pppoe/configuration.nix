@@ -1,6 +1,6 @@
 { config, pkgs, lib, ... } :
 let
-  inherit (pkgs.liminix.networking) interface address route dnsmasq;
+  inherit (pkgs.liminix.networking) interface address route;
   inherit (pkgs.liminix.services) oneshot longrun bundle target output;
 in rec {
   services.lan4 =
@@ -9,6 +9,7 @@ in rec {
 
   imports = [
     ../../modules/ppp
+    ../../modules/dnsmasq
   ];
 
   services.pppoe =
@@ -39,16 +40,8 @@ in rec {
       dependencies = [iface];
     };
 
-  users.dnsmasq = {
-    uid = 51; gid= 51; gecos = "DNS/DHCP service user";
-    dir = "/run/dnsmasq";
-    shell = "/bin/false";
-  };
-  groups.dnsmasq = {
-    gid = 51; usernames = ["dnsmasq"];
-  };
   services.dns =
-    dnsmasq {
+    config.system.service.dnsmasq {
       interface = services.lan4;
       ranges = ["192.168.19.10,192.168.19.253"];
       domain = "fake.liminix.org";

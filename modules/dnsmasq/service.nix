@@ -4,20 +4,48 @@
 , serviceFns
 , lib
 }:
-{
-  user ? "dnsmasq"
-, group ? "system"
-, resolvconf ? null
-, interface
-, upstreams ? []
-, ranges
-, domain
-} :
 let
   inherit (liminix.services) longrun;
   inherit (lib) concatStringsSep;
+  inherit (liminix.lib) typeChecked;
+  inherit (lib) mkOption types;
+
+  t = {
+    user = mkOption {
+      type = types.str;
+      default = "dnsmasq";
+    };
+    group = mkOption {
+      type = types.str;
+      default = "dnsmasq";
+    };
+    resolvconf = mkOption {
+      type = types.nullOr liminix.lib.types.service;
+      default = null;
+    };
+    interface = mkOption {
+      type = liminix.lib.types.service;
+      default = null;
+    };
+    upstreams = mkOption {
+      type = types.listOf types.str;
+      default = [];
+    };
+    ranges = mkOption {
+      type = types.listOf types.str;
+    };
+    domain = mkOption {
+      type = types.str;
+    };
+  };
+in
+params:
+let
+  inherit (typeChecked "dnsmasq" t params)
+    interface user domain group ranges upstreams resolvconf;
   name = "${interface.device}.dnsmasq";
-in longrun {
+in
+longrun {
   inherit name;
   dependencies = [ interface ];
   run = ''
