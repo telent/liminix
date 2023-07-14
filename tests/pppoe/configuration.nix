@@ -1,27 +1,19 @@
 { config, pkgs, lib, ... } :
 let
-  inherit (pkgs.liminix.networking) interface address pppoe route dnsmasq;
+  inherit (pkgs.liminix.networking) interface address route dnsmasq;
   inherit (pkgs.liminix.services) oneshot longrun bundle target output;
 in rec {
   services.lan4 =
     let iface = interface { type = "hardware"; device = "eth1";};
     in address iface { family = "inet4"; address ="192.168.19.1"; prefixLength = 24;};
 
-  kernel.config = {
-    "PPP" = "y";
-    "PPPOE" = "y";
-    "PPPOL2TP" = "y";
-    "L2TP" = "y";
-    "PPP_ASYNC" = "y";
-    "PPP_BSDCOMP" = "y";
-    "PPP_DEFLATE" = "y";
-    "PPP_MPPE" = "y";
-    "PPP_SYNC_TTY" = "y";
-  };
+  imports = [
+    ../../modules/ppp
+  ];
 
   services.pppoe =
-    let iface = interface { type = "hardware"; device = "eth0"; };
-    in pppoe iface {
+    config.system.service.pppoe {
+      interface = interface { type = "hardware"; device = "eth0"; };
       ppp-options = [
         "debug" "+ipv6" "noauth"
         "name" "db123@a.1"
@@ -30,7 +22,7 @@ in rec {
     };
 
   services.defaultroute4 = route {
-    name = "defautlrote";
+    name = "defaultroute";
     via = "$(output ${services.pppoe} address)";
     target = "default";
     dependencies = [ services.pppoe ];
