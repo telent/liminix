@@ -42,7 +42,6 @@ in {
     name = "${interface.device}.odhcp";
     run = "odhcpcd ${interface.device}";
   };
-  pppoe = callPackage ./pppoe.nix {};
   dnsmasq = callPackage ./dnsmasq.nix {};
   hostapd = callPackage ./hostapd.nix {};
   route = { name, target, via, dependencies, dev ? null }:

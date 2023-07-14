@@ -8,7 +8,7 @@ in {
     };
   };
   config = {
-    system.service.pppoe = pkgs.liminix.networking.pppoe;
+    system.service.pppoe = pkgs.callPackage ./pppoe.nix {};
     kernel = {
       config = {
         PPP = "y";
