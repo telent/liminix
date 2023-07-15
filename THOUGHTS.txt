@@ -2004,3 +2004,14 @@ system.services.pqmud = args :
      inherit (args) name;
      run = "${pkgs.pqmud}/bin/pqmud --port ${port} ....."
   };
+
+Fri Jul 14 19:07:59 BST 2023
+
+It works for pppoe, though typechecking error messages could be
+better.
+
+- We need to find a good place to keep the typeCheck function so that
+everyone can use it.
+
+- also the type_service type defn exists only locally in modules.nix,
+and we would like to refer to it elsewhere
