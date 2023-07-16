@@ -5,11 +5,13 @@ let
 in rec {
   services.loopback = config.hardware.networkInterfaces.lo;
 
-  imports = [ ../../modules/wlan.nix ];
+  imports = [
+    ../../modules/wlan.nix
+    ../../modules/hostapd
+  ];
 
-  services.wlan = config.hardware.networkInterfaces.wlan_24;
-
-  services.hostap = hostapd (services.wlan) {
+  services.hostap = config.system.service.hostapd {
+    interface = config.hardware.networkInterfaces.wlan_24;
     params = {
       ssid = "liminix";
       country_code = "GB";
