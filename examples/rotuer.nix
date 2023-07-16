@@ -194,11 +194,9 @@ in rec {
     dependencies = [ services.wan ];
   };
 
-  services.firewall =
-    let ruleset = import ./rotuer-firewall.nix;
-    in config.system.service.firewall {
-      inherit ruleset;
-    };
+  services.firewall = config.system.service.firewall {
+    ruleset = import ./rotuer-firewall.nix;
+  };
 
   services.packet_forwarding =
     let
