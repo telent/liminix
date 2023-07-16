@@ -44,11 +44,14 @@ in
       let svc = (pkgs.callPackage ./service.nix {}) params;
       in svc // { dependencies = svc.dependencies ++ [loadModules]; };
 
+    # For historical reasons the kernel config is split between
+    # monolithic options and modules. TODO: go through this list
+    # and see what can be moved into the "kconf" definiton above
     kernel.config = {
       NETFILTER_XT_MATCH_CONNTRACK = "y";
 
-      IP6_NF_IPTABLES= "y";     # do we still need these
-      IP_NF_IPTABLES= "y";      # if using nftables directly
+      IP6_NF_IPTABLES= "y";
+      IP_NF_IPTABLES= "y";
 
       IP_NF_NAT = "y";
       IP_NF_TARGET_MASQUERADE = "y";
