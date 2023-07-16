@@ -26,6 +26,11 @@ in {
     };
     kernel = {
       src = mkOption { type = types.package; } ;
+      modular = mkOption {
+        type = types.boolean;
+        default = true;
+        description = "support loadable kernel modules";
+      };
       extraPatchPhase = mkOption {
         default = "true";
         type = types.lines;
@@ -67,14 +72,15 @@ in {
     };
 
     kernel = rec {
+      modular = true; # disabling this is not yet supported
       config = {
         IKCONFIG = "y";
         IKCONFIG_PROC = "y";
         PROC_FS = "y";
 
         KEXEC = "y";
-        MODULES = "y";
-        MODULE_SIG = "y";
+        MODULES = if modular then "y" else "n";
+        MODULE_SIG = if modular then "y" else "n";
         DEBUG_FS = "y";
 
         MIPS_BOOTLOADER_CMDLINE_REQUIRE_COOKIE = "y";

@@ -35,39 +35,13 @@ in rec {
     ../modules/standard.nix
     ../modules/ppp
     ../modules/dnsmasq
+    ../modules/firewall
   ];
   rootfsType = "jffs2";
   hostname = "rotuer";
   kernel = {
     config = {
       BRIDGE = "y";
-
-      NETFILTER_XT_MATCH_CONNTRACK = "y";
-
-      IP6_NF_IPTABLES= "y";     # do we still need these
-      IP_NF_IPTABLES= "y";      # if using nftables directly
-
-      IP_NF_NAT = "y";
-      IP_NF_TARGET_MASQUERADE = "y";
-      NETFILTER = "y";
-      NETFILTER_ADVANCED = "y";
-      NETFILTER_XTABLES = "y";
-
-      NFT_COMPAT = "y";
-      NFT_CT = "y";
-      NFT_LOG = "y";
-      NFT_MASQ = "y";
-      NFT_NAT = "y";
-      NFT_REJECT = "y";
-      NFT_REJECT_INET = "y";
-
-      NF_CONNTRACK = "y";
-      NF_NAT = "y";
-      NF_NAT_MASQUERADE  = "y";
-      NF_TABLES= "y";
-      NF_TABLES_INET = "y";
-      NF_TABLES_IPV4 = "y";
-      NF_TABLES_IPV6 = "y";
     };
   };
 
@@ -221,33 +195,9 @@ in rec {
   };
 
   services.firewall =
-    let
-      script= pkgs.firewallgen "firewall.nft" (import ./rotuer-firewall.nix);
-      kmodules = pkgs.kernel-modules.override {
-        kernelSrc  = config.system.outputs.kernel.src;
-        modulesupport = config.system.outputs.kernel.modulesupport;
-        kconfig = {
-          NFT_FIB_IPV4 = "m";
-          NFT_FIB_IPV6 = "m";
-          NF_TABLES = "m";
-          NF_CT_PROTO_DCCP = "y";
-          NF_CT_PROTO_SCTP = "y";
-          NF_CT_PROTO_UDPLITE = "y";
-          #          NF_CONNTRACK_FTP = "m";
-          NFT_CT = "m";
-        };
-        targets = [
-          "nft_fib_ipv4"
-          "nft_fib_ipv6"
-        ];
-      };
-    in oneshot {
-      name = "firewall";
-      up = ''
-        sh ${kmodules}/load.sh
-        ${script};
-      '';
-      down = "${pkgs.nftables}/bin/nft flush ruleset";
+    let ruleset = import ./rotuer-firewall.nix;
+    in config.system.service.firewall {
+      inherit ruleset;
     };
 
   services.packet_forwarding =
