@@ -1,23 +1,34 @@
-# This is not a friendly interface to configuring a wireless AP: it
-# just passes everything straight through to the hostapd config.  When
-# we've worked out what the sensible options are to expose, we'll add
-# them as top-level attributes and rename params to extraParams
-
 {
   liminix
 , hostapd
-, lib
 , writeText
-}:
-interface:
-{
-  params ? {}
+, lib
 }:
 let
   inherit (liminix.services) longrun;
   inherit (lib) concatStringsSep mapAttrsToList;
-  inherit (builtins) toString;
+  inherit (liminix.lib) typeChecked;
+  inherit (lib) mkOption types;
 
+  # This is not a friendly interface to configuring a wireless AP: it
+  # just passes everything straight through to the hostapd config.
+  # When we've worked out what the sensible options are to expose,
+  # we'll add them as top-level attributes and rename params to
+  # extraParams
+
+  t = {
+    interface = mkOption {
+      type = liminix.lib.types.service;
+    };
+    params = mkOption {
+      type = types.attrs;
+    };
+  };
+in
+args:
+let
+  inherit (typeChecked "hostapd" t args)
+    interface params;
   name = "${interface.device}.hostapd";
   defaults =  {
     driver = "nl80211";

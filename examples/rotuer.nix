@@ -11,7 +11,6 @@ let
   secrets = import ./rotuer-secrets.nix;
   inherit (pkgs.liminix.networking)
     address
-    hostapd
     interface
     route;
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
@@ -36,6 +35,7 @@ in rec {
     ../modules/ppp
     ../modules/dnsmasq
     ../modules/firewall
+    ../modules/hostapd
   ];
   rootfsType = "jffs2";
   hostname = "rotuer";
@@ -45,7 +45,8 @@ in rec {
     };
   };
 
-  services.hostap = hostapd (config.hardware.networkInterfaces.wlan_24) {
+  services.hostap = config.system.service.hostapd {
+    interface = config.hardware.networkInterfaces.wlan_24;
     params = {
       ssid = "liminix";
       country_code = "GB";
@@ -62,7 +63,8 @@ in rec {
     };
   };
 
-  services.hostap5 = hostapd (config.hardware.networkInterfaces.wlan_5) {
+  services.hostap5 = config.system.service.hostapd {
+    interface = config.hardware.networkInterfaces.wlan_5;
     params = rec {
       ssid = "liminix_5";
       country_code = "GB";
