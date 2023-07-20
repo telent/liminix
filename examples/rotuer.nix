@@ -20,6 +20,7 @@ let
     writeText
     writeFennelScript
     serviceFns;
+  svc = config.system.service;
 in rec {
   boot = {
     tftp = {
@@ -45,7 +46,7 @@ in rec {
     };
   };
 
-  services.hostap = config.system.service.hostapd {
+  services.hostap = svc.hostapd {
     interface = config.hardware.networkInterfaces.wlan_24;
     params = {
       ssid = "liminix";
@@ -63,7 +64,7 @@ in rec {
     };
   };
 
-  services.hostap5 = config.system.service.hostapd {
+  services.hostap5 = svc.hostapd {
     interface = config.hardware.networkInterfaces.wlan_5;
     params = rec {
       ssid = "liminix_5";
@@ -145,7 +146,7 @@ in rec {
 
   services.dns =
     let interface = services.int;
-    in config.system.service.dnsmasq {
+    in svc.dnsmasq {
       resolvconf = services.resolvconf;
       inherit interface;
       ranges = [
@@ -157,7 +158,7 @@ in rec {
 
   services.wan =
     let iface = config.hardware.networkInterfaces.wan;
-    in config.system.service.pppoe {
+    in svc.pppoe {
       interface = iface;
       ppp-options = [
         "debug" "+ipv6" "noauth"
@@ -196,7 +197,7 @@ in rec {
     dependencies = [ services.wan ];
   };
 
-  services.firewall = config.system.service.firewall {
+  services.firewall = svc.firewall {
     ruleset = import ./rotuer-firewall.nix;
   };
 
