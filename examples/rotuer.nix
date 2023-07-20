@@ -37,14 +37,10 @@ in rec {
     ../modules/dnsmasq
     ../modules/firewall
     ../modules/hostapd
+    ../modules/bridge
   ];
   rootfsType = "jffs2";
   hostname = "rotuer";
-  kernel = {
-    config = {
-      BRIDGE = "y";
-    };
-  };
 
   services.hostap = svc.hostapd {
     interface = config.hardware.networkInterfaces.wlan_24;
@@ -87,29 +83,19 @@ in rec {
   };
 
   services.int =
-    let iface = interface {
-          type = "bridge";
-          device = "int";
+    let iface = svc.bridge.primary {
+          ifname = "int";
         };
     in address iface {
       family = "inet4"; address ="10.8.0.1"; prefixLength = 16;
     };
 
-  services.bridge =
-    let
-      primary = services.int;
-      addif = dev: oneshot {
-        name = "add-${dev.device}-to-bridge";
-        up = "${ifwait}/bin/ifwait -v ${dev.device} running && ip link set dev ${dev.device} master ${primary.device}";
-        down = "ip link set dev ${dev} nomaster";
-        dependencies = [ primary dev ];
-      };
-    in bundle {
-      name = "bridge-members";
-      contents = with config.hardware.networkInterfaces; map addif [
-        wlan_24 lan wlan_5
-      ];
-    };
+  services.bridge = svc.bridge.members {
+    primary = services.int;
+    members = with config.hardware.networkInterfaces;  [
+      wlan_24 lan wlan_5
+    ];
+  };
 
   services.ntp =
     let config = writeText "chrony.conf" ''
