@@ -83,9 +83,7 @@ in rec {
   };
 
   services.int =
-    let iface = svc.bridge.primary {
-          ifname = "int";
-        };
+    let iface = svc.bridge.primary { ifname = "int"; };
     in address iface {
       family = "inet4"; address ="10.8.0.1"; prefixLength = 16;
     };
@@ -142,16 +140,14 @@ in rec {
       domain = "fake.liminix.org";
     };
 
-  services.wan =
-    let iface = config.hardware.networkInterfaces.wan;
-    in svc.pppoe {
-      interface = iface;
-      ppp-options = [
-        "debug" "+ipv6" "noauth"
-        "name" secrets.l2tp.name
-        "password" secrets.l2tp.password
-      ];
-    };
+  services.wan = svc.pppoe {
+    interface = config.hardware.networkInterfaces.wan;
+    ppp-options = [
+      "debug" "+ipv6" "noauth"
+      "name" secrets.l2tp.name
+      "password" secrets.l2tp.password
+    ];
+  };
 
   services.resolvconf = oneshot rec {
     dependencies = [ services.wan ];
