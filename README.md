@@ -20,12 +20,11 @@ Liminix is pre-1.0. We are still finding new and better ways to do things,
 and there is no attempt to maintain backward compatibility with the old
 ways. This will change when it settles down.
 
-In general: development mostly happens on the `main` branch, which is
+_In general:_ development mostly happens on the `main` branch, which is
 therefore not guaranteed to build or to work on every commit. For the
-latest functioning version, see [the CI system](https://build.liminix.org/jobset/liminix/build) and pick a
-revision with all jobs green.
+latest functioning version, see [the CI system](https://build.liminix.org/jobset/liminix/build) and pick a revision with all jobs green.
 
-In particular, as of July 2023, a significant re-arrangement of
+_In particular:_ as of July 2023, a significant re-arrangement of
 modules and services is ongoing:
 
 * if you are using out-of-tree configurations created before commit
