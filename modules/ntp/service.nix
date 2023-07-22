@@ -20,9 +20,15 @@ let
     servers = mkOption { type = types.attrsOf serverOpts; default = {}; };
     pools = mkOption { type = types.attrsOf serverOpts; default = {}; };
     peers = mkOption { type = types.attrsOf serverOpts; default = {}; };
-    makestep = {
-      threshold = mkOption { type = types.number; };
-      limit = mkOption { type = types.number; };
+    makestep = mkOption {
+      default = null;
+      type = types.nullOr
+        (types.submodule {
+          options = {
+            threshold = mkOption { type = types.number; default = null;};
+            limit = mkOption { type = types.number; };
+          };
+        });
     };
     allow = mkOption {
       description = "subnets from which NTP clients are allowed to access the server";
@@ -48,6 +54,8 @@ let
     };
   };
   configFile = p:
+    assert (builtins.trace p.makestep true);
+
     (mapAttrsToList (name: opts: "server ${name} ${concatStringsSep "" opts}")
       p.servers)
     ++
