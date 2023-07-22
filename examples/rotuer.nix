@@ -21,6 +21,17 @@ let
     writeFennelScript
     serviceFns;
   svc = config.system.service;
+  wirelessConfig =  {
+    country_code = "GB";
+    inherit (secrets) wpa_passphrase;
+    auth_algs = 1; # 1=wpa2, 2=wep, 3=both
+    wpa = 2;       # 1=wpa, 2=wpa2, 3=both
+    wpa_key_mgmt = "WPA-PSK";
+    wpa_pairwise = "TKIP CCMP";   # auth for wpa (may not need this?)
+    rsn_pairwise = "CCMP";        # auth for wpa2
+    wmm_enabled = 1;
+  };
+
 in rec {
   boot = {
     tftp = {
@@ -47,40 +58,23 @@ in rec {
     interface = config.hardware.networkInterfaces.wlan_24;
     params = {
       ssid = "liminix";
-      country_code = "GB";
       hw_mode="g";
       channel = "2";
-      wmm_enabled = 1;
       ieee80211n = 1;
-      inherit (secrets) wpa_passphrase;
-      auth_algs = 1; # 1=wpa2, 2=wep, 3=both
-      wpa = 2;       # 1=wpa, 2=wpa2, 3=both
-      wpa_key_mgmt = "WPA-PSK";
-      wpa_pairwise = "TKIP CCMP";   # auth for wpa (may not need this?)
-      rsn_pairwise = "CCMP";        # auth for wpa2
-    };
+    } // wirelessConfig;
   };
 
   services.hostap5 = svc.hostapd {
     interface = config.hardware.networkInterfaces.wlan_5;
     params = rec {
       ssid = "liminix_5";
-      country_code = "GB";
       hw_mode="a";
       channel = 36;
       ht_capab = "[HT40+]";
       vht_oper_chwidth = 1;
       vht_oper_centr_freq_seg0_idx = channel + 6;
       ieee80211ac = 1;
-
-      wmm_enabled = 1;
-      inherit (secrets) wpa_passphrase;
-      auth_algs = 1; # 1=wpa2, 2=wep, 3=both
-      wpa = 2;       # 1=wpa, 2=wpa2, 3=both
-      wpa_key_mgmt = "WPA-PSK";
-      wpa_pairwise = "TKIP CCMP";   # auth for wpa (may not need this?)
-      rsn_pairwise = "CCMP";        # auth for wpa2
-    };
+    } // wirelessConfig;
   };
 
   services.int =
