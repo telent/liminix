@@ -7,6 +7,7 @@ in rec {
   imports = [
     ./modules/tftpboot.nix
     ./modules/wlan.nix
+    ./modules/ntp
   ];
   services.loopback = config.hardware.networkInterfaces.lo;
 
@@ -36,16 +37,9 @@ in rec {
       dependencies = [iface];
     };
 
-  services.ntp =
-    let config = writeText "chrony.conf" ''
-      pool pool.ntp.org iburst
-      dumpdir /run/chrony
-      makestep 1.0 3
-    '';
-    in longrun {
-      name = "ntp";
-      run = "${pkgs.chrony}/bin/chronyd -f ${config} -d";
-    };
+  services.ntp = config.system.service.ntp {
+    pools = { "pool.ntp.org" = ["iburst"] ; };
+  };
 
   services.default = target {
     name = "default";

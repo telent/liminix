@@ -38,6 +38,7 @@ in rec {
     ../modules/firewall
     ../modules/hostapd
     ../modules/bridge
+    ../modules/ntp
   ];
   rootfsType = "jffs2";
   hostname = "rotuer";
@@ -95,16 +96,10 @@ in rec {
     ];
   };
 
-  services.ntp =
-    let config = writeText "chrony.conf" ''
-      pool pool.ntp.org iburst
-      dumpdir /run/chrony
-      makestep 1.0 3
-    '';
-    in longrun {
-      name = "ntp";
-      run = "${pkgs.chrony}/bin/chronyd -f ${config} -d";
-    };
+  services.ntp = svc.ntp {
+    pools = { "pool.ntp.org" = ["iburst"]; };
+    makestep = { threshold = 1.0; limit = 3; };
+  };
 
   services.sshd = longrun {
     name = "sshd";
