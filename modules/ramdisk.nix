@@ -10,11 +10,11 @@ in {
   options = {
     boot = {
       ramdisk = {
-        enable = mkEnableOption (lib.mdDoc ''
-          Configure kernel to enable reserving part of memory as
+        enable = mkEnableOption ''
+          reserving part of memory as
           an MTD-based RAM disk.  Needed for TFTP booting or for
           kexec-based revertable upgrade
-        '');
+        '';
       };
     };
   };

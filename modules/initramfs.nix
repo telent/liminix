@@ -11,7 +11,7 @@ in
 {
   options = {
     boot.initramfs = {
-      enable = mkEnableOption "enable initramfs";
+      enable = mkEnableOption "initramfs";
     };
     system.outputs.initramfs = mkOption {
       type = types.package;
