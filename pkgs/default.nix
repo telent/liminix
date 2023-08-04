@@ -2,7 +2,14 @@
   callPackage
 , lib
 }:
-{
+let
+  typeChecked = caller: type: value:
+    let
+      inherit (lib) types mergeDefinitions;
+      defs = [{ file = caller; inherit value; }];
+      type' = types.submodule { options = type; };
+    in (mergeDefinitions [] type' defs).mergedValue;
+in {
   pseudofile = callPackage ./pseudofile {};
   liminix = {
     services = callPackage ./liminix-tools/services {};
@@ -11,22 +18,29 @@
       squashfs = callPackage ./liminix-tools/builders/squashfs.nix {};
       kernel = callPackage ./kernel {};
     };
+    callService = path : parameters :
+      let pkg = callPackage path {};
+          checkTypes = t : p : typeChecked (builtins.tostring path) t p;
+      in {
+        inherit parameters;
+        build = args : pkg (checkTypes parameters args);
+      };
     lib = {
-      types = {
-        service =
-          let inherit (lib) types isDerivation hasAttr;
-          in types.package // {
+      types =
+        let inherit (lib) types isDerivation;
+        in  {
+          service = types.package // {
             name = "service";
             description = "s6-rc service";
-            check = x: isDerivation x && hasAttr "serviceType" x;
+            check = x: isDerivation x && x ? serviceType;
           };
-      };
-      typeChecked = caller: type: value:
-        let
-          inherit (lib) types mergeDefinitions;
-          defs = [{ file = caller; inherit value; }];
-          type' = types.submodule { options = type; };
-        in (mergeDefinitions [] type' defs).mergedValue;
+          serviceDefn = types.attrs // {
+            name = "service-defn";
+            description = "parametrisable s6-rc service definition";
+            check = x: lib.isAttrs x && x ? parameters && x ? build;
+          };
+        };
+      inherit typeChecked;
     };
   };
   writeFennelScript = callPackage ./write-fennel-script {};

@@ -41,7 +41,7 @@ in rec {
     };
 
   services.dns =
-    config.system.service.dnsmasq {
+    config.system.service.dnsmasq.build {
       interface = services.lan4;
       ranges = ["192.168.19.10,192.168.19.253"];
       domain = "fake.liminix.org";

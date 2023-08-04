@@ -119,7 +119,7 @@ in rec {
 
   services.dns =
     let interface = services.int;
-    in svc.dnsmasq {
+    in svc.dnsmasq.build {
       resolvconf = services.resolvconf;
       inherit interface;
       ranges = [
