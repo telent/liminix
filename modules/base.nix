@@ -27,7 +27,7 @@ in {
     kernel = {
       src = mkOption { type = types.package; } ;
       modular = mkOption {
-        type = types.boolean;
+        type = types.bool;
         default = true;
         description = "support loadable kernel modules";
       };
