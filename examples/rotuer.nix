@@ -168,7 +168,7 @@ in rec {
     dependencies = [ services.wan ];
   };
 
-  services.firewall = svc.firewall {
+  services.firewall = svc.firewall.build {
     ruleset = import ./rotuer-firewall.nix;
   };
 

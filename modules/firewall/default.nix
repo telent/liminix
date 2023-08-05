@@ -1,6 +1,7 @@
 { lib, pkgs, config, ...}:
 let
   inherit (lib) mkOption types;
+  inherit (pkgs) liminix;
   inherit (pkgs.liminix.services) oneshot;
 
   kconf = isModule :
@@ -36,13 +37,22 @@ in
 {
   options = {
     system.service.firewall = mkOption {
-      type = types.anything; # types.functionTo pkgs.liminix.lib.types.service;
+      type = liminix.lib.types.serviceDefn;
     };
   };
   config = {
-    system.service.firewall = params :
-      let svc = (pkgs.callPackage ./service.nix {}) params;
-      in svc // { dependencies = svc.dependencies ++ [loadModules]; };
+    system.service.firewall =
+      let svc = liminix.callService ./service.nix  {
+            ruleset = mkOption {
+              type = types.attrsOf types.attrs;   # we could usefully tighten this a bit :-)
+              description = "firewall ruleset";
+            };
+          };
+      in svc // {
+        build = args : (svc.build args) // {
+          dependencies = [ loadModules ] ++ (svc.dependencies or []);
+        };
+      };
 
     # For historical reasons the kernel config is split between
     # monolithic options and modules. TODO: go through this list
