@@ -78,12 +78,12 @@ in rec {
   };
 
   services.int =
-    let iface = svc.bridge.primary { ifname = "int"; };
+    let iface = svc.bridge.primary.build { ifname = "int"; };
     in address iface {
       family = "inet4"; address ="10.8.0.1"; prefixLength = 16;
     };
 
-  services.bridge = svc.bridge.members {
+  services.bridge = svc.bridge.members.build {
     primary = services.int;
     members = with config.hardware.networkInterfaces;  [
       wlan_24 lan wlan_5
