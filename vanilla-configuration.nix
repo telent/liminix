@@ -37,7 +37,7 @@ in rec {
       dependencies = [iface];
     };
 
-  services.ntp = config.system.service.ntp {
+  services.ntp = config.system.service.ntp.build {
     pools = { "pool.ntp.org" = ["iburst"] ; };
   };
 

@@ -5,6 +5,7 @@
 , lib
 , writeText
 }:
+params:
 let
   inherit (liminix.services) longrun;
   inherit (lib) concatStringsSep mapAttrsToList;
@@ -12,50 +13,7 @@ let
   inherit (lib) mkOption types;
 
   serverOpts = types.listOf types.str;
-  t = {
-    user = mkOption {
-      type = types.str;
-      default = "ntp";
-    };
-    servers = mkOption { type = types.attrsOf serverOpts; default = {}; };
-    pools = mkOption { type = types.attrsOf serverOpts; default = {}; };
-    peers = mkOption { type = types.attrsOf serverOpts; default = {}; };
-    makestep = mkOption {
-      default = null;
-      type = types.nullOr
-        (types.submodule {
-          options = {
-            threshold = mkOption { type = types.number; default = null;};
-            limit = mkOption { type = types.number; };
-          };
-        });
-    };
-    allow = mkOption {
-      description = "subnets from which NTP clients are allowed to access the server";
-      type = types.listOf types.str;
-      default = [];
-    };
-    bindaddress = mkOption {
-      type = types.nullOr types.str;
-      default = null;
-    };
-    binddevice = mkOption {
-      type = types.nullOr types.str;
-      default = null;
-    };
-    dumpdir = mkOption {
-      internal = true;
-      type = types.path;
-      default = "/run/chrony";
-    };
-    extraConfig = mkOption {
-      type = types.lines;
-      default = "";
-    };
-  };
   configFile = p:
-    assert (builtins.trace p.makestep true);
-
     (mapAttrsToList (name: opts: "server ${name} ${concatStringsSep "" opts}")
       p.servers)
     ++
@@ -71,12 +29,9 @@ let
     ++ (lib.optional (p.binddevice != null) "binddevice ${p.binddevice}")
     ++ (lib.optional (p.dumpdir != null) "dumpdir ${p.dumpdir}")
     ++ [p.extraConfig];
-in
-params:
-let
+
   config = writeText "chrony.conf"
-    (concatStringsSep "\n"
-      (configFile (typeChecked "" t params)));
+    (concatStringsSep "\n" (configFile params));
 in longrun {
   name = "ntp"; # bad name, needs to be unique
   run = "${chrony}/bin/chronyd -f ${config} -d";

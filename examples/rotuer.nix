@@ -90,7 +90,7 @@ in rec {
     ];
   };
 
-  services.ntp = svc.ntp {
+  services.ntp = svc.ntp.build {
     pools = { "pool.ntp.org" = ["iburst"]; };
     makestep = { threshold = 1.0; limit = 3; };
   };
