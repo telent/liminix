@@ -54,7 +54,7 @@ in rec {
   rootfsType = "jffs2";
   hostname = "rotuer";
 
-  services.hostap = svc.hostapd {
+  services.hostap = svc.hostapd.build {
     interface = config.hardware.networkInterfaces.wlan_24;
     params = {
       ssid = "liminix";
@@ -64,7 +64,7 @@ in rec {
     } // wirelessConfig;
   };
 
-  services.hostap5 = svc.hostapd {
+  services.hostap5 = svc.hostapd.build {
     interface = config.hardware.networkInterfaces.wlan_5;
     params = rec {
       ssid = "liminix_5";

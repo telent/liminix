@@ -1,13 +1,21 @@
 { lib, pkgs, config, ...}:
 let
   inherit (lib) mkOption types;
+  inherit (pkgs) liminix;
 in {
   options = {
     system.service.hostapd = mkOption {
-      type = types.functionTo types.package;
+      type = liminix.lib.types.serviceDefn;
     };
   };
   config = {
-    system.service.hostapd = pkgs.callPackage ./service.nix {};
+    system.service.hostapd = liminix.callService ./service.nix {
+      interface = mkOption {
+        type = liminix.lib.types.service;
+      };
+      params = mkOption {
+        type = types.attrs;
+      };
+    };
   };
 }

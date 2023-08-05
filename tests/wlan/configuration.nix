@@ -10,7 +10,7 @@ in rec {
     ../../modules/hostapd
   ];
 
-  services.hostap = config.system.service.hostapd {
+  services.hostap = config.system.service.hostapd.build {
     interface = config.hardware.networkInterfaces.wlan_24;
     params = {
       ssid = "liminix";

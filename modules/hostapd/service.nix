@@ -4,6 +4,7 @@
 , writeText
 , lib
 }:
+{ interface, params} :
 let
   inherit (liminix.services) longrun;
   inherit (lib) concatStringsSep mapAttrsToList;
@@ -16,19 +17,6 @@ let
   # we'll add them as top-level attributes and rename params to
   # extraParams
 
-  t = {
-    interface = mkOption {
-      type = liminix.lib.types.service;
-    };
-    params = mkOption {
-      type = types.attrs;
-    };
-  };
-in
-args:
-let
-  inherit (typeChecked "hostapd" t args)
-    interface params;
   name = "${interface.device}.hostapd";
   defaults =  {
     driver = "nl80211";
