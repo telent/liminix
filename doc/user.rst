@@ -242,7 +242,7 @@ crash in surprising ways.
 
 
 Flashing from OpenWrt (not currently advised!)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. CAUTION:: At your own risk! This will (at least in some
              circumstances) lead to bricking the device: we think this
