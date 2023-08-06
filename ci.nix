@@ -26,9 +26,10 @@ let
       }).buildEnv;
       doc = pkgs.stdenv.mkDerivation {
         name = "liminix-doc";
-        nativeBuildInputs = with pkgs; [ gnumake sphinx ];
+        nativeBuildInputs = with pkgs; [ gnumake sphinx  fennel luaPackages.dkjson ];
         src = ./doc;
         buildPhase = ''
+          cat ${(import ./doc/extract-options.nix).doc} | fennel --correlate parse-options.fnl > modules.rst
           make html
         '';
         installPhase = ''
