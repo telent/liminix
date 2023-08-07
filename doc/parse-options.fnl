@@ -73,7 +73,7 @@
         (table.insert e option)
         (tset modules path e))))
   (each [name module (pairs modules)]
-    (print (read-preamble name))
+    (print (or (read-preamble name) (headline name)))
     (let [options (sort-options module)]
       (each [_ o (ipairs options)]
         (if (= o.type "parametrisable s6-rc service definition")
