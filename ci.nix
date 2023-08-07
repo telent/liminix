@@ -18,7 +18,9 @@ let
     }).outputs.default;
   tests = import ./tests/ci.nix;
   jobs =
-    (genAttrs devices (name: for-device name)) // tests // {
+    (genAttrs devices (name: for-device name)) //
+    tests //
+    {
       buildEnv = (import liminix {
         inherit nixpkgs  borderVmConf;
         device = import (liminix + "/devices/qemu");
@@ -26,7 +28,10 @@ let
       }).buildEnv;
       doc = pkgs.stdenv.mkDerivation {
         name = "liminix-doc";
-        nativeBuildInputs = with pkgs; [ gnumake sphinx  fennel luaPackages.dkjson ];
+        nativeBuildInputs = with pkgs; [
+          gnumake sphinx
+          fennel luaPackages.lyaml
+        ];
         src = ./doc;
         buildPhase = ''
           cat ${(import ./doc/extract-options.nix).doc} | fennel --correlate parse-options.fnl > modules.rst

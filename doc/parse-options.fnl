@@ -1,4 +1,4 @@
-(local json (require :dkjson))
+(local yaml (require :lyaml))
 
 (local { : view } (require :fennel))
 
@@ -7,6 +7,17 @@
         len (basename:len)]
     (print basename)
     (print (string.rep "=" len))))
+
+(fn read-preamble [pathname]
+  (if (= (pathname:sub 1 1) "/")
+      (let [pathname (if (string.match pathname ".nix$")
+                         pathname
+                         (.. pathname "/default.nix"))]
+        (with-open [f (assert (io.open pathname :r))]
+          (accumulate [lines ""
+                       l (f:lines)
+                       :until (not (= (string.sub l 1 2) "##"))]
+            (.. lines (string.gsub l "^## *" "") "\n"))))))
 
 (fn strip-newlines [text]
   (and text
@@ -54,15 +65,15 @@
   (table.sort module (fn [a b] (< a.name b.name)))
   module)
 
-(let [raw (json.decode (io.read "*a"))
+(let [raw (yaml.load (io.read "*a"))
       modules {}]
   (each [_ option (ipairs raw)]
-    (let [[path] option.declarations
-          e (or (. modules path) [])]
-      (table.insert e option)
-      (tset modules path e)))
+    (each [_ path (ipairs option.declarations)]
+      (let [e (or (. modules path) [])]
+        (table.insert e option)
+        (tset modules path e))))
   (each [name module (pairs modules)]
-    (print (headline name))
+    (print (read-preamble name))
     (let [options (sort-options module)]
       (each [_ o (ipairs options)]
         (if (= o.type "parametrisable s6-rc service definition")

@@ -49,7 +49,8 @@ let
   o = builtins.map spliceServiceDefn
     (pkgs.lib.optionAttrSetToDocList eval.options);
 in {
-  doc = pkgs.writeText "options.json"
-    (builtins.unsafeDiscardStringContext (builtins.toJSON o))
-  ;
+  doc = pkgs.writeText "options.yaml" ''
+    # ${./..}
+    ${builtins.toJSON o}
+  '';
 }
