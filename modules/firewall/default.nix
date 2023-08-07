@@ -1,3 +1,9 @@
+## Firewall
+## ========
+##
+## Provides a service to create an nftables ruleset based on
+## configuration supplied to it.
+
 { lib, pkgs, config, ...}:
 let
   inherit (lib) mkOption types;

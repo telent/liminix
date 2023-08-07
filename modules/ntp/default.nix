@@ -1,3 +1,11 @@
+## NTP
+## ===
+##
+## A network time protocol implementation so that your Liminix device
+## may synchronize its clock with an accurate time source, and
+## optionally also provide time service to its peers. The
+## implementation used in Liminix is Chrony
+
 { lib, pkgs, config, ...}:
 let
   inherit (lib) mkOption types;

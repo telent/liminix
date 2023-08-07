@@ -1,3 +1,10 @@
+## Dnsmasq
+## =======
+##
+## This module includes a service to provide DNS, DHCP, and IPv6
+## router advertisement for the local network.
+
+
 { lib, pkgs, config, ...}:
 let
   inherit (lib) mkOption types;
