@@ -72,13 +72,17 @@
       (let [e (or (. modules path) [])]
         (table.insert e option)
         (tset modules path e))))
-  (each [name module (pairs modules)]
-    (print (or (read-preamble name) (headline name)))
-    (let [options (sort-options module)]
-      (each [_ o (ipairs options)]
-        (if (= o.type "parametrisable s6-rc service definition")
-            (print-service o)
-            (print-option o))))))
+  (tset modules "lib/modules.nix" nil)
+  (let [module-names (doto (icollect [n _ (pairs modules)] n) table.sort)]
+    (io.stderr:write (view module-names))
+    (each [_ name (ipairs module-names)]
+      (let [module (. modules name)
+            options (sort-options module)]
+        (print (or (read-preamble name) (headline name)))
+        (each [_ o (ipairs options)]
+          (if (= o.type "parametrisable s6-rc service definition")
+              (print-service o)
+              (print-option o)))))))
 
 ;; for each element el, add to table modules keyed on
 ;; el.declarations
