@@ -83,19 +83,42 @@ Creating configuration.nix
 ==========================
 
 
-You need to create a :file:`configuration.nix` that describes your device
-and the services that you want to run on it. Start by copying
-:file:`vanilla-configuration.nix` and adjusting it, or look in the `examples`
-directory for some pre-written configurations.
+You need to create a :file:`configuration.nix` that describes your
+device and the services that you want to run on it. The best way to
+get started is by reading one of the examples such as
+:file:`examples/rotuer.nix` and modifying it to your needs.
 
 :file:`configuration.nix` conventionally describes the packages, services,
 user accounts etc of the device. It does not describe the hardware
 itself, which is specified separately in the build command (as you
 will see below).
 
-Your configuration may include modules: it probably *should*
-include the ``standard`` module unless you understand what it
-does and what happens if you leave it out.
+Most of the functionality of a Liminix system is driven by *services*
+which are declared by *modules*: thus, to add for example an NTP service
+you first add :file:`modules/ntp` to your ``imports`` list, then
+you create a service by calling :code:`config.system.service.ntp.build { .... }`
+with the appropriate service-dependent configuration parameters.
+
+.. code-block:: nix
+
+  let svc = config.system.service;
+  in {
+    # ...
+    imports = [
+      ./modules/ntp
+      # ....
+    ];
+    config.services.ntp = svc.ntp.build {
+      pools = { "pool.ntp.org" = ["iburst"]; };
+      makestep = { threshold = 1.0; limit = 3; };
+    };
+
+A :ref:`full list of module options <module-options>` is provided
+later in this manual.
+
+You *most likely* want to include the ``standard`` module unless you
+have a quite unusual use case for a very minimal system, in which case
+you will understand what it does and what happens if you leave it out.
 
 .. code-block:: nix
 
@@ -318,5 +341,7 @@ Caveats
 
 Configuration options
 *********************
+
+.. _module-options:
 
 .. include:: modules.rst
