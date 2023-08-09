@@ -1,11 +1,12 @@
 ## PPP
 ## ===
 ##
-## A rudimentary PPPoE (PPP over Ethernet) configuration to address
-## the case where your Liminix device is connected to an upstream
-## network using PPPoE. This is typical for UK broadband connections
-## (except "cable"), and common in some other localities as well: ask
-## your ISP if this is you.
+## A PPPoE (PPP over Ethernet) configuration to address the case where
+## your Liminix device is connected to an upstream network using
+## PPPoE. This is typical for UK broadband connections where the
+## physical connection is made by OpenReach ("Fibre To The X") and
+## common in some other localities as well: ask your ISP if this is
+## you.
 
 { lib, pkgs, config, ...}:
 let

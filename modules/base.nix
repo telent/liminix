@@ -1,3 +1,7 @@
+## Base options
+## ============
+
+
 { lib, pkgs, config, ...}:
 let
   inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;

@@ -1,3 +1,16 @@
+## Users
+## =====
+##
+## User- and group-related configuration.
+##
+## Changes made here are reflected in files such as :file:/etc/shadow,
+## :file:/etc/passwd, :file:/etc/group etc. If you are familiar with
+## user configuration in NixOS, please note that Liminix does not have
+## the concept of "mutable users" - files in /etc/ are symlinks to
+## the immutable store, so you can't e.g  change a password with
+## :command:`passwd`
+
+
 { lib, pkgs, config, ...}:
 let
   inherit (lib)

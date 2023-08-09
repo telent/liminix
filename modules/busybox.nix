@@ -1,3 +1,11 @@
+## Busybox
+## =======
+##
+## Busybox provides stripped-down versions of many usual
+## Linux/Unix tools, and may be configured to include only
+## the commands (termed "applets") required by the user or
+## by other included modules.
+
 { lib, pkgs, config, ...}:
 let
   inherit (lib) mkOption mkEnableOption types mapAttrsToList;
@@ -47,12 +55,14 @@ in {
     programs.busybox = {
       applets =  mkOption {
         type = types.listOf types.str;
+        description = "Applets required";
         default = [];
         example = ["sh" "getty" "login"];
       };
       options = mkOption {
         # mostly the values are y n or m, but sometimes
         # other strings are also used
+        description = "Other busybox config flags that do not map directly to applet names (often prefixed FEATURE_)";
         type = types.attrsOf types.nonEmptyStr;
         default =  { };
       };

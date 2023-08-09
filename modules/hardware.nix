@@ -1,3 +1,11 @@
+## Hardware-dependent options
+## ==========================
+##
+## These are attributes of the hardware not of the application
+## you want to run on it, and would usually be set in the "device" file:
+## :file:`devices/manuf-model/default.nix`
+
+
 { lib, pkgs, config, ...}:
 let
   inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;
