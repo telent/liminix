@@ -50,6 +50,7 @@ in rec {
     ../modules/hostapd
     ../modules/bridge
     ../modules/ntp
+    ../modules/ssh
   ];
   rootfsType = "jffs2";
   hostname = "rotuer";
@@ -95,25 +96,7 @@ in rec {
     makestep = { threshold = 1.0; limit = 3; };
   };
 
-  services.sshd = longrun {
-    name = "sshd";
-    # env -i clears the environment so we don't pass anything weird to
-    # ssh sessions. Dropbear params are
-    # -e  pass environment to child
-    # -E  log to stderr
-    # -R  create hostkeys if needed
-    # -P  pid-file
-    # -F  don't fork into background
-
-    run = ''
-      if test -d /persist; then
-        mkdir -p /persist/secrets/dropbear
-        ln -s /persist/secrets/dropbear /run
-      fi
-      PATH=${lib.makeBinPath config.defaultProfile.packages}:/bin
-      exec env -i ENV=/etc/ashrc PATH=$PATH ${dropbear}/bin/dropbear -e -E -R -P /run/dropbear.pid  -F
-    '';
-  };
+  services.sshd = svc.ssh.build { };
 
   users.root = secrets.root;
 
