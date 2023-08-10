@@ -112,7 +112,7 @@ in rec {
       domain = "fake.liminix.org";
     };
 
-  services.wan = svc.pppoe {
+  services.wan = svc.pppoe.build {
     interface = config.hardware.networkInterfaces.wan;
     ppp-options = [
       "debug" "+ipv6" "noauth"

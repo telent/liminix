@@ -6,25 +6,9 @@
 , writeAshScript
 , serviceFns
 } :
+{ interface, ppp-options }:
 let
   inherit (liminix.services) longrun;
-  inherit (liminix.lib) typeChecked;
-  inherit (lib) mkOption types;
-
-  t = {
-    interface = mkOption {
-      type = liminix.lib.types.service;
-      description = "ethernet interface to run PPPoE over";
-    };
-    ppp-options = mkOption {
-      type = types.listOf types.str;
-      description = "options supplied on ppp command line";
-    };
-  };
-in
-params:
-let
-  inherit (typeChecked "pppoe.nix" t params) interface ppp-options;
   name = "${interface.device}.pppoe";
   ip-up = writeAshScript "ip-up" {} ''
     . ${serviceFns} 
@@ -55,7 +39,6 @@ let
     "usepeerdns"
     "logfd" "2"
   ];
-
 in
 longrun {
   inherit name;

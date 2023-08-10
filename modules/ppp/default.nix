@@ -11,14 +11,24 @@
 { lib, pkgs, config, ...}:
 let
   inherit (lib) mkOption types;
+  inherit (pkgs) liminix;
 in {
   options = {
     system.service.pppoe = mkOption {
-      type = types.functionTo types.package;
+      type = liminix.lib.types.serviceDefn;
     };
   };
   config = {
-    system.service.pppoe = pkgs.callPackage ./pppoe.nix {};
+    system.service.pppoe = pkgs.liminix.callService ./pppoe.nix {
+      interface = mkOption {
+        type = liminix.lib.types.service;
+        description = "ethernet interface to run PPPoE over";
+      };
+      ppp-options = mkOption {
+        type = types.listOf types.str;
+        description = "options supplied on ppp command line";
+      };
+    };
     kernel = {
       config = {
         PPP = "y";
