@@ -2015,3 +2015,28 @@ everyone can use it.
 
 - also the type_service type defn exists only locally in modules.nix,
 and we would like to refer to it elsewhere
+
+Thu Aug 10 21:46:36 BST 2023
+
+to finish service/modules milestone
+
+[done] there are some modules not using serviceDefn
+- modules included by standard.nix should have all their options
+  grouped together in docs
+  how can we determine which they are? or maybe "modules that
+   don't contain services" is an acceptable criterion
+  maybe this is not actually an issue, if the modules are
+   reasonably coherent. It looks odd now because base.nix is a mess
+- print the module pathname so people know what to import
+- docs don't print the examples
+- and seem to be getting the default wrong too
+- decide what we deem to be "internal" (if anything)
+   is `filesystem` internal, for example? or `busybox`? they're
+   both mostly _used_ internally but may still be valuable to expose
+- maybe document outputs separately or not at all?
+- bridge to be one service instead of two?
+[done] get rid of services/
+- anything else in rotuer.nix that we should servicify
+- services for liminix.networking
+- a nice way to specify service dependencies
+- do another video
