@@ -12,6 +12,9 @@ let
   type_service = pkgs.liminix.lib.types.service;
 
 in {
+  imports = [
+    ./kernel.nix                # this is a separate module for doc purposes
+  ];
   options = {
     # analogous to nixos systemPackages, but we don't symlink into
     # /run/current-system, we just add the paths in /etc/profile
@@ -27,23 +30,6 @@ in {
     rootfsType =  mkOption {
       default = "squashfs";
       type = types.str;
-    };
-    kernel = {
-      src = mkOption { type = types.package; } ;
-      modular = mkOption {
-        type = types.bool;
-        default = true;
-        description = "support loadable kernel modules";
-      };
-      extraPatchPhase = mkOption {
-        default = "true";
-        type = types.lines;
-      } ;
-      config = mkOption {
-        # mostly the values are y n or m, but sometimes
-        # other strings are also used
-        type = types.attrsOf types.nonEmptyStr;
-      };
     };
     boot = {
       commandLine = mkOption {
@@ -75,52 +61,6 @@ in {
         };
     };
 
-    kernel = rec {
-      modular = true; # disabling this is not yet supported
-      config = {
-        IKCONFIG = "y";
-        IKCONFIG_PROC = "y";
-        PROC_FS = "y";
-
-        KEXEC = "y";
-        MODULES = if modular then "y" else "n";
-        MODULE_SIG = if modular then "y" else "n";
-        DEBUG_FS = "y";
-
-        MIPS_BOOTLOADER_CMDLINE_REQUIRE_COOKIE = "y";
-        MIPS_BOOTLOADER_CMDLINE_COOKIE = "\"liminix\"";
-        MIPS_CMDLINE_DTB_EXTEND = "y";
-
-        # basic networking protocols
-        NET = "y";
-        UNIX = "y";
-        INET = "y";
-        IPV6 = "y";
-        PACKET = "y";           # for ppp, tcpdump ...
-        SYSVIPC= "y";
-
-        # disabling this option causes the kernel to use an "empty"
-        # initramfs instead: it has a /dev/console node and not much
-        # else.  Note that pid 1 is started *before* the root
-        # filesystem is mounted and it expects /dev/console to be
-        # present already
-        BLK_DEV_INITRD = lib.mkDefault "n"; # overriden by initramfs module
-
-        # s6-linux-init mounts this on /dev
-        DEVTMPFS = "y";
-        # some or all of these may be fix for "tmpfs: Unknown parameter 'mode'" error
-        TMPFS = "y";
-        TMPFS_POSIX_ACL = "y";
-        TMPFS_XATTR = "y";
-
-        FW_LOADER = "y";
-        FW_LOADER_COMPRESS = "y";
-        # We don't have a user helper, so we get multiple 60s pauses
-        # at boot time unless we disable trying to call it.
-        # https://lkml.org/lkml/2013/8/5/175
-        FW_LOADER_USER_HELPER = "n";
-      };
-    };
     boot.commandLine = [
       "console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8"
       "root=${config.hardware.rootDevice}"
