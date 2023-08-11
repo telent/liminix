@@ -34,12 +34,13 @@ let
         ];
         src = ./doc;
         buildPhase = ''
-          cat ${(import ./doc/extract-options.nix).doc} | fennel --correlate parse-options.fnl > modules.rst
+          cat ${(import ./doc/extract-options.nix).doc} > options.json
+          cat options.json | fennel --correlate parse-options.fnl > modules.rst
           make html
         '';
         installPhase = ''
           mkdir -p $out/nix-support $out/share/doc/
-          # (cd _build && tar cf $out/share/doc/liminix_manual.tar html)
+          cp modules.rst options.json $out
           cp -a _build/html $out/share/doc/liminix
           echo "file source-dist \"$out/share/doc/liminix\"" \
               > $out/nix-support/hydra-build-products

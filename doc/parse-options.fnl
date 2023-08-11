@@ -20,38 +20,44 @@
             (.. lines (string.gsub l "^## *" "") "\n"))))))
 
 (fn strip-newlines [text]
-  (and text
-       (-> text
-           (string.gsub "\n([^\n])" " %1")
-           (string.gsub "\n\n+" "\n"))))
+  (-> text
+      (string.gsub "\n([^\n])" " %1")
+      (string.gsub "\n\n+" "\n")))
 
 (fn indent [n text]
   (let [margin (string.rep " " n)]
-    (.. margin (string.gsub text "\n +" (.. "\n" margin )))))
+    (.. margin (string.gsub (or text "") "\n +" (.. "\n" margin )))))
+
+(fn indent-literal [n text]
+  (let [margin (string.rep " " n)]
+    (.. margin (string.gsub (or text "") "\n" (.. "\n" margin )))))
 
 (fn extract-text [description]
-  (and description
-;       (do (print (view description)) true)
-       (-> (match description
-             { :type "literalExpression" : text } text
-             {} nil
-             nil nil
-             t description)
-           strip-newlines)))
+  (match description
+    { :_type "literalExpression" : text } text
+    (where s (= (type s) "string")) description
+    _ nil))
 
 (fn print-option [o offset]
   (let [i (or offset 0)]
     (print (indent i (.. " * option ``" o.name "``")))
-    (print (indent (+ 4 i)
-                   (or (extract-text o.description) "(no description)")))
+    (case (-?> o.description extract-text strip-newlines)
+          descr (print (indent (+ 4 i) descr)))
     (print)
     (print (indent (+ 4 i) (.. "**type** " o.type "\n")))
-    (print (indent (+ 4 i)
-                   (.. "**default** "
-                       (or (extract-text (?. o :default)) "(none)")
-                       "\n"
-                       )))
-    (print )))
+    (when o.example
+      (print (indent (+ 4 i) "**example**")) (print)
+      (print (indent (+ 4 i) ".. code-block:: nix"))
+      (print)
+      (print (indent-literal (+ 8 i) (extract-text o.example)) "\n")
+      (print))
+
+    (when (extract-text o.default)
+      (print (indent (+ 4 i) "**default**")) (print)
+      (print (indent (+ 4 i) ".. code-block:: nix"))
+      (print)
+      (print (indent-literal (+ 8 i) (extract-text o.default)) "\n")
+      (print))))
 
 (fn print-service [o]
   (print (.. " * service ``" o.name "``"))
@@ -83,13 +89,3 @@
           (if (= o.type "parametrisable s6-rc service definition")
               (print-service o)
               (print-option o)))))))
-
-;; for each element el, add to table modules keyed on
-;; el.declarations
-
-;; for each value in modules
-;;   print title
-;;   elements = (sort elements on el.name)
-;;   for each el in elements
-;;     is option or service? print whichever
-;;

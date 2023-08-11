@@ -1,6 +1,7 @@
 ## Kernel-related options
 ## ======================
-
+##
+##
 
 { lib, pkgs, config, ...}:
 let
@@ -32,6 +33,13 @@ in {
           but sometimes other strings are also used.
         '';
         type = types.attrsOf types.nonEmptyStr;
+        example = lib.literalExpression ''
+          {
+            BRIDGE = "y";
+            TMPFS = "y";
+            FW_LOADER_USER_HELPER = "n";
+          };
+        '';
       };
     };
   };
