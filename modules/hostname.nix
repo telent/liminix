@@ -5,6 +5,10 @@ let
 in {
   options = {
     hostname = mkOption {
+      description = ''
+        System hostname of the device, as returned by gethostname(2). May or
+        may not correspond to any name it's reachable at on any network.
+      '';
       default = "liminix";
       type = types.nonEmptyStr;
     };
