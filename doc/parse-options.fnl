@@ -3,10 +3,9 @@
 (local { : view } (require :fennel))
 
 (fn headline [name]
-  (let [(_ _ basename) (string.find name ".*/([^/].*)")
+  (let [(_ _ basename) (string.find name ".*/([^/].*).nix")
         len (basename:len)]
-    (print basename)
-    (print (string.rep "=" len))))
+    (.. basename "\n" (string.rep "=" len))))
 
 (fn read-preamble [pathname]
   (if (= (pathname:sub 1 1) "/")
@@ -14,10 +13,10 @@
                          pathname
                          (.. pathname "/default.nix"))]
         (with-open [f (assert (io.open pathname :r))]
-          (accumulate [lines ""
+          (accumulate [lines nil
                        l (f:lines)
                        :until (not (= (string.sub l 1 2) "##"))]
-            (.. lines (string.gsub l "^## *" "") "\n"))))))
+            (.. (or lines "") (string.gsub l "^## *" "") "\n"))))))
 
 (fn strip-newlines [text]
   (-> text
