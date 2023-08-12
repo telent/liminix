@@ -73,11 +73,32 @@
     ["system" "outputs" & _] true
     _ false))
 
+(fn is-service? [o]
+  (= o.type "parametrisable s6-rc service definition"))
+
+(fn has-service? [module]
+  (accumulate [found false
+               _ o (ipairs module)]
+    (or found (is-service? o))))
+
+(fn sort-modules [modules]
+  ;; modules containing services should sort _after_ modules
+  ;; that contain only options
+  (doto (icollect [n m (pairs modules)]
+          { :name n :service? (has-service? m) :module m })
+    (table.sort
+     (fn [a b]
+       (if (and a.service? (not b.service?))
+           false
+           (and b.service? (not a.service?))
+           true
+           (< a.name b.name))))))
+
 (fn sort-options [module]
   (let [options (icollect [_ o (ipairs module)]
                   (if (not (output? o))
                       o))]
-    (doto options (table.sort  (fn [a b] (< a.name b.name))))))
+    (doto options (table.sort (fn [a b] (< a.name b.name))))))
 
 (let [raw (yaml.load (io.read "*a"))
       modules {}]
@@ -87,13 +108,11 @@
         (table.insert e option)
         (tset modules path e))))
   (tset modules "lib/modules.nix" nil)
-  (let [module-names (doto (icollect [n _ (pairs modules)] n) table.sort)]
-    (io.stderr:write (view module-names))
-    (each [_ name (ipairs module-names)]
-      (let [module (. modules name)
-            options (sort-options module)]
+  (let [modules (sort-modules modules)]
+    (each [_ {: name : module} (ipairs modules)]
+      (let [options (sort-options module)]
         (print (or (read-preamble name) (headline name)))
         (each [_ o (ipairs options)]
-          (if (= o.type "parametrisable s6-rc service definition")
+          (if (is-service? o)
               (print-service o)
               (print-option o)))))))
