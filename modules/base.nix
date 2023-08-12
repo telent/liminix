@@ -13,35 +13,66 @@ let
 
 in {
   imports = [
-    ./kernel.nix                # this is a separate module for doc purposes
+    ./kernel.nix                # kernel is a separate module for doc purposes
   ];
   options = {
-    # analogous to nixos systemPackages, but we don't symlink into
-    # /run/current-system, we just add the paths in /etc/profile
     defaultProfile = {
       packages = mkOption {
         type = types.listOf types.package;
+        description = ''
+          List of packages which are available in a login shell. (This
+          is analogous to systemPackages in NixOS, but we don't symlink into
+          /run/current-system, we just add the paths in /etc/profile
+        '';
       };
     };
     services = mkOption {
       type = types.attrsOf type_service;
     };
-    filesystem = mkOption { type = types.anything; };
+    filesystem = mkOption {
+      type = types.anything;
+      description = ''
+        Skeleton filesystem, represented as nested attrset. Consult the
+        source code if you need to add to this
+      '';
+      # internal = true;  # probably a good case to make this internal
+    };
     rootfsType =  mkOption {
       default = "squashfs";
-      type = types.str;
+      type = types.enum ["squashfs" "jffs2"];
     };
     boot = {
       commandLine = mkOption {
         type = types.listOf types.nonEmptyStr;
         default = [];
+        description = "Kernel command line";
       };
       tftp = {
-        loadAddress = mkOption { type = types.str; };
+        loadAddress = mkOption {
+          type = types.str;
+          description = ''
+            RAM address at which to load data when transferring via
+            TFTP. This is not the address of the flash storage,
+            nor the kernel load address: it should be set to some part
+            of RAM that's not used for anything else and suitable for
+            temporary storage.
+          '';
+        };
         # These names match the uboot environment variables. I reserve
         # the right to change them if I think of better ones.
-        ipaddr =  mkOption { type = types.str; };
-        serverip =  mkOption { type = types.str; };
+        ipaddr =  mkOption {
+          type = types.str;
+          description = ''
+            Our IP address to use when creating scripts to
+            boot or flash from U-Boot. Not relevant in normal operation
+          '';
+        };
+        serverip = mkOption {
+          type = types.str;
+          description = ''
+            IP address of the TFTP server.  Not relevant in normal operation
+          '';
+        };
       };
     };
   };

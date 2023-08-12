@@ -65,6 +65,7 @@ in {
         description = "Other busybox config flags that do not map directly to applet names (often prefixed FEATURE_)";
         type = types.attrsOf types.nonEmptyStr;
         default =  { };
+        example =  { FEATURE_DD_IBS_OBS = "y"; };
       };
     };
   };
