@@ -67,9 +67,16 @@
   (each [_ param (ipairs o.parameters)]
     (print-option param 4)))
 
+(fn output? [option]
+  (match option.loc
+    ["system" "outputs" & _] true
+    _ false))
+
 (fn sort-options [module]
-  (table.sort module (fn [a b] (< a.name b.name)))
-  module)
+  (let [options (icollect [_ o (ipairs module)]
+                  (if (not (output? o))
+                      o))]
+    (doto options (table.sort  (fn [a b] (< a.name b.name))))))
 
 (let [raw (yaml.load (io.read "*a"))
       modules {}]
