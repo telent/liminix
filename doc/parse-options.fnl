@@ -61,7 +61,8 @@
 
 (fn print-service [o]
   (print (.. " * service ``" o.name "``"))
-  (print (indent 4 (or (extract-text o.description) "(no description)")))
+  (match (extract-text o.description)
+    descr (print (indent 4 descr)))
   (print)
   (print (indent 4 "**Service parameters**\n"))
   (each [_ param (ipairs o.parameters)]
