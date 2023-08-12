@@ -18,6 +18,13 @@
                        :until (not (= (string.sub l 1 2) "##"))]
             (.. (or lines "") (string.gsub l "^## *" "") "\n"))))))
 
+(fn relative-pathname [pathname]
+  (let [pathname
+        (if (string.match pathname ".nix$")
+            pathname
+            (.. pathname "/default.nix"))]
+    (pick-values 1 (string.gsub pathname "^/nix/store/[^/]+/" "modules/"))))
+
 (fn strip-newlines [text]
   (-> text
       (string.gsub "\n([^\n])" " %1")
@@ -108,10 +115,14 @@
         (tset modules path e))))
   (tset modules "lib/modules.nix" nil)
   (let [modules (sort-modules modules)]
-    (each [_ {: name : module} (ipairs modules)]
+    (each [_ {: name : module : service?} (ipairs modules)]
       (let [options (sort-options module)]
-        (print (or (read-preamble name) (headline name)))
-        (each [_ o (ipairs options)]
-          (if (is-service? o)
-              (print-service o)
-              (print-option o)))))))
+        (when (> (# options) 0)
+          (print (or (read-preamble name) (headline name)))
+          (when service?
+            (print "**path** " (.. ":file:`" (relative-pathname name) "`")))
+          (print)
+          (each [_ o (ipairs options)]
+            (if (is-service? o)
+                (print-service o)
+                (print-option o))))))))
