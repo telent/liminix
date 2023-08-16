@@ -44,13 +44,16 @@
     (where s (= (type s) "string")) description
     _ nil))
 
+(fn escape-backslash [s]
+  (string.gsub s "\\" "\\\\"))
+
 (fn print-option [o offset]
   (let [i (or offset 0)]
     (print (indent i (.. " * option ``" o.name "``")))
     (case (-?> o.description extract-text strip-newlines)
           descr (print (indent (+ 4 i) descr)))
     (print)
-    (print (indent (+ 4 i) (.. "**type** " o.type "\n")))
+    (print (indent (+ 4 i) (.. "**type** " (escape-backslash o.type) "\n")))
     (when o.example
       (print (indent (+ 4 i) "**example**")) (print)
       (print (indent (+ 4 i) ".. code-block:: nix"))
