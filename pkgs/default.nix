@@ -20,7 +20,7 @@ in {
     };
     callService = path : parameters :
       let pkg = callPackage path {};
-          checkTypes = t : p : typeChecked (builtins.tostring path) t p;
+          checkTypes = t : p : typeChecked (builtins.toString path) t p;
       in {
         inherit parameters;
         build = args : pkg (checkTypes parameters args);
