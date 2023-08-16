@@ -13,7 +13,7 @@ in rec {
   ];
 
   services.pppoe =
-    config.system.service.pppoe {
+    config.system.service.pppoe.build {
       interface = interface { type = "hardware"; device = "eth0"; };
       ppp-options = [
         "debug" "+ipv6" "noauth"
