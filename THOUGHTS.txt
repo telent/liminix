@@ -2027,14 +2027,14 @@ to finish service/modules milestone
    don't contain services" is an acceptable criterion
   maybe this is not actually an issue, if the modules are
    reasonably coherent. It looks odd now because base.nix is a mess
-- print the module pathname so people know what to import
-- docs don't print the examples
-- and seem to be getting the default wrong too
+[done] print the module pathname so people know what to import
+[done] docs don't print the examples
+[check?] and seem to be getting the default wrong too
 - decide what we deem to be "internal" (if anything)
    is `filesystem` internal, for example? or `busybox`? they're
    both mostly _used_ internally but may still be valuable to expose
-- maybe document outputs separately or not at all?
-- bridge to be one service instead of two?
+[done] maybe document outputs separately or not at all?
+[done] bridge to be one service instead of two?
 [done] get rid of services/
 - anything else in rotuer.nix that we should servicify
 - services for liminix.networking
