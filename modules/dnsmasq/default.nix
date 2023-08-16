@@ -20,10 +20,12 @@ in {
       user = mkOption {
         type = types.str;
         default = "dnsmasq";
+        description = "Specifies the unix user which dnsmasq will run as" ;
       };
       group = mkOption {
         type = types.str;
         default = "dnsmasq";
+        description = "Specifies the unix group which dnsmasq will run as" ;
       };
       resolvconf = mkOption {
         type = types.nullOr liminix.lib.types.service;
