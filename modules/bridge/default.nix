@@ -4,9 +4,7 @@
 ##  Allows creation of Layer 2 software "bridge" network devices.  A
 ##  common use case is to merge together a hardware Ethernet device
 ##  with one or more WLANs so that several local devices appear to be
-##  on the same network. Create a ``primary`` service to specify the
-##  new device, and a ``members`` service to add constituent devices
-##  to it.
+##  on the same network.
 
 
 { lib, pkgs, config, ...}:
