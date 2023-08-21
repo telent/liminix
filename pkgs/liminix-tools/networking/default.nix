@@ -37,13 +37,6 @@ in {
     } // {
       inherit (interface) device;
     };
-  udhcpc = callPackage ./udhcpc.nix {};
-  odhcpc = interface: { ... } @ args: longrun {
-    name = "${interface.device}.odhcp";
-    run = "odhcpcd ${interface.device}";
-  };
-  dnsmasq = callPackage ./dnsmasq.nix {};
-  hostapd = callPackage ./hostapd.nix {};
   route = { name, target, via, dependencies, dev ? null }:
     let with_dev = if dev != null then "dev ${dev}" else "";
     in oneshot {
