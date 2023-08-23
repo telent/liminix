@@ -28,12 +28,13 @@ in {
     lib = {
       types =
         let inherit (lib) types isDerivation;
-        in  {
+        in  rec {
           service = types.package // {
             name = "service";
             description = "s6-rc service";
             check = x: isDerivation x && x ? serviceType;
           };
+          interface = service;
           serviceDefn = types.attrs // {
             name = "service-defn";
             description = "parametrisable s6-rc service definition";
