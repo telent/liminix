@@ -25,18 +25,14 @@ in {
       up = lib.concatStringsSep "\n" ups;
       down = "ip link set down dev ${device}";
       dependencies = dependencies ++ lib.optional (primary != null) primary;
-    } // {
-      inherit device;
     };
   address = interface: { family, dependencies ? [], prefixLength, address } @ args:
     let inherit (builtins) toString;
     in oneshot {
       dependencies = [ interface ] ++ dependencies;
-      name = "${interface.device}.addr.${address}";
-      up = "ip address add ${address}/${toString prefixLength} dev ${interface.device} ";
-      down = "ip address del ${address}/${toString prefixLength} dev ${interface.device} ";
-    } // {
-      inherit (interface) device;
+      name = "${interface.name}.addr.${address}";
+      up = "ip address add ${address}/${toString prefixLength} dev $(output ${interface} ifname)";
+      down = "ip address del ${address}/${toString prefixLength} dev $(output ${interface} ifname)";
     };
   route = { name, target, via, dependencies, dev ? null }:
     let with_dev = if dev != null then "dev ${dev}" else "";

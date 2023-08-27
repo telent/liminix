@@ -9,7 +9,7 @@
 { interface, ppp-options }:
 let
   inherit (liminix.services) longrun;
-  name = "${interface.device}.pppoe";
+  name = "${interface.name}.pppoe";
   ip-up = writeAshScript "ip-up" {} ''
     . ${serviceFns} 
     (in_outputs ${name}
@@ -42,7 +42,10 @@ let
 in
 longrun {
   inherit name;
-  run = "${ppp}/bin/pppd pty '${pppoe}/bin/pppoe -I ${interface.device}' ${lib.concatStringsSep " " ppp-options'}" ;
+  run = ''
+    . ${serviceFns} 
+    ${ppp}/bin/pppd pty "${pppoe}/bin/pppoe -I $(output ${interface} ifname)" ${lib.concatStringsSep " " ppp-options'}
+  '';
   notification-fd = 10;
   dependencies = [ interface ];
 }
