@@ -3,10 +3,20 @@
 , liminix
 , ifwait
 , lib
+, serviceFns
 }:
 let
   inherit (liminix.services) oneshot longrun;
   inherit (lib) concatStringsSep optional;
+  ifup = name : ifname : ''
+    . ${serviceFns}
+    ${ifwait}/bin/ifwait -v ${ifname} present
+    ip link set up dev ${ifname}
+    (in_outputs ${name}
+     echo ${ifname} > ifname
+    )
+  '';
+
 in {
   interface = { type ? "hardware", device, link ? null, primary ? null, id ? null, dependencies ? [] }  @ args:
     let name = "${device}.link";
@@ -16,8 +26,7 @@ in {
             "ip link add name ${device} type bridge"
           ++ optional (type == "vlan")
             "ip link add link ${link} name ${device} type vlan id ${id}"
-          ++ ["${ifwait}/bin/ifwait -v ${device} present"]
-          ++ ["ip link set up dev ${device}"]
+          ++ [(ifup name device)]
           ++ optional (primary != null)
             "ip link set dev ${device} master ${primary.device}";
     in oneshot {
@@ -26,6 +35,7 @@ in {
       down = "ip link set down dev ${device}";
       dependencies = dependencies ++ lib.optional (primary != null) primary;
     };
+  inherit ifup;
   address = interface: { family, dependencies ? [], prefixLength, address } @ args:
     let inherit (builtins) toString;
     in oneshot {
