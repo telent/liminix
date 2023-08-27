@@ -15,19 +15,27 @@ let
 in
 {
   options = {
-    system.service.bridge = mkOption {
-      type = liminix.lib.types.serviceDefn;
+    system.service.bridge = {
+      primary = mkOption { type = liminix.lib.types.serviceDefn; };
+      members = mkOption { type = liminix.lib.types.serviceDefn; };
     };
   };
-  config.system.service = {
-    bridge = liminix.callService ./service.nix {
-      members = mkOption {
-        type = types.listOf liminix.lib.types.service;
-        description = "interfaces to add to the bridge";
-      };
+  config.system.service.bridge = {
+    primary = liminix.callService ./primary.nix {
       ifname = mkOption {
         type = types.str;
         description = "bridge interface name to create";
+      };
+    };
+    members = liminix.callService ./members.nix {
+      primary = mkOption {
+        type = liminix.lib.types.interface;
+        description = "primary bridge interface";
+      };
+
+      members = mkOption {
+        type = types.listOf liminix.lib.types.interface;
+        description = "interfaces to add to the bridge";
       };
     };
   };
