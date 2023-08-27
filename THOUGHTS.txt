@@ -2039,4 +2039,75 @@ to finish service/modules milestone
 - anything else in rotuer.nix that we should servicify
 - services for liminix.networking
 - a nice way to specify service dependencies
-- do another video
+[done] - do another video
+
+Mon Aug 21 20:02:55 BST 2023
+
+a nice way to do dependencies would be somethng like
+
+services.thething =
+  let s = svc.thing { .... };
+  in addDependencies s (with config.services; [otherthing yetanother]);
+
+except that addDependencies is a really klunky name. dependsOn is very
+slightly better? or maybe it could be a function of the derivation?
+
+services.thething =
+  svc.thing { .... }.depends (with config.services; [otherthing yetanother]);
+
+---
+
+what does it mean to be dependent on an interface? that's it up? running?
+has an address? has a collection of addresses?
+
+
+  services.defaultroute4 = route {
+    name = "defaultroute4";
+    via = "$(output ${services.wan} address)";
+    target = "default";
+    dependencies = [ services.wan ];
+  };
+
+- this route requires the interface to have an address (if wan is an
+  interface, anyway ...)
+
+- but otoh a dhcp client doesn't want to wait for an address, because
+   it is assigning the address.
+
+should an address provider have "interface name" as an output?
+is there a set of outputs that every address provider should have -
+whether static, dhcp, pppoe?
+
+maybe we're in decision paralysis and should just move forward with
+what we know
+
+Wed Aug 23 18:56:08 BST 2023
+
+We may want to change the hardware device files to specify network
+interface names not services. Otherwise hardware devices (boards)
+depend on module-based-services, which is a bit weird.
+
+Thu Aug 24 18:54:03 BST 2023
+
+- we want network and bridge to be separate modules, because bridge
+introduces extra kernel config
+
+- bridge/service wants to create a network device ("ip link"),
+using quite similar code as network/link.nix
+
+- but bridge/service is a derivation: it has sight of pkgs but not
+config
+
+https://www.skarnet.org/software/s6-rc/faq.html
+
+Fri Aug 25 23:37:57 BST 2023
+
+where we left off: bridge is a bundle, and bundles can't have outputs,
+so how do we set the ifname of the bridge?
+
+- ifname of the primary is set
+- actually, most things that depend on the bridge really just depend
+  on the primary anyway (it's OK if 1 <= n < #members are down)
+- but *something* should depeond on all the members
+
+turns out maybe we needed two services after all?
