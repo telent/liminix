@@ -9,7 +9,8 @@ let
   inherit (lib) concatStringsSep optional;
 in {
   interface = { type ? "hardware", device, link ? null, primary ? null, id ? null, dependencies ? [] }  @ args:
-    let ups =
+    let name = "${device}.link";
+        ups =
           []
           ++ optional (type == "bridge")
             "ip link add name ${device} type bridge"
@@ -20,7 +21,7 @@ in {
           ++ optional (primary != null)
             "ip link set dev ${device} master ${primary.device}";
     in oneshot {
-      name = "${device}.link";
+      inherit name;
       up = lib.concatStringsSep "\n" ups;
       down = "ip link set down dev ${device}";
       dependencies = dependencies ++ lib.optional (primary != null) primary;
