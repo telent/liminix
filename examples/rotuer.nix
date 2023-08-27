@@ -44,6 +44,7 @@ in rec {
   imports = [
     ../modules/wlan.nix
     ../modules/standard.nix
+    ../modules/network
     ../modules/ppp
     ../modules/dnsmasq
     ../modules/firewall
@@ -78,16 +79,16 @@ in rec {
     } // wirelessConfig;
   };
 
-  services.int =
-    let iface = svc.bridge.build {
-          ifname = "int";
-          members = with config.hardware.networkInterfaces;  [
-            wlan_24 lan wlan_5
-          ];
-        };
-    in address iface {
-      family = "inet4"; address ="10.8.0.1"; prefixLength = 16;
-    };
+  services.int = svc.network.address.build {
+    interface = svc.bridge.primary.build { ifname = "int"; };# services.int;
+    family = "inet"; address ="10.8.0.1"; prefixLength = 16;
+  };
+
+  services.bridge =  svc.bridge.members.build {
+    primary = services.int;
+    members = with config.hardware.networkInterfaces;
+      [ wlan_24 wlan_5  lan ];
+  };
 
   services.ntp = svc.ntp.build {
     pools = { "pool.ntp.org" = ["iburst"]; };
@@ -204,8 +205,8 @@ in rec {
     name = "default";
     contents = with config.services; [
       config.hardware.networkInterfaces.lo
-      config.hardware.networkInterfaces.lan
       int
+      bridge
       hostap
       hostap5
       ntp

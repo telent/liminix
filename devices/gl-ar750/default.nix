@@ -80,6 +80,8 @@
       inherit (pkgs.pseudofile) dir symlink;
       inherit (pkgs.liminix.networking) interface;
     in {
+      imports = [ ../../modules/network];
+
       programs.busybox.options = {
         FEATURE_DD_IBS_OBS = "y"; # ath10k_cal_data needs skip_bytes,fullblock
       };
@@ -100,19 +102,20 @@
           ];
         };
 
-        networkInterfaces = {
-          lan = interface { device = "eth0"; };
-          wan = interface { device = "eth1"; };
-
-          wlan_24 = interface {
-            device = "wlan0";
-            dependencies = [ mac80211 ];
+        networkInterfaces =
+          let inherit (config.system.service.network) link;
+          in {
+            lan = link.build { ifname = "eth0"; };
+            wan = link.build { ifname = "eth1"; };
+            wlan_24 = link.build {
+              ifname = "wlan0";
+              dependencies = [ mac80211 ];
+            };
+            wlan_5 = link.build {
+              ifname = "wlan1";
+              dependencies = [ mac80211 ath10k_cal_data ];
+            };
           };
-          wlan_5 = interface {
-            device = "wlan1";
-            dependencies = [ mac80211 ath10k_cal_data ];
-          };
-        };
       };
       filesystem = dir {
         lib = dir {
