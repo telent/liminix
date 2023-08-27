@@ -105,7 +105,7 @@ in rec {
       inherit interface;
       ranges = [
         "10.8.0.10,10.8.0.240"
-        "::,constructor:${interface.device},ra-stateless"
+        "::,constructor:$(output ${interface} ifname),ra-stateless"
       ];
       domain = "fake.liminix.org";
     };
@@ -188,7 +188,7 @@ in rec {
     let script = pkgs.callPackage ./acquire-delegated-prefix.nix {  };
     in longrun {
       name = "acquire-lan-prefix";
-      run = "${script} /run/service-state/dhcp6c.wan ${services.int.device}";
+      run = "${script} /run/service-state/dhcp6c.wan $(output ${services.int} ifname)";
       dependencies = [ services.dhcp6 ];
     };
 

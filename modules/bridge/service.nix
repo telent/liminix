@@ -13,14 +13,15 @@ let
     type = "bridge";
   };
   addif = member :
-    oneshot {
-      name = "add-${member.device}-to-br-${primary.device}";
-      up = "${ifwait}/bin/ifwait ${member.device} running && ip link set dev ${member.device} master ${primary.device}";
-      down = "ip link set dev ${member.device} nomaster";
+    let ifname = "$(output ${member} ifname)";
+    in oneshot {
+      name = "add-${member.name}-to-br-${primary.name}";
+      up = "${ifwait}/bin/ifwait ${ifname} running && ip link set dev ${ifname} master $(output ${primary} ifname)";
+      down = "ip link set dev ${ifname} nomaster";
       dependencies = [ primary member ];
     };
 
-in (bundle {
-  name = "bridge-${primary.device}-members";
+in bundle {
+  name = "bridge-${primary.name}-members";
   contents = [ primary ] ++ map addif members;
-}) // { device = primary.device; }
+}

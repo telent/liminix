@@ -17,7 +17,7 @@ let
   # we'll add them as top-level attributes and rename params to
   # extraParams
 
-  name = "${interface.device}.hostapd";
+  name = "${interface.name}.hostapd";
   defaults =  {
     driver = "nl80211";
     logger_syslog = "-1";
@@ -35,5 +35,5 @@ let
 in longrun {
   inherit name;
   dependencies = [ interface ];
-  run = "${hostapd}/bin/hostapd -i ${interface.device}  -P /run/${name}.pid -S ${conf}";
+  run = "${hostapd}/bin/hostapd -i $(output ${interface} ifname)  -P /run/${name}.pid -S ${conf}";
 }

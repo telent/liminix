@@ -14,7 +14,7 @@
 , resolvconf
 }:
 let
-  name = "${interface.device}.dnsmasq";
+  name = "${interface.name}.dnsmasq";
   inherit (liminix.services) longrun;
   inherit (lib) concatStringsSep;
 in
@@ -27,7 +27,7 @@ longrun {
     --user=${user} \
     --domain=${domain} \
     --group=${group} \
-    --interface=${interface.device} \
+    --interface=$(output ${interface} ifname) \
     ${lib.concatStringsSep " " (builtins.map (r: "--dhcp-range=${r}") ranges)} \
     ${lib.concatStringsSep " " (builtins.map (r: "--server=${r}") upstreams)} \
     --keep-in-foreground \
