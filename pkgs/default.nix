@@ -23,7 +23,14 @@ in {
           checkTypes = t : p : typeChecked (builtins.toString path) t p;
       in {
         inherit parameters;
-        build = args : pkg (checkTypes parameters args);
+        build = { dependencies ? [], ... } @ args :
+          let
+            s = pkg (checkTypes parameters
+              (builtins.removeAttrs args ["dependencies"]));
+          in s.overrideAttrs (o: {
+            dependencies = (builtins.map (d: d.name) dependencies) ++ o.dependencies;
+            buildInputs = dependencies ++ o.buildInputs;
+          });
       };
     lib = {
       types =
