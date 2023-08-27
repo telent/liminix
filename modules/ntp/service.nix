@@ -22,7 +22,7 @@ let
     ++
     (mapAttrsToList (name: opts: "peer ${name} ${concatStringsSep "" opts}")
       p.peers)
-    ++ [ "user #{p.user}" ]
+    ++ [ "user ${p.user}" ]
     ++ (lib.optional (p.makestep != null) "makestep ${toString p.makestep.threshold} ${toString p.makestep.limit}")
     ++ (map (n: "allow ${n}") p.allow)
     ++ (lib.optional (p.bindaddress != null) "bindaddress ${p.bindaddress}")

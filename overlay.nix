@@ -72,7 +72,6 @@ extraPkgs // {
       nspr = null;
       readline = null;
       libedit = null;
-      libcap = null;
       libseccomp = null;
       # should texinfo be in nativeBuildInputs instead of
       # buildInputs?
