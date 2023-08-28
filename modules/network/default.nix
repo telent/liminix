@@ -20,6 +20,14 @@ in {
         description = "network interface address";
         type = liminix.lib.types.serviceDefn;
       };
+      dhcp = {
+        client = mkOption {
+          # this needs to move to its own service as it has
+          # busybox config
+          description = "DHCP v4 client";
+          type = liminix.lib.types.serviceDefn;
+        };
+      };
     };
   };
   config = {
@@ -49,6 +57,12 @@ in {
           type = types.ints.between 0 128;
         };
       };
+      dhcp.client = liminix.callService ./dhcpc.nix {
+        interface = mkOption {
+          type = liminix.lib.types.service;
+        };
+      };
+
     };
   };
 }

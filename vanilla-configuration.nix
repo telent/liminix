@@ -1,23 +1,21 @@
 { config, pkgs, ... } :
 let
-  inherit (pkgs.liminix.networking) interface address udhcpc odhcpc route;
+  inherit (pkgs.liminix.networking) interface address route;
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
   inherit (pkgs) writeText;
+  svc = config.system.service;
 in rec {
   imports = [
     ./modules/tftpboot.nix
     ./modules/wlan.nix
+    ./modules/network
     ./modules/ntp
   ];
   services.loopback = config.hardware.networkInterfaces.lo;
 
   services.dhcpv4 =
-    let iface = interface { type = "hardware"; device = "eth1"; };
-    in udhcpc iface {};
-
-  services.dhcpv6 =
-    let iface = interface { type = "hardware"; device = "eth1"; };
-    in odhcpc iface { uid = "e7"; };
+    let iface = svc.network.link.build { ifname = "eth1"; };
+    in svc.network.dhcp.client.build { interface = iface; };
 
   services.defaultroute4 = route {
     name = "defautlrote";
