@@ -14,15 +14,13 @@
   inherit
     (pkgs.liminix.networking)
     address
-    udhcpc
-    hostapd
     interface
     route
   ;
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
   inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs) dropbear ifwait serviceFns
-    ;
+  inherit (pkgs) dropbear ifwait serviceFns;
+  svc = config.system.service;
 in rec {
   boot = {
     tftp = {
@@ -33,6 +31,9 @@ in rec {
 
   imports = [
     ../modules/wlan.nix
+    ../modules/network
+    ../modules/hostapd
+    ../modules/bridge
     ../modules/standard.nix
   ];
 
@@ -71,7 +72,8 @@ in rec {
     };
   };
 
-  services.hostap = hostapd (config.hardware.networkInterfaces.wlan) {
+  services.hostap = svc.hostapd.build {
+    interface = config.hardware.networkInterfaces.wlan;
     params = {
       country_code = "GB";
       hw_mode = "g";
@@ -91,28 +93,18 @@ in rec {
     device = "int";
   };
 
-  services.dhcpc = (udhcpc services.int {
+  services.dhcpc = svc.network.dhcp.client.build {
+    interface = services.int;
     dependencies = [ config.services.hostname ];
-  }) // { device = "int"; };
+  };
 
-  services.bridge = let
+  services.bridge = svc.bridge.members.build {
     primary = services.int;
-    addif = dev:
-      oneshot {
-        name = "add-${dev.device}-to-bridge";
-        up = "${ifwait}/bin/ifwait -v ${dev.device} running && ip link set dev ${dev.device} master ${primary.device}";
-        down = "ip link set dev ${dev} nomaster";
-        dependencies = [primary dev];
-      };
-  in
-    bundle {
-      name = "bridge-members";
-      contents = with config.hardware.networkInterfaces;
-        map addif [
-          lan
-          wlan
-        ];
-    };
+    members = with config.hardware.networkInterfaces; [
+      lan
+      wlan
+    ];
+  };
 
   services.sshd = longrun {
     name = "sshd";
