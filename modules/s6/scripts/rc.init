@@ -21,7 +21,7 @@ mount -t sysfs none /sys
 mkdir /dev/pts
 mount -t devpts none /dev/pts
 
-mkdir -m 0750 /run/service-state
+mkdir -m 0751 /run/service-state
 chgrp system /run/service-state
 
 ### If your services are managed by s6-rc:

@@ -128,6 +128,7 @@ in rec {
       ( in_outputs ${name}
        echo "nameserver $(output ${services.wan} ns1)" > resolv.conf
        echo "nameserver $(output ${services.wan} ns2)" >> resolv.conf
+       chmod 0444 resolv.conf
       )
     '';
     down = ''
