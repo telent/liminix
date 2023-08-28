@@ -201,27 +201,6 @@ in rec {
       dependencies = [ services.dhcp6 ];
     };
 
-  services.default = target {
-    name = "default";
-    contents = with config.services; [
-      config.hardware.networkInterfaces.lo
-      int
-      bridge
-      hostap
-      hostap5
-      ntp
-      defaultroute4
-      defaultroute6
-      packet_forwarding
-      dns
-      resolvconf
-      sshd
-      config.services.hostname
-      dhcp6
-      acquire-lan-prefix
-      acquire-wan-address
-    ];
-  };
   defaultProfile.packages = with pkgs; [
     min-collect-garbage
   ];

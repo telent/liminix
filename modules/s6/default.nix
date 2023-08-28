@@ -7,10 +7,21 @@ let
     s6-linux-init
     stdenvNoCC;
   inherit (pkgs.pseudofile) dir symlink;
+  inherit (pkgs.liminix.services) bundle;
 
-  s6-rc-db = pkgs.s6-rc-database.override {
-    services = builtins.attrValues config.services;
-  };
+  s6-rc-db =
+    let
+      defaultDefaultTarget = bundle {
+        name = "default";
+        contents = builtins.attrValues config.services;
+      };
+      servicesAttrs = {
+        default = defaultDefaultTarget;
+      } // config.services;
+    in
+      pkgs.s6-rc-database.override {
+        services = builtins.attrValues servicesAttrs;
+      };
   s6-init-scripts = stdenvNoCC.mkDerivation {
     name = "s6-scripts";
     src = ./scripts;
