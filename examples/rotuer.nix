@@ -87,7 +87,7 @@ in rec {
   services.bridge =  svc.bridge.members.build {
     primary = services.int;
     members = with config.hardware.networkInterfaces;
-      [ wlan_24 wlan_5  lan ];
+      [ wlan_24 wlan_5 lan ];
   };
 
   services.ntp = svc.ntp.build {

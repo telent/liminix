@@ -75,6 +75,7 @@ in
         inherit kernel;
         inherit dtb;
       };
+      # could use trivial-builders.linkFarmFromDrvs here?
       vmroot = pkgs.runCommand "qemu" {} ''
         mkdir $out
         cd $out

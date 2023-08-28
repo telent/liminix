@@ -54,6 +54,7 @@ in {
         '';
       flashimage =
         let o = config.system.outputs; in
+        # could use trivial-builders.linkFarmFromDrvs here?
         pkgs.runCommand "flashimage" {} ''
           mkdir $out
           cd $out
