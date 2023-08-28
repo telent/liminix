@@ -13,14 +13,12 @@
   secrets = import ./extneder-secrets.nix;
   inherit
     (pkgs.liminix.networking)
-    address
-    udhcpc
-    interface
     route
   ;
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs) writeText dropbear ifwait serviceFns;
+  svc = config.system.service;
 in rec {
   boot = {
     tftp = {
@@ -32,6 +30,7 @@ in rec {
   imports = [
     ../modules/standard.nix
     ../modules/wlan.nix
+    ../modules/network
   ];
 
   hostname = "arhcive";
@@ -62,10 +61,11 @@ in rec {
   };
 
   services.dhcpc =
-    let iface =  config.hardware.networkInterfaces.lan;
-    in (udhcpc iface {
+    let iface = config.hardware.networkInterfaces.lan;
+    in svc.network.dhcp.client.build {
+      interface = iface;
       dependencies = [ config.services.hostname ];
-    }) // { inherit (iface) device; };
+    };
 
   services.sshd = longrun {
     name = "sshd";
