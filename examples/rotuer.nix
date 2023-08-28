@@ -134,6 +134,14 @@ in rec {
       rm -rf /run/service-state/${name}/
     '';
   };
+  filesystem =
+    let inherit (pkgs.pseudofile) dir symlink;
+    in dir {
+      etc = dir {
+        "resolv.conf" = symlink "${services.resolvconf}/.outputs/resolv.conf";
+      };
+    };
+
 
   services.defaultroute4 = route {
     name = "defaultroute4";
