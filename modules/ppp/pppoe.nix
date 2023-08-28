@@ -43,6 +43,7 @@ in
 longrun {
   inherit name;
   run = ''
+    . ${serviceFns} 
     ${ppp}/bin/pppd pty "${pppoe}/bin/pppoe -I $(output ${interface} ifname)" ${lib.concatStringsSep " " ppp-options'}
   '';
   notification-fd = 10;
