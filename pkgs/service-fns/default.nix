@@ -4,7 +4,7 @@ writeText "service-fns.sh" ''
   output_path() { echo $(realpath $1/.outputs)/$2; }
   mkoutputs() {
     d=/run/service-state/$1
-    mkdir -m 2750 -p $d && chown root:system $d
+    mkdir -m 2751 -p $d && chown root:system $d
     echo $d
   }
   in_outputs() {
