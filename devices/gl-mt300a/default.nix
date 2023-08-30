@@ -145,8 +145,6 @@
 
           PARTITION_ADVANCED = "y";
           PRINTK_TIME = "y";
-          SQUASHFS = "y";
-          SQUASHFS_XZ = "y";
         };
       };
     };

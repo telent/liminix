@@ -30,9 +30,6 @@
         MTD_BLKDEVS = "y";
         MTD_BLOCK = "y";
 
-        SQUASHFS = "y";
-        SQUASHFS_XZ = "y";
-
         VIRTIO_MENU = "y";
         PCI = "y";
         VIRTIO_PCI = "y";
