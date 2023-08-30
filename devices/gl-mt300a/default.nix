@@ -115,6 +115,7 @@
           NET_RALINK_MDIO = "y";
           NET_RALINK_MDIO_MT7620 = "y";
           NET_RALINK_MT7620 = "y";
+          SWPHY = "y";
 
           SPI = "y";
           MTD_SPI_NOR = "y";
@@ -122,14 +123,6 @@
           SPI_RT2880 = "y"; # }
           SPI_MASTER= "y";
           SPI_MEM= "y";
-
-          # both the ethernet ports on this device (lan and wan)
-          # are behind a switch, so we need VLANs to do anything
-          # useful with them
-
-          VLAN_8021Q = "y";
-          SWCONFIG = "y";
-          SWPHY = "y";
 
           MTD = "y";
           MTD_CMDLINE_PARTS = "y";

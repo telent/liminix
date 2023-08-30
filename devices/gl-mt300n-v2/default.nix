@@ -52,44 +52,40 @@
             "${openwrt.src}/target/linux/ramips/dts"
           ];
         };
-        networkInterfaces = rec {
-          # lan and wan ports are both behind a switch on eth0
-          eth =
-            let swconfig = oneshot {
-                  name = "swconfig";
-                  up = ''
-                    PATH=${pkgs.swconfig}/bin:$PATH
-                    swconfig dev switch0 set reset
-                    swconfig dev switch0 set enable_vlan 1
-                    swconfig dev switch0 vlan 1 set ports '1 2 3 4 6t'
-                    swconfig dev switch0 vlan 2 set ports '0 6t'
-                    swconfig dev switch0 set apply
-                  '';
-                  down = "swconfig dev switch0 set reset";
-                };
-            in interface {
-              device = "eth0";
-              dependencies =  [swconfig];
+        networkInterfaces =
+          let
+            inherit (config.system.service.network) link;
+            inherit (config.system.service) vlan;
+            swconfig = oneshot {
+              name = "swconfig";
+              up = ''
+                PATH=${pkgs.swconfig}/bin:$PATH
+                swconfig dev switch0 set reset
+                swconfig dev switch0 set enable_vlan 1
+                swconfig dev switch0 vlan 1 set ports '1 2 3 4 6t'
+                swconfig dev switch0 vlan 2 set ports '0 6t'
+                swconfig dev switch0 set apply
+              '';
+              down = "swconfig dev switch0 set reset";
             };
-          lan = interface {
-            type = "vlan";
-            device = "eth0.1";
-            link = "eth0";
-            id = "1";
-            dependencies = [eth];
+          in rec {
+            eth = link.build { ifname = "eth0"; dependencies =  [swconfig]; };
+            # lan and wan ports are both behind a switch on eth0
+            lan = vlan.build {
+              ifname = "eth0.1";
+              primary = eth;
+              vid = "1";
+            };
+            wan = vlan.build {
+              ifname = "eth0.2";
+              primary = eth;
+              vid = "2";
+            };
+            wlan = link.build {
+              ifname = "wlan0";
+              dependencies = [ mac80211 ];
+            };
           };
-          wan = interface {
-            type = "vlan";
-            device = "eth0.2";
-            id = "2";
-            link = "eth0";
-            dependencies = [eth];
-          };
-          wlan = interface {
-            device = "wlan0";
-            dependencies = [ mac80211 ];
-          };
-        };
       };
       boot.tftp = {
         # 20MB seems to give enough room to uncompress the kernel
@@ -148,13 +144,6 @@
           NET_VENDOR_RALINK = "y";
           NET_RALINK_RT3050 = "y";
           NET_RALINK_SOC="y";
-
-          # both the ethernet ports on this device (lan and wan)
-          # are behind a switch, so we need VLANs to do anything
-          # useful with them
-
-          VLAN_8021Q = "y";
-          SWCONFIG = "y";
           SWPHY = "y";
 
           WATCHDOG = "y";

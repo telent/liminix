@@ -31,6 +31,7 @@ in rec {
     ../modules/standard.nix
     ../modules/wlan.nix
     ../modules/network
+    ../modules/vlan
   ];
 
   hostname = "arhcive";
