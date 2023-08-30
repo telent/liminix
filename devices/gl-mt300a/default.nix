@@ -131,10 +131,6 @@
           SWCONFIG = "y";
           SWPHY = "y";
 
-          BRIDGE = "y";
-          BRIDGE_VLAN_FILTERING = "y";
-          BRIDGE_IGMP_SNOOPING = "y";
-
           MTD = "y";
           MTD_CMDLINE_PARTS = "y";
           MTD_BLOCK = "y";         # fix undefined ref to register_mtd_blktrans_devs

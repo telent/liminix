@@ -39,5 +39,9 @@ in
       };
     };
   };
-  config.kernel.config.BRIDGE = "y";
+  config.kernel.config = {
+    BRIDGE = "y";
+    BRIDGE_VLAN_FILTERING = "y";
+    BRIDGE_IGMP_SNOOPING = "y";
+  };
 }
