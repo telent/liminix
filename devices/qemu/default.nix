@@ -48,19 +48,20 @@
           drivers = ["mac80211_hwsim"];
           klibBuild = config.system.outputs.kernel.modulesupport;
         };
-        inherit (pkgs.liminix.networking) interface;
       in {
         defaultOutput = "vmroot";
         flash.eraseBlockSize = "65536"; # c.f. pkgs/mips-vm/mips-vm.sh
-        networkInterfaces = {
-          lan = interface { device = "eth0"; };
-          wan = interface { device = "eth1"; };
+        networkInterfaces =
+          let inherit (config.system.service.network) link;
+          in {
+            lan = link.build { ifname = "eth0"; };
+            wan = link.build { ifname = "eth1"; };
 
-          wlan_24 = interface {
-            device = "wlan0";
-            dependencies = [ mac80211 ];
+            wlan_24 = link.build {
+              ifname = "wlan0";
+              dependencies = [ mac80211 ];
+            };
           };
-        };
       };
 
   };
