@@ -31,6 +31,7 @@ in rec {
 
   imports = [
     ../modules/wlan.nix
+    ../modules/vlan
     ../modules/network
     ../modules/hostapd
     ../modules/bridge
@@ -88,9 +89,8 @@ in rec {
     };
   };
 
-  services.int = interface {
-    type = "bridge";
-    device = "int";
+  services.int = svc.bridge.primary.build {
+    ifname = "int";
   };
 
   services.dhcpc = svc.network.dhcp.client.build {
