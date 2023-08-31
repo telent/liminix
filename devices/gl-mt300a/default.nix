@@ -55,28 +55,41 @@
             "${openwrt.src}/target/linux/ramips/dts"
           ];
         };
-        networkInterfaces = rec {
-          # lan and wan ports are both behind a switch on eth0
-          eth = interface { device = "eth0"; };
-          lan = interface {
-            type = "vlan";
-            device = "eth0.1";
-            link = "eth0";
-            id = "1";
-            dependencies = [eth];
+        networkInterfaces =
+          let
+            inherit (config.system.service.network) link;
+            inherit (config.system.service) vlan;
+            inherit (pkgs.liminix.services) oneshot;
+            swconfig = oneshot {
+              name = "swconfig";
+              up = ''
+                PATH=${pkgs.swconfig}/bin:$PATH
+                swconfig dev switch0 set reset
+                swconfig dev switch0 set enable_vlan 1
+                swconfig dev switch0 vlan 1 set ports '1 2 3 4 6t'
+                swconfig dev switch0 vlan 2 set ports '0 6t'
+                swconfig dev switch0 set apply
+              '';
+              down = "swconfig dev switch0 set reset";
+            };
+          in rec {
+            eth = link.build { ifname = "eth0"; dependencies =  [swconfig]; };
+            # lan and wan ports are both behind a switch on eth0
+            lan = vlan.build {
+              ifname = "eth0.1";
+              primary = eth;
+              vid = "1";
+            };
+            wan = vlan.build {
+              ifname = "eth0.2";
+              primary = eth;
+              vid = "2";
+            };
+            wlan = link.build {
+              ifname = "wlan0";
+              dependencies = [ mac80211 ];
+            };
           };
-          wan = interface {
-            type = "vlan";
-            device = "eth0.2";
-            id = "2";
-            link = "eth0";
-            dependencies = [eth];
-          };
-          wlan = interface {
-            device = "wlan0";
-            dependencies = [ mac80211 ];
-          };
-        };
       };
       boot.tftp = {
         loadAddress = "0x00A00000";
