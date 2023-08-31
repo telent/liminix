@@ -21,6 +21,9 @@ in {
         description = "network interface address";
         type = liminix.lib.types.serviceDefn;
       };
+      route = mkOption {
+        type = liminix.lib.types.serviceDefn;
+      };
       dhcp = {
         client = mkOption {
           # this needs to move to its own service as it has
@@ -82,6 +85,28 @@ in {
           type = types.ints.between 0 128;
         };
       };
+
+      route = liminix.callService ./route.nix {
+        interface = mkOption {
+          type = types.nullOr liminix.lib.types.interface;
+          default = null;
+          description = "Interface to route through. May be omitted if it can be inferred from \"via\"";
+        };
+        target = mkOption {
+          type = types.str;
+          description = "host or network to add route to";
+        };
+        via = mkOption {
+          type = types.str;
+          description = "address of next hop";
+        };
+        metric = mkOption {
+          type = types.int;
+          description = "route metric";
+          default = 100;
+        };
+      };
+
       dhcp.client = liminix.callService ./dhcpc.nix {
         interface = mkOption {
           type = liminix.lib.types.service;

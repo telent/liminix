@@ -9,10 +9,6 @@
 { config, pkgs, lib, ... } :
 let
   secrets = import ./rotuer-secrets.nix;
-  inherit (pkgs.liminix.networking)
-    address
-    interface
-    route;
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
   inherit (pkgs)
     dropbear
@@ -144,19 +140,16 @@ in rec {
     };
 
 
-  services.defaultroute4 = route {
-    name = "defaultroute4";
+  services.defaultroute4 = svc.network.route.build {
     via = "$(output ${services.wan} address)";
     target = "default";
     dependencies = [ services.wan ];
   };
 
-  services.defaultroute6 = route {
-    name = "defaultroute6";
+  services.defaultroute6 = svc.network.route.build {
     via = "$(output ${services.wan} ipv6-peer-address)";
     target = "default";
-    dev = "$(output ${services.wan} ifname)";
-    dependencies = [ services.wan ];
+    interface = services.wan;
   };
 
   services.firewall = svc.firewall.build {
