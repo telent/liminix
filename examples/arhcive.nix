@@ -64,13 +64,7 @@ in rec {
       dependencies = [ config.services.hostname ];
     };
 
-  services.sshd = longrun {
-    name = "sshd";
-    run = ''
-      mkdir -p /run/dropbear
-      ${dropbear}/bin/dropbear -E -P /run/dropbear.pid -R -F
-    '';
-  };
+  services.sshd = svc.ssh.build { };
 
   services.watchdog =
     let
