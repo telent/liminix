@@ -58,6 +58,7 @@ in {
           ];
         };
     };
+    services.loopback = config.hardware.networkInterfaces.lo;
 
     system.service.network = {
       link = liminix.callService ./link.nix {
