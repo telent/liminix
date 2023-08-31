@@ -11,12 +11,6 @@
   ...
 }: let
   secrets = import ./extneder-secrets.nix;
-  inherit
-    (pkgs.liminix.networking)
-    address
-    interface
-    route
-  ;
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs) dropbear ifwait serviceFns;
@@ -138,8 +132,7 @@ in rec {
     };
   };
 
-  services.defaultroute4 = route {
-    name = "defaultroute";
+  services.defaultroute4 = svc.network.route.build {
     via = "$(output ${services.dhcpc} router)";
     target = "default";
     dependencies = [services.dhcpc];

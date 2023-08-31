@@ -1,6 +1,5 @@
 { config, pkgs, ... } :
 let
-  inherit (pkgs.liminix.networking) interface address route;
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
   inherit (pkgs) writeText;
   svc = config.system.service;
@@ -10,15 +9,14 @@ in rec {
     ./modules/wlan.nix
     ./modules/network
     ./modules/ntp
+    ./modules/vlan
   ];
-  services.loopback = config.hardware.networkInterfaces.lo;
 
   services.dhcpv4 =
     let iface = svc.network.link.build { ifname = "eth1"; };
     in svc.network.dhcp.client.build { interface = iface; };
 
-  services.defaultroute4 = route {
-    name = "defautlrote";
+  services.defaultroute4 = svc.network.route.build {
     via = "$(output ${services.dhcpv4} address)";
     target = "default";
     dependencies = [ services.dhcpv4 ];
