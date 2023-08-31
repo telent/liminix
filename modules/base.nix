@@ -80,18 +80,6 @@ in {
     defaultProfile.packages = with pkgs;
       [ s6 s6-init-bin execline s6-linux-init s6-rc ];
 
-    hardware.networkInterfaces = {
-      lo =
-        let iface = interface { type = "loopback"; device = "lo";};
-        in bundle {
-          name = "loopback";
-          contents = [
-            (address iface { family = "inet4"; address ="127.0.0.1"; prefixLength = 8;})
-            (address iface { family = "inet6"; address ="::1"; prefixLength = 128;})
-          ];
-        };
-    };
-
     boot.commandLine = [
       "console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8"
       "root=${config.hardware.rootDevice}"

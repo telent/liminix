@@ -9,6 +9,7 @@
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
+  inherit (pkgs.liminix.services) bundle;
 in {
   options = {
     system.service.network = {
@@ -31,6 +32,30 @@ in {
     };
   };
   config = {
+    hardware.networkInterfaces = {
+      lo =
+        let
+          net = config.system.service.network;
+          iface = net.link.build { ifname = "lo";};
+        in bundle {
+          name = "loopback";
+          contents = [
+            ( net.address.build {
+              interface = iface;
+              family = "inet";
+              address ="127.0.0.1";
+              prefixLength = 8;
+            })
+            ( net.address.build {
+              interface = iface;
+              family = "inet6";
+              address = "::1";
+              prefixLength = 128;
+            })
+          ];
+        };
+    };
+
     system.service.network = {
       link = liminix.callService ./link.nix {
         ifname = mkOption {
