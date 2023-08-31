@@ -11,7 +11,7 @@
     };
   };
 
-  module = { pkgs, config, ...}:
+  module = { pkgs, config, lib, ...}:
     let
       inherit (pkgs.liminix.networking) interface;
       inherit (pkgs.liminix.services) oneshot;
@@ -160,6 +160,8 @@
 
           PARTITION_ADVANCED = "y";
           PRINTK_TIME = "y";
+        } // lib.optionalAttrs (config.system.service ? vlan) {
+          SWCONFIG = "y";
         };
       };
     };

@@ -18,7 +18,7 @@
     support into the kernel even if we're using TFTP root
   '';
 
-  module = { pkgs, config, ...}:
+  module = { pkgs, config, lib, ...}:
     let
       inherit (pkgs.liminix.networking) interface;
       inherit (pkgs) openwrt;
@@ -151,6 +151,8 @@
 
           PARTITION_ADVANCED = "y";
           PRINTK_TIME = "y";
+        } // lib.optionalAttrs (config.system.service ? vlan) {
+          SWCONFIG = "y";
         };
       };
     };

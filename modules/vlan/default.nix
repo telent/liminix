@@ -36,6 +36,5 @@ in
   };
   config.kernel.config = {
     VLAN_8021Q = "y";
-    SWCONFIG = "y"; # not always appropriate, some devices will use DSA
   };
 }
