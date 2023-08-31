@@ -145,20 +145,6 @@ in rec {
     dependencies = [services.dhcpc];
   };
 
-  services.default = target {
-    name = "default";
-    contents =
-      let links = config.hardware.networkInterfaces;
-      in with config.services; [
-        links.lo links.eth links.wlan
-        int
-        bridge
-        hostap
-        defaultroute4
-        resolvconf
-        sshd
-      ];
-  };
   users.root.passwd = lib.mkForce secrets.root_password;
   defaultProfile.packages = with pkgs; [nftables strace tcpdump swconfig];
 }

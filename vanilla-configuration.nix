@@ -39,11 +39,6 @@ in rec {
     pools = { "pool.ntp.org" = ["iburst"] ; };
   };
 
-  services.default = target {
-    name = "default";
-    contents = with services; [ loopback ntp defaultroute4 ];
-  };
-
   boot.tftp = {
     serverip = "192.168.8.148";
     ipaddr = "192.168.8.251";

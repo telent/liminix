@@ -200,20 +200,6 @@ in rec {
       ] ;
     };
 
-  services.default = target {
-    name = "default";
-    contents =
-      let links = config.hardware.networkInterfaces;
-      in with config.services; [
-        links.lo
-        defaultroute4
-        resolvconf
-        sshd
-        rsync
-        watchdog
-      ];
-  };
-
   users.root = {
     passwd = lib.mkForce secrets.root_password;
     # openssh.authorizedKeys.keys = [
