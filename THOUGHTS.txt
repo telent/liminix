@@ -2098,7 +2098,7 @@ using quite similar code as network/link.nix
 - but bridge/service is a derivation: it has sight of pkgs but not
 config
 
-https://www.skarnet.org/software/s6-rc/faq.html
+offtopic: useful s6-rc commands at https://www.skarnet.org/software/s6-rc/faq.html
 
 Fri Aug 25 23:37:57 BST 2023
 
@@ -2111,3 +2111,41 @@ so how do we set the ifname of the bridge?
 - but *something* should depeond on all the members
 
 turns out maybe we needed two services after all?
+
+Sun Aug 27 23:50:18 BST 2023
+
+I've done enough to make rotuer build, but in the process
+trashed vanilla-configuration as I entirely forgot we don't have
+a dhcpv4 client service. Need to fix that ...
+
+- anything else in rotuer.nix that we should servicify
+- anything in vanilla-configuration ditto
+- and arhcive (rsync, watchdog)
+- services for liminix.networking
+- tidy up the dependency handling in serviceDefn build
+   (interface is fine, implementation is a bit brutal)
+- write a blog entry
+
+Mon Aug 28 16:58:49 BST 2023
+
+- [done] ntp is not setting the time
+- nftables syntax error
+
+Thu Aug 31 23:53:54 BST 2023
+
+- anything else in rotuer.nix that we should servicify
+  - packet forwarding
+  - dhcp6 client
+  - what to do with acquire-{wan,lan} scripts?
+- anything in vanilla-configuration ditto
+  - packet forwarding
+- and arhcive
+  - rsync
+  - watchdog
+  - mount
+- nftables syntax error
+- tidy up the dependency handling in serviceDefn build
+   (interface is fine, implementation is a bit brutal)
+- [done] services for liminix.networking
+- [done] write a blog entry
+- [done] ntp is not setting the time
