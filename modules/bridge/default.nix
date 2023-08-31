@@ -41,7 +41,11 @@ in
   };
   config.kernel.config = {
     BRIDGE = "y";
-    BRIDGE_VLAN_FILTERING = "y";
     BRIDGE_IGMP_SNOOPING = "y";
-  };
+  } // lib.optionalAttrs (config.system.service ? vlan) {
+    # depends on bridge _and_ vlan. I would like there to be
+    # a better way to test for the existence of vlan config:
+    # maybe the module should set an `enabled` attribute?
+    BRIDGE_VLAN_FILTERING = "y";
+  };    
 }
