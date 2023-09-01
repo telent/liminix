@@ -22,16 +22,7 @@ in rec {
     dependencies = [ services.dhcpv4 ];
   };
 
-  services.packet_forwarding =
-    let
-      iface = services.dhcpv4;
-      filename = "/proc/sys/net/ipv4/conf/$(output ${iface} ifname)/forwarding";
-    in oneshot {
-      name = "let-the-ip-flow";
-      up = "echo 1 > ${filename}";
-      down = "echo 0 > ${filename}";
-      dependencies = [iface];
-    };
+  services.packet_forwarding = svc.network.forward.build { };
 
   services.ntp = config.system.service.ntp.build {
     pools = { "pool.ntp.org" = ["iburst"] ; };

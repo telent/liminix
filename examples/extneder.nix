@@ -43,7 +43,9 @@ in rec {
       IP6_NF_IPTABLES = "y"; # do we still need these
       IP_NF_IPTABLES = "y"; # if using nftables directly
 
-      # these are copied from rotuer and need review
+      # these are copied from rotuer and need review.
+      # we're not running a firewall, so why do we need
+      # nftables config?
       IP_NF_NAT = "y";
       IP_NF_TARGET_MASQUERADE = "y";
       NETFILTER = "y";

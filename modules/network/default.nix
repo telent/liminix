@@ -24,6 +24,9 @@ in {
       route = mkOption {
         type = liminix.lib.types.serviceDefn;
       };
+      forward = mkOption {
+        type = liminix.lib.types.serviceDefn;
+      };
       dhcp = {
         client = mkOption {
           # this needs to move to its own service as it has
@@ -105,6 +108,17 @@ in {
           type = types.int;
           description = "route metric";
           default = 100;
+        };
+      };
+
+      forward = liminix.callService ./forward.nix {
+        enableIPv4 = mkOption {
+          type = types.bool;
+          default = true;
+        };
+        enableIPv6 = mkOption {
+          type = types.bool;
+          default = true;
         };
       };
 

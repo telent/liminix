@@ -156,22 +156,7 @@ in rec {
     ruleset = import ./rotuer-firewall.nix;
   };
 
-  services.packet_forwarding =
-    let
-      ip4 = "/proc/sys/net/ipv4/conf/all/forwarding";
-      ip6 = "/proc/sys/net/ipv6/conf/all/forwarding";
-    in oneshot {
-      name = "let-the-ip-flow";
-      up = ''
-        echo 1 > ${ip4}
-        echo 1 > ${ip6}
-      '';
-      down = ''
-        echo 0 > ${ip4};
-        echo 0 > ${ip6};
-      '';
-      dependencies = [ services.firewall ];
-    };
+  services.packet_forwarding = svc.network.forward.build { };
 
   services.dhcp6 =
     let
