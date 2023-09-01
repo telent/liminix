@@ -28,6 +28,7 @@ in rec {
     ../modules/wlan.nix
     ../modules/network
     ../modules/vlan
+    ../modules/ssh
   ];
 
   hostname = "arhcive";

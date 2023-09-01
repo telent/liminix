@@ -29,6 +29,7 @@ in rec {
     ../modules/network
     ../modules/hostapd
     ../modules/bridge
+    ../modules/ssh
     ../modules/standard.nix
   ];
 
@@ -100,13 +101,7 @@ in rec {
     ];
   };
 
-  services.sshd = longrun {
-    name = "sshd";
-    run = ''
-      mkdir -p /run/dropbear
-      ${dropbear}/bin/dropbear -E -P /run/dropbear.pid -R -F
-    '';
-  };
+  services.sshd = svc.ssh.build {};
 
   services.resolvconf = oneshot rec {
     dependencies = [ services.dhcpc ];
