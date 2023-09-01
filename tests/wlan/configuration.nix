@@ -3,11 +3,10 @@ let
   inherit (pkgs.liminix.networking) interface address hostapd route dnsmasq;
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
 in rec {
-  services.loopback = config.hardware.networkInterfaces.lo;
-
   imports = [
     ../../modules/wlan.nix
     ../../modules/hostapd
+    ../../modules/network
   ];
 
   services.hostap = config.system.service.hostapd.build {
@@ -28,12 +27,5 @@ in rec {
     };
   };
 
-  services.default = target {
-    name = "default";
-    contents = with config.services; [
-      loopback
-      hostap
-    ];
-  };
   defaultProfile.packages = with pkgs;  [ tcpdump ] ;
 }
