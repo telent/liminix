@@ -76,7 +76,7 @@ in rec {
   };
 
   services.int = svc.network.address.build {
-    interface = svc.bridge.primary.build { ifname = "int"; };# services.int;
+    interface = svc.bridge.primary.build { ifname = "int"; };
     family = "inet"; address ="10.8.0.1"; prefixLength = 16;
   };
 

@@ -2134,10 +2134,10 @@ Mon Aug 28 16:58:49 BST 2023
 Thu Aug 31 23:53:54 BST 2023
 
 - anything else in rotuer.nix that we should servicify
-  - packet forwarding
+ [done] - packet forwarding
   - dhcp6 client
   - what to do with acquire-{wan,lan} scripts?
-- anything in vanilla-configuration ditto
+- [done] anything in vanilla-configuration ditto
   - packet forwarding
 - and arhcive
   - rsync
@@ -2149,3 +2149,5 @@ Thu Aug 31 23:53:54 BST 2023
 - [done] services for liminix.networking
 - [done] write a blog entry
 - [done] ntp is not setting the time
+- static dhcp(6) lease support reqd for dogfooding
+
