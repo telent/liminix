@@ -54,8 +54,8 @@
         networkInterfaces =
           let inherit (config.system.service.network) link;
           in {
-            lan = link.build { ifname = "eth0"; };
-            wan = link.build { ifname = "eth1"; };
+            wan = link.build { ifname = "eth0"; };
+            lan = link.build { ifname = "eth1"; };
 
             wlan_24 = link.build {
               ifname = "wlan0";
