@@ -146,10 +146,6 @@
           NET_RALINK_SOC="y";
           SWPHY = "y";
 
-          WATCHDOG = "y";
-          RALINK_WDT = "y";  # watchdog
-          MT7621_WDT = "y";  # or it might be this one
-
           GPIOLIB="y";
           GPIO_MT7621 = "y";
 
@@ -162,6 +158,9 @@
           PRINTK_TIME = "y";
         } // lib.optionalAttrs (config.system.service ? vlan) {
           SWCONFIG = "y";
+        } // lib.optionalAttrs (config.system.service ? watchdog) {
+          RALINK_WDT = "y";  # watchdog
+          MT7621_WDT = "y";  # or it might be this one
         };
       };
     };

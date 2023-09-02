@@ -29,6 +29,7 @@ in rec {
     ../modules/network
     ../modules/vlan
     ../modules/ssh
+    ../modules/watchdog
   ];
 
   hostname = "arhcive";
@@ -67,42 +68,9 @@ in rec {
 
   services.sshd = svc.ssh.build { };
 
-  services.watchdog =
-    let
-      watched = with config.services ; [ sshd dhcpc ];
-      spinupGrace = 60;
-      script = pkgs.writeAshScript "gaspode" {
-        runtimeInputs = [ pkgs.s6 ];
-      } ''
-      deadline=$(expr $(date +%s) + ${toString spinupGrace})
-      services=$@
-      echo started feeding the dog
-      exec 3> ''${WATCHDOG-/dev/watchdog}
-
-      healthy(){
-          test $(date +%s) -le $deadline && return 0
-
-          for i in $services; do
-              if test "$(s6-svstat -o up /run/service/$i)" != "true" ; then
-                 echo "service $i is down"
-                 return 1
-              fi
-          done
-      }
-
-      while healthy ;do
-          sleep 10
-          echo >&3
-      done
-      echo "stopped feeding the dog"
-      sleep 6000  # don't want s6-rc to restart
-    '';
-    in longrun {
-      name = "watchdog";
-      run =
-        "${script} ${lib.concatStringsSep " " (builtins.map (s: s.name) watched)}";
-    };
-
+  services.watchdog = svc.watchdog.build {
+    watched = with config.services ; [ sshd dhcpc ];
+  };
 
   services.resolvconf = oneshot rec {
     dependencies = [ services.dhcpc ];
