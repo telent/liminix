@@ -30,6 +30,7 @@ in rec {
     ../modules/vlan
     ../modules/ssh
     ../modules/watchdog
+    ../modules/mount
   ];
 
   hostname = "arhcive";
@@ -101,27 +102,18 @@ in rec {
   };
 
   programs.busybox  = {
-    applets = ["blkid" "lsusb" "findfs" "tar"];
+    applets = ["lsusb" "tar"];
     options = {
       FEATURE_LS_TIMESTAMPS = "y";
       FEATURE_LS_SORTFILES = "y";
-      FEATURE_BLKID_TYPE = "y";
-      FEATURE_MOUNT_FLAGS = "y";
-      FEATURE_MOUNT_LABEL = "y";
       FEATURE_VOLUMEID_EXT = "y";
     };
   };
 
-  services.mount_external_disk = oneshot {
-    name = "mount_external_disk";
-    up = ''
-      while ! findfs LABEL=backup-disk; do
-        echo waiting for backup-disk
-        sleep 1
-      done
-      mount -t ext4 LABEL=backup-disk /srv
-    '';
-    down = "umount /srv";
+  services.mount_external_disk = svc.mount.build {
+    device = "LABEL=backup-disk";
+    mountpoint = "/srv";
+    fstype = "ext4";
   };
 
   services.rsync =

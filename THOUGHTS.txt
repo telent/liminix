@@ -2141,8 +2141,8 @@ Thu Aug 31 23:53:54 BST 2023
   - packet forwarding
 - and arhcive
   - rsync
-  - watchdog
-  - mount
+  - [done] watchdog
+  - [done] mount
 - nftables syntax error
 - tidy up the dependency handling in serviceDefn build
    (interface is fine, implementation is a bit brutal)
