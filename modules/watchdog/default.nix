@@ -1,3 +1,9 @@
+## Watchdog
+##
+## Enable hardware watchdog (for devices that support one) and
+## feed it by checking the health of specified critical services.
+## If the watchdog feeder stops, the device will reboot.
+
 { lib, pkgs, config, ...}:
 let
   inherit (lib) mkOption types;
