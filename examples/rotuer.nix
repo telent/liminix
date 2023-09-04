@@ -9,13 +9,8 @@
 { config, pkgs, lib, ... } :
 let
   secrets = import ./rotuer-secrets.nix;
-  inherit (pkgs.liminix.services) oneshot longrun bundle target;
-  inherit (pkgs)
-    dropbear
-    ifwait
-    writeText
-    writeFennelScript
-    serviceFns;
+  inherit (pkgs.liminix.services) oneshot longrun;
+  inherit (pkgs) serviceFns;
   svc = config.system.service;
   wirelessConfig =  {
     country_code = "GB";
