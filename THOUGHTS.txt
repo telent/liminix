@@ -2151,3 +2151,99 @@ Thu Aug 31 23:53:54 BST 2023
 - [done] ntp is not setting the time
 - static dhcp(6) lease support reqd for dogfooding
 
+Sat Sep  2 21:35:41 BST 2023
+
+Considerations for "mount" service: each filesystem needs to depend on
+any mount points for its parent directories, and maybe also on other
+services (e.g. filesystem modules, network devices, routes)
+
+mountpoints = {
+ mnt = {
+   media = svc.mountpoint.build {
+     fstype = "msdos";
+     device = "/dev/sda1";
+     options = [ ...];
+   };
+   archive = svc.mountpoint.build {
+     fstype = "ext4";
+     device = "/dev/sda2";
+     options = [ ...];
+     mountpoints = {
+       remote = svc.mountpoint.build {
+         fstype = "nfs";
+	 device = "doc.ic.ac.uk:/public";
+       };
+     };
+   };
+  };
+}
+
+services.somethingelse = svc.ftpd.build {
+  # ...
+  dependencies = [ mountpoints.mnt.archive ];
+}
+
+what don't we like about this? we have to walk the nested attrset in a
+weird way, because the services may contain other mountpoints. Maybe
+just keep it simple and do
+
+
+services.mountpoints = bundle {
+ name = "mountpoints";
+ contents = [
+   svc.mountpoint.build {
+     device = "/dev/sda2"; fstype = "ext4"; directory = "/mnt/isos";
+   };
+   svc.mountpoint.build {
+     device = "/dev/sdb1"; fstype = "msdos"; directory = "/mnt/backup";
+     dependencies = [ load-vfat-module ];
+   };
+ ];
+}
+
+Sun Sep  3 17:34:36 BST 2023
+
+how to dogfood
+
+DHCP6 server: static lease support
+DHCP client and acquire-{lan-prefix,wan-address}
+
+The emergency boot thingy in glinet u-boot won't help because it
+expects to flash from its tftp request instead of booting it. So we
+could use kexec instead except that the openwrt install doesn't have
+it.  So we could swap the hardware devices, the only downside of that
+being that then I don't have a test system any more. Or we could YOLO it.
+
+Sun Sep  3 22:11:02 BST 2023
+
+I think we should rejigger the documentation ...
+
+- "getting started": worked example, building and installing Liminix
+with a very simple config (wifi AP with ssh daemon)
+
+- using modules
+  - link to module reference
+
+- creating custom services
+  - longrun or oneshot
+  - dependencies
+  - outputs
+
+- creating your own modules
+
+- hacking on Liminix itself
+
+- contributing
+
+- external links and resources
+
+- module reference
+
+- hardware device reference
+
+---
+
+I think we might rename wlan_24 to wlan and wlan_5 to wlan1.
+This is on the assumption that almost no device is 5GHz only, so
+would make it easier to write a basic wlan example that works
+both on 2.4GHz boards and dual radio boards

@@ -42,6 +42,37 @@ in {
       ranges = mkOption {
         type = types.listOf types.str;
       };
+      hosts = mkOption {
+        type = types.attrsOf (types.submodule {
+          options = {
+            mac = mkOption {
+              description = ''
+                MAC or other hardware address to match on. For Ethernet
+                this is a 48 bit address represented as colon-separated
+                hex bytes, or "id:clientid" to match a presented
+                client id (IPv6 DUID)
+              '';
+              type = types.str;
+              example = "01:20:31:4a:50";
+            };
+            v4 = mkOption  {
+              description = "IPv4 address to assign to this client";
+              example = "192.0.2.1";
+              type = types.str;
+            };
+            v6 = mkOption  {
+              type = types.listOf types.str;
+              description = "IPv6 addresses or interface-ids to assign to this client";
+              default = [];
+              example = [ "fe80::42:1eff:fefd:b341" "::1234"];
+            };
+            leasetime = mkOption {
+              type = types.int;
+              default = 86400;
+            };
+          };
+        });
+      };
       domain = mkOption {
         # this can be given multiple times so probably should be
         # domains plural and list of string
