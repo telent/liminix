@@ -126,6 +126,7 @@ in rec {
       rm -rf /run/service-state/${name}/
     '';
   };
+
   filesystem =
     let inherit (pkgs.pseudofile) dir symlink;
     in dir {
@@ -133,7 +134,6 @@ in rec {
         "resolv.conf" = symlink "${services.resolvconf}/.outputs/resolv.conf";
       };
     };
-
 
   services.defaultroute4 = svc.network.route.build {
     via = "$(output ${services.wan} address)";
