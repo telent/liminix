@@ -97,8 +97,17 @@ in rec {
       inherit interface;
       ranges = [
         "10.8.0.10,10.8.0.240"
+        # ra-stateless: sends router advertisements with the O and A
+        # bits set, and provides a stateless DHCP service. The client
+        # will use a SLAAC address, and use DHCP for other
+        # configuration information.
         "::,constructor:$(output ${interface} ifname),ra-stateless"
       ];
+
+      # You can add static addresses for the DHCP server here.  I'm
+      # not putting my actual MAC addresses in a public git repo ...
+      hosts = { } // lib.optionalAttrs (builtins.pathExists ./static-leases.nix) (import ./static-leases.nix);
+
       domain = "fake.liminix.org";
     };
 
