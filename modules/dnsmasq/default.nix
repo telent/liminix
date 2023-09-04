@@ -43,6 +43,7 @@ in {
         type = types.listOf types.str;
       };
       hosts = mkOption {
+        default = {};
         type = types.attrsOf (types.submodule {
           options = {
             mac = mkOption {
