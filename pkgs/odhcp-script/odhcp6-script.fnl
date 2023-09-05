@@ -1,6 +1,9 @@
+(local { : split : merge : mkdir } (require :anoia))
+(local { : view } (require :fennel))
 
 (local state-directory (assert (os.getenv "SERVICE_STATE")))
-(os.execute (.. "mkdir -p " state-directory))
+
+(mkdir state-directory)
 
 (fn write-value [name value]
   (let [path (.. state-directory "/" name)]
@@ -9,6 +12,49 @@
 
 (fn write-value-from-env [name]
   (write-value name (os.getenv (string.upper name))))
+
+;; Format: <prefix>/<length>,preferred,valid[,excluded=<excluded-prefix>/<length>][,class=<prefix class #>]
+
+;;(parse-prefix "2001:8b0:de3a:40dc::/64,7198,7198")
+;;(parse-prefix "2001:8b0:de3a:1001::/64,7198,7188,excluded=1/2,thi=10")
+
+(fn parse-prefix [str]
+  (fn parse-extra [s]
+    (let [out {}]
+      (each [name val (string.gmatch s ",(.-)=([^,]+)")]
+        (tset out name val))
+      out))
+  (let [(prefix len preferred valid extra)
+        (string.match str "(.-)::/(%d+),(%d+),(%d+)(.*)$")]
+    (merge {: prefix : len : preferred : valid} (parse-extra extra))))
+
+
+(fn parse-address [str]
+  (fn parse-extra [s]
+    (let [out {}]
+      (each [name val (string.gmatch s ",(.-)=([^,]+)")]
+        (tset out name val))
+      out))
+  (let [(address len preferred valid extra)
+        (string.match str "(.-)/(%d+),(%d+),(%d+)(.*)$")]
+    (merge {: address : len : preferred : valid} (parse-extra extra))))
+
+
+(fn write-addresses [addresses]
+  (each [_ a (ipairs (split " " addresses))]
+    (let [address (parse-address a)
+          keydir (.. "address/" (address.address:gsub ":" "-"))]
+      (mkdir (.. state-directory "/" keydir))
+      (each [k v (pairs address)]
+        (write-value (.. keydir "/" k) v)))))
+
+(fn write-prefixes [prefixes]
+  (each [_ a (ipairs (split " " prefixes))]
+    (let [prefix (parse-prefix a)
+          keydir (.. "prefix/" (prefix.prefix:gsub ":" "-"))]
+      (mkdir (.. state-directory "/" keydir))
+      (each [k v (pairs prefix)]
+        (write-value (.. keydir "/" k) v)))))
 
 ;; we remove state before updating to ensure that consumers don't get
 ;; a half-updated snapshot
@@ -48,7 +94,9 @@
        :sntp_fqdn
        ]]
   (each [_ n (ipairs wanted)]
-    (write-value-from-env n)))
+    (write-value-from-env n))
+  (write-addresses (os.getenv :ADDRESSES))
+  (write-prefixes (os.getenv :PREFIXES)))
 
 (let [[ifname state] arg
       ready (match state
