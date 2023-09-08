@@ -35,7 +35,7 @@ in writeScriptBin "fennelrepl" ''
     end
     if #arg > 0 then
        script = table.remove(arg, 1)
-       fennel.dofile(script, {},  arg)
+       fennel.dofile(script, {correlate = true},  arg)
     else
         fennel.repl()
     end
