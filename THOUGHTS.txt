@@ -2137,10 +2137,11 @@ Thu Aug 31 23:53:54 BST 2023
  [done] - packet forwarding
   - dhcp6 client
   - what to do with acquire-{wan,lan} scripts?
+  - resolvconf
 - [done] anything in vanilla-configuration ditto
   - packet forwarding
 - and arhcive
-  - rsync
+  - [not doing] rsync
   - [done] watchdog
   - [done] mount
 - nftables syntax error
@@ -2149,7 +2150,7 @@ Thu Aug 31 23:53:54 BST 2023
 - [done] services for liminix.networking
 - [done] write a blog entry
 - [done] ntp is not setting the time
-- static dhcp(6) lease support reqd for dogfooding
+- [done] static dhcp(6) lease support reqd for dogfooding
 
 Sat Sep  2 21:35:41 BST 2023
 
@@ -2247,3 +2248,40 @@ I think we might rename wlan_24 to wlan and wlan_5 to wlan1.
 This is on the assumption that almost no device is 5GHz only, so
 would make it easier to write a basic wlan example that works
 both on 2.4GHz boards and dual radio boards
+
+Mon Sep  4 23:15:26 BST 2023
+
+If dhcpcd parsed the update-script output into separate files, half
+the complexity of acquire-lan-prefix would go away. The other half is
+because it subscribes to changes in the outputs instead of just
+running once. Perhaps there's a better way to do that?
+
+Could separate prefixes and addresses something like this... 
+
+outputs/prefix/2001\:8b0\:de3a\:40dc\:\:/prefix
+outputs/prefix/2001\:8b0\:de3a\:40dc\:\:/length
+outputs/prefix/2001\:8b0\:de3a\:40dc\:\:/preferred
+outputs/prefix/2001\:8b0\:de3a\:40dc\:\:/valid
+outputs/prefix/2001\:8b0\:de3a\:80\:\:/prefix
+outputs/prefix/2001\:8b0\:de3a\:80\:\:/length
+outputs/prefix/2001\:8b0\:de3a\:80\:\:/preferred
+outputs/prefix/2001\:8b0\:de3a\:80\:\:/valid
+
+the directory name is arbitrary as long as it's unique. Might even be better to
+remove the colons
+
+outputs/prefix/200108b0de3a40dc/valid
+
+or we could adopt the MS convention and replace with hyphens
+
+outputs/prefix/2001-8b0-de3a-40dc--/prefix
+
+Also: we should write some kind of test for this...
+
+
+Tue Sep  5 21:36:39 BST 2023 
+
+How do we set the cpu governor?
+
+
+
