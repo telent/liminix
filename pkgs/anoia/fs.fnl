@@ -29,4 +29,8 @@
     (error (.. "can't remove " pathname " of kind \"" unknown.mode "\""))))
 
 
-{ : mktree : rmtree }
+{
+ : mktree
+ : rmtree
+ : directory?
+ }

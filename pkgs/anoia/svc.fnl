@@ -1,5 +1,7 @@
 (local inotify (require :inotify))
 (local { : file-exists? } (require :anoia))
+(local { : directory? } (require :anoia.fs))
+(local lfs (require :lfs))
 
 (fn read-line [name]
   (with-open [f (assert (io.open name :r) (.. "can't open file " name))]
@@ -17,14 +19,30 @@
                      inotify.IN_CLOSE_WRITE)
     handle))
 
+(fn read-value [pathname]
+  (case (lfs.symlinkattributes pathname)
+    nil nil
+    {:mode "directory"}
+    (collect [f (lfs.dir pathname)]
+      (when (not (or (= f ".") (= f "..")))
+        (values f (read-value ( .. pathname "/" f)))))
+    {:mode "file"}
+    (read-line pathname)
+    {:mode "link"}
+    (read-line pathname)
+    unknown
+    (error (.. "can't read " pathname " of kind \"" unknown.mode "\""))))
+
+
 (fn open [directory]
   (let [watcher (watch-fsevents directory)
         has-file? (fn [filename] (file-exists? (.. directory "/" filename)))]
     {
-     :wait (fn [] (watcher:read))
+     :wait #(watcher:read)
      :ready? (fn [self]
                (and (has-file? "state") (not (has-file? ".lock"))))
-     :output (fn [_ filename] (read-line (.. directory "/" filename)))
+     :output (fn [_ filename]
+               (read-value (.. directory "/" filename)))
      :close #(watcher:close)
      }))
 
