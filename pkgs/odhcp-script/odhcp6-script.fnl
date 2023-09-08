@@ -40,21 +40,21 @@
     (merge {: address : len : preferred : valid} (parse-extra extra))))
 
 
-(fn write-addresses [addresses]
+(fn write-addresses-thing [prefix addresses]
   (each [_ a (ipairs (split " " addresses))]
     (let [address (parse-address a)
-          keydir (.. "address/" (address.address:gsub ":" "-"))]
+          keydir (.. prefix (-> address.address
+                                (: :gsub "::$" "")
+                                (: :gsub ":" "-")))]
       (mkdir (.. state-directory "/" keydir))
       (each [k v (pairs address)]
         (write-value (.. keydir "/" k) v)))))
 
+(fn write-addresses [addresses]
+  (write-addresses-thing "address/" addresses))
+
 (fn write-prefixes [prefixes]
-  (each [_ a (ipairs (split " " prefixes))]
-    (let [prefix (parse-prefix a)
-          keydir (.. "prefix/" (prefix.prefix:gsub ":" "-"))]
-      (mkdir (.. state-directory "/" keydir))
-      (each [k v (pairs prefix)]
-        (write-value (.. keydir "/" k) v)))))
+  (write-addresses-thing "prefix/" prefixes))
 
 ;; we remove state before updating to ensure that consumers don't get
 ;; a half-updated snapshot
