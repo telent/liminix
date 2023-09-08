@@ -13,21 +13,6 @@
 (fn write-value-from-env [name]
   (write-value name (os.getenv (string.upper name))))
 
-;; Format: <prefix>/<length>,preferred,valid[,excluded=<excluded-prefix>/<length>][,class=<prefix class #>]
-
-;;(parse-prefix "2001:8b0:de3a:40dc::/64,7198,7198")
-;;(parse-prefix "2001:8b0:de3a:1001::/64,7198,7188,excluded=1/2,thi=10")
-
-(fn parse-prefix [str]
-  (fn parse-extra [s]
-    (let [out {}]
-      (each [name val (string.gmatch s ",(.-)=([^,]+)")]
-        (tset out name val))
-      out))
-  (let [(prefix len preferred valid extra)
-        (string.match str "(.-)::/(%d+),(%d+),(%d+)(.*)$")]
-    (merge {: prefix : len : preferred : valid} (parse-extra extra))))
-
 
 (fn parse-address [str]
   (fn parse-extra [s]
@@ -38,7 +23,6 @@
   (let [(address len preferred valid extra)
         (string.match str "(.-)/(%d+),(%d+),(%d+)(.*)$")]
     (merge {: address : len : preferred : valid} (parse-extra extra))))
-
 
 (fn write-addresses-thing [prefix addresses]
   (each [_ a (ipairs (split " " addresses))]
