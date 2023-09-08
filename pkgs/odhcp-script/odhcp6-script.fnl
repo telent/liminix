@@ -34,11 +34,6 @@
       (each [k v (pairs address)]
         (write-value (.. keydir "/" k) v)))))
 
-(fn write-addresses [addresses]
-  (write-addresses-thing "address/" addresses))
-
-(fn write-prefixes [prefixes]
-  (write-addresses-thing "prefix/" prefixes))
 
 ;; we remove state before updating to ensure that consumers don't get
 ;; a half-updated snapshot
@@ -79,8 +74,9 @@
        ]]
   (each [_ n (ipairs wanted)]
     (write-value-from-env n))
-  (write-addresses (os.getenv :ADDRESSES))
-  (write-prefixes (os.getenv :PREFIXES)))
+
+  (write-addresses-thing "address/" (os.getenv :ADDRESSES))
+  (write-addresses-thing "prefix/" (os.getenv :PREFIXES)))
 
 (let [[ifname state] arg
       ready (match state
