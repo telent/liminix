@@ -24,7 +24,7 @@
         (string.match str "(.-)/(%d+),(%d+),(%d+)(.*)$")]
     (merge {: address : len : preferred : valid} (parse-extra extra))))
 
-(fn write-addresses-thing [prefix addresses]
+(fn write-addresses [prefix addresses]
   (each [_ a (ipairs (split " " addresses))]
     (let [address (parse-address a)
           keydir (.. prefix (-> address.address
@@ -75,8 +75,8 @@
   (each [_ n (ipairs wanted)]
     (write-value-from-env n))
 
-  (write-addresses-thing "address/" (os.getenv :ADDRESSES))
-  (write-addresses-thing "prefix/" (os.getenv :PREFIXES)))
+  (write-addresses "address/" (os.getenv :ADDRESSES))
+  (write-addresses "prefix/" (os.getenv :PREFIXES)))
 
 (let [[ifname state] arg
       ready (match state
