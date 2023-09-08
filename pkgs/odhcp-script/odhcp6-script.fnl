@@ -1,8 +1,25 @@
 (local { : split : merge : mkdir } (require :anoia))
 (local { : view } (require :fennel))
+(local lfs (require :lfs))
+
+(fn rmtree [pathname]
+  (case (lfs.symlinkattributes pathname)
+    nil true
+    {:mode "directory"}
+    (do
+      (each [f (lfs.dir pathname)]
+        (when (not (or (= f ".") (= f "..")))
+          (rmtree ( .. pathname "/" f)))
+        (lfs.rmdir pathname)))
+    {:mode "file"}
+    (os.remove pathname)
+    {:mode "link"}
+    (os.remove pathname)
+    unknown
+    (error (.. "can't remove " pathname " of kind \"" unknown.mode "\""))))
+
 
 (local state-directory (assert (os.getenv "SERVICE_STATE")))
-
 (mkdir state-directory)
 
 (fn write-value [name value]
@@ -12,7 +29,6 @@
 
 (fn write-value-from-env [name]
   (write-value name (os.getenv (string.upper name))))
-
 
 (fn parse-address [str]
   (fn parse-extra [s]
@@ -38,6 +54,10 @@
 ;; we remove state before updating to ensure that consumers don't get
 ;; a half-updated snapshot
 (os.remove (.. state-directory "/state"))
+
+;; remove parsed addresses/prefixes from any previous run
+(rmtree (.. state-directory "/prefix"))
+(rmtree (.. state-directory "/address"))
 
 (let [wanted
       [

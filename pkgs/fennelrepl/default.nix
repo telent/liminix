@@ -14,6 +14,7 @@ let packages = [
       linotify
       anoia
       fennel
+      lua.pkgs.luafilesystem
     ];
     join = ps: builtins.concatStringsSep ";" ps;
     luapath = join (builtins.map (f:
