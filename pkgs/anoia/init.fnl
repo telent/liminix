@@ -13,7 +13,4 @@
 
 (fn system [s] (assert (os.execute s)))
 
-(fn mkdir [directory]
-  (os.execute (.. "mkdir -p " directory)))
-
-{ : merge : split : file-exists? : system : mkdir }
+{ : merge : split : file-exists? : system }

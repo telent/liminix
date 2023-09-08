@@ -1,9 +1,9 @@
-(local { : split : merge : mkdir } (require :anoia))
+(local { : split : merge } (require :anoia))
 (local { : view } (require :fennel))
-(local { : rmtree } (require :anoia.fs))
+(local { : mktree : rmtree } (require :anoia.fs))
 
 (local state-directory (assert (os.getenv "SERVICE_STATE")))
-(mkdir state-directory)
+(mktree state-directory)
 
 (fn write-value [name value]
   (let [path (.. state-directory "/" name)]
@@ -29,10 +29,9 @@
           keydir (.. prefix (-> address.address
                                 (: :gsub "::$" "")
                                 (: :gsub ":" "-")))]
-      (mkdir (.. state-directory "/" keydir))
+      (mktree (.. state-directory "/" keydir))
       (each [k v (pairs address)]
         (write-value (.. keydir "/" k) v)))))
-
 
 ;; we remove state before updating to ensure that consumers don't get
 ;; a half-updated snapshot

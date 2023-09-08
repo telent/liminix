@@ -1,5 +1,17 @@
 (local lfs (require :lfs))
 
+(fn directory? [pathname]
+  (= (lfs.symlinkattributes pathname :mode) "directory"))
+
+(fn mktree [pathname]
+  (if (or (= pathname "") (= pathname "/"))
+      (error (.. "can't mkdir " pathname)))
+
+  (or (directory? pathname)
+      (let [parent (string.gsub pathname "/[^/]+/?$" "")]
+        (or (directory? parent) (mktree parent))
+        (assert (lfs.mkdir pathname)))))
+
 (fn rmtree [pathname]
   (case (lfs.symlinkattributes pathname)
     nil true
@@ -17,4 +29,4 @@
     (error (.. "can't remove " pathname " of kind \"" unknown.mode "\""))))
 
 
-{ : rmtree }
+{ : mktree : rmtree }
