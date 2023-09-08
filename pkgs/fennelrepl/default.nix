@@ -28,7 +28,8 @@ in writeScriptBin "fennelrepl" ''
     package.path = ${lib.strings.escapeShellArg luapath} .. ";" .. package.path
     package.cpath = ${lib.strings.escapeShellArg luacpath} .. ";" .. (package.cpath or "")
     local fennel = require "fennel"
-    fennel.install()
+    table.insert(package.loaders or package.searchers,1, fennel.searcher)
+
     local more_fennel = os.getenv("FENNEL_PATH")
     if more_fennel then
         fennel.path = more_fennel .. ";" .. fennel.path
