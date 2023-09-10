@@ -1,4 +1,4 @@
-(local { : split : merge } (require :anoia))
+(local { : split : merge : hash : base64url } (require :anoia))
 (local { : view } (require :fennel))
 (local { : mktree : rmtree } (require :anoia.fs))
 
@@ -26,9 +26,18 @@
 (fn write-addresses [prefix addresses]
   (each [_ a (ipairs (split " " addresses))]
     (let [address (parse-address a)
-          keydir (.. prefix (-> address.address
-                                (: :gsub "::$" "")
-                                (: :gsub ":" "-")))]
+          suffix (base64url (string.pack "n" (hash a)))
+          ;; keydir should be a function of all the address
+          ;; attributes: we want it to change whenever anything changes
+          ;; so that clients can see which addresses are new without
+          ;; deep table comparisons
+          keydir (..
+                  prefix
+                  (-> address.address
+                      (: :gsub "::$" "")
+                      (: :gsub ":" "-"))
+                  "_"
+                  suffix)]
       (mktree (.. state-directory "/" keydir))
       (each [k v (pairs address)]
         (write-value (.. keydir "/" k) v)))))
