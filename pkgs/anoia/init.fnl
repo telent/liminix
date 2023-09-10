@@ -2,6 +2,9 @@
   (collect [k v (pairs table2) &into table1]
     k v))
 
+(fn dup [table]
+  (collect [k v (pairs table)] k v))
+
 (fn split [sep string]
   (icollect [v (string.gmatch string (.. "([^" sep "]+)"))]
     v))
@@ -56,4 +59,4 @@
     (s:sub 1 (- (# s) pad))))
 
 
-{ : merge : split : file-exists? : system : hash : base64url }
+{ : merge : split : file-exists? : system : hash : base64url : dup }
