@@ -9,6 +9,7 @@ in stdenv.mkDerivation {
   version = "0.1";
   src = ./.;
   nativeBuildInputs = [ fennel ];
+  buildInputs = with lua.pkgs; [ luafilesystem ];
   buildPhase = ''
     for f in *.fnl ; do
       fennel --compile $f > `basename $f .fnl`.lua
