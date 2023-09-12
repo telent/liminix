@@ -1,5 +1,4 @@
 (local { : split : merge : hash : base64url } (require :anoia))
-(local { : view } (require :fennel))
 (local { : mktree : rmtree } (require :anoia.fs))
 
 (local state-directory (assert (os.getenv "SERVICE_STATE")))
