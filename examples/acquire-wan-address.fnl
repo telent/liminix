@@ -31,14 +31,14 @@
     new-addresses))
 
 (fn run []
+  (var addresses [])
   (let [[state-directory wan-device] arg
         dir (svc.open state-directory)]
-    (var addresses [])
-    (while true
-      (while (not (dir:ready?)) (dir:wait))
-      (when (. bound-states (dir:output "state"))
+    (each [v (dir:events)]
+      ;; we don't handle unbound or stopped, where we should
+      ;; take the addresses away
+      (when (. bound-states (v:output "state"))
         (set addresses
-             (update-addresses wan-device addresses (dir:output "address"))))
-      (dir:wait))))
+             (update-addresses wan-device addresses (v:output "address")))))))
 
 { : update-addresses : changes : run }

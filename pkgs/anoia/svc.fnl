@@ -33,6 +33,12 @@
     unknown
     (error (.. "can't read " pathname " of kind \"" unknown.mode "\""))))
 
+(fn events [self]
+  (coroutine.wrap
+   #(while true
+      (while (not (self:ready?)) (self:wait))
+      (coroutine.yield self)
+      (self:wait))))
 
 (fn open [directory]
   (let [watcher (watch-fsevents directory)
@@ -44,6 +50,7 @@
      :output (fn [_ filename]
                (read-value (.. directory "/" filename)))
      :close #(watcher:close)
+     : events
      }))
 
 { : open }
