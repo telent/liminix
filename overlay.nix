@@ -170,5 +170,18 @@ extraPkgs // {
     '';
   });
 
+  openssl = prev.openssl.overrideAttrs (o: {
+    # we want to apply
+    # https://patch-diff.githubusercontent.com/raw/openssl/openssl/pull/20273.patch";
+    # which disables overriding the -march cflags to the wrong values,
+    # but openssl is used for bootstrapping so that's easier said than
+    # done. Do it the ugly way..
+    postPatch =
+      o.postPatch
+      + (with final;
+        lib.optionalString (stdenv.buildPlatform != stdenv.hostPlatform)
+          "\nsed -i.bak 's/linux.*-mips/linux-mops/' Configure\n");
+  });
+
   pppBuild = prev.ppp;
 }
