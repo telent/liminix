@@ -1,8 +1,9 @@
 {
-  writeFennelScript
+  writeFennel
 , linotify
 , anoia
 }:
-writeFennelScript "acquire-wan-address"
-  [ linotify anoia ]
-  ./acquire-wan-address.fnl
+writeFennel "acquire-wan-address" {
+  packages = [ linotify anoia ];
+  mainFunction = "run";
+} ./acquire-wan-address.fnl

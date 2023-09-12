@@ -30,8 +30,9 @@
        (.. "ip address del " p.address "/" p.len " dev " wan-device)))
     new-addresses))
 
-(fn run [state-directory wan-device]
-  (let [dir (svc.open state-directory)]
+(fn run []
+  (let [[state-directory wan-device] arg
+        dir (svc.open state-directory)]
     (var addresses [])
     (while true
       (while (not (dir:ready?)) (dir:wait))
@@ -40,8 +41,4 @@
              (update-addresses wan-device addresses (dir:output "address"))))
       (dir:wait))))
 
-
-(if (os.getenv "RUN_TESTS")
-    { : update-addresses : changes : run }
-    (let [[state-directory wan-device] arg]
-      (run state-directory wan-device)))
+{ : update-addresses : changes : run }
