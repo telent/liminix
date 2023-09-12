@@ -52,6 +52,7 @@ in {
     };
   };
   writeFennelScript = callPackage ./write-fennel-script {};
+  writeFennel = callPackage ./write-fennel {};
   writeAshScript = callPackage ./write-ash-script {};
   systemconfig = callPackage ./systemconfig {};
   s6-init-bin =  callPackage ./s6-init-bin {};
