@@ -2256,7 +2256,7 @@ the complexity of acquire-lan-prefix would go away. The other half is
 because it subscribes to changes in the outputs instead of just
 running once. Perhaps there's a better way to do that?
 
-Could separate prefixes and addresses something like this... 
+Could separate prefixes and addresses something like this...
 
 outputs/prefix/2001\:8b0\:de3a\:40dc\:\:/prefix
 outputs/prefix/2001\:8b0\:de3a\:40dc\:\:/length
@@ -2279,9 +2279,62 @@ outputs/prefix/2001-8b0-de3a-40dc--/prefix
 Also: we should write some kind of test for this...
 
 
-Tue Sep  5 21:36:39 BST 2023 
+Tue Sep  5 21:36:39 BST 2023
 
 How do we set the cpu governor?
 
+
+Fri Sep  8 21:26:36 BST 2023
+
+We want a fennel thing that reads a filesystem tree into a nested
+table. And a thing to diff two tables
+
+Sat Sep  9 22:40:50 BST 2023
+
+Subscribers to odhcp6c outputs need to be able to tell which addresses
+are new and which have been removed since the last run, which now we
+have ohdcp-script  producing parsed data means they need to compare
+tables by value. Which is a faff.
+
+What if the directory name were a hash of all the relevant fields
+such that clients could just say "new directory, must be new address"
+
+We can have literal prefix, then need to encode
+length,preferred,valid,extra space-efficiently. I cannot currently see
+any way to use whatever hashing Lua uses for its table lookups,
+which is a bit disapppointing, so we might have to make our own
+
+
+https://gist.github.com/scheler/26a942d34fb5576a68c111b05ac3fabe
+this is DJBHash, though doesn't appear to deal with integer overflow
+
+
+function hash(str)
+    h = 5381;
+
+    for c in str:gmatch"." do
+        h = ((h << 5) + h) + string.byte(c)
+    end
+    return h
+end
+
+
+Mon Sep 11 20:31:25 BST 2023
+
+acquire-lan/wan-foo have no tests, and the test setup is a bit of a
+faff as they are both waiting on the filesystem
+
+also, testing lua scripts is a faff without splitting them into
+script/module
+
+am wondering if we could do some kind of convention that we only write
+modules not scripts but something in the fennel->lua can call the
+module's `run` method.
+
+Tuesday
+
+Here is a working shebang for write-fennel:
+
+#!/nix/store/5iwv3h2jjbk2vib2bpwx3g9knpb02x3y-lua-5.3.6/bin/lua -e dofile(arg[0]).run()
 
 
