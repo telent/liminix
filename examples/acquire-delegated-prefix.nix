@@ -1,9 +1,10 @@
 {
-  writeFennelScript
+  writeFennel
 , linotify
 , anoia
 , lua
 }:
-writeFennelScript "acquire-delegated-prefix"
-  [ linotify anoia lua.pkgs.luafilesystem ]
-  ./acquire-delegated-prefix.fnl
+writeFennel "acquire-delegated-prefix" {
+  packages = [ linotify anoia lua.pkgs.luafilesystem ];
+  mainFunction = "run";
+} ./acquire-delegated-prefix.fnl

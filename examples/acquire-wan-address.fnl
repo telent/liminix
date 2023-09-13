@@ -1,6 +1,9 @@
 (local { : system } (require :anoia))
 (local svc (require :anoia.svc))
 
+;; acquire-delegated-prefix has very similar code: we'd like to move
+;; this to anoia.svc when we see what the general form would look like
+
 (fn changes [old-addresses new-addresses]
   (let [added {}
         deleted {}]
