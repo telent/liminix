@@ -14,7 +14,10 @@
     f (do (f:close) true)
     _ false))
 
-(fn system [s] (assert (os.execute s)))
+(fn system [s]
+  (match (os.execute s)
+    res res
+    (nil err) (error (.. "Error executing \"" s "\" (" err ")"))))
 
 (fn hash [str]
   (accumulate [h 5381
