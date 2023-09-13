@@ -9,12 +9,17 @@
 }:
 let
   inherit (builtins) concatStringsSep;
-  output = service: name: "/run/service-state/${service.name}/${name}";
+  prefix = "/run/service-state";
+  output = service: name: "${prefix}/${service.name}/${name}";
   serviceScript = commands : ''
     #!/bin/sh
     exec 2>&1
     . ${serviceFns}
     ${commands}
+  '';
+  cleanupScript = name : ''
+    #!/bin/sh
+    test -d ${prefix}/${name} && rm -rf ${prefix}/${name}
   '';
   service = {
     name
@@ -61,21 +66,23 @@ let
     in service (args // {
       buildInputs = [ logger ];
       serviceType = "longrun";
-      run = serviceScript run;
+      run = serviceScript "${run}\n${cleanupScript name}";
       producer-for = "${name}-log";
     });
 
   oneshot = {
     name
     , up
-    , down
+    , down ? ""
     , outputs ? []
     , dependencies ? []
     , ...
   } @ args : service (args  // {
     serviceType = "oneshot";
     up = writeScript "${name}-up" (serviceScript up);
-    down= writeScript "${name}-down" (serviceScript down);
+    down = writeScript
+      "${name}-down"
+      "${serviceScript down}\n${cleanupScript name}";
   });
   bundle = {
     name

@@ -75,7 +75,6 @@
              dd if=/dev/$part of=data iflag=skip_bytes,fullblock bs=${toString size} skip=${toString offset} count=1
             )
         '';
-        down = "true";
       };
       inherit (pkgs.pseudofile) dir symlink;
       inherit (pkgs.liminix.networking) interface;

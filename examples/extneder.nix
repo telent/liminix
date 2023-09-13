@@ -119,9 +119,6 @@ in rec {
       done
       )
     '';
-    down = ''
-      rm -rf /run/service-state/${name}/
-    '';
   };
   filesystem = dir {
     etc = dir {

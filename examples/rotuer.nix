@@ -131,9 +131,6 @@ in rec {
        chmod 0444 resolv.conf
       )
     '';
-    down = ''
-      rm -rf /run/service-state/${name}/
-    '';
   };
 
   filesystem =
