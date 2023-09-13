@@ -1,14 +1,6 @@
 (local { : system } (require :anoia))
 (local svc (require :anoia.svc))
 
-(local bound-states
-       { :bound true
-         :rebound true
-         :informed true
-         :updated true
-         :ra-updated true
-         })
-
 (fn changes [old-addresses new-addresses]
   (let [added {}
         deleted {}]
@@ -35,9 +27,6 @@
         dir (svc.open state-directory)]
     (accumulate [addresses []
                  v (dir:events)]
-      ;; we don't handle unbound or stopped, where we should
-      ;; take the addresses away
-      (when (. bound-states (v:output "state"))
-        (update-addresses wan-device addresses (v:output "address"))))))
+      (update-addresses wan-device addresses (v:output "address")))))
 
 { : update-addresses : changes : run }
