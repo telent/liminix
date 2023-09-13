@@ -85,8 +85,8 @@
   (each [_ n (ipairs wanted)]
     (write-value-from-env n))
 
-  (write-addresses "address/" (os.getenv :ADDRESSES))
-  (write-addresses "prefix/" (os.getenv :PREFIXES)))
+  (match (os.getenv :ADDRESSES) s (write-addresses "address/" s))
+  (match (os.getenv :PREFIXES) s (write-addresses "prefix/" s)))
 
 (let [[ifname state] arg
       ready (match state
