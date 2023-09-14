@@ -5,10 +5,7 @@ Liminix
    :maxdepth: 3
    :caption: Contents:
 
-   intro
-   user
-   developer
-   etc
+   new
 
 
 Indices and tables
