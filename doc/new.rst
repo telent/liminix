@@ -24,17 +24,18 @@ Requirements
 ************
 
 You will need a reasonably powerful computer running Nix.  Devices
-that run Liminix are unlikely tohave the CPU power and disk space to
+that run Liminix are unlikely to have the CPU power and disk space to
 be able to build it in situ, so the build process is based around
 "cross-compilation" from another computer. The build machine can be
 any reasonably powerful desktop/laptop/server PC running NixOS.
-Standalone Nixpkgs installations on other Linux distribuions or MacOS
-also ought to work (but I haven't tested that configuration)
+Standalone Nixpkgs installations on other Linux distributions - or on
+MacOS - also ought to work but are untested.
 
 
 Running in Qemu
 ***************
 
+You can do this without even having a router to play with.
 Clone the Liminix git repository and change into its directory
 
 
@@ -50,13 +51,13 @@ Now build Liminix
     nix-build -I liminix-config=./examples/hellonet.nix \
      --arg device "import ./devices/qemu" -A outputs.default
 
-In this command ``liminix-config`` points to the configuration for the
-device (services, users, filesystem, secrets) and ``device`` is the
-file for your hardware device definition.  ``outputs.default`` tells
-Liminix to build the appropriate  image output appropriate to
-flash to the hardware device: for the qemu "hardware" it's an alias
-for ``outputs.vmbuild``, which creates a directory containing a root
-filesystem image and a kernel.
+In this command ``liminix-config`` points to the desired software
+configuration (e.g. services, users, filesystem, secrets) and
+``device`` describes the hardware (or emulated hardware) to run it on.
+``outputs.default`` tells Liminix that we want the default image
+output for flashing to the device: for the Qemu "hardware" it's an
+alias for ``outputs.vmbuild``, which creates a directory containing a
+root filesystem image and a kernel.
 
 .. tip:: The first time you run this it may take several hours,
          because it builds all of the dependencies including a full
@@ -70,10 +71,11 @@ Now you can try it:
 
     nix-shell --run "mips-vm ./result/vmlinux ./result/rootfs"
 
-This starts the Qemu emulator to run the Liminix configuration you
-just built.  It connects the Liminix serial console and the `QEMU
-monitor <https://www.qemu.org/docs/master/system/monitor.html>`_ to
-stdin/stdout. Use ^P (not ^A) to switch to the monitor.
+This starts Qemu emulator with a bunch of useful options, to run
+the Liminix configuration you just built.  It connects the Liminix
+serial console and the `QEMU monitor
+<https://www.qemu.org/docs/master/system/monitor.html>`_ to
+stdin/stdout.
 
 You should now see Linux boot messages and after a few seconds be
 presented with a login prompt. You can login on the console as
