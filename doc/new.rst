@@ -83,14 +83,44 @@ presented with a login prompt. You can login on the console as
 running. To kill the emulator, press ^P (Control P) then c to enter the
 "QEMU Monitor", then type ``quit`` at the ``(qemu)`` prompt.
 
-To see that it running an ssh service we need to connect to its
-emulated network. Start the machine again, if you had stopped it,
-and open up a second terminal on your build machine. We're going to
-run another virtual machine attached to the virtual network, which will
-request an IP address from our Liminix system and give you a shell
-you can run ssh from.
+To see that it's running network services we need to connect to its
+emulated network. Start the machine again, if you had stopped it, and
+open up a second terminal on your build machine. We're going to run
+another virtual machine attached to the virtual network, which will
+request an IP address from our Liminix system and give you a shell you
+can run ssh from.
 
+We'll use `System Rescue <https://www.system-rescue.org/>`_ in tty
+mode (no graphical output) for this purpose, but if you have some
+other favourite Linux Live CD ISO - or, for that matter, any other OS
+image that QEMU can boot - adjust the command to suit:
 
+.. code-block:: console
+
+    curl https://fastly-cdn.system-rescue.org/releases/10.01/systemrescue-10.01-amd64.iso -O
+
+    nix-shell -p qemu --run " \
+    qemu-system-x86_64 \
+	-echr 16 \
+	-m 1024 \
+	-cdrom systemrescue-10.01-amd64.iso \
+	-netdev socket,mcast=230.0.0.1:1235,localaddr=127.0.0.1,id=lan \
+	-device virtio-net,disable-legacy=on,disable-modern=off,netdev=lan,mac=ba:ad:3d:ea:21:01 \
+	-display none -serial mon:stdio"
+
+System Rescue displays a boot menu at which you should select the
+"serial console" option, then after a few moments it boots to a root
+prompt. You can now try things out:
+
+* run :command:`ip a` and see that it's been allocated an IP address in the range 10.3.0.0/16.
+
+* run :command:`ping 10.3.0.1` to see that the Liminix VM responds
+
+* run :command:`ssh root@10.3.0.1` to try logging into it.
+
+Congratulations! You have installed your first Liminix system - albeit
+it has no practical use and it's not even real. The next step is to try
+running it on hardware.
 
 
 - using modules
