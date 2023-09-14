@@ -35,6 +35,8 @@ longrun {
     if test -d /persist; then
       mkdir -p /persist/secrets/dropbear
       ln -s /persist/secrets/dropbear /run
+    else
+      mkdir -p /run/dropbear
     fi
     . /etc/profile # sets PATH but do we need this?  it's the same file as ashrc
     exec env -i ENV=/etc/ashrc PATH=$PATH ${dropbear}/bin/dropbear ${concatStringsSep " " options}
