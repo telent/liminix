@@ -77,9 +77,9 @@ stdin/stdout. Use ^P (not ^A) to switch to the monitor.
 
 You should now see Linux boot messages and after a few seconds be
 presented with a login prompt. You can login on the console as
-``root`` (no password) and poke around to see what processes are
-running.  Run ``shutdown`` to shut it down cleanly, or press ^P then
-type ``exit`` at the monitor to stop it suddenly.
+``root`` (password is "secret") and poke around to see what processes are
+running. To kill the emulator, press ^P (Control P) then c to enter the
+"QEMU Monitor", then type ``quit`` at the ``(qemu)`` prompt.
 
 To see that it running an ssh service we need to connect to its
 emulated network. Start the machine again, if you had stopped it,
