@@ -7,7 +7,6 @@ in rec {
   imports = [
     ../modules/network
     ../modules/dnsmasq
-    ../modules/ntp
     ../modules/ssh
   ];
   hostname = "hellonet";
@@ -15,11 +14,6 @@ in rec {
   services.int = svc.network.address.build {
     interface = config.hardware.networkInterfaces.lan;
     family = "inet"; address ="10.3.0.1"; prefixLength = 16;
-  };
-
-  services.ntp = svc.ntp.build {
-    pools = { "pool.ntp.org" = ["iburst"]; };
-    makestep = { threshold = 1.0; limit = 3; };
   };
 
   services.sshd = svc.ssh.build { };
