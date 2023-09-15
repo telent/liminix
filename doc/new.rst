@@ -48,7 +48,7 @@ Now build Liminix
 
 .. code-block:: console
 
-    nix-build -I liminix-config=./examples/hellonet.nix \
+    nix-build -I liminix-config=./examples/hello-from-qemu.nix \
      --arg device "import ./devices/qemu" -A outputs.default
 
 In this command ``liminix-config`` points to the desired software

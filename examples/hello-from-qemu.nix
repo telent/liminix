@@ -9,8 +9,10 @@ in rec {
     ../modules/dnsmasq
     ../modules/ssh
   ];
-  hostname = "hellonet";
 
+  hostname = "hello";
+
+  # configure the internal network (LAN) with an address
   services.int = svc.network.address.build {
     interface = config.hardware.networkInterfaces.lan;
     family = "inet"; address ="10.3.0.1"; prefixLength = 16;
@@ -30,10 +32,6 @@ in rec {
       inherit interface;
       ranges = [
         "10.3.0.10,10.3.0.240"
-        # ra-stateless: sends router advertisements with the O and A
-        # bits set, and provides a stateless DHCP service. The client
-        # will use a SLAAC address, and use DHCP for other
-        # configuration information.
         "::,constructor:$(output ${interface} ifname),ra-stateless"
       ];
 
