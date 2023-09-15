@@ -28,7 +28,7 @@
       };
      in {
       hardware = {
-        defaultOutput = "tftpboot";
+        defaultOutput = "flashimage";
         loadAddress = "0x80000000";
         entryPoint  = "0x80000000";
 

@@ -85,7 +85,7 @@
         FEATURE_DD_IBS_OBS = "y"; # ath10k_cal_data needs skip_bytes,fullblock
       };
       hardware = {
-        defaultOutput = "tftpboot";
+        defaultOutput = "flashimage";
         loadAddress = "0x80060000";
         entryPoint  = "0x80060000";
         flash = {
