@@ -1,13 +1,13 @@
 Getting Started
 ###############
 
-Liminix is very configurable, which can make it initially daunting
-especially if you're learning Nix or Linux or networking concepts at
-the same time. In this section we build some "worked example" Liminix
-images to introduce the concepts. If you follow the examples exactly,
-they should work. If you change things as you go along, they may work
-differently or not at all, but the experience should be educational
-either way.
+Liminix is very configurable, which can make it initially quite
+daunting, especially if you're learning Nix or Linux or networking
+concepts at the same time. In this section we build some "worked
+example" Liminix images to introduce the concepts. If you follow the
+examples exactly, they should work. If you change things as you go
+along, they may work differently or not at all, but the experience
+should be educational either way.
 
 
 .. warning:: The first example we will look at runs under emulation,
@@ -23,19 +23,20 @@ either way.
 Requirements
 ************
 
-You will need a reasonably powerful computer running Nix.  Devices
-that run Liminix are unlikely to have the CPU power and disk space to
-be able to build it in situ, so the build process is based around
+You will need a reasonably powerful computer running Nix.  Target
+devices for Liminix are unlikely to have the CPU power and disk space
+to be able to build it in situ, so the build process is based around
 "cross-compilation" from another computer. The build machine can be
 any reasonably powerful desktop/laptop/server PC running NixOS.
 Standalone Nixpkgs installations on other Linux distributions - or on
-MacOS - also ought to work but are untested.
+MacOS, or even in a Docker container - also ought to work but are
+untested.
 
 
 Running in Qemu
 ***************
 
-You can do this without even having a router to play with.
+You can try out Liminix without even having a router to play with.
 Clone the Liminix git repository and change into its directory
 
 
@@ -71,9 +72,9 @@ Now you can try it:
 
     nix-shell --run "mips-vm ./result/vmlinux ./result/rootfs"
 
-This starts Qemu emulator with a bunch of useful options, to run
-the Liminix configuration you just built.  It connects the Liminix
-serial console and the `QEMU monitor
+This starts the Qemu emulator with a bunch of useful options, to run
+the Liminix configuration you just built.  It connects the emulated
+device's serial console and the `QEMU monitor
 <https://www.qemu.org/docs/master/system/monitor.html>`_ to
 stdin/stdout.
 
@@ -90,14 +91,20 @@ another virtual machine attached to the virtual network, which will
 request an IP address from our Liminix system and give you a shell you
 can run ssh from.
 
-We'll use `System Rescue <https://www.system-rescue.org/>`_ in tty
-mode (no graphical output) for this purpose, but if you have some
+We use `System Rescue <https://www.system-rescue.org/>`_ in tty
+mode (no graphical output) for this example, but if you have some
 other favourite Linux Live CD ISO - or, for that matter, any other OS
-image that QEMU can boot - adjust the command to suit:
+image that QEMU can boot - adjust the command to suit.
+
+Download the System Rescue ISO:
 
 .. code-block:: console
 
     curl https://fastly-cdn.system-rescue.org/releases/10.01/systemrescue-10.01-amd64.iso -O
+
+and run it
+
+.. code-block:: console
 
     nix-shell -p qemu --run " \
     qemu-system-x86_64 \
