@@ -129,6 +129,135 @@ Congratulations! You have installed your first Liminix system - albeit
 it has no practical use and it's not even real. The next step is to try
 running it on hardware.
 
+Installing on hardware
+**********************
+
+For the next example, we're going to install onto an actual hardware
+device.  These steps have been tested using a GL-iNet GL-MT300A, which
+has been chosen for the purpose because it's cheap and easy to
+unbrick. Using some other Liminix-supported MIPS hardware device also
+*ought* to work here, but you accept the slightly greater bricking
+risk if it doesn't.
+
+You may want to acquire a `USB TTL serial cable
+<https://cpc.farnell.com/ftdi/ttl-232r-rpi/cable-debug-ttl-232-usb-rpi/dp/SC12825?st=usb%20to%20uart%20cable>`_
+when you start working with Liminix on real hardware. You
+won't *need* it for this example, assuming it works, but it
+allows you
+to see the boot monitor and kernel messages, and to login directly to
+the device if for some reason it doesn't bring its network up. You have options
+here: the FTDI-based cables are the Rolls Royce of serial cables,
+whereas the ones based on PL2303 and CP2102 chipsets are cheaper but
+also fussier - or you could even get creative and use e.g. a
+`Raspberry Pi <https://pinout.xyz/#>`_ or other SBC with a UART and
+TX/RX/GND header pins. Make sure that the voltages are compatible:
+this is a 3.3v device and you don't want to be sending it 5v or (even
+worse) 12v.
+
+Now we can build Liminix. Although we could use the same example
+configuration as we did for Qemu, you might not want to plug a DHCP
+server into your working LAN because it will compete with the real
+DHCP service. So we're going to use a different configuration with a
+DHCP client: this is :file:`examples/hello-from-mt300.nix`
+
+It's instructive to compare the two configurations:
+
+.. code-block:: console
+
+    diff -u examples/hello-from-qemu.nix examples/hello-from-mt300.nix
+
+You'll see a new ``boot.tftp`` stanza which you can ignore,
+``services.dns`` has been removed, and the static IP address allocation
+has been replaced by a ``dhcp.client`` service.
+
+.. code-block:: console
+
+    nix-build -I liminix-config=./examples/hello-from-mt300.nix \
+     --arg device "import ./devices/gl-mt300a" -A outputs.default
+
+.. tip:: The first time you run this it may take several hours.
+         Again? Yes, even if you ran the previous example. Qemu is
+         set up as a big-endian system whereas the MediaTek SoC
+         on this device is little-endian - so it requires building
+         all of the dependencies including an entirely different
+         MIPS gcc and library toolchain to the other one.
+
+This time in :file:`result/` you will see a bunch of files. Most of
+them you can ignore for the moment, but :file:`result/firmware.bin` is
+the firmware image you can flash.
+
+
+Flashing
+========
+
+Again, there are a number of different ways you could do this: using
+TFTP with a serial cable, through the stock firmware's web UI, or
+using the `vendor's "debrick" process
+<https://docs.gl-inet.com/router/en/3/tutorials/debrick/>`_. The last
+of these options has a lot to recommend it for a first attempt:
+
+* it works no matter what firmware is currently installed
+
+* it doesn't require plugging a router into the same network as your
+  build system and potentially messing up your actual upstream
+
+* no need to open the device and add cables
+
+You can read detailed instructions on the vendor site, but the short version is:
+
+1. turn the device off
+2. connect it by ethernet cable to a computer
+3. configure the computer to have static ip address 192.168.1.10
+4. while holding down the Reset button, turn the device on
+5. after about five seconds you can release the Reset button
+6. visit http://192.168.1.1/ using a web browser on the connected computer
+7. click on "Browse" and choose :file:`result/firmware.bin`
+8. click on "Update firmware"
+9. wait a minute or so while it updates.
+
+There's no feedback from the web interface when the flashing is
+finished, but what should happen is that the router reboots and
+starts running Liminix. Now you need to figure out what address it got
+from DHCP - e.g. by checking the DHCP server logs, or maybe by pinging
+``hello.lan`` or something. Once you've found it on the
+network you can ping it and ssh to it just like you did the Qemu
+example, but this time for real.
+
+.. warning:: Do not leave the default root password in place on any
+             device exposed to the internet!  Although it has no
+             writable storage and no default route, a motivated attacker
+	     with some imagination could probably still do something
+	     awful using it.
+
+Congratulations Part II! You have installed your first Liminix system on
+actual hardware - albeit that it *still* has no practical use.
+
+Exercise for the reader: change the default password by editing
+:file:`examples/hello-from-mt300.nix`, and then create and upload a
+new image that has it set to something less hopeless.
+
+
+Final thoughts
+**************
+
+* These are demonstration configs for pedagogical purposes. If you'd
+  like to see some more realistic uses of Liminix,
+  :file:`examples/rotuer,arhcive,extneder.nix` are based on some
+  actual real hosts in my home network.
+
+* These example images are not writable. Later we will explain how to
+  generate an image that can be changed after installation, and
+  even use :command:`liminix-rebuild` (analogous to :command:`nixos-rebuild`)
+  to keep it up to date.
+
+* The technique used here for flashing was chosen mostly because it
+  doesn't need much infrastructure/tooling, but it is a bit of a faff
+  (requires physical access, vendor specific). There are slicker ways
+  to do it that need a bit more setup - we'll talk about that later as
+  well.
+
+
+
 
 - using modules
 
