@@ -70,20 +70,22 @@
                 swconfig dev switch0 vlan 2 set ports '0 6t'
                 swconfig dev switch0 set apply
               '';
-              down = "swconfig dev switch0 set reset";
+              down = "${pkgs.swconfig}/bin/swconfig dev switch0 set reset";
             };
           in rec {
-            eth = link.build { ifname = "eth0"; dependencies =  [swconfig]; };
+            eth = link.build { ifname = "eth0"; };
             # lan and wan ports are both behind a switch on eth0
             lan = vlan.build {
               ifname = "eth0.1";
               primary = eth;
               vid = "1";
+              dependencies =  [swconfig eth];
             };
             wan = vlan.build {
               ifname = "eth0.2";
               primary = eth;
               vid = "2";
+              dependencies =  [swconfig eth];
             };
             wlan = link.build {
               ifname = "wlan0";
