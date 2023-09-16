@@ -84,3 +84,52 @@ domains, or you want to run two SSH daemons on different ports.
 	 combining configuration values from different sources. We
 	 don't use the NixOS modules themselves, because the
 	 underlying system is not similar enough for them to work.
+
+
+Services
+********
+
+We use the s6/s6-rc system to start/stop/restart services and handle
+service dependencies. Any attribute in `config.services` will become
+part of the default set of services that s6 will try to bring up on
+boot.
+
+For the most part, for common use cases, hopefully the services you
+need will be defined by modules and you will only have to pass the
+right parameters to ``build``.
+
+Should you need to create a custom service of your own devising, use
+the `oneshot` or `longrun` functions:
+
+* a "longrun" service is the "normal" service concept: it has a
+  ``run`` action which describes the process to start, and it watches
+  that process to restart it if it exits. The process should not
+  attempt to daemonize or "background" itself, otherwise s6 will think
+  it died.  . Whatever it prints to standard output/standard error
+  will be logged.
+
+.. code-block:: nix
+
+    config.services.cowsayd = pkgs.liminix.services.longrun {
+      name = "cowsayd";
+      run = "${pkgs.cowsayd}/bin/cowsayd --port 3001 --breed hereford";
+    }
+
+
+* a "oneshot" service doesn't have a process attached. It consists of
+  ``up`` and ``down`` actions which are bits of shell script that
+  are run at the appropriate points in the service lifecycle
+
+.. code-block:: nix
+
+    config.services.greenled = pkgs.liminix.services.oneshot {
+      name = "greenled";
+      up = ''
+	echo 17 > /sys/class/gpio/export
+	echo out > /sys/class/gpio/gpio17/direction
+	echo 0   > /sys/class/gpio/gpio17/value
+      '';
+      down = ''
+	echo 0   > /sys/class/gpio/gpio17/value
+      '';
+    }
