@@ -5,7 +5,7 @@ Liminix
    :maxdepth: 3
    :caption: Contents:
 
-   new
+   tutorial
 
 
 Indices and tables

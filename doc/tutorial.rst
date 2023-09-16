@@ -255,28 +255,3 @@ Final thoughts
   (requires physical access, vendor specific). There are slicker ways
   to do it that need a bit more setup - we'll talk about that later as
   well.
-
-
-
-
-- using modules
-
-  - link to module reference
-
-- creating custom services
-
-  - longrun or oneshot
-  - dependencies
-  - outputs
-
-- creating your own modules
-
-- hacking on Liminix itself
-
-- contributing
-
-- external links and resources
-
-- module reference
-
-- hardware device reference
