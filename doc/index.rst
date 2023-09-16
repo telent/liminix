@@ -6,6 +6,7 @@ Liminix
    :caption: Contents:
 
    tutorial
+   configuration
 
 
 Indices and tables
