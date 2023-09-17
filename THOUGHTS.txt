@@ -2337,4 +2337,102 @@ Here is a working shebang for write-fennel:
 
 #!/nix/store/5iwv3h2jjbk2vib2bpwx3g9knpb02x3y-lua-5.3.6/bin/lua -e dofile(arg[0]).run()
 
+Tue Sep 12 20:47:52 BST 2023
 
+We don't handle unbound or stopped states in odhcp consumers. I think
+probably we should do this in odhcp-script by deleting the outputs,
+rather than making each consumer do it.
+
+... turns out that odhcp6c itself unsets ADDRESSES and PREFIXES before
+calling the script with "unbound", so maybe we don't need to do
+anything special.
+
+Wed Sep 13 17:55:33 BST 2023
+
+
+
+@400000000000001f2723b3cb eth1.link.pppoe Script /nix/store/nyks8zl86dcp44k5sjcc76digrnfgm17-ip-up finished (pid 403), status = 0x0
+@400000000000001f27b2db3b eth1.link.pppoe Script /nix/store/ds0lc4qd1zfiyxsva87rpplyr21awjh1-ip6-up finished (pid 404), status = 0x1
+
+@400000000000001f30a7c5c5 /nix/store/v9ijgyywizqbbd9y73r2wifkxc0d1jjm-route-default-1a22c69d0e1f-up: line 4: input: not found
+@400000000000001f31abf9b5 ip: command line is not complete, try "help"
+@400000000000001f31ca1395 s6-rc: warning: unable to start service route-default-1a22c69d0e1f: command exited 1
+@400000000000001f31f236b4 s6-rc: info: service route-default-d2586cf00da0 successfully started
+@
+
+
+Wed Sep 13 18:05:38 BST 2023
+
+TODO
+
+- service for dhcp6 client
+- move acquire-{wan,lan} scripts out of examples/
+- service for resolvconf
+- nftables syntax error
+- tidy up the dependency handling in serviceDefn build
+   (interface is fine, implementation is a bit brutal)
+- docs
+
+considerations:
+
+1) in some ways, we should be able to specify acquire-{wan,lan} as if
+they were just additional addresses on the respective
+interfaces. However, they're longruns so the implementation of
+"address" doesn't really fit.
+
+2) should they be bundled into a dhcp client service? I think the
+answer is "no" because which of the dhcp config we want to
+honour locally (and how) is policy not mechainmsm
+
+svc.dhcp6c.client.build { interface = wan; };
+svc.dhcp6c.address.build {
+  inherit client;
+  interface = lan;
+};
+svc.dhcp6c.address.build {
+  inherit client;
+  interface = wan;
+};
+svc.dhcp6c.prefix.build {
+  inherit client;
+  interface = lan;
+  index = 1;			# default to first interface
+};
+svc.dhcp6c.prefix.build {
+  inherit client;
+  interface = vpn;
+  index = 2;
+};
+
+
+
+Fri Sep 15 12:04:25 BST 2023
+
+Qemu worked example provides dhcp and ssh service
+
+Hardware worked example needs to be plugged into same lan as build
+machine if we are going to tftp the image onto it - so it might be
+awkward if we run dhcp on it
+
+The device I have lying around is the A
+
+How do we do the actual flash step? Assuming the device is running
+stock firmware, from a laptop we can wifi to it and use the web ui to
+upgrade
+
+we can't build the hellonet config because it requires tftp
+
+plug in mt300a
+put stock firmware on it
+
+Sun Sep 17 00:08:03 BST 2023
+
+I don't think the user manual needs a full justification of why we
+have the module/service split. Maybe we should have "decision records"
+in the git tree instead
+
+Sun Sep 17 16:44:31 BST 2023
+
+Can we figure out which bits of the old doc are missing from the new
+one and just transplant those? Then we can merge it sooner
+instead of blocking on writig all the new stuff
