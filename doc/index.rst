@@ -10,6 +10,7 @@ Liminix
    configuration
    admin
    development
+   modules
 
 
 Indices and tables

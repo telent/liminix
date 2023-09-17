@@ -35,7 +35,7 @@ let
         src = ./doc;
         buildPhase = ''
           cat ${(import ./doc/extract-options.nix).doc} > options.json
-          cat options.json | fennel --correlate parse-options.fnl > modules.rst
+          cat options.json | fennel --correlate parse-options.fnl > modules-generated.rst
           make html
         '';
         installPhase = ''
