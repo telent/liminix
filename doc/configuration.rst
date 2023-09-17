@@ -150,7 +150,110 @@ meaning that it won't be started until that other service is up.
 Module implementation
 *********************
 
-TODO: make your own modules
+Modules in Liminix conventionally live in
+:file:`modules/somename/default.nix`. If you want or need to
+write your own, you may wish to refer to the
+examples there in conjunction with reading this section.
 
-* how a module exposes services
-* defining types
+A module is a function that accepts ``{lib, pkgs, config, ... }`` and
+returns an attrset with keys ``imports, options config``.
+
+* ``imports`` is a list of paths to the other modules required by this one
+
+* ``options`` is a nested set of option declarations
+
+* ``config`` is a nested set of option definitions
+
+The NixOS manual section `Writing NixOS Modules
+<https://nixos.org/manual/nixos/stable/#sec-writing-modules>`_ is a
+quite comprehensive reference to writing NixOS modules, which is also
+mostly applicable to Liminix except that it doesn't cover
+service templates.
+
+Service templates
+=================
+
+To expose a service template in a module, it needs the following:
+
+* an option declaration for ``system.service.myservicename`` with the
+  type of ``liminix.lib.types.serviceDefn``
+
+.. code-block:: nix
+
+    options = {
+      system.service.cowsay = mkOption {
+	type = liminix.lib.types.serviceDefn;
+      };
+    };
+
+* an option definition for the same key, which specifies where to
+  import the service template from (often :file:`./service.nix`)
+  and the types of its parameters.
+
+.. code-block:: nix
+
+    config.system.service.cowsay = liminix.callService ./service.nix {
+      address = mkOption {
+	type = types.str;
+	default = "0.0.0.0";
+	description = "Listen on specified address";
+	example = "127.0.0.1";
+      };
+      port = mkOption {
+	type = types.port;
+	default = 22;
+	description = "Listen on specified TCP port";
+      };
+      breed = mkOption {
+	type = types.str;
+	default = "British Friesian"
+	description = "Breed of the cow";
+      };
+    };
+
+Then you need to provide the service template itself, probably in
+:file:`./service.nix`:
+
+.. code-block:: nix
+
+    {
+      # any nixpkgs package can be named here
+      liminix
+    , cowsayd
+    , serviceFns
+    , lib
+    }:
+    # these are the parameters declared in the callService invocation
+    { address, port, breed} :
+    let
+      inherit (liminix.services) longrun;
+      inherit (lib.strings) escapeShellArg;
+    in longrun {
+      name = "cowsayd";
+      run = "${cowsayd}/bin/cowsayd --address ${address} --port ${builtins.toString port} --breed ${escapeShellArg breed}";
+    }
+
+.. tip::
+
+   Not relevant to module-based services specifically, but a common
+   gotcha when specifiying services is forgetting to transform "rich"
+   parameter values into text when composing a command for the shell
+   to execute. Note here that the port number, an integer, is
+   stringified with ``toString``, and the name of the breed,
+   which may contain spaces, is
+   escaped with ``escapeShellArg``
+
+Types
+=====
+
+All of the NixOS module types are available in Liminix. These
+Liminix-specific types also exist in ``pkgs.liminix.lib.types``:
+
+* ``service``: an s6-rc service
+* ``interface``: an s6-rc service which specifies a network
+  interface
+* ``serviceDefn``: a service "template" definition
+
+In the future it is likely that we will extend this to include other
+useful types in the networking domain: for example; IP address,
+network prefix or netmask, protocol family ...
