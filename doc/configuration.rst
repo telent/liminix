@@ -76,6 +76,7 @@ intentional choice to allow the creation of multiple
 differently-configured services based on the same template - perhaps
 e.g. when you have multiple networks (VPNs etc) in different trust
 domains, or you want to run two SSH daemons on different ports.
+(For the background to this, please refer to the :doc:`architecture decision record <adr/module-system>`)
 
 .. tip:: Liminix modules should be quite familiar (but also different)
 	 if you already know how to use NixOS modules. We use the
