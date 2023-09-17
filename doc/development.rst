@@ -87,6 +87,8 @@ time with configurations for RP-PPPoE and/or Accel PPP.`
 Hardware devices
 ****************
 
+.. _tftp server:
+
 How you get your image onto hardware will vary according to the
 device, but is likely to involve taking it apart to add wires to
 serial console pads/headers, then using U-Boot to fetch images over

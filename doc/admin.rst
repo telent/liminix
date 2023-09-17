@@ -12,8 +12,8 @@ Flashing and updating
 
 
 
-Flashing from an existing Liminix system with :command:`flashcp`
-================================================================
+Flashing from Liminix
+=====================
 
 The flash procedure from an existing Liminix-system has two steps.
 First we reboot the device (using "kexec") into an "ephemeral"
@@ -34,7 +34,7 @@ For example
 
 .. code-block:: console
 
-   nix-build --show-trace -I liminix-config=./examples/arhcive.nix \
+   nix-build -I liminix-config=./examples/arhcive.nix \
      --arg device "import ./devices/gl-ar750"
      -A outputs.kexecboot && \
      (tar chf - result | ssh root@the-device tar -C /run -xvf -)
@@ -59,10 +59,15 @@ to the old configuration it finds in flash.
 Building the second (permanent) image
 -------------------------------------
 
-While running in the kexecboot system, you can copy the permanent
-image to the device with :command:`ssh`
+While running in the kexecboot system, you can build the permanent
+image and copy it to the device with :command:`ssh`
 
 .. code-block:: console
+
+   build-machine$ nix-build -I liminix-config=./examples/arhcive.nix \
+     --arg device "import ./devices/gl-ar750"
+     -A outputs.default && \
+     (tar chf - result | ssh root@the-device tar -C /run -xvf -)
 
    build-machine$ tar chf - result/firmware.bin | \
     ssh root@the-device tar -C /run -xvf -
@@ -109,9 +114,10 @@ Flashing from the boot monitor
 ==============================
 
 If you are prepared to open the device and have a TTL serial adaptor
-of some kind to connect it to, you can probably flash it using U-Boot.
-This is quite hardware-specific, and sometimes involves soldering:
-please refer to the Developer Manual.
+of some kind to connect it to, you can probably use U-Boot and a TFTP
+server to download and flash the image.  This is quite
+hardware-specific, and sometimes involves soldering: please refer
+to the :ref:`development manual <tftp server>`.
 
 
 Flashing from OpenWrt (not currently advised!)
