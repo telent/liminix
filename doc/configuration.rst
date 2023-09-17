@@ -1,10 +1,10 @@
 Configuration and Module Guide
 ##############################
 
-Liminix uses the Nix language to provide congruent configuration.
-This means that to change anything about the way in which a
-Liminix system works, you make that change in
-:file:`configuration.nix` (or one of the other files it references)
+Liminix uses the Nix language to provide congruent configuration
+management.  This means that to change anything about the way in
+which a Liminix system works, you make that change in
+your :file:`configuration.nix` (or one of the other files it references),
 and rerun :command:`nix-build` or :command:`liminix-rebuild` to action
 the change. It is not possible (at least, without shenanigans) to make
 changes by logging into the device and running imperative commands
@@ -89,9 +89,9 @@ domains, or you want to run two SSH daemons on different ports.
 Services
 ********
 
-We use the s6/s6-rc system to start/stop/restart services and handle
+We use the `s6-rc service manager <https://www.skarnet.org/software/s6-rc/overview.html>`_  to start/stop/restart services and handle
 service dependencies. Any attribute in `config.services` will become
-part of the default set of services that s6 will try to bring up on
+part of the default set of services that s6-rc will try to bring up on
 boot.
 
 For the most part, for common use cases, hopefully the services you
@@ -104,8 +104,8 @@ the `oneshot` or `longrun` functions:
 * a "longrun" service is the "normal" service concept: it has a
   ``run`` action which describes the process to start, and it watches
   that process to restart it if it exits. The process should not
-  attempt to daemonize or "background" itself, otherwise s6 will think
-  it died.  . Whatever it prints to standard output/standard error
+  attempt to daemonize or "background" itself, otherwise s6-rc will think
+  it died. Whatever it prints to standard output/standard error
   will be logged.
 
 .. code-block:: nix
