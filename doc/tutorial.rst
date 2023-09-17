@@ -1,23 +1,13 @@
-Getting Started
-###############
+Tutorial
+########
 
 Liminix is very configurable, which can make it initially quite
-daunting, especially if you're learning Nix or Linux or networking
+daunting - especially if you're learning Nix or Linux or networking
 concepts at the same time. In this section we build some "worked
 example" Liminix images to introduce the concepts. If you follow the
 examples exactly, they should work. If you change things as you go
 along, they may work differently or not at all, but the experience
 should be educational either way.
-
-
-.. warning:: The first example we will look at runs under emulation,
-	     so there is no danger of bricking your hardware
-	     device. For the second example you may (if you have
-	     appropriate hardware and choose to do so) flash the
-	     configuration onto an actual router. There is always a
-	     risk of rendering the device unbootable when you do this,
-	     and various ways to recover depending on what went wrong.
-	     We'll write more about that at the appropriate point
 
 
 Requirements
@@ -135,9 +125,17 @@ Installing on hardware
 For the next example, we're going to install onto an actual hardware
 device.  These steps have been tested using a GL-iNet GL-MT300A, which
 has been chosen for the purpose because it's cheap and easy to
-unbrick. Using some other Liminix-supported MIPS hardware device also
-*ought* to work here, but you accept the slightly greater bricking
-risk if it doesn't.
+unbrick if necessary
+
+.. warning:: There is always a risk of rendering your device
+	     unbootable by flashing it with an image that doesn't
+	     work. The GL-MT300A has a builtin "debrick" procedure in
+	     the boot monitor and is also comparatively simple to
+	     attach serial cables to (soldering not required), so it
+	     is lower-risk than some devices.  Using some other
+	     Liminix-supported MIPS hardware device also *ought* to
+	     work here, but you accept the slightly greater bricking
+	     risk if it doesn't.
 
 You may want to acquire a `USB TTL serial cable
 <https://cpc.farnell.com/ftdi/ttl-232r-rpi/cable-debug-ttl-232-usb-rpi/dp/SC12825?st=usb%20to%20uart%20cable>`_
