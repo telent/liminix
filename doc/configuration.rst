@@ -1,5 +1,5 @@
-Configuration and Module Guide
-##############################
+Configuration
+#############
 
 Liminix uses the Nix language to provide congruent configuration
 management.  This means that to change anything about the way in
@@ -150,8 +150,7 @@ meaning that it won't be started until that other service is up.
 Module implementation
 *********************
 
-..
-	TODO: make your own modules
+TODO: make your own modules
 
-	* how a module exposes services
-	* defining types
+* how a module exposes services
+* defining types
