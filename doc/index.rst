@@ -7,6 +7,8 @@ Liminix
 
    tutorial
    configuration
+   admin
+   development
 
 
 Indices and tables

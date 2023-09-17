@@ -140,3 +140,18 @@ the `oneshot` or `longrun` functions:
 Services may have dependencies: as you see above in the ``cowsayd``
 example, it depends on some service called ``config.services.lan``,
 meaning that it won't be started until that other service is up.
+
+..
+	TODO: explain service outputs
+
+..
+	TODO: outputs that change, and services that poll other services
+
+Module implementation
+*********************
+
+..
+	TODO: make your own modules
+
+	* how a module exposes services
+	* defining types
