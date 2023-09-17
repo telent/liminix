@@ -5,6 +5,7 @@ Liminix
    :maxdepth: 3
    :caption: Contents:
 
+   intro
    tutorial
    configuration
    admin
