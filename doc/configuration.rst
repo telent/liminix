@@ -113,6 +113,8 @@ the `oneshot` or `longrun` functions:
     config.services.cowsayd = pkgs.liminix.services.longrun {
       name = "cowsayd";
       run = "${pkgs.cowsayd}/bin/cowsayd --port 3001 --breed hereford";
+      # don't start this until the lan interface is ready
+      dependencies = [ config.services.lan ];
     }
 
 
@@ -133,3 +135,7 @@ the `oneshot` or `longrun` functions:
 	echo 0   > /sys/class/gpio/gpio17/value
       '';
     }
+
+Services may have dependencies: as you see above in the ``cowsayd``
+example, it depends on some service called ``config.services.lan``,
+meaning that it won't be started until that other service is up.
