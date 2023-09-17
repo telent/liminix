@@ -256,4 +256,4 @@ Liminix-specific types also exist in ``pkgs.liminix.lib.types``:
 
 In the future it is likely that we will extend this to include other
 useful types in the networking domain: for example; IP address,
-network prefix or netmask, protocol family ...
+network prefix or netmask, protocol family and others as we find them.
