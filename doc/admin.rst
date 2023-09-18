@@ -120,13 +120,14 @@ hardware-specific, and sometimes involves soldering: please refer
 to the :ref:`development manual <tftp server>`.
 
 
-Flashing from OpenWrt (not currently advised!)
-==============================================
+Flashing from OpenWrt
+=====================
 
-.. CAUTION:: At your own risk! This will (at least in some
-             circumstances) lead to bricking the device: we think this
-             flash method is currently incompatible with use of a
-             writeable (jffs2) filesystem.
+.. CAUTION:: Untested! A previous version of these instructions
+	     (without the -e flag) led to bricking the device
+	     when flashing a jffs2 image. If you are reading
+	     this message, nobody has yet reported on whether the
+	     new instructions are any better.
 
 If your device is running OpenWrt then it probably has the
 :command:`mtd` command installed. After transferring the image onto the
@@ -134,8 +135,11 @@ device using e.g. :command:`ssh`,  you can run it as follows:
 
 .. code-block:: console
 
-   mtd -r write /tmp/firmware.bin firmware
+   mtd -e -r write /tmp/firmware.bin firmware
 
+The options to this command are for "erase before writing" and "reboot
+after writing". 
+   
 For more information, please see the `OpenWrt manual <https://openwrt.org/docs/guide-user/installation/sysupgrade.cli>`_ which may also contain (hardware-dependent) instructions on how to flash an image using the vendor firmware - perhaps even from a web interface.
 
 Updating an installed system (JFFS2)
