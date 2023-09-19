@@ -1,6 +1,7 @@
 # This "device" generates images that can be used with the QEMU
 # emulator. The default output is a directory containing separate
-# kernel (uncompressed vmlinux) and initrd (squashfs) images
+# kernel ("Image" format) and root filesystem (squashfs or jffs2)
+# images
 {
   system = {
     crossSystem = {
@@ -54,7 +55,6 @@
         defaultOutput = "vmroot";
         loadAddress = "0x0";
         entryPoint  = "0x0";
-        dts.src = ./empty.dts;
         rootDevice = "/dev/mtd1";
 
         flash.eraseBlockSize = "65536"; # c.f. pkgs/mips-vm/mips-vm.sh
