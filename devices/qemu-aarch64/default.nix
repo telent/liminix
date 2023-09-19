@@ -20,12 +20,6 @@
         CPU_BIG_ENDIAN= "n";
 
         VIRTUALIZATION = "y";
-        ACPI="y";
-        ARM64_VA_BITS_48="y";
-
-        ARM_SMMU="y";
-        ARM_SMMU_V3="y";
-
         PCI_HOST_GENERIC="y";
 
         MTD = "y";
