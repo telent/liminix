@@ -76,11 +76,12 @@ in
         inherit dtb;
       };
       # could use trivial-builders.linkFarmFromDrvs here?
-      vmroot = pkgs.runCommand "qemu" {} ''
+      vmroot = pkgs.runCommandCC "vmroot" {} ''
         mkdir $out
         cd $out
         ln -s ${config.system.outputs.rootfs} rootfs
         ln -s ${kernel} vmlinux
+        ${pkgs.stdenv.cc.targetPrefix}objcopy -O binary -S ${kernel} Image
         ln -s ${manifest} manifest
         ln -s ${kernel.headers} build
       '';

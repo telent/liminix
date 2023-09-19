@@ -2436,3 +2436,17 @@ Sun Sep 17 16:44:31 BST 2023
 Can we figure out which bits of the old doc are missing from the new
 one and just transplant those? Then we can merge it sooner
 instead of blocking on writig all the new stuff
+
+We need to find a nice place for an introduction to choosing
+rootfsType
+
+Mon Sep 18 17:07:56 BST 2023
+
+Let's see if we can hack up an aarch64 qemu port
+
+From https://gist.github.com/oznu/ac9efae7c24fd1f37f1d933254587aa4 :
+
+curl -L https://releases.linaro.org/components/kernel/uefi-linaro/latest/release/qemu64/QEMU_EFI.fd -O
+dd if=/dev/zero of=flash1.img bs=1M count=64
+dd if=/dev/zero of=flash0.img bs=1M count=64
+dd if=QEMU_EFI.fd of=flash0.img conv=notrunc

@@ -6,6 +6,7 @@
 } :
 let
   objcopy = "${stdenv.cc.bintools.targetPrefix}objcopy";
+  arch = "arm64";
 in {
   kernel
 , commandLine
@@ -40,7 +41,7 @@ stdenv.mkDerivation {
   buildPhase = ''
     ${objcopy} -O binary -R .reginfo -R .notes -R .note -R .comment -R .mdebug -R .note.gnu.build-id -S vmlinux.elf vmlinux.bin
     rm -f vmlinux.bin.lzma ; lzma -k -z  vmlinux.bin
-    mkimage -A mips -O linux -T kernel -C lzma -a ${loadAddress} -e ${entryPoint} -n 'MIPS Liminix Linux ${extraName}' -d vmlinux.bin.lzma kernel.uimage
+    mkimage -A ${arch} -O linux -T kernel -C lzma -a ${loadAddress} -e ${entryPoint} -n '${arch} Liminix Linux ${extraName}' -d vmlinux.bin.lzma kernel.uimage
   '';
   installPhase = ''
     cp kernel.uimage $out

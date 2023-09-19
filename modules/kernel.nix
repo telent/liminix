@@ -56,9 +56,9 @@ in {
         MODULE_SIG = if modular then "y" else "n";
         DEBUG_FS = "y";
 
-        MIPS_BOOTLOADER_CMDLINE_REQUIRE_COOKIE = "y";
-        MIPS_BOOTLOADER_CMDLINE_COOKIE = "\"liminix\"";
-        MIPS_CMDLINE_DTB_EXTEND = "y";
+        # MIPS_BOOTLOADER_CMDLINE_REQUIRE_COOKIE = "y";
+        # MIPS_BOOTLOADER_CMDLINE_COOKIE = "\"liminix\"";
+        # MIPS_CMDLINE_DTB_EXTEND = "y";
 
         # basic networking protocols
         NET = "y";

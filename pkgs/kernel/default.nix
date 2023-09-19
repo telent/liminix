@@ -28,7 +28,7 @@ stdenv.mkDerivation rec {
     "-I${openssl.dev}/include -L${openssl.out}/lib -L${ncurses.out}/lib";
   PKG_CONFIG_PATH = "./pkgconfig";
   CROSS_COMPILE = stdenv.cc.bintools.targetPrefix;
-  ARCH = "mips";  # kernel uses "mips" here for both mips and mipsel
+  ARCH = "arm64";
   KBUILD_BUILD_HOST = "liminix.builder";
 
   dontStrip = true;
@@ -47,7 +47,7 @@ stdenv.mkDerivation rec {
   ];
 
   patches = [
-    ./cmdline-cookie.patch
+#    ./cmdline-cookie.patch
   ];
 
   # this is here to work around what I think is a bug in nixpkgs

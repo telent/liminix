@@ -16,6 +16,7 @@ let
       ];
     };
   });
+  pkgsNative = pkgs.pkgsBuildBuild;
 
   config = (pkgs.lib.evalModules {
     modules = [
@@ -49,16 +50,19 @@ in {
   # cross-compiling nix-shell for any package we're customizing
   inherit pkgs;
 
-  buildEnv = pkgs.mkShell {
-    packages = with pkgs.pkgsBuildBuild; [
-      tufted
-      routeros.routeros
-      routeros.ros-exec-script
-      mips-vm
-      borderVm.build.vm
-      go-l2tp
-      min-copy-closure
-      fennelrepl
-    ];
-  };
+  buildEnv =
+    pkgs.mkShell {
+      packages =
+        with pkgsNative; [
+        tufted
+        routeros.routeros
+        routeros.ros-exec-script
+        borderVm.build.vm
+        go-l2tp
+        min-copy-closure
+        fennelrepl
+        (mips-vm.override { inherit (pkgs) ubootQemuAarch64; })
+      ];
+
+    };
 }

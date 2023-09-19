@@ -1,7 +1,7 @@
 let
   nixpkgs = <nixpkgs>;
   liminix = (import ./default.nix {
-    device = (import ./devices/qemu);
+    device = (import ./devices/qemu-aarch64);
     liminix-config = ./vanilla-configuration.nix;
     inherit nixpkgs;
   });
