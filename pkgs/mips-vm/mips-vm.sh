@@ -48,7 +48,7 @@ qemu-system-aarch64 \
     -echr 16 \
     -append "liminix default earlycon=smh console=ttyAMA0,38400n8 panic=10 oops=panic init=$INIT loglevel=8 root=/dev/mtdblock0 block2mtd.block2mtd=/dev/vda,65536" \
     -semihosting \
-    -cpu cortex-a72 -bios $UBOOT \
+    -cpu cortex-a72 \
     -drive file=$rootfs,format=raw,readonly=off,if=virtio,index=0 \
     ${initramfs} \
     -netdev socket,id=access,mcast=230.0.0.1:1234,localaddr=127.0.0.1 \

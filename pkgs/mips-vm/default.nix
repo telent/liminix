@@ -1,14 +1,12 @@
 {
   qemu
 , socat
-, ubootQemuAarch64
 , writeShellScriptBin
 , symlinkJoin
 , lib
 }: let
   mips-vm = writeShellScriptBin "mips-vm" ''
      export PATH="${lib.makeBinPath [qemu]}:$PATH"
-     export UBOOT=${ubootQemuAarch64}/u-boot.bin
      ${builtins.readFile ./mips-vm.sh}
   '';
   connect = writeShellScriptBin "connect-vm" ''
