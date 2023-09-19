@@ -22,13 +22,10 @@
         VIRTUALIZATION = "y";
         ACPI="y";
         ARM64_VA_BITS_48="y";
-        # ARM_MHU="y";
-        # PLATFORM_MHU="y";
+
         ARM_SMMU="y";
         ARM_SMMU_V3="y";
-        ARCH_VEXPRESS = "y";
 
-        
         PCI_HOST_GENERIC="y";
 
         MTD = "y";
@@ -45,20 +42,12 @@
         VIRTIO_NET = "y";
 
         # https://stackoverflow.com/a/68340492
-        CMDLINE="\"earlycon=ttyS0 console=ttyS0\"";
+        CMDLINE="\"earlycon=smh console=ttyAMA0\"";
         CMDLINE_FROM_BOOTLOADER = "y";
-        ARM64 = "y";
-        PINCTRL = "y";
-        
-        EFI_EARLYCON = "y";
+
         SERIAL_EARLYCON_ARM_SEMIHOST = "y"; # earlycon=smh
         SERIAL_AMBA_PL011 = "y";
         SERIAL_AMBA_PL011_CONSOLE = "y";
-
-        SERIAL_8250= "y";
-        SERIAL_8250_CONSOLE= "y";
-        SERIAL_EARLYCON = "y";
-        
       };
     };
     hardware =
