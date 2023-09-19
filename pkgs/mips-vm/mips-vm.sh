@@ -39,38 +39,16 @@ if test -n "$3"; then
     initramfs="-initrd $3"
 fi
 
-cat <<_IGNORE
-fdt addr 5edbbdb0
-fdt set /chosen bootargs 'earlycon=smh console=ttyAMA0 rw root=/dev/vda'
-run bootcmd_qfw
-_IGNORE
 
 INIT=${INIT-/bin/init}
 echo $QEMU_OPTIONS
-set -x
+
 qemu-system-aarch64 \
-    -echr 16 \
     -M virt  -m 512 \
+    -echr 16 \
+    -append "liminix default earlycon=smh console=ttyAMA0,38400n8 panic=10 oops=panic init=$INIT loglevel=8 root=/dev/mtdblock0 block2mtd.block2mtd=/dev/vda,65536" \
     -semihosting \
     -cpu cortex-a72 -bios $UBOOT \
-    -drive file=$rootfs,format=raw,readonly=off,if=virtio,index=0 \
-    -kernel $1 \
-    -display none $flags
-
-
-exit
-
-    -device nand,chip_id=0x59,id=cheeky \
-    -drive file=$rootfs,format=raw,readonly=off,if=mtd,index=0,id=cheeky \
-
-
--drive file=flash0.img,format=raw,if=pflash \
-    -drive file=flash1.img,format=raw,if=pflash \
- # -D log.txt
-qemu-system-aarch64 \
-    -M virt,gic-version=max -cpu max -m 512 -D log.txt \
-    -echr 16 \
-    -append "liminix default console=ttyS0,38400n8 panic=10 oops=panic init=$INIT loglevel=8 root=/dev/mtdblock0 block2mtd.block2mtd=/dev/vda,65536" \
     -drive file=$rootfs,format=raw,readonly=off,if=virtio,index=0 \
     ${initramfs} \
     -netdev socket,id=access,mcast=230.0.0.1:1234,localaddr=127.0.0.1 \
