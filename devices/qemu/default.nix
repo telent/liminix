@@ -13,6 +13,7 @@
   };
 
   module = {pkgs, config, ... }: {
+    imports = [ ../../modules/arch/mipseb.nix ];
     kernel = {
       src = pkgs.pkgsBuildBuild.fetchurl {
         name = "linux.tar.gz";
@@ -21,8 +22,6 @@
       };
       config = {
         MIPS_MALTA= "y";
-        CPU_LITTLE_ENDIAN= "n";
-        CPU_BIG_ENDIAN= "y";
         CPU_MIPS32_R2= "y";
 
         MTD = "y";
