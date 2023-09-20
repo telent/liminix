@@ -15,8 +15,9 @@ let
     builtins.attrNames
       (lib.filterAttrsRecursive
         (n: t:
-          (t=="directory") ||
-          ((t=="regular") && ((builtins.match ".*\\.nix$" n) != null)))
+          (n != "arch") &&
+          ((t=="directory") ||
+           ((t=="regular") && ((builtins.match ".*\\.nix$" n) != null))))
         (builtins.readDir ../modules));
   modulefiles = builtins.map (n: builtins.toPath "${../modules}/${n}") modulenames;
   eval = (lib.evalModules {
