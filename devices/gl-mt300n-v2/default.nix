@@ -27,6 +27,7 @@
         hash = "sha256:1dkhfznmdz6s50kwc841x3wj0h6zg6icg5g2bim9pvg66as2vmh9";
       };
     in {
+      imports = [ ../../modules/arch/mipsel.nix ];
       filesystem = dir {
         lib = dir {
           firmware = dir {
@@ -103,14 +104,12 @@
           ${openwrt.applyPatches.ramips}
         '';
         config = {
-          MIPS_ELF_APPENDED_DTB = "y";
           OF = "y";
           USE_OF = "y";
 
           RALINK = "y";
           PCI = "y";
           SOC_MT7620 = "y";
-          CPU_LITTLE_ENDIAN= "y";
 
           SERIAL_8250_CONSOLE = "y";
           SERIAL_8250 = "y";

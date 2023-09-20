@@ -79,7 +79,10 @@
       inherit (pkgs.pseudofile) dir symlink;
       inherit (pkgs.liminix.networking) interface;
     in {
-      imports = [ ../../modules/network];
+      imports = [
+        ../../modules/network
+        ../../modules/arch/mipseb.nix
+      ];
 
       programs.busybox.options = {
         FEATURE_DD_IBS_OBS = "y"; # ath10k_cal_data needs skip_bytes,fullblock
@@ -139,7 +142,6 @@
           ${openwrt.applyPatches.ath79}
         '';
         config = {
-          MIPS_ELF_APPENDED_DTB = "y";
           OF = "y";
           USE_OF = "y";
           ATH79 = "y";
@@ -191,8 +193,6 @@
 
           WATCHDOG = "y";
           ATH79_WDT = "y";  # watchdog timer
-
-          CPU_BIG_ENDIAN= "y";
 
           # this is all copied from nixwrt ath79 config. Clearly not all
           # of it is device config, some of it is wifi config or

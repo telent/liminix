@@ -26,7 +26,8 @@
         drivers = ["rt2800soc"];
         klibBuild = config.system.outputs.kernel.modulesupport;
       };
-     in {
+    in {
+      imports = [ ../../modules/arch/mipsel.nix ];
       hardware = {
         defaultOutput = "flashimage";
         loadAddress = "0x80000000";
@@ -107,7 +108,6 @@
           ${openwrt.applyPatches.ramips}
         '';
         config = {
-          MIPS_ELF_APPENDED_DTB = "y";
           OF = "y";
           USE_OF = "y";
 
@@ -142,8 +142,6 @@
           MTD = "y";
           MTD_CMDLINE_PARTS = "y";
           MTD_BLOCK = "y";         # fix undefined ref to register_mtd_blktrans_devs
-
-          CPU_LITTLE_ENDIAN = "y";
 
           CMDLINE_PARTITION = "y";
           EARLY_PRINTK = "y";
