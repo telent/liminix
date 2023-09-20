@@ -27,13 +27,13 @@ To build it,
 
     nix-build -I liminix-config=path/to/your/configuration.nix --arg device "import ./devices/qemu" -A outputs.default
 
-In a ``buildEnv`` nix-shell, you can use the :command:`mips-vm` command
+In a ``buildEnv`` nix-shell, you can use the :command:`run-liminix-vm` command
 to run Qemu with appropriate options. It connects the Liminix
 serial console and the `QEMU monitor  <https://www.qemu.org/docs/master/system/monitor.html>`_ to stdin/stdout. Use ^P (not ^A) to switch to the monitor.
 
 .. code-block:: console
 
-    nix-shell --run "mips-vm result/vmlinux result/squashfs"
+    nix-shell --run "run-liminix-vm result/vmlinux result/squashfs"
 
 If you run with ``--background /path/to/some/directory`` as the first
 parameter, it will fork into the background and open Unix sockets in
@@ -53,7 +53,7 @@ the right way:
 * multicast 230.0.0.1:1235  : lan
 * multicast 230.0.0.1:1236  : world (the internet)
 
-A VM started with :command:`mips-vm` is connected to "lan" and "access", and
+A VM started with :command:`run-liminix-vm` is connected to "lan" and "access", and
 the emulated border network gateway (see below) runs PPPoE and is
 connected to "access" and "world".
 

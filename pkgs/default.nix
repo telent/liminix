@@ -59,7 +59,7 @@ in {
   systemconfig = callPackage ./systemconfig {};
   s6-init-bin =  callPackage ./s6-init-bin {};
   s6-rc-database = callPackage ./s6-rc-database {};
-  mips-vm = callPackage ./mips-vm {};
+  run-liminix-vm = callPackage ./run-liminix-vm {};
   ppp = callPackage ./ppp {};
   pppoe = callPackage ./pppoe {};
 

@@ -7,7 +7,7 @@ let img = (import liminix {
       liminix-config = ./configuration.nix;
     }).outputs.default;
     pkgs = import <nixpkgs> { overlays = [(import ../../overlay.nix)]; };
-    inherit (pkgs.pkgsBuildBuild) routeros mips-vm;
+    inherit (pkgs.pkgsBuildBuild) routeros run-liminix-vm;
 in pkgs.runCommand "check" {
   nativeBuildInputs = with pkgs; [
     python3Packages.scapy
@@ -15,7 +15,7 @@ in pkgs.runCommand "check" {
     jq
     socat
     routeros.routeros
-    mips-vm
+    run-liminix-vm
   ] ;
 } ''
 serverstatedir=$(mktemp -d -t routeros-XXXXXX)
@@ -27,7 +27,7 @@ export MPLCONFIGDIR=$(mktemp -d -t routeros-XXXXXX)
 
 routeros $serverstatedir
 mkdir vm
-mips-vm --background ./vm ${img}/vmlinux ${img}/rootfs
+run-liminix-vm --background ./vm ${img}/vmlinux ${img}/rootfs
 expect ${./getaddress.expect}
 
 set -o pipefail

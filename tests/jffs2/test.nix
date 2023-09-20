@@ -7,15 +7,15 @@ let img = (import liminix {
       liminix-config = ./configuration.nix;
     }).outputs.vmroot;
     pkgs = import <nixpkgs> { overlays = [(import ../../overlay.nix)]; };
-    inherit (pkgs.pkgsBuildBuild) routeros mips-vm;
+    inherit (pkgs.pkgsBuildBuild) routeros run-liminix-vm;
 in pkgs.runCommand "check" {
   nativeBuildInputs = with pkgs; [
-    mips-vm
+    run-liminix-vm
     expect
     socat
   ] ;
 } ''
 mkdir vm
-mips-vm --background ./vm ${img}/vmlinux ${img}/rootfs
+run-liminix-vm --background ./vm ${img}/vmlinux ${img}/rootfs
 expect ${./script.expect} >$out
 ''

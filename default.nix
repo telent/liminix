@@ -54,7 +54,7 @@ in {
       tufted
       routeros.routeros
       routeros.ros-exec-script
-      mips-vm
+      run-liminix-vm
       borderVm.build.vm
       go-l2tp
       min-copy-closure

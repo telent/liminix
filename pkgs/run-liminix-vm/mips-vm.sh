@@ -31,7 +31,7 @@ test -n "$2" || usage
 
 lan=${LAN-"socket,mcast=230.0.0.1:1235,localaddr=127.0.0.1"}
 
-rootfs=$(mktemp mips-vm-fs-XXXXXX)
+rootfs=$(mktemp run-liminix-vm-fs-XXXXXX)
 dd if=/dev/zero of=$rootfs bs=1M count=16 conv=sync
 dd if=$2 of=$rootfs bs=65536 conv=sync,nocreat,notrunc
 

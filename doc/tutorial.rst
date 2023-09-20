@@ -60,7 +60,7 @@ Now you can try it:
 
 .. code-block:: console
 
-    nix-shell --run "mips-vm ./result/vmlinux ./result/rootfs"
+    nix-shell --run "run-liminix-vm ./result/vmlinux ./result/rootfs"
 
 This starts the Qemu emulator with a bunch of useful options, to run
 the Liminix configuration you just built.  It connects the emulated

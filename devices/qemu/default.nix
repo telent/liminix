@@ -50,7 +50,7 @@
         };
       in {
         defaultOutput = "vmroot";
-        flash.eraseBlockSize = "65536"; # c.f. pkgs/mips-vm/mips-vm.sh
+        flash.eraseBlockSize = "65536"; # c.f. pkgs/run-liminix-vm/run-liminix-vm.sh
         networkInterfaces =
           let inherit (config.system.service.network) link;
           in {

@@ -7,17 +7,17 @@ let img = (import liminix {
       liminix-config = ./configuration.nix;
     }).outputs.default;
     pkgs = import <nixpkgs> { overlays = [(import ../../overlay.nix)]; };
-    inherit (pkgs.pkgsBuildBuild)  mips-vm;
+    inherit (pkgs.pkgsBuildBuild)  run-liminix-vm;
 in pkgs.runCommand "check" {
   nativeBuildInputs = with pkgs; [
     expect
-    mips-vm
+    run-liminix-vm
     socat
   ] ;
 } ''
 . ${../test-helpers.sh}
 
 mkdir vm
-mips-vm --background ./vm ${img}/vmlinux ${img}/rootfs
+run-liminix-vm --background ./vm ${img}/vmlinux ${img}/rootfs
 expect ${./wait-for-wlan.expect} |tee output && mv output $out
 ''

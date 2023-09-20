@@ -36,7 +36,7 @@ in
         type = types.package;
         description = ''
           Directory containing separate kernel and rootfs image for
-          use with qemu (see mips-vm)
+          use with qemu (see run-liminix-vm)
         '';
       };
       manifest = mkOption {
