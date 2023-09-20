@@ -24,7 +24,7 @@ in {
       extraPatchPhase = mkOption {
         default = "true";
         type = types.lines;
-      } ;
+      };
       config = mkOption {
         description = ''
           Kernel config options, as listed in Kconfig* files in the

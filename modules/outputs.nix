@@ -62,14 +62,14 @@ in
       kernel = liminix.builders.kernel.override {
         inherit (config.kernel) config src extraPatchPhase;
       };
-      dtb =  (callPackage ../kernel/dtb.nix {}) {
+      dtb = liminix.builders.dtb {
         inherit (config.boot) commandLine;
         dts = config.hardware.dts.src;
         includes = config.hardware.dts.includes ++ [
           "${kernel.headers}/include"
         ];
       };
-      uimage = (callPackage ../kernel/uimage.nix {}) {
+      uimage = liminix.builders.uimage {
         commandLine = concatStringsSep " " config.boot.commandLine;
         inherit (config.hardware) loadAddress entryPoint;
         inherit kernel;

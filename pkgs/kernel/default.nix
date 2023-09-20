@@ -11,6 +11,12 @@
 let
   writeConfig = import ./write-kconfig.nix { inherit lib writeText; };
   kconfigFile = writeConfig "kconfig" config;
+  arch = if stdenv.isMips
+         then "mips"
+         else if stdenv.isAarch64
+         then "arm64"
+         else throw "unknown arch";
+
   inherit lib; in
 stdenv.mkDerivation rec {
   name = "kernel";
@@ -28,7 +34,7 @@ stdenv.mkDerivation rec {
     "-I${openssl.dev}/include -L${openssl.out}/lib -L${ncurses.out}/lib";
   PKG_CONFIG_PATH = "./pkgconfig";
   CROSS_COMPILE = stdenv.cc.bintools.targetPrefix;
-  ARCH = "mips";  # kernel uses "mips" here for both mips and mipsel
+  ARCH = arch;
   KBUILD_BUILD_HOST = "liminix.builder";
 
   dontStrip = true;

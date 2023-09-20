@@ -16,6 +16,8 @@ in {
     networking =  callPackage ./liminix-tools/networking {};
     builders =  {
       squashfs = callPackage ./liminix-tools/builders/squashfs.nix {};
+      dtb = callPackage ./kernel/dtb.nix {};
+      uimage = callPackage ./kernel/uimage.nix {};
       kernel = callPackage ./kernel {};
     };
     callService = path : parameters :
