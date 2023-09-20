@@ -7,6 +7,12 @@
 let
   inherit (lib) mkOption types concatStringsSep;
   inherit (pkgs) liminix callPackage writeText;
+  arch = let s = pkgs.stdenv; in
+         if s.isAarch64
+         then "aarch64"
+         else if s.isMips
+         then "mips"
+         else throw "can't determine arch";
 in
 {
   imports = [
@@ -76,14 +82,27 @@ in
         inherit dtb;
       };
       # could use trivial-builders.linkFarmFromDrvs here?
-      vmroot = pkgs.runCommand "qemu" {} ''
-        mkdir $out
-        cd $out
-        ln -s ${config.system.outputs.rootfs} rootfs
-        ln -s ${kernel} vmlinux
-        ln -s ${manifest} manifest
-        ln -s ${kernel.headers} build
-      '';
+      vmroot =
+        let
+          cmdline = builtins.toJSON (concatStringsSep " " config.boot.commandLine);
+          makeBootableImage = pkgs.runCommandCC "objcopy" {}
+            (if pkgs.stdenv.isAarch64
+             then "${pkgs.stdenv.cc.targetPrefix}objcopy -O binary -S ${kernel} $out"
+             else "cp ${kernel} $out");
+        in pkgs.runCommandCC "vmroot" {} ''
+          mkdir $out
+          cd $out
+          ln -s ${config.system.outputs.rootfs} rootfs
+          ln -s ${kernel} vmlinux
+          ln -s ${manifest} manifest
+          ln -s ${kernel.headers} build
+          echo ${cmdline} > commandline
+          cat > run.sh << EOF
+          #!${pkgs.runtimeShell}
+          CMDLINE=${cmdline} run-liminix-vm --arch ${arch} ${makeBootableImage} ${config.system.outputs.rootfs}
+          EOF
+          chmod +x run.sh
+       '';
 
       manifest = writeText "manifest.json" (builtins.toJSON config.filesystem.contents);
     };

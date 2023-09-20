@@ -12,6 +12,12 @@ usage(){
     exit 1
 }
 
+arch="mips"
+if test "$1" = "--arch" ; then
+    arch=$2
+    shift;shift
+fi
+
 if test "$1" = "--background" ; then
     statedir=$2
     if test -z "$statedir" || ! test -d $statedir ; then
@@ -39,13 +45,21 @@ if test -n "$3"; then
     initramfs="-initrd $3"
 fi
 
+case "$arch" in
+    mips)
+	QEMU="qemu-system-mips -M malta"
+	;;
+    aarch64)
+	QEMU="qemu-system-aarch64 -M virt -semihosting -cpu cortex-a72"
+	;;
+esac
 
 INIT=${INIT-/bin/init}
-echo $QEMU_OPTIONS
-qemu-system-mips \
-    -M malta -m 256 \
+set -x
+$QEMU \
+    -m 256 \
     -echr 16 \
-    -append "liminix default console=ttyS0,38400n8 panic=10 oops=panic init=$INIT loglevel=8 root=/dev/mtdblock0 block2mtd.block2mtd=/dev/vda,65536" \
+    -append "$CMDLINE liminix root=/dev/mtdblock0 block2mtd.block2mtd=/dev/vda,65536" \
     -drive file=$rootfs,format=raw,readonly=off,if=virtio,index=0 \
     ${initramfs} \
     -netdev socket,id=access,mcast=230.0.0.1:1234,localaddr=127.0.0.1 \

@@ -1,19 +1,16 @@
 # This "device" generates images that can be used with the QEMU
 # emulator. The default output is a directory containing separate
-# kernel (uncompressed vmlinux) and initrd (squashfs) images
+# kernel ("Image" format) and root filesystem (squashfs or jffs2)
+# images
 {
   system = {
     crossSystem = {
-      config = "mips-unknown-linux-musl";
-      gcc = {
-        abi = "32";
-        arch = "mips32";          # maybe mips_24kc-
-      };
+      config = "aarch64-unknown-linux-musl";
     };
   };
 
   module = {pkgs, config, ... }: {
-    imports = [ ../../modules/arch/mipseb.nix ];
+    imports = [ ../../modules/arch/aarch64.nix ];
     kernel = {
       src = pkgs.pkgsBuildBuild.fetchurl {
         name = "linux.tar.gz";
@@ -21,8 +18,8 @@
         hash = "sha256-yhO2cXIeIgUxkSZf/4aAsF11uxyh+UUZu6D1h92vCD8=";
       };
       config = {
-        MIPS_MALTA= "y";
-        CPU_MIPS32_R2= "y";
+        VIRTUALIZATION = "y";
+        PCI_HOST_GENERIC="y";
 
         MTD = "y";
         MTD_BLOCK2MTD = "y";
@@ -37,8 +34,9 @@
         NETDEVICES = "y";
         VIRTIO_NET = "y";
 
-        SERIAL_8250= "y";
-        SERIAL_8250_CONSOLE= "y";
+        SERIAL_EARLYCON_ARM_SEMIHOST = "y"; # earlycon=smh
+        SERIAL_AMBA_PL011 = "y";
+        SERIAL_AMBA_PL011_CONSOLE = "y";
       };
     };
     hardware =
@@ -49,8 +47,11 @@
         };
       in {
         defaultOutput = "vmroot";
+        loadAddress = "0x0";
+        entryPoint  = "0x0";
         rootDevice = "/dev/mtdblock0";
-        flash.eraseBlockSize = "65536"; # c.f. pkgs/run-liminix-vm/run-liminix-vm.sh
+
+        flash.eraseBlockSize = "65536"; # c.f. pkgs/mips-vm/mips-vm.sh
         networkInterfaces =
           let inherit (config.system.service.network) link;
           in {
