@@ -12,7 +12,7 @@ in stdenv.mkDerivation {
     sha256 = "0hi2rj1a1fbvr5n1090q1zzigjyxmn643jzrwngw4ij0g82za3al";
   };
   name = "swconfig";
-  buildInputs = [ buildPackages.pkgconfig ];
+  buildInputs = [ buildPackages.pkg-config ];
   nativeBuildInputs = [ libnl ];
   CFLAGS="-O2 -Ifrom_kernel -I${libnl.dev}/include/libnl3";
   LDFLAGS="-L${libnl.out}/lib";

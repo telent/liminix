@@ -24,7 +24,7 @@ stdenv.mkDerivation rec {
   hardeningDisable = ["all"];
   nativeBuildInputs = [buildPackages.stdenv.cc] ++
                       (with buildPackages.pkgs; [
-                        rsync bc bison flex pkgconfig
+                        rsync bc bison flex pkg-config
                         openssl ncurses.all perl
                       ]);
   CC = "${stdenv.cc.bintools.targetPrefix}gcc";

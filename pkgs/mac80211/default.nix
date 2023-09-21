@@ -94,7 +94,7 @@ let
     hardeningDisable = ["all"];
     nativeBuildInputs = [buildPackages.stdenv.cc] ++
                         (with buildPackages.pkgs;
-                          [bc bison flex pkgconfig openssl
+                          [bc bison flex pkg-config openssl
                            which kmod cpio
                           ]);
     inherit CC CROSS_COMPILE;
