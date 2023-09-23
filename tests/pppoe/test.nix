@@ -15,7 +15,6 @@ in pkgs.runCommand "check" {
     jq
     socat
     routeros.routeros
-    run-liminix-vm
   ] ;
 } ''
 serverstatedir=$(mktemp -d -t routeros-XXXXXX)
@@ -27,7 +26,7 @@ export MPLCONFIGDIR=$(mktemp -d -t routeros-XXXXXX)
 
 routeros $serverstatedir
 mkdir vm
-run-liminix-vm --background ./vm ${img}/vmlinux ${img}/rootfs
+${img}/run.sh --background ./vm
 expect ${./getaddress.expect}
 
 set -o pipefail

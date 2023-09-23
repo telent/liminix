@@ -10,14 +10,12 @@ let img = (import liminix {
     inherit (pkgs.pkgsBuildBuild)  run-liminix-vm;
 in pkgs.runCommand "check" {
   nativeBuildInputs = with pkgs; [
-    expect
-    run-liminix-vm
-    socat
+    expect socat
   ] ;
 } ''
 . ${../test-helpers.sh}
 
 mkdir vm
-run-liminix-vm --background ./vm ${img}/vmlinux ${img}/rootfs
+${img}/run.sh --background ./vm
 expect ${./wait-for-wlan.expect} |tee output && mv output $out
 ''

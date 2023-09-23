@@ -99,7 +99,7 @@ in
           echo ${cmdline} > commandline
           cat > run.sh << EOF
           #!${pkgs.runtimeShell}
-          CMDLINE=${cmdline} run-liminix-vm --arch ${arch} ${makeBootableImage} ${config.system.outputs.rootfs}
+          CMDLINE=${cmdline} ${pkgs.pkgsBuildBuild.run-liminix-vm}/bin/run-liminix-vm --arch ${arch} \$* ${makeBootableImage} ${config.system.outputs.rootfs}
           EOF
           chmod +x run.sh
        '';
