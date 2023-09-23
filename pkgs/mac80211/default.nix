@@ -14,6 +14,11 @@
 , lib
 }:
 let
+  arch = if stdenv.isMips
+         then "mips"
+         else if stdenv.isAarch64
+         then "arm64"
+         else throw "unknown arch";
   openwrtSrc = fetchFromGitHub {
     name = "openwrt-source";
     repo = "openwrt";
@@ -98,7 +103,7 @@ let
                            which kmod cpio
                           ]);
     inherit CC CROSS_COMPILE;
-    ARCH = "mips";  # kernel uses "mips" here for both mips and mipsel
+    ARCH = arch;
     dontStrip = true;
     dontPatchELF = true;
     phases = [

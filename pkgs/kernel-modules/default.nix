@@ -11,6 +11,11 @@
 }:
 let
   writeConfig = import ../kernel/write-kconfig.nix { inherit lib writeText; };
+  arch = if stdenv.isMips
+         then "mips"
+         else if stdenv.isAarch64
+         then "arm64"
+         else throw "unknown arch";
 in stdenv.mkDerivation {
   name = "kernel-modules";
 
@@ -25,7 +30,7 @@ in stdenv.mkDerivation {
   HOST_EXTRACFLAGS = with buildPackages.pkgs;
     "-I${buildPackages.openssl.dev}/include -L${buildPackages.openssl.out}/lib";
   CROSS_COMPILE = stdenv.cc.bintools.targetPrefix;
-  ARCH = "mips";  # kernel uses "mips" here for both mips and mipsel
+  ARCH = arch;
   KBUILD_BUILD_HOST = "liminix.builder";
 
   buildPhase = ''
