@@ -7,7 +7,7 @@
 
 { config, pkgs, lib, ... } :
 let
-  inherit (pkgs.liminix.services) oneshot longrun;
+  inherit (pkgs.liminix.services) bundle oneshot longrun;
   inherit (pkgs) serviceFns;
   # EDIT: you can pick your preferred RFC1918 address space
   # for NATted connections, if you don't like this one.
@@ -25,6 +25,7 @@ in rec {
 
   imports = [
     ../modules/bridge
+    ../modules/dhcp6c
     ../modules/dnsmasq
     ../modules/firewall
     ../modules/hostapd
@@ -95,11 +96,16 @@ in rec {
       resolvconf = services.resolvconf;
       inherit interface;
       ranges = [
-        "${ipv4LocalNet}.10,${ipv4LocalNet}.240"
-        # ra-stateless: sends router advertisements with the O and A
+        "${ipv4LocalNet}.10,${ipv4LocalNet}.249"
+        # EDIT: ... maybe. In this example we use "ra-stateless",
+        # meaning dnsmasq sends router advertisements with the O and A
         # bits set, and provides a stateless DHCP service. The client
         # will use a SLAAC address, and use DHCP for other
         # configuration information.
+        # If you didn't understand the preceding sentence then
+        # the default is _probably_ fine, but if you need
+        # a DHCP-only IPv6 network or some other different
+        # configuration, this is the place to change it.
         "::,constructor:$(output ${interface} ifname),ra-stateless"
       ];
       # EDIT: choose a domain name for the DNS names issued for your
@@ -158,34 +164,37 @@ in rec {
 
   services.packet_forwarding = svc.network.forward.build { };
 
-  services.dhcp6 =
-    let
-      name = "dhcp6c.wan";
-    in longrun {
-      inherit name;
-      notification-fd = 10;
-      run = ''
-        export SERVICE_STATE=/run/service-state/${name}
-        ${pkgs.odhcp6c}/bin/odhcp6c -s ${pkgs.odhcp-script} -e -v -p /run/${name}.pid -P 48 $(output ${services.wan} ifname)
-        )
-      '';
-      dependencies = [ services.wan ];
-    };
+  # We expect the ISP uses DHCP6 to issue IPv6 addresses. There is a
+  # service to request address information in the form of a DHCP
+  # lease, and two dependent services that listen for updates to the
+  # DHCP address information and update the addresses of the WAN and
+  # LAN interfaces respectively.
 
-  services.acquire-lan-prefix =
-    let script = pkgs.callPackage ./acquire-delegated-prefix.nix {  };
-    in longrun {
-      name = "acquire-lan-prefix";
-      run = "${script} /run/service-state/dhcp6c.wan $(output ${services.int} ifname)";
-      dependencies = [ services.dhcp6 ];
-    };
-
-  services.acquire-wan-address =
-    let script = pkgs.callPackage ./acquire-wan-address.nix {  };
-    in longrun {
-      name = "acquire-wan-address";
-      run = "${script} /run/service-state/dhcp6c.wan $(output ${services.wan} ifname)";
-      dependencies = [ services.dhcp6 ];
+  services.dhcp6c =
+    let client = svc.dhcp6c.client.build {
+          interface = services.wan;
+        };
+    in bundle {
+      name = "dhcp6c";
+      contents = [
+        (svc.dhcp6c.prefix.build {
+          # if your ISP provides you a real IPv6 prefix for your local
+          # network (usually a /64 or /48 or something in between the
+          # two), this service subscribes to that "prefix delegation"
+          # information, and uses it to assign an address to the LAN
+          # device. dnsmasq will notice this address and use it to
+          # form the addresses it hands out to devices on the lan
+          inherit client;
+          interface = services.int;
+        })
+        (svc.dhcp6c.address.build {
+          # if your ISP provides you a regular global IPv6 address,
+          # this service subscribes to that information and assigns
+          # the address to the WAN device.
+          inherit client;
+          interface = services.wan;
+        })
+      ];
     };
 
   defaultProfile.packages = with pkgs; [

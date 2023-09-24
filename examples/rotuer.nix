@@ -9,7 +9,7 @@
 { config, pkgs, lib, ... } :
 let
   secrets = import ./rotuer-secrets.nix;
-  inherit (pkgs.liminix.services) oneshot longrun;
+  inherit (pkgs.liminix.services) oneshot longrun bundle;
   inherit (pkgs) serviceFns;
   svc = config.system.service;
   wirelessConfig =  {
@@ -38,6 +38,7 @@ in rec {
     ../modules/network
     ../modules/ppp
     ../modules/dnsmasq
+    ../modules/dhcp6c
     ../modules/firewall
     ../modules/hostapd
     ../modules/bridge
@@ -154,39 +155,27 @@ in rec {
   };
 
   services.firewall = svc.firewall.build {
-    ruleset = import ./rotuer-firewall.nix;
+    ruleset = import ./demo-firewall.nix;
   };
 
   services.packet_forwarding = svc.network.forward.build { };
 
-  services.dhcp6 =
-    let
-      name = "dhcp6c.wan";
-    in longrun {
-      inherit name;
-      notification-fd = 10;
-      run = ''
-        export SERVICE_STATE=/run/service-state/${name}
-        ${pkgs.odhcp6c}/bin/odhcp6c -s ${pkgs.odhcp-script} -e -v -p /run/${name}.pid -P 48 $(output ${services.wan} ifname)
-        )
-      '';
-      dependencies = [ services.wan ];
-    };
-
-  services.acquire-lan-prefix =
-    let script = pkgs.callPackage ./acquire-delegated-prefix.nix {  };
-    in longrun {
-      name = "acquire-lan-prefix";
-      run = "${script} /run/service-state/dhcp6c.wan $(output ${services.int} ifname)";
-      dependencies = [ services.dhcp6 ];
-    };
-
-  services.acquire-wan-address =
-    let script = pkgs.callPackage ./acquire-wan-address.nix {  };
-    in longrun {
-      name = "acquire-wan-address";
-      run = "${script} /run/service-state/dhcp6c.wan $(output ${services.wan} ifname)";
-      dependencies = [ services.dhcp6 ];
+  services.dhcp6c =
+    let client = svc.dhcp6c.client.build {
+          interface = services.wan;
+        };
+    in bundle {
+      name = "dhcp6c";
+      contents = [
+        (svc.dhcp6c.prefix.build {
+          inherit client;
+          interface = services.int;
+        })
+        (svc.dhcp6c.address.build {
+          inherit client;
+          interface = services.wan;
+        })
+      ];
     };
 
   defaultProfile.packages = with pkgs; [
