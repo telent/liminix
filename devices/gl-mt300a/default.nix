@@ -142,6 +142,7 @@
           MTD = "y";
           MTD_CMDLINE_PARTS = "y";
           MTD_BLOCK = "y";         # fix undefined ref to register_mtd_blktrans_devs
+          MTD_SPI_NOR_USE_4K_SECTORS = "n";
 
           CMDLINE_PARTITION = "y";
           EARLY_PRINTK = "y";
