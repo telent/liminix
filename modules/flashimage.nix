@@ -47,10 +47,12 @@ in {
 
     system.outputs = {
       firmware =
-        let o = config.system.outputs; in
-        pkgs.runCommand "firmware" {} ''
-          dd if=${o.uimage} of=$out bs=128k conv=sync
-          dd if=${o.rootfs} of=$out bs=128k conv=sync,nocreat,notrunc oflag=append
+        let
+          o = config.system.outputs;
+          bs = config.hardware.flash.eraseBlockSize;
+        in pkgs.runCommand "firmware" {} ''
+          dd if=${o.uimage} of=$out bs=${bs} conv=sync
+          dd if=${o.rootfs} of=$out bs=${bs} conv=sync,nocreat,notrunc oflag=append
         '';
       flashimage =
         let o = config.system.outputs; in
