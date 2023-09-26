@@ -1,3 +1,8 @@
+From 12345790 Tue Sep 26 18:30:44 2023
+From: Daniel Barlow <dan@telent.net>
+Date: Tue Sep 26 18:29:47 BST 2023
+Subject: mtdsplit: find magic of little-endian JFFS2
+
 On a little-endian CPU, the little-endian JFFS2 magic
 appears to be word-swapped.
 

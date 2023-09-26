@@ -26,6 +26,7 @@ let
     patch --batch -p1 --reverse <  ${src}/target/linux/generic/pending-5.15/330-MIPS-kexec-Accept-command-line-parameters-from-users.patch
     patches ${src}/target/linux/generic/hack-5.15/*.patch
     patches ${src}/target/linux/${family}/patches-5.15/*.patch
+    patches ${./make-mtdsplit-jffs2-endian-agnostic.patch}
   '';
 in {
   inherit src;

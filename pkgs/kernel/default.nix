@@ -54,7 +54,6 @@ stdenv.mkDerivation rec {
 
   patches = [
     ./cmdline-cookie.patch
-    ./make-mtdsplit-jffs2-endian-agnostic.patch
   ];
 
   # this is here to work around what I think is a bug in nixpkgs
