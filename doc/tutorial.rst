@@ -234,6 +234,78 @@ Exercise for the reader: change the default password by editing
 :file:`examples/hello-from-mt300.nix`, and then create and upload a
 new image that has it set to something less hopeless.
 
+Routing
+*******
+
+The third example :file:`examples/demo.nix` is a fully-functional home
+"WiFi router" - although you will have to edit it a bit before it will
+actually work for you. Copy :file:`examples/demo.nix` to
+:file:`my-router.nix` (or other name of your choice) and open it in
+your favourite text editor. Everywhere that the text :code:`EDIT`
+appears is either a place you probably want to change or a place you
+almost certainly need to change.
+
+There's a lot going on in this configuration:
+
+* it provides a wireless access point using the :code:`hostapd`
+  service: in this stanza you can change the ssid, the channel,
+  the passphrase etc.
+
+* the wireless lan and wired lan are bridged together with the
+  :code:`bridge` service, so that your wired and wireless clients appear
+  to be on the same network.
+
+.. tip:: If you were using a hardware device that provides both 2.4GHz
+	  and 5GHz wifi, you'd probably find that it has two wireless
+	  devices (often called wlan0 and wlan1). In Liminix we handle
+	  this by running two :code:`hostapd` services, and adding
+	  both of them to the network bridge along with the wired lan.
+	  (You can see an example in :file:`examples/rotuer.nix`)
+
+* we use the combination DNS and DHCP daemon provided by the
+  :code:`dnsmasq` service, which you can configure
+
+* the upstream network is "PPP over Ethernet", provided by the
+  :code:`pppoe` service. Assuming that your ISP uses this standard,
+  they will have provided you with a PPP username and password
+  (sometimes this will be listed as "PAP" or "CHAP") which you can edit
+  into the configuration
+
+* this example supports the new [#ipv6]_ Internet Protocol v6
+  as well as traditional IPv4. Configuring IPv6 seems to
+  vary from one ISP to the next: this example expects them
+  to be providing IP address allocation and "prefix delegation"
+  using DHCP6.
+
+Build it using the same method as the previous example
+
+
+.. code-block:: console
+
+    nix-build -I liminix-config=./my-router.nix \
+     --arg device "import ./devices/gl-mt300a" -A outputs.default
+
+and then you can flash it to the device.
+
+
+Bonus: in-place updates
+=======================
+
+This configuration uses a writable filesystem (see the line
+:code:`rootfsType = "jffs2"`), which means that once you've flashed it
+for the first time, you can make further updates over SSH onto the
+running router. To try this, make a small change (I'd suggest changing
+the hostname) and then run
+
+.. code-block:: console
+
+    nix-shell --run "liminix-rebuild root@address-of-the-device  -I liminix-config=./my-router.nix --arg device "import ./devices/gl-ar750""
+
+(This requires the device to be network-accessible from your build
+machine, which for a test/demo system might involve a second network
+device in your build system - USB ethernet adapters are cheap - or
+a bit of messing around unplugging cables.)
+
 
 Final thoughts
 **************
@@ -253,3 +325,9 @@ Final thoughts
   (requires physical access, vendor specific). There are slicker ways
   to do it that need a bit more setup - we'll talk about that later as
   well.
+
+
+
+.. rubric:: Footnotes
+
+.. [#ipv6] `RFC1883 Internet Protocol, Version 6 <https://datatracker.ietf.org/doc/html/rfc1883>`_ was published in 1995, so only "new" when Bill Clinton was US President
