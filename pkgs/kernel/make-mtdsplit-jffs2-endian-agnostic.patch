@@ -1,0 +1,20 @@
+On a little-endian CPU, the little-endian JFFS2 magic
+appears to be word-swapped.
+
+There is probably a better way to implement this; if you are reading
+this patch you are probably well-qualified to do that and upstream it
+to OpenWrt
+
+
+diff --git a/drivers/mtd/mtdsplit/mtdsplit.c b/drivers/mtd/mtdsplit/mtdsplit.c
+index b2e51dcfc6..533af0298e 100644
+--- a/drivers/mtd/mtdsplit/mtdsplit.c
++++ b/drivers/mtd/mtdsplit/mtdsplit.c
+@@ -92,6 +93,6 @@
+ 			*type = MTDSPLIT_PART_TYPE_SQUASHFS;
+ 		return 0;
+-	} else if (magic == 0x19852003) {
++	} else if ((magic == 0x19852003) || (magic == 0x20031985)) {
+ 		if (type)
+ 			*type = MTDSPLIT_PART_TYPE_JFFS2;
+ 		return 0;
