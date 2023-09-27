@@ -306,6 +306,8 @@ machine, which for a test/demo system might involve a second network
 device in your build system - USB ethernet adapters are cheap - or
 a bit of messing around unplugging cables.)
 
+For more information about :code:`liminix-rebuild`, see the manual section :ref:`admin:Rebuilding the system`.
+
 
 Final thoughts
 **************
@@ -314,11 +316,6 @@ Final thoughts
   like to see some more realistic uses of Liminix,
   :file:`examples/rotuer,arhcive,extneder.nix` are based on some
   actual real hosts in my home network.
-
-* These example images are not writable. Later we will explain how to
-  generate an image that can be changed after installation, and
-  even use :command:`liminix-rebuild` (analogous to :command:`nixos-rebuild`)
-  to keep it up to date.
 
 * The technique used here for flashing was chosen mostly because it
   doesn't need much infrastructure/tooling, but it is a bit of a faff
