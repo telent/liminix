@@ -171,7 +171,6 @@
           AR8216_PHY = "y";         # eth1 is behind a switch
 
           MTD_SPI_NOR = "y";
-          MTD_SPI_NOR_USE_4K_SECTORS = "n";  # jffs2 needs min 8k erase block
 
           SPI_ATH79 = "y";      # these are copied from OpenWrt.
           SPI_MASTER= "y";      # At least one of them is necessary

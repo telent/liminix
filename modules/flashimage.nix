@@ -38,6 +38,8 @@ in {
     kernel = {
       config = {
         MTD_SPLIT_UIMAGE_FW = "y";
+        # https://stackoverflow.com/questions/26466470/can-the-logical-erase-block-size-of-an-mtd-device-be-increased
+        MTD_SPI_NOR_USE_4K_SECTORS = "n";
       };
     };
 
