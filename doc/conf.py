@@ -28,3 +28,11 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'alabaster'
 html_static_path = ['_static']
+
+html_theme_options = {
+    'logo': '/logo.svg',
+    'globaltoc_collapse': 'false',
+    'page_width': '90%',
+    'body_max_width': '90%',
+    'description': 'A Nix-based OpenWrt-style embedded Linux system for consumer wifi routers'
+}
