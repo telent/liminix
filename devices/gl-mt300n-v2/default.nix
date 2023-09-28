@@ -1,5 +1,3 @@
-# GL.INet GL-MT300N v2
-
 {
   system = {
     crossSystem = {
@@ -12,13 +10,18 @@
   };
 
   description = ''
-    GL.Inet GL-MT300N-v2
+    GL.iNet GL-MT300N-v2
     ********************
 
     The GL-MT300N-v2 "Mango" is is very similar to the MT300A, but is
     based on MT7628 instead of MT7620.  It's also marginally cheaper
     and comes in a yellow case not a blue one.  It's different again
     to the v1, which has only half the RAM.
+
+    Vendor web page: https://www.gl-inet.com/products/gl-mt300n-v2/
+
+    OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-mt300n_v2
+
   '';
 
   module = { pkgs, config, lib, ...}:

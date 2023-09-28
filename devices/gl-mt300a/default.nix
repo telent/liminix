@@ -1,4 +1,4 @@
-# GL.INet GL-MT300A
+# GL.iNet GL-MT300A
 
 {
   system = {
@@ -12,12 +12,12 @@
   };
 
   description = ''
-    GL.Inet GL-MT300A
+    GL.iNet GL-MT300A
     ********************
 
     The GL-MT300A is based on a MT7620 chipset.
 
-    The GL-Inet pocket router range makes nice cheap hardware for
+    The GL.iNet pocket router range makes nice cheap hardware for
     playing with Liminix or similar projects. The manufacturers seem
     open to the DIY market, and the devices have a reasonable amount
     of RAM and are much easier to get serial connections than many
@@ -47,6 +47,12 @@
     expects firmware to be present in the "factory" MTD partition, so
     - assuming we want to use the wireless - we need to build MTD
     support into the kernel even if we're using TFTP root.
+
+
+    Vendor web page: https://www.gl-inet.com/products/gl-mt300a/
+
+    OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-mt300a
+
   '';
 
   module = { pkgs, config, lib, ...}:

@@ -123,9 +123,9 @@ Installing on hardware
 **********************
 
 For the next example, we're going to install onto an actual hardware
-device.  These steps have been tested using a GL-iNet GL-MT300A, which
+device.  These steps have been tested using a GL.iNet GL-MT300A, which
 has been chosen for the purpose because it's cheap and easy to
-unbrick if necessary
+unbrick if necessary.
 
 .. warning:: There is always a risk of rendering your device
 	     unbootable by flashing it with an image that doesn't
@@ -227,8 +227,7 @@ example, but this time for real.
 	     with some imagination could probably still do something
 	     awful using it.
 
-Congratulations Part II! You have installed your first Liminix system on
-actual hardware - albeit that it *still* has no practical use.
+Congratulations Part II! You have installed your first Liminix system on actual hardware - albeit that it *still* has no practical use.
 
 Exercise for the reader: change the default password by editing
 :file:`examples/hello-from-mt300.nix`, and then create and upload a

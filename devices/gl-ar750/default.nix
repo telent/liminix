@@ -18,7 +18,7 @@
   };
 
   description = ''
-    GL.INet GL-AR750
+    GL.iNet GL-AR750
     ****************
 
     The GL-AR750 "Creta" travel router features:
@@ -30,7 +30,7 @@
      - 16MB NOR Flash
      - supported in OpenWrt by the "ath79" SoC family
 
-    As with many GL.INet devices, the stock vendor firmware
+    As with many GL.iNet devices, the stock vendor firmware
     is a fork of OpenWrt, meaning that the plain binary
     ``firmware.bin`` that Liminix builds can be flashed using the
     vendor web UI and the U-Boot emergency "unbrick" routine
