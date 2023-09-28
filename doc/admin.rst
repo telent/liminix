@@ -138,8 +138,8 @@ device using e.g. :command:`ssh`,  you can run it as follows:
    mtd -e -r write /tmp/firmware.bin firmware
 
 The options to this command are for "erase before writing" and "reboot
-after writing". 
-   
+after writing".
+
 For more information, please see the `OpenWrt manual <https://openwrt.org/docs/guide-user/installation/sysupgrade.cli>`_ which may also contain (hardware-dependent) instructions on how to flash an image using the vendor firmware - perhaps even from a web interface.
 
 Updating an installed system (JFFS2)
@@ -188,7 +188,7 @@ this except for building the previous configuration again.
 
 
 Caveats
-~~~~~~~
+-------
 
 * it needs there to be enough free space on the device for all the new
   packages in addition to all the packages already on it - which may be
