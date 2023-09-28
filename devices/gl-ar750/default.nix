@@ -18,13 +18,22 @@
   };
 
   description = ''
-    GL.INet GL-AR750 "Creta" travel router
+    GL.INet GL-AR750
+    ****************
+
+    The GL-AR750 "Creta" travel router features:
+
      - QCA9531 @650Mhz SoC
      - dual band wireless: IEEE 802.11a/b/g/n/ac
      - two 10/100Mbps LAN ports and one WAN
-     - 128MB DDR2 RAM / 16MB  NOR Flash
-     - "ath79" soc family
-    https://www.gl-inet.com/products/gl-ar750/
+     - 128MB DDR2 RAM
+     - 16MB NOR Flash
+     - supported in OpenWrt by the "ath79" SoC family
+
+    As with many GL.INet devices, the stock vendor firmware
+    is a fork of OpenWrt, meaning that the plain binary
+    ``firmware.bin`` that Liminix builds can be flashed using the
+    vendor web UI and the U-Boot emergency "unbrick" routine
 
     The GL-AR750 has two distinct sets of wifi hardware. The 2.4GHz
     radio is part of the QCA9531 SoC, i.e. it's on the same silicon as
@@ -34,8 +43,13 @@
     other hand, is provided by a QCA9887 PCIe (PCI embedded) WLAN chip:
     I haven't looked closely at the router innards to see if this is
     actually physically a separate board that could be unplugged, but
-    as far as the Linux is concerned it behaves as one. This is
+    as far as Linux is concerned it behaves as one. This is
     supported by the ath10k driver.
+
+    Vendor web page: https://www.gl-inet.com/products/gl-ar750/
+
+    OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-ar750
+
   '';
 
   module = {pkgs, config, ... }:

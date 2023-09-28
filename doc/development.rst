@@ -41,6 +41,8 @@ that directory for console and monitor.  Use :command:`connect-vm`
 (also in the ``buildEnv`` environment) to connect to either of these
 sockets, and ^O to disconnect.
 
+.. _qemu-networking:
+
 Networking
 ==========
 

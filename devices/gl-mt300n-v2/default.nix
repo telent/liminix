@@ -11,6 +11,16 @@
     };
   };
 
+  description = ''
+    GL.Inet GL-MT300N-v2
+    ********************
+
+    The GL-MT300N-v2 "Mango" is is very similar to the MT300A, but is
+    based on MT7628 instead of MT7620.  It's also marginally cheaper
+    and comes in a yellow case not a blue one.  It's different again
+    to the v1, which has only half the RAM.
+  '';
+
   module = { pkgs, config, lib, ...}:
     let
       inherit (pkgs.liminix.networking) interface;

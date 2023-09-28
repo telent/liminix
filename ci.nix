@@ -40,6 +40,7 @@ let
         buildPhase = ''
           cat ${(import ./doc/extract-options.nix).doc} > options.json
           cat options.json | fennel --correlate parse-options.fnl > modules-generated.rst
+          cp ${(import ./doc/hardware.nix)} hardware.rst
           make html
         '';
         installPhase = ''

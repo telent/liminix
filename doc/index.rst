@@ -11,6 +11,7 @@ Liminix
    admin
    development
    modules
+   hardware
 
 
 Indices and tables

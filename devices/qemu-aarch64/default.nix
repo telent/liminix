@@ -9,6 +9,10 @@
     };
   };
 
+  # this device is described by the "qemu" device
+  description = "";
+
+
   module = {pkgs, config, ... }: {
     imports = [ ../../modules/arch/aarch64.nix ];
     kernel = {
