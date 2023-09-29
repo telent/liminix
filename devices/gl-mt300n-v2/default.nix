@@ -133,7 +133,6 @@
           CONSOLE_LOGLEVEL_QUIET = "4";
 
           MTD = "y";
-          MTD_CMDLINE_PARTS = "y";
           MTD_BLOCK = "y";          # fix undefined ref to register_mtd_blktrans_dev
 
           SPI = "y";

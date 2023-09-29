@@ -201,7 +201,6 @@
           SYSFS = "y";
           SPI = "y";
           MTD = "y";
-          MTD_CMDLINE_PARTS = "y";
           MTD_BLOCK = "y";          # fix undefined ref to register_mtd_blktrans_devs
 
           WATCHDOG = "y";

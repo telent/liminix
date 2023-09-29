@@ -177,7 +177,6 @@
           SPI_MEM= "y";
 
           MTD = "y";
-          MTD_CMDLINE_PARTS = "y";
           MTD_BLOCK = "y";         # fix undefined ref to register_mtd_blktrans_devs
 
           CMDLINE_PARTITION = "y";
