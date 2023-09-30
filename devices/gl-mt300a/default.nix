@@ -179,7 +179,6 @@
           MTD = "y";
           MTD_BLOCK = "y";         # fix undefined ref to register_mtd_blktrans_devs
 
-          CMDLINE_PARTITION = "y";
           EARLY_PRINTK = "y";
 
           NEW_LEDS = "y";

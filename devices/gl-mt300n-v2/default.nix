@@ -162,7 +162,6 @@
 
           PHY_RALINK_USB = "y";
 
-          CMDLINE_PARTITION = "y";
           EARLY_PRINTK = "y";
 
           PARTITION_ADVANCED = "y";

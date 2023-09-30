@@ -210,7 +210,6 @@
           # of it is device config, some of it is wifi config or
           # installation method config or ...
 
-          CMDLINE_PARTITION = "y";
           EARLY_PRINTK = "y";
 
           PARTITION_ADVANCED = "y";
