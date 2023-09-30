@@ -184,7 +184,6 @@
           NEW_LEDS = "y";
           LEDS_CLASS = "y";         # required by rt2x00lib
 
-          PARTITION_ADVANCED = "y";
           PRINTK_TIME = "y";
         } // lib.optionalAttrs (config.system.service ? vlan) {
           SWCONFIG = "y";

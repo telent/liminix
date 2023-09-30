@@ -164,7 +164,6 @@
 
           EARLY_PRINTK = "y";
 
-          PARTITION_ADVANCED = "y";
           PRINTK_TIME = "y";
         } // lib.optionalAttrs (config.system.service ? vlan) {
           SWCONFIG = "y";

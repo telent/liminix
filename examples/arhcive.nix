@@ -51,7 +51,6 @@ in rec {
       SCSI = "y";
       BLK_DEV_SD = "y";
       USB_PRINTER = "y";
-      PARTITION_ADVANCED = "y";
       MSDOS_PARTITION = "y";
       EFI_PARTITION = "y";
       EXT4_FS = "y";
