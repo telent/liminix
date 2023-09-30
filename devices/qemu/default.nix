@@ -53,7 +53,6 @@
 
         MTD = "y";
         MTD_BLOCK2MTD = "y";
-        MTD_BLKDEVS = "y";
         MTD_BLOCK = "y";
 
         VIRTIO_MENU = "y";
