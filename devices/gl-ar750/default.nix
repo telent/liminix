@@ -156,8 +156,6 @@
           ${openwrt.applyPatches.ath79}
         '';
         config = {
-          OF = "y";
-          USE_OF = "y";
           ATH79 = "y";
           PCI = "y";
           PCI_AR724X = "y";

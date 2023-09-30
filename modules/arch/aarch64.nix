@@ -8,6 +8,9 @@
       # on CMDLINE being set to something non-empty
       CMDLINE="\"console=ttyAMA0\"";
       CMDLINE_FROM_BOOTLOADER = "y";
+
+      OF = "y";
+      USE_OF = "y";
     };
     boot.commandLine = [
       "console=ttyAMA0,38400"

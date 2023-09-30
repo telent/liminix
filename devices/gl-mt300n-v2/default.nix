@@ -117,8 +117,6 @@
           ${openwrt.applyPatches.ramips}
         '';
         config = {
-          OF = "y";
-          USE_OF = "y";
 
           RALINK = "y";
           PCI = "y";
