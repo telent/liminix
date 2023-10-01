@@ -14,6 +14,7 @@ let
     cp -av ${src}/target/linux/generic/files/* .
     chmod -R u+w .
     cp -av ${src}/target/linux/${family}/files/* .
+    test -d ${src}/target/linux/${family}/files-5.15/ && cp -av ${src}/target/linux/${family}/files-5.15/* .
     chmod -R u+w .
     patches() {
       for i in $* ; do patch --batch --forward -p1 < $i ;done
@@ -32,4 +33,5 @@ in {
   inherit src;
   applyPatches.ath79 = doPatch "ath79";
   applyPatches.ramips = doPatch "ramips";
+  applyPatches.mediatek = doPatch "mediatek"; # aarch64
 }
