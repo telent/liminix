@@ -35,7 +35,6 @@ stdenv.mkDerivation {
     dtc -I dtb -O dts -o tmp.dts ${dtb}
     echo '/{ chosen { bootargs = ${builtins.toJSON commandLine}; }; };'  >> tmp.dts
     dtc -I dts -O dtb -o tmp.dtb tmp.dts
-	  ${objcopy} --update-section .appended_dtb=tmp.dtb vmlinux.elf || ${objcopy} --add-section .appended_dtb=${dtb} vmlinux.elf
   '';
 
   buildPhase =
@@ -51,9 +50,16 @@ stdenv.mkDerivation {
     in ''
       ${objcopy} -O binary -R .reginfo -R .notes -R .note -R .comment -R .mdebug -R .note.gnu.build-id -S vmlinux.elf vmlinux.bin
       rm -f vmlinux.bin.lzma ; lzma -k -z  vmlinux.bin
-      mkimage -A ${arch} -O linux -T kernel -C lzma -a ${loadAddress} -e ${entryPoint} -n '${lib.toUpper arch} Liminix Linux ${extraName}' -d vmlinux.bin.lzma kernel.uimage
+      cat ${./kernel_fdt.its} > mkimage.its
+      echo '/ { images { kernel { data = /incbin/("./vmlinux.bin.lzma"); }; }; };' >> mkimage.its
+      echo '/ { images { kernel { load = <${loadAddress}>; }; }; };' >> mkimage.its
+      echo '/ { images { kernel { entry = <${entryPoint}>; }; }; };' >> mkimage.its
+      echo '/ { images { kernel { compression = "lzma"; }; }; };' >> mkimage.its
+      echo '/ { images { fdt-1 { data = /incbin/("./tmp.dtb"); }; }; }; ' >> mkimage.its
+      mkimage -f mkimage.its mkimage.itb
+      mkimage -l mkimage.itb
     '';
   installPhase = ''
-    cp kernel.uimage $out
+    cp mkimage.itb $out
   '';
 }
