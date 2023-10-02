@@ -25,7 +25,6 @@
         ARCH_MEDIATEK = "y";
         # ARM_MEDIATEK_CPUFREQ = "y";
 
-
         # needed for "Cannot find regmap for /infracfg@10000000"
         MFD_SYSCON = "y";
         MTK_INFRACFG = "y";
@@ -69,6 +68,12 @@
         MMC_BLOCK = "y";
         MMC_CQHCI = "y";
         MMC_MTK = "y";
+
+        # Distributed Switch Architecture is needed
+        # to make the ethernet ports visible
+        NET_DSA="y";
+        NET_DSA_MT7530="y";
+        NET_DSA_TAG_MTK="y";
 
         PSTORE = "y";
         PSTORE_RAM = "y";
@@ -114,12 +119,18 @@
 
         flash.eraseBlockSize = "65536"; # c.f. pkgs/mips-vm/mips-vm.sh
         networkInterfaces =
-          let inherit (config.system.service.network) link;
-          in {
-            wan = link.build { ifname = "eth0"; };
-            lan = link.build { ifname = "eth1"; };
+          let
+            inherit (config.system.service.network) link;
+            inherit (config.system.service) bridge;
+          in rec {
+            wan = link.build { ifname = "wan"; };
+            lan1 = link.build { ifname = "lan1"; };
+            lan2 = link.build { ifname = "lan2"; };
+            lan3 = link.build { ifname = "lan3"; };
+            lan4 = link.build { ifname = "lan4"; };
+            lan = lan3;
 
-            wlan_24 = link.build {
+            wlan = link.build {
               ifname = "wlan0";
               dependencies = [ mac80211 ];
             };
