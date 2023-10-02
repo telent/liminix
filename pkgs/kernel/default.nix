@@ -54,6 +54,7 @@ stdenv.mkDerivation rec {
 
   patches = [
     ./cmdline-cookie.patch
+    ./phram-allow-cached-mappings.patch
   ];
 
   # this is here to work around what I think is a bug in nixpkgs
