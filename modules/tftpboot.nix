@@ -42,27 +42,41 @@ in {
           ln -s ${o.manifest} manifest
           ln -s ${o.kernel.headers} build
           ln -s ${o.uimage} uimage
-          ln -s ${o.boot-scr} boot.scr
+          ln -s ${o.boot-scr}/dtb dtb
+          ln -s ${o.boot-scr}/script boot.scr
        '';
 
       boot-scr =
         let
           inherit (pkgs.lib.trivial) toHexString;
           o = config.system.outputs;
+          cmdline = concatStringsSep " " config.boot.commandLine;
         in
-          pkgs.buildPackages.runCommand "boot-scr" {} ''
+          pkgs.buildPackages.runCommand "boot-scr" { nativeBuildInputs = [ pkgs.pkgsBuildBuild.dtc ];  } ''
             uimageSize=$(($(stat -L -c %s ${o.uimage}) + 0x1000 &(~0xfff)))
-            rootfsStart=0x$(printf %x $((${cfg.loadAddress} + 0x100000 + $uimageSize)))
+            rootfsStart=0x$(printf %x $((${cfg.loadAddress} + 0x100000 + $uimageSize   &(~0xfffff) )))
             rootfsBytes=$(($(stat -L -c %s ${o.rootfs}) + 0x100000 &(~0xfffff)))
+            rootfsMb=$(($rootfsBytes >> 20))
             rootfsBytes=$(($rootfsBytes + ${toString cfg.freeSpaceBytes} ))
-            cmd="mtdparts=phram0:''${rootfsMb}M(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsBytes},${config.hardware.flash.eraseBlockSize} memmap=''${rootfsBytes}\$''${rootfsStart} root=/dev/mtdblock0";
+            cmd="mtdparts=phram0:''${rootfsMb}M(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsBytes},${config.hardware.flash.eraseBlockSize} root=/dev/mtdblock0";
 
-            cat > $out << EOF
+            dtbStart=$(printf %x $((${cfg.loadAddress} + $rootfsBytes + 0x100000 + $uimageSize )))
+
+            mkdir $out
+            dtc -I dtb -O dts -o tmp.dts ${o.dtb}
+            echo "/ { reserved-memory { phram: phram@$rootfsStart {compatible = \"phram\"; reg = <0x0 $rootfsStart 0x0 $(printf "0x%x" $rootfsBytes )>; }; }; } ;" >> tmp.dts
+            cat tmp.dts
+
+            dtc -I dts -O dtb -o $out/dtb tmp.dts
+            dtbBytes=$(($(stat -L -c %s $out/dtb) + 0x1000 &(~0xfff)))
+
+            cat > $out/script << EOF
             setenv serverip ${cfg.serverip}
             setenv ipaddr ${cfg.ipaddr}
-            setenv bootargs 'liminix $cmd'
-            tftp 0x$(printf %x ${cfg.loadAddress}) result/uimage ; tftp 0x$(printf %x $rootfsStart) result/rootfs
-            bootm 0x$(printf %x ${cfg.loadAddress})
+            setenv bootargs 'liminix ${cmdline} $cmd'
+            tftp 0x$(printf %x ${cfg.loadAddress}) result/uimage ; tftp 0x$(printf %x $rootfsStart) result/rootfs ; tftp 0x$dtbStart result/dtb
+            bootm 0x$(printf %x ${cfg.loadAddress}) - 0x$dtbStart
+            #
             EOF
           '';
     };
