@@ -57,6 +57,14 @@ let
       WLAN_VENDOR_MEDIATEK = "y";
       MT7603E = "y";
     };
+
+    mt7915e = {
+      MT7915E = "m";
+    };
+    mt7615e = {
+      MT7615E = "m";
+      MT7622_WMAC = "y";
+    };
     mac80211_hwsim = {
       MAC80211_HWSIM = "y";
     };
