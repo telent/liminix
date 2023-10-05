@@ -80,7 +80,6 @@
         NET_MEDIATEK_STAR_EMAC = "y"; # this enables REGMAP_MMIO
         NET_VENDOR_MEDIATEK = "y";
         PCIE_MEDIATEK = "y";
-        # PWM_MEDIATEK = "y"; # seems to be ramips?
 
         BLOCK = "y"; # move this to base option
         NETDEVICES = "y";  # and this probably also
@@ -110,11 +109,6 @@
         # SERIAL_8250_NR_UARTS="3";
         # SERIAL_8250_RUNTIME_UARTS="3";
         SERIAL_OF_PLATFORM="y";
-
-
-        # probably don't need these
-        # SERIAL_AMBA_PL011 = "y";
-        # SERIAL_AMBA_PL011_CONSOLE = "y";
       };
     };
     boot.commandLine = [
