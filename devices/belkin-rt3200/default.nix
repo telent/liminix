@@ -24,7 +24,16 @@
     };
   };
 
-  module = {pkgs, config, lib, ... }: {
+  module = {pkgs, config, lib, ... }:
+    let firmware = pkgs.stdenv.mkDerivation {
+          name = "wlan-firmware";
+          phases = ["installPhase"];
+          installPhase = ''
+            mkdir $out
+            cp ${pkgs.linux-firmware}/lib/firmware/mediatek/{mt7915,mt7615,mt7622}* $out
+          '';
+        };
+    in {
     imports = [ ../../modules/arch/aarch64.nix ];
     kernel = {
       src = pkgs.pkgsBuildBuild.fetchurl {
@@ -111,12 +120,22 @@
     boot.commandLine = [
       "console=ttyS0,115200"
     ];
+    filesystem =
+      let inherit (pkgs.pseudofile) dir symlink;
+           in
+             dir {
+               lib = dir {
+                 firmware = dir {
+                   mediatek = symlink firmware;
+                 };
+               };
+             };
 
     hardware =
       let
         openwrt = pkgs.openwrt;
         mac80211 =  pkgs.mac80211.override {
-          drivers = ["mac80211_hwsim"];
+          drivers = [ "mt7915e" "mt7615e"];
           klibBuild = config.system.outputs.kernel.modulesupport;
         };
       in {
@@ -147,6 +166,10 @@
 
             wlan = link.build {
               ifname = "wlan0";
+              dependencies = [ mac80211 ];
+            };
+            wlan5 = link.build {
+              ifname = "wlan1";
               dependencies = [ mac80211 ];
             };
           };
