@@ -134,7 +134,10 @@
       let
         openwrt = pkgs.openwrt;
         mac80211 =  pkgs.mac80211.override {
-          drivers = [ "mt7915e" "mt7615e"];
+          drivers = [
+            "mt7615e"
+            "mt7915e"
+          ];
           klibBuild = config.system.outputs.kernel.modulesupport;
         };
       in {
