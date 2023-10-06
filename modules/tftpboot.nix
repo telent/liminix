@@ -74,7 +74,7 @@ in {
             setenv serverip ${cfg.serverip}
             setenv ipaddr ${cfg.ipaddr}
             setenv bootargs 'liminix ${cmdline} $cmd'
-            tftp 0x$(printf %x ${cfg.loadAddress}) result/uimage ; tftp 0x$(printf %x $rootfsStart) result/rootfs ; tftp 0x$dtbStart result/dtb
+            tftpboot 0x$(printf %x ${cfg.loadAddress}) result/uimage ; tftpboot 0x$(printf %x $rootfsStart) result/rootfs ; tftpboot 0x$dtbStart result/dtb
             bootm 0x$(printf %x ${cfg.loadAddress}) - 0x$dtbStart
             #
             EOF
