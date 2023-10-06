@@ -74,7 +74,6 @@
         MEDIATEK_GE_PHY = "y";
         # MEDIATEK_MT6577_AUXADC = "y";
         # MEDIATEK_WATCHDOG = "y";
-        # MTD_NAND_ECC_MEDIATEK = "y";
         NET_MEDIATEK_SOC = "y";
         NET_MEDIATEK_SOC_WED = "y";
         NET_MEDIATEK_STAR_EMAC = "y"; # this enables REGMAP_MMIO
@@ -84,8 +83,29 @@
         BLOCK = "y"; # move this to base option
         NETDEVICES = "y";  # and this probably also
 
+        SPI_MASTER = "y";
+        SPI = "y";
+        SPI_MEM="y";
+        SPI_MTK_NOR="y";
+        SPI_MTK_SNFI = "y";
+
         MTD = "y";
         MTD_BLOCK = "y";
+        MTD_RAW_NAND = "y";
+        MTD_NAND_MTK = "y";
+        MTD_NAND_MTK_BMT = "y";      # Bad-block Management Table
+        MTD_NAND_ECC_MEDIATEK= "y";
+        MTD_NAND_ECC_SW_HAMMING= "y";
+        MTD_SPI_NAND= "y";
+        MTD_OF_PARTS = "y";
+        MTD_NAND_CORE= "y";
+        MTD_SPI_NOR= "y";
+        MTD_SPLIT_FIRMWARE= "y";
+        MTD_SPLIT_FIT_FW= "y";
+        MTD_UBI="y";
+        MTD_UBI_BEB_LIMIT="20";
+        MTD_UBI_BLOCK="y";
+        MTD_UBI_WL_THRESHOLD="4096";
 
         MMC = "y";
         MMC_BLOCK = "y";
