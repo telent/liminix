@@ -42,6 +42,9 @@
         SERIAL_AMBA_PL011_CONSOLE = "y";
       };
     };
+    boot.commandLine = [
+      "console=ttyAMA0,38400"
+    ];
     hardware =
       let
         mac80211 =  pkgs.mac80211.override {
