@@ -24,7 +24,7 @@
     };
   };
 
-  module = {pkgs, config, ... }: {
+  module = {pkgs, config, lib, ... }: {
     imports = [ ../../modules/arch/aarch64.nix ];
     kernel = {
       src = pkgs.pkgsBuildBuild.fetchurl {
@@ -39,10 +39,25 @@
         PCI = "y";
         ARCH_MEDIATEK = "y";
         # ARM_MEDIATEK_CPUFREQ = "y";
+
+
+        # needed for "Cannot find regmap for /infracfg@10000000"
+        MFD_SYSCON = "y";
+        MTK_INFRACFG = "y";
+
+        MTK_PMIC_WRAP = "y";
+        MTK_EFUSE="y";
+        # MTK_HSDMA="y";
+        MTK_SCPSYS="y";
+        MTK_SCPSYS_PM_DOMAINS="y";
+        # MTK_THERMAL="y";
+        MTK_TIMER="y";
+
         COMMON_CLK_MT7622 = "y";
         COMMON_CLK_MT7622_ETHSYS = "y";
         COMMON_CLK_MT7622_HIFSYS = "y";
         COMMON_CLK_MT7622_AUDSYS = "y";
+        PM_CLK="y";
 
         REGMAP_MMIO = "y";
         CLKSRC_MMIO = "y";
@@ -75,10 +90,23 @@
         PSTORE_CONSOLE = "y";
         PSTORE_DEFLATE_COMPRESS = "n";
 
-        SERIAL_AMBA_PL011 = "y";
-        SERIAL_AMBA_PL011_CONSOLE = "y";
+        SERIAL_8250 = "y";
+        SERIAL_8250_CONSOLE = "y";
+        SERIAL_8250_MT6577="y";
+        # SERIAL_8250_NR_UARTS="3";
+        # SERIAL_8250_RUNTIME_UARTS="3";
+        SERIAL_OF_PLATFORM="y";
+
+
+        # probably don't need these
+        # SERIAL_AMBA_PL011 = "y";
+        # SERIAL_AMBA_PL011_CONSOLE = "y";
       };
     };
+    boot.commandLine = [
+      "console=ttyS0,115200"
+    ];
+
     hardware =
       let
         openwrt = pkgs.openwrt;
