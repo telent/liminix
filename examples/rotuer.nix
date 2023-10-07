@@ -49,7 +49,7 @@ in rec {
   hostname = "rotuer";
 
   services.hostap = svc.hostapd.build {
-    interface = config.hardware.networkInterfaces.wlan_24;
+    interface = config.hardware.networkInterfaces.wlan;
     params = {
       ssid = "liminix";
       hw_mode="g";
@@ -59,7 +59,7 @@ in rec {
   };
 
   services.hostap5 = svc.hostapd.build {
-    interface = config.hardware.networkInterfaces.wlan_5;
+    interface = config.hardware.networkInterfaces.wlan5;
     params = rec {
       ssid = "liminix_5";
       hw_mode="a";
@@ -79,7 +79,9 @@ in rec {
   services.bridge =  svc.bridge.members.build {
     primary = services.int;
     members = with config.hardware.networkInterfaces;
-      [ wlan_24 wlan_5 lan ];
+      [ wlan
+        wlan5
+        lan ];
   };
 
   services.ntp = svc.ntp.build {

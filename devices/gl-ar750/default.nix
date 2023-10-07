@@ -123,11 +123,11 @@
           in {
             lan = link.build { ifname = "eth0"; };
             wan = link.build { ifname = "eth1"; };
-            wlan_24 = link.build {
+            wlan = link.build {
               ifname = "wlan0";
               dependencies = [ mac80211 ];
             };
-            wlan_5 = link.build {
+            wlan5 = link.build {
               ifname = "wlan1";
               dependencies = [ mac80211 ath10k_cal_data ];
             };
