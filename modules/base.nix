@@ -47,6 +47,10 @@ in {
         default = [];
         description = "Kernel command line";
       };
+      imageFormat = mkOption {
+        type = types.enum ["fit" "uimage"];
+        default = "uimage";
+      };
       tftp = {
         loadAddress = mkOption {
           type = types.str;

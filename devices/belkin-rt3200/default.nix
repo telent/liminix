@@ -131,9 +131,11 @@
         SERIAL_OF_PLATFORM="y";
       };
     };
-    boot.commandLine = [
-      "console=ttyS0,115200"
-    ];
+    boot = {
+      commandLine = [ "console=ttyS0,115200" ];
+      tftp.loadAddress =  "0x4007ff28";
+      imageFormat = "fit";
+    };
     filesystem =
       let inherit (pkgs.pseudofile) dir symlink;
            in

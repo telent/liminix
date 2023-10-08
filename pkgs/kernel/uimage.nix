@@ -7,21 +7,27 @@
 } :
 let
   objcopy = "${stdenv.cc.bintools.targetPrefix}objcopy";
+  arch = stdenv.hostPlatform.linuxArch;
+  stripAndZip = ''
+    ${objcopy} -O binary -R .reginfo -R .notes -R .note -R .comment -R .mdebug -R .note.gnu.build-id -S vmlinux.elf vmlinux.bin
+    rm -f vmlinux.bin.lzma ; lzma -k -z  vmlinux.bin
+  '';
 in {
   kernel
 , commandLine
 , entryPoint
 , extraName ? ""                # e.g. socFamily
 , loadAddress
+, imageFormat
 , dtb ? null
-} :
-stdenv.mkDerivation {
+} : stdenv.mkDerivation {
   name = "kernel.image";
   phases = [
     "preparePhase"
-    (if dtb != null then "dtbPhase" else ":")
-    "buildPhase"
-    "installPhase" ];
+    (if commandLine != null then assert dtb != null; "mungeDtbPhase" else ":")
+    (if imageFormat == "fit" then "buildPhaseFIT" else "buildPhaseUImage")
+    "installPhase"
+  ];
   nativeBuildInputs = [
     lzma
     dtc
@@ -31,35 +37,39 @@ stdenv.mkDerivation {
   preparePhase = ''
     cp ${kernel} vmlinux.elf; chmod +w vmlinux.elf
   '';
-  dtbPhase = ''
+  mungeDtbPhase = ''
     dtc -I dtb -O dts -o tmp.dts ${dtb}
     echo '/{ chosen { bootargs = ${builtins.toJSON commandLine}; }; };'  >> tmp.dts
     dtc -I dts -O dtb -o tmp.dtb tmp.dts
   '';
 
-  buildPhase =
-    let arch =
-          # per output of "mkimage -A list". I *think* these
-          # are the same as the kernel arch convention, but
-          # maybe that's coincidence
-          if stdenv.isMips
-          then "mips"
-          else if stdenv.isAarch64
-          then "arm64"
-          else throw "unknown arch";
-    in ''
-      ${objcopy} -O binary -R .reginfo -R .notes -R .note -R .comment -R .mdebug -R .note.gnu.build-id -S vmlinux.elf vmlinux.bin
-      rm -f vmlinux.bin.lzma ; lzma -k -z  vmlinux.bin
-      cat ${./kernel_fdt.its} > mkimage.its
-      echo '/ { images { kernel { data = /incbin/("./vmlinux.bin.lzma"); }; }; };' >> mkimage.its
-      echo '/ { images { kernel { load = <${loadAddress}>; }; }; };' >> mkimage.its
-      echo '/ { images { kernel { entry = <${entryPoint}>; }; }; };' >> mkimage.its
-      echo '/ { images { kernel { compression = "lzma"; }; }; };' >> mkimage.its
-      echo '/ { images { fdt-1 { data = /incbin/("./tmp.dtb"); }; }; }; ' >> mkimage.its
-      mkimage -f mkimage.its mkimage.itb
-      mkimage -l mkimage.itb
-    '';
+  buildPhaseUImage = ''
+    test -f tmp.dtb && ${objcopy} --update-section .appended_dtb=tmp.dtb vmlinux.elf || ${objcopy} --add-section .appended_dtb=tmp.dtb vmlinux.elf
+    ${stripAndZip}
+    mkimage -A ${arch} -O linux -T kernel -C lzma -a ${loadAddress} -e ${entryPoint} -n '${lib.toUpper arch} Liminix Linux ${extraName}' -d vmlinux.bin.lzma kernel.uimage
+  '';
+
+  buildPhaseFIT = ''
+    ${stripAndZip}
+    cat ${./kernel_fdt.its} > mkimage.its
+    cat << _VARS  >> mkimage.its
+    / {
+        images {
+            kernel {
+                data = /incbin/("./vmlinux.bin.lzma");
+                load = <${loadAddress}>;
+                entry = <${entryPoint}>;
+                compression = "lzma";
+            };
+            fdt-1 { data = /incbin/("./tmp.dtb"); };
+        };
+    };
+    _VARS
+    mkimage -f mkimage.its kernel.uimage
+    mkimage -l kernel.uimage
+  '';
+
   installPhase = ''
-    cp mkimage.itb $out
+    cp kernel.uimage $out
   '';
 }

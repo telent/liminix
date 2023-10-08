@@ -78,6 +78,7 @@ in
       uimage = liminix.builders.uimage {
         commandLine = concatStringsSep " " config.boot.commandLine;
         inherit (config.hardware) loadAddress entryPoint;
+        inherit (config.boot) imageFormat;
         inherit kernel;
         inherit dtb;
       };
