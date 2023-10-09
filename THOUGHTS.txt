@@ -2436,3 +2436,258 @@ Sun Sep 17 16:44:31 BST 2023
 Can we figure out which bits of the old doc are missing from the new
 one and just transplant those? Then we can merge it sooner
 instead of blocking on writig all the new stuff
+
+Mon Sep 25 16:58:51 BST 2023
+
+jffs2 on mt300a isn't finding root partition in initramfs, and it
+seems to be because MTD_SPLIT_UIMAGE_FW isn't working
+
+[    0.426792] spi spi0.0: force spi mode3
+[    0.431305] spi-nor spi0.0: w25q128 (16384 Kbytes)
+[    0.436322] 5 fixed-partitions partitions found on MTD device spi0.0
+[    0.442875] OF: Bad cell count for /palmbus@10000000/spi@b00/flash@0/partitions
+[    0.450400] OF: Bad cell count for /palmbus@10000000/spi@b00/flash@0/partitions
+[    0.458208] OF: Bad cell count for /palmbus@10000000/spi@b00/flash@0/partitions
+[    0.465751] OF: Bad cell count for /palmbus@10000000/spi@b00/flash@0/partitions
+[    0.473522] Creating 5 MTD partitions on "spi0.0":
+[    0.478466] 0x000000000000-0x000000030000 : "u-boot"
+[    0.484447] 0x000000030000-0x000000040000 : "u-boot-env"
+[    0.490888] 0x000000040000-0x000000050000 : "factory"
+[    0.497110] 0x000000050000-0x000000fd0000 : "firmware"
+[    0.596423] 0x000000ff0000-0x000001000000 : "art"
+[    0.611508] gsw: setting port4 to ephy mode
+
+with squashfs root it's the same but for the extra split partitions:
+
+[    0.468715] Creating 5 MTD partitions on "spi0.0":
+[    0.473653] 0x000000000000-0x000000030000 : "u-boot"
+[    0.479652] 0x000000030000-0x000000040000 : "u-boot-env"
+[    0.486085] 0x000000040000-0x000000050000 : "factory"
+[    0.492318] 0x000000050000-0x000000fd0000 : "firmware"
+[    0.499304] 2 uimage-fw partitions found on MTD device firmware
+[    0.505457] Creating 2 MTD partitions on "firmware":
+[    0.510543] 0x000000000000-0x000000260000 : "kernel"
+[    0.516616] 0x000000260000-0x000000f80000 : "rootfs"
+[    0.522570] mtd: device 5 (rootfs) set to be root filesystem
+[    0.528565] 0x000000ff0000-0x000001000000 : "art"
+
+turns out this is because the device thinks it has 4k erase block size
+because MTD_SPI_NOR_USE_4K_SECTORS was set, and that was causing
+mtdsplit to look in the wrong place for a root filesystem
+
+Mon Sep 25 18:50:05 BST 2023
+
+No, that wasn't it. Turned out to be an endianness-dependent check for
+JFFS2 magic in mtdsplit.
+
+setenv serverip 10.0.0.1
+setenv ipaddr 10.0.0.8
+tftp 0xa00000 result/uimage
+bootm 0xa00000
+
+Fri Sep 29 20:50:39 BST 2023
+
+setenv bootargs 'liminix mtdparts=phram0:M(rootfs) phram.phram=phram0,0x40411f28,4194304,65536 memmap=4194304$0x40411f28 root=/dev/mtdblock0 console=ttyAMA0,115200 earlycon'
+
+setenv serverip 10.0.0.1
+setenv ipaddr 10.0.0.5
+setenv bootargs 'liminix console=ttyS0,115200  panic=10 oops=panic earlycon=uart8250,mmio32,0x11002000 root=/dev/mtdblock0'
+tftp 0x4007ff28 result/uimage ;  tftp 0x40432f28 result/rootfs
+bootm 0x4007ff28
+
+setenv bootargs 'liminix console=ttyS0,115200  panic=1 oops=panic earlycon  root=/dev/mtdblock0'
+
+md 0x42ff0000
+
+Cannot find regmap for /infracfg@10000000: -524.
+
+# "console=ttyAMA0,38400 panic=10 oops=panic init=/bin/init loglevel=8 root=/dev/mtdblock0 rootfstype=squashfs fw_devlink=off"
+
+
+40812468: 69726553 203a6c61 41424d41 304c5020    Serial: AMBA PL0
+40812478: 55203131 20545241 76697264 3c0a7265    11 UART driver.<
+40812488: 61723e33 706f6f6d 61203a73 6165726c    3>ramoops: alrea
+40812498: 69207964 6974696e 7a696c61 3c0a6465    dy initialized.<
+408124a8: 61723e34 706f6f6d 70203a73 65626f72    4>ramoops: probe
+408124b8: 20666f20 66663234 30303030 6d61722e     of 42ff0000.ram
+408124c8: 73706f6f 69616620 2064656c 68746977    oops failed with
+408124d8: 72726520 2d20726f 3c0a3232 61433e33     error -22.<3>Ca
+408124e8: 746f6e6e 6e696620 65722064 70616d67    nnot find regmap
+408124f8: 726f6620 6e692f20 63617266 31406766     for /infracfg@1
+40812508: 30303030 3a303030 32352d20 333c0a34    0000000: -524.<3
+40812518: 6e61433e 20746f6e 646e6966 67657220    >Cannot find reg
+MT7622>
+40812528: 2070616d 20726f66 666e692f 66636172    map for /infracf
+40812538: 30314067 30303030 203a3030 3432352d    g@10000000: -524
+40812548: 3e333c0a 6e6e6143 6620746f 20646e69    .<3>Cannot find
+40812558: 6d676572 66207061 2f20726f 72666e69    regmap for /infr
+40812568: 67666361 30303140 30303030 2d203a30    acfg@10000000: -
+40812578: 0a343235 433e333c 6f6e6e61 69662074    524.<3>Cannot fi
+40812588: 7220646e 616d6765 6f662070 702f2072    nd regmap for /p
+40812598: 63697265 31406766 32303030 3a303030    ericfg@10002000:
+408125a8: 32352d20 313c0a34 616e553e 20656c62     -524.<1>Unable
+408125b8: 68206f74 6c646e61 656b2065 6c656e72    to handle kernel
+408125c8: 67617020 20676e69 75716572 20747365     paging request
+408125d8: 76207461 75747269 61206c61 65726464    at virtual addre
+408125e8: 66207373 66666666 66666666 66666666    ss fffffffffffff
+408125f8: 0a656666 4d3e313c 61206d65 74726f62    ffe.<1>Mem abort
+
+
+CONFIG_SERIAL_8250_FSL=y
+CONFIG_SERIAL_8250_MT6577=y
+CONFIG_SERIAL_8250_NR_UARTS=3
+CONFIG_SERIAL_8250_RUNTIME_UARTS=3
+CONFIG_SERIAL_DEV_BUS=y
+CONFIG_SERIAL_DEV_CTRL_TTYPORT=y
+CONFIG_SERIAL_MCTRL_GPIO=y
+CONFIG_SERIAL_OF_PLATFORM=y
+
+Mon Oct  2 10:17:04 BST 2023
+
+We have a bootable aarch64 kernel for the Belkin, but it does not
+understand the memmap= parameter we're using to protect the
+phram image from being used as general memory.
+
+One option is to add a reserved-memory stanza in the device tree,
+using u-boot "fdt" command, but we don't know the fdt address in u-boot
+because it doesn't have any commands to parse the image and set
+variables pointing at the sub-components. (There's iminfo, but it's
+onyl human-readable)
+
+Second option is to amend the dtb in the tftpboot module: this
+would mean regenerating the uimage
+
+Third option: for tftpboot do we _have_ to use FIT? maybe we could
+grab the fdt as a separate tftp transaction
+
+we need to apply kernel patch 9401911f2d9f89035f7acebab16e72d43d1282fb
+to avoid using ioremap on sysem ram which is not allowed on arm
+
+
+Tue Oct  3 14:15:38 BST 2023
+
+Progress on Liminix ARM support. The device I'm starting with is
+the Belkin RT3200 (also known as [Linksys E8450](https://openwrt.org/toh/linksys/e8450)) which seems to be a featureful piece of kit, and whioch I snagged for a
+very good price on the Bay of E
+
+# Where are we right now?
+
+* we can TFTP boot it to userland
+* ethernet works
+
+## What else needs doing?
+
+* it has dual band wifi with many interesting features. I've built the
+
+* we're only running in RAM, probably need to add some kernel config
+  to support the flash
+* initramfs support is not yet implemented
+* the flash is NAND flash and it's quite large compared with the
+  existing Liminix devices, so we're going to add UBIFS which will
+  use it better than  JFFS2 does
+* all this work is on a branch and needs to be cleaned up a lot before
+   I'm letting it into main
+
+## What have we found?
+
+There are some significant differences between this and the MIPS
+devices (yes, other than an entirely different architecture), mostly
+to do with "legacy boot" support or the lack thereof. For example:
+
+* there aren't any options like `MIPS_RAW_APPENDED_DTB` to glom
+  together a kernel and device tree (FDT), because the bootloader is
+  expected to be able to provide a FDT following "standards".
+  U-Boot will do this, provided that we use the newer "FIT" Uimage
+  format which allows a kernel and DTB and initrd to be combined in
+  the same container.  (Sadly we can't use FIT everywhere because a
+  lot of MIPS devices use really old forks of U-Boot that don't
+  understand it)
+
+* for tftpboot, on MIPS we use the `memmap` kernel command line option
+  to reserve some RAM for the root filesystem. On Arm there's no such
+  option, so we have to add a
+  [reserved-memory](https://github.com/torvalds/linux/blob/master/Documentation/devicetree/bindings/reserved-memory/reserved-memory.yaml)
+  node in the device tree instead. Which means, given that we _only_
+  want to do this when tftp booting (the memory is wasted
+  otherwise), we have to rewrite the device tree in that
+  scenario.
+
+* then it turns out that phram doesn't (didn't) work anyway, because
+  it calls ioremap() and [you can't use ioremap on system memory on ARM](https://lwn.net/Articles/409689/). In newer kernels this is
+  fixed: there is a [conditional](https://github.com/torvalds/linux/blob/master/drivers/mtd/devices/phram.c#L127) here to use whichever of ioremap or
+  memremap is appropriate for the memory passed to phram, but it looks
+  non-trivial to backport so I've gone for a [much less sophisticated approach](https://gti.telent.net/dan/liminix/commit/f7cd9c2b6e6c99a228e066b09e3febcf71c63fa1#diff-d8e355f1b2dcde7378ebb40c92cdd2ce3125753c)
+
+* we're using [DSA](https://www.kernel.org/doc/Documentation/networking/dsa/dsa.txt) instead of the OpenWrt [swconfig](https://openwrt.org/docs/techref/swconfig) program. There was actually surprisingly little work needed to adjust to this.
+
+
+Other than that, it was mostly the usual process of "did the kernel
+crash silently, or has it just been unable to open a console device?".
+In this regard, *one neat trick*: even though U-Boot on this device
+doesn't support pstore, we can use it anyway if we don't do compression.
+Enable
+
+```
+        PSTORE = "y";
+        PSTORE_RAM = "y";
+        PSTORE_CONSOLE = "y";
+        PSTORE_DEFLATE_COMPRESS = "n";
+```
+
+then boot with `panic=3 oops=panic`, then when it resets use the
+U_Boot `md` command to see what happened:
+
+```
+MT7622> md 0x42ff0000
+42ff0000: 43474244 00000000 00000ff4 3d3d3d3d    DBGC........====
+42ff0010: 39342e31 36373031 500a442d 63696e61    1.491076-D.Panic
+42ff0020: 50203123 31747261 3e363c0a 20505050    #1 Part1.<6>PPP
+42ff0030: 20445342 706d6f43 73736572 206e6f69    BSD Compression
+[....]
+42ff0ca0: 20676e69 73756e75 6b206465 656e7265    ing unused kerne
+42ff0cb0: 656d206c 79726f6d 3731203a 0a4b3832    l memory: 1728K.
+42ff0cc0: 523e363c 2f206e75 74696e69 20736120    <6>Run /init as
+42ff0cd0: 74696e69 6f727020 73736563 3e373c0a    init process.<7>
+```
+
+Wed Oct  4 21:08:44 BST 2023
+
+By randomly including chinks of the openwrt config we have made it
+find the mt7915e on the pcie bus. I just don't yet know which bit of
+the openwrt config it was.
+
+It doesn't actually work yet though. 5GHz wifi gets calibration data
+from the flash, so it is not going to work unless (1) we reflash the
+firmware partition, or (2) we find another way to provide it
+calibration data.
+
+https://forum.openwrt.org/t/belkin-rt3200-linksys-e8450-wifi-ax-discussion/94302/401
+
+Sat Oct  7 22:56:40 BST 2023
+
+We're almost ready to merge the rt3200 support (it's not finished
+but it mostly won't break mips) except for the uimage module
+which needs all that FIT stuff, and the tftpboot contortions
+to amend the dtb for memmap
+
+For legacy uimage
+
+1) add commandline params to dtb
+2) objcopy fdt into vmlinux.elf
+3) strip to raw image and compress
+4) mkimage
+
+
+For FIT uimage
+
+1) add commandline params to dtb
+2) strip to raw image and compress
+3) create its file
+4) mkimage
+
+Do we still want to handle the no-dtb case? what about
+standards-compliant boot, where u-boot is providing the dtb? No option
+to provide a commandline in that case, but maybe also no need to.
+
+For tftpboot, am undecided. We could use the dtb rewriting thing
+everywhere, in the interest of consistency.
