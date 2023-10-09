@@ -1,0 +1,47 @@
+From bb7e7aeb3d832059e33b1e76eb85d4680f77abf2 Mon Sep 17 00:00:00 2001
+From: Ben Hutchings <ben@decadent.org.uk>
+Date: Fri, 3 Jun 2016 01:08:36 +0100
+Subject: [PATCH] phram: Use memremap() to allow mapping of system RAM
+
+Using memremap() instead of ioremap() allows mapping a disk image in
+system RAM that has somehow been reserved.  It should fall back
+to ioremap() where necessary.
+
+Entirely untested, and I'm not convinced this is a good idea at all.
+---
+ drivers/mtd/devices/phram.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mtd/devices/phram.c b/drivers/mtd/devices/phram.c
+index 8b66e52ca3cc..0ea254e2ba51 100644
+--- a/drivers/mtd/devices/phram.c
++++ b/drivers/mtd/devices/phram.c
+@@ -88,7 +88,7 @@ static void unregister_devices(void)
+ 
+ 	list_for_each_entry_safe(this, safe, &phram_list, list) {
+ 		mtd_device_unregister(&this->mtd);
+-		iounmap(this->mtd.priv);
++		memunmap(this->mtd.priv);
+ 		kfree(this->mtd.name);
+ 		kfree(this);
+ 	}
+@@ -104,7 +104,8 @@ static int register_device(char *name, phys_addr_t start, size_t len)
+ 		goto out0;
+ 
+ 	ret = -EIO;
+-	new->mtd.priv = ioremap(start, len);
++	new->mtd.priv = memremap(start, len,
++				 MEMREMAP_WB | MEMREMAP_WT | MEMREMAP_WC);
+ 	if (!new->mtd.priv) {
+ 		pr_err("ioremap failed\n");
+ 		goto out1;
+@@ -134,7 +135,7 @@ static int register_device(char *name, phys_addr_t start, size_t len)
+ 	return 0;
+ 
+ out2:
+-	iounmap(new->mtd.priv);
++	memunmap(new->mtd.priv);
+ out1:
+ 	kfree(new);
+ out0:
+
