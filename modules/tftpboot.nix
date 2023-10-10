@@ -56,8 +56,8 @@ in {
             uimageSize=$(($(stat -L -c %s ${o.uimage}) + 0x1000 &(~0xfff)))
             rootfsStart=0x$(printf %x $((${cfg.loadAddress} + 0x100000 + $uimageSize   &(~0xfffff) )))
             rootfsBytes=$(($(stat -L -c %s ${o.rootfs}) + 0x100000 &(~0xfffff)))
-            rootfsMb=$(($rootfsBytes >> 20))
             rootfsBytes=$(($rootfsBytes + ${toString cfg.freeSpaceBytes} ))
+            rootfsMb=$(($rootfsBytes >> 20))
             cmd="mtdparts=phram0:''${rootfsMb}M(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsBytes},${config.hardware.flash.eraseBlockSize} root=/dev/mtdblock0";
 
             dtbStart=$(printf %x $((${cfg.loadAddress} + $rootfsBytes + 0x100000 + $uimageSize )))
@@ -65,7 +65,7 @@ in {
             mkdir $out
             cat ${o.dtb} > $out/dtb
             fdtput -p -t s $out/dtb /reserved-memory/phram-rootfs compatible phram
-            fdtput -p -t lx $out/dtb /reserved-memory/phram-rootfs reg 0 $rootfsStart 0 $rootfsBytes
+            fdtput -p -t lx $out/dtb /reserved-memory/phram-rootfs reg 0 $rootfsStart 0 $(printf %x $rootfsBytes)
 
             dtbBytes=$(($(stat -L -c %s $out/dtb) + 0x1000 &(~0xfff)))
 
