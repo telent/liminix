@@ -159,11 +159,16 @@
         };
       in {
         defaultOutput = "flashimage";
-        loadAddress = "0x41080000";
-        entryPoint  = "0x41080000";
+        # the kernel expects this to be on a 2MB boundary. U-Boot
+        # (I don't know why) has a default of 0x41080000, which isn't.
+        # We put it at the 32MB mark so that tftpboot can put its rootfs
+        # image and DTB underneath, but maybe this is a terrible waste of
+        # RAM unless the kernel is able to reuse it later. Oh well
+        loadAddress = "0x42000000";
+        entryPoint  = "0x42000000";
         rootDevice = "/dev/mtdblock0";
         dts = {
-          src = "${openwrt.src}/target/linux/mediatek/dts/mt7622-linksys-e8450.dts";
+          src = "${openwrt.src}/target/linux/mediatek/dts/mt7622-linksys-e8450-ubi.dts";
           includes =  [
             "${openwrt.src}/target/linux/mediatek/dts"
             "${config.system.outputs.kernel.modulesupport}/arch/arm64/boot/dts/mediatek/"
