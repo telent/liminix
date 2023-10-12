@@ -24,14 +24,14 @@ static int begins_with(char * str, char * prefix)
 	return 1;
 }
 
-static void fork_exec(char * command, char *args[])
+static int fork_exec(char * command, char *args[])
 {
 	int fork_pid = fork();
 	AVER(fork_pid);
 	if(fork_pid > 0)
 		wait(NULL);
 	else
-		AVER(execve(command, args, NULL));
+		return execve(command, args, NULL);
 }
 
 char banner[]  = "Running pre-init...\n";
@@ -69,12 +69,12 @@ int main(int argc, char *argv[], char *envp[])
 		write(1, rootdevice, strlen(rootdevice));
 		write(1, "\n", 1);
 
-		AVER(mount(rootdevice, "/target/persist", "jffs2", 0, NULL));
+		AVER(mount(rootdevice, "/target/persist", "ubifs", 0, NULL));
 		AVER(mount("/target/persist/nix", "/target/nix",
 			   "bind", MS_BIND, NULL));
 
 		char *exec_args[] = { "activate",  "/target", NULL };
-		fork_exec("/target/persist/activate", exec_args);
+		AVER(fork_exec("/target/persist/activate", exec_args));
 		AVER(chdir("/target"));
 
 		AVER(mount("/target", "/", "bind", MS_BIND | MS_REC, NULL));
