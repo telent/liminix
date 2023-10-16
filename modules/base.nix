@@ -39,7 +39,7 @@ in {
     };
     rootfsType =  mkOption {
       default = "squashfs";
-      type = types.enum ["squashfs" "jffs2"];
+      type = types.enum ["squashfs" "jffs2" "ubifs"];
     };
     boot = {
       commandLine = mkOption {

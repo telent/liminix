@@ -7,5 +7,6 @@
     ./kexecboot.nix
     ./flashimage.nix
     ./jffs2.nix
+    ./ubifs.nix
   ];
 }

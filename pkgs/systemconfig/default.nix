@@ -68,7 +68,7 @@ in attrset:
     src = ./.;
 
     CFLAGS = "-Os";
-    LDFLAGS  = "-static";
+    LDFLAGS  = "-static -Xlinker -static";
 
     postConfigure = ''
       cp ${makedevs} makedevs.c

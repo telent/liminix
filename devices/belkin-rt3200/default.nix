@@ -102,10 +102,7 @@
         MTD_SPI_NOR= "y";
         MTD_SPLIT_FIRMWARE= "y";
         MTD_SPLIT_FIT_FW= "y";
-        MTD_UBI="y";
-        MTD_UBI_BEB_LIMIT="20";
-        MTD_UBI_BLOCK="y";
-        MTD_UBI_WL_THRESHOLD="4096";
+
 
         MMC = "y";
         MMC_BLOCK = "y";
@@ -158,6 +155,12 @@
           klibBuild = config.system.outputs.kernel.modulesupport;
         };
       in {
+        ubi = {
+          minIOSize = "2048";
+          eraseBlockSize = "126976";
+          maxLEBcount = "1024"; # guessing
+        };
+
         defaultOutput = "flashimage";
         # the kernel expects this to be on a 2MB boundary. U-Boot
         # (I don't know why) has a default of 0x41080000, which isn't.
@@ -166,7 +169,7 @@
         # RAM unless the kernel is able to reuse it later. Oh well
         loadAddress = "0x42000000";
         entryPoint  = "0x42000000";
-        rootDevice = "/dev/mtdblock0";
+        rootDevice = "ubi0:liminix";
         dts = {
           src = "${openwrt.src}/target/linux/mediatek/dts/mt7622-linksys-e8450-ubi.dts";
           includes =  [
@@ -175,7 +178,7 @@
           ];
         };
 
-        flash.eraseBlockSize = "65536"; # c.f. pkgs/mips-vm/mips-vm.sh
+        flash.eraseBlockSize = "65536"; # this is probably wrong
         networkInterfaces =
           let
             inherit (config.system.service.network) link;
