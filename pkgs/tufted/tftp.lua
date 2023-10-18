@@ -195,19 +195,22 @@ function tftp:handle_RRQ(socket, host, port, source, options)
                 ]]
                 yield(false, true)
             end
-            socket:sendto(self.DATA(data, tid), host, port)
-            --[[  Now check for an ACK.
-                RFC1350 requires that for every packet sent, an ACK is received
-                before the next packet can be sent.
-            ]]
+
             local acked
             local retried = 0
             local timeout = time() + timeout_secs
             local timedout = false
             repeat
+                socket:sendto(self.DATA(data, tid), host, port)
+                --[[  Now check for an ACK.
+                   RFC1350 requires that for every packet sent, an ACK is received
+                   before the next packet can be sent.
+                ]]
                 yield(true, false) -- we need to wait until the socket is readable again
                 local ack, ackhost, ackport = socket:recvfrom(ACKSIZE)
-                if ackhost ~= host or ackport ~= port or self.parse_ACK(ack) ~= tid then
+                local ack_sequence = self.parse_ACK(ack)
+
+                if ackhost ~= host or ackport ~= port then
                    --[[https://tools.ietf.org/html/rfc1350#page-5
                        "If a source TID does not match, the packet should be
                        discarded as erroneously sent from somewhere else.
@@ -216,13 +219,21 @@ function tftp:handle_RRQ(socket, host, port, source, options)
                    ]]
                    socket:sendto(err(ERR_UNKNOWN_ID), ackhost, ackport)
                    yield(true, false)
-                else
-                    acked = true
-                end
+		elseif ack_sequence ~= tid then
+		   -- this looks confusing, but the local variable
+		   -- "tid" here is actually block number (aka
+		   -- sequence number), not tid at all.
+		   log(("ack received for old block %d (expecting %d)"):format(ack_sequence, tid))
+		   acked = false
+		else
+		   acked = true
+		end
+
+		if not acked then log("resending") end
                 retried = retried + 1
                 timedout = time() > timeout
-            until acked or retried > ACK_RETRIES or timedout
-            if timedout or retried > ACK_RETRIES then
+            until acked or retried > ACK_RETRIES
+            if retried > ACK_RETRIES then
                 --There doesn't seem to be a standard error for timeout.
                 socket:sendto(err("Ack timeout"), host, port)
                 error("Timeout waiting for ACK")
