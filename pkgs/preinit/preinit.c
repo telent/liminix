@@ -1,14 +1,11 @@
-#ifdef PREINIT_USE_LIBC
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/mount.h>
 #include <sys/wait.h>
 #include <string.h>
-#else
-#include <nolibc.h>
-#endif
-#include <asm/setup.h>
+
+#include <asm/setup.h>		/* for COMMAND_LINE_SIZE */
 
 void parseopts(char * cmdline, char **root, char **rootfstype);
 
