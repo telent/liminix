@@ -15,7 +15,6 @@ stdenv.mkDerivation {
 
 #  NIX_DEBUG=2;
   hardeningDisable = [ "all" ];
-  CFLAGS = "-Os -static -DPREINIT_USE_LIBC  -fno-stack-protector -fpic -fPIC -I ./ -I ${kernel}/tools/include/nolibc";
 
   postBuild = ''
     $STRIP  --remove-section=.note --remove-section=.comment preinit

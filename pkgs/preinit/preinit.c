@@ -10,6 +10,8 @@
 #endif
 #include <asm/setup.h>
 
+void parseopts(char * cmdline, char **root, char **rootfstype);
+
 #define ERR(x) write(2, x, strlen(x))
 #define AVER(c) do { if(c < 0) ERR("failed: "  #c); } while(0)
 
@@ -40,6 +42,7 @@ char buf[COMMAND_LINE_SIZE];
 int main(int argc, char *argv[], char *envp[])
 {
 	char *rootdevice = 0;
+	char *rootfstype = 0;
 	char *p = buf;
 	write(1, banner, strlen(banner));
 
@@ -54,22 +57,17 @@ int main(int argc, char *argv[], char *envp[])
 		write(1, buf, len);
 	};
 
-	while(*p) {
-		if(begins_with(p, "root=")) {
-			rootdevice = p + 5;
-			while(*p && (*p != ' ')) p++;
-			*p= '\0';
-		}
-		while(*p && (*p != ' ')) p++;
-		p++;
-	}
-
+	parseopts(buf, &rootdevice, &rootfstype);
+	
 	if(rootdevice) {
+    	        if(!rootfstype) rootfstype = "jffs2"; /* backward compatibility */
 		write(1, "rootdevice ", 11);
 		write(1, rootdevice, strlen(rootdevice));
-		write(1, "\n", 1);
+		write(1, " (", 2);
+		write(1, rootfstype, strlen(rootfstype));
+		write(1, ")\n", 1);
 
-		AVER(mount(rootdevice, "/target/persist", "ubifs", 0, NULL));
+		AVER(mount(rootdevice, "/target/persist", rootfstype, 0, NULL));
 		AVER(mount("/target/persist/nix", "/target/nix",
 			   "bind", MS_BIND, NULL));
 
