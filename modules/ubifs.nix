@@ -11,16 +11,6 @@ in
   imports = [
     ./initramfs.nix
   ];
-  options.system.outputs = {
-    systemConfiguration = mkOption {
-      type = types.package;
-      description = ''
-        pkgs.systemconfig for the configured filesystem,
-        contains 'activate' and 'init' commands
-      '';
-      internal = true;
-    };
-  };
   options.hardware.ubi = {
     minIOSize = mkOption { type = types.str; };
     eraseBlockSize = mkOption { type = types.str; }; # LEB
