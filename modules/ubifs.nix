@@ -35,9 +35,10 @@ in
         in runCommand "mkfs.ubifs" {
           depsBuildBuild = [ mtdutils ];
         } ''
-          mkdir -p $TMPDIR/empty/nix/store/ $TMPDIR/empty/secrets
+          mkdir -p $TMPDIR/empty/nix/store/ $TMPDIR/empty/secrets $TMPDIR/empty/boot
           cp ${systemConfiguration}/bin/activate $TMPDIR/empty/activate
           ln -s ${pkgs.s6-init-bin}/bin/init $TMPDIR/empty/init
+          cp ${config.system.outputs.uimage} $TMPDIR/empty/boot/uimage
           mkdir -p $TMPDIR/empty/nix/store
           for path in $(cat ${systemConfiguration}/etc/nix-store-paths) ; do
             (cd $TMPDIR/empty && cp -a $path .$path)
