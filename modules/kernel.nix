@@ -64,6 +64,8 @@ in {
         PACKET = "y";           # for ppp, tcpdump ...
         SYSVIPC= "y";
 
+        NETDEVICES = "y";       # even PPP needs this
+
         # disabling this option causes the kernel to use an "empty"
         # initramfs instead: it has a /dev/console node and not much
         # else.  Note that pid 1 is started *before* the root

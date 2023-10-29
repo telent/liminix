@@ -81,7 +81,6 @@
         PCIE_MEDIATEK = "y";
 
         BLOCK = "y"; # move this to base option
-        NETDEVICES = "y";  # and this probably also
 
         SPI_MASTER = "y";
         SPI = "y";

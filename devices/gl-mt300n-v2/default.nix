@@ -143,7 +143,6 @@
           REGULATOR_FIXED_VOLTAGE = "y";
 
           NET = "y";
-          NETDEVICES = "y";
           ETHERNET = "y";
 
           PHYLIB = "y";
