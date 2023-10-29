@@ -77,7 +77,7 @@ stdenv.mkDerivation rec {
     export KBUILD_OUTPUT=`pwd`
     cp ${kconfigFile} .config
     cp ${kconfigFile} .config.orig
-    make V=1 olddefconfig
+    make olddefconfig
   '';
 
   checkConfigurationPhase = ''
