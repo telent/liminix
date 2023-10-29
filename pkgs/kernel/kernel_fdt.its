@@ -1,6 +1,6 @@
 /dts-v1/;
 
-//  used on aarch64 to provide a U-bootable image that combines
+//  used on arm/aarch64 to provide a U-bootable image that combines
 //  kernel and fdt
 
 / {
@@ -12,7 +12,7 @@
             description = "Vanilla Linux kernel";
             // data = /incbin/("./vmlinux.bin.gz");
             type = "kernel";
-            arch = "arm64";
+            // arch = "arm64";
             os = "linux";
             // compression = "gzip";
             // load = <00000000>;
@@ -28,7 +28,7 @@
             description = "Flattened Device Tree blob";
             // data = /incbin/("./target.dtb");
             type = "flat_dt";
-            arch = "arm64";
+            // arch = "arm64";
             compression = "none";
             hash-1 {
                     algo = "crc32";
