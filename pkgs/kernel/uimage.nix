@@ -59,9 +59,13 @@ in {
                 data = /incbin/("./vmlinux.bin.lzma");
                 load = <${loadAddress}>;
                 entry = <${entryPoint}>;
+                arch = "${arch}";
                 compression = "lzma";
             };
-            fdt-1 { data = /incbin/("./tmp.dtb"); };
+            fdt-1 {
+                data = /incbin/("./tmp.dtb");
+                arch = "${arch}";
+            };
         };
     };
     _VARS
