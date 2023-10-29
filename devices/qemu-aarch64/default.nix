@@ -34,7 +34,6 @@
         VIRTIO_PCI = "y";
         BLOCK = "y";
         VIRTIO_BLK = "y";
-        NETDEVICES = "y";
         VIRTIO_NET = "y";
 
         SERIAL_EARLYCON_ARM_SEMIHOST = "y"; # earlycon=smh

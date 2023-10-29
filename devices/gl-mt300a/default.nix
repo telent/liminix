@@ -159,7 +159,6 @@
           CONSOLE_LOGLEVEL_QUIET = "4";
 
           NET = "y";
-          NETDEVICES = "y";
           ETHERNET = "y";
           NET_VENDOR_RALINK = "y";
           NET_RALINK_MDIO = "y";

@@ -175,7 +175,6 @@
           CONSOLE_LOGLEVEL_QUIET = "4";
 
           NET = "y";
-          NETDEVICES = "y";
           ETHERNET = "y";
           NET_VENDOR_ATHEROS = "y";
           AG71XX = "y";             # ethernet (qca,qca9530-eth)

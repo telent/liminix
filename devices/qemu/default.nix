@@ -60,7 +60,6 @@
         VIRTIO_PCI = "y";
         BLOCK = "y";
         VIRTIO_BLK = "y";
-        NETDEVICES = "y";
         VIRTIO_NET = "y";
 
         SERIAL_8250= "y";
