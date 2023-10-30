@@ -13,13 +13,23 @@ in
     boot.initramfs = {
       enable = mkEnableOption "initramfs";
     };
-    system.outputs.initramfs = mkOption {
-      type = types.package;
-      internal = true;
-      description = ''
-        Initramfs image capable of mounting the jffs2 root
-        filesystem
-      '';
+    system.outputs = {
+      initramfs = mkOption {
+        type = types.package;
+        internal = true;
+        description = ''
+          Initramfs image capable of mounting the real root
+          filesystem
+        '';
+      };
+      systemConfiguration = mkOption {
+        type = types.package;
+        description = ''
+          pkgs.systemconfig for the configured filesystem,
+          contains 'activate' and 'init' commands
+        '';
+        internal = true;
+      };
     };
   };
   config = mkIf config.boot.initramfs.enable {
