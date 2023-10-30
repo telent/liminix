@@ -160,7 +160,7 @@
           maxLEBcount = "1024"; # guessing
         };
 
-        defaultOutput = "flashimage";
+        defaultOutput = "ubimage";
         # the kernel expects this to be on a 2MB boundary. U-Boot
         # (I don't know why) has a default of 0x41080000, which isn't.
         # We put it at the 32MB mark so that tftpboot can put its rootfs
@@ -177,7 +177,13 @@
           ];
         };
 
-        flash.eraseBlockSize = "65536"; # this is probably wrong
+        # - 0x000000000000-0x000008000000 : "spi-nand0"
+        #         - 0x000000000000-0x000000080000 : "bl2"
+        #         - 0x000000080000-0x0000001c0000 : "fip"
+        #         - 0x0000001c0000-0x0000002c0000 : "factory"
+        #         - 0x0000002c0000-0x000000300000 : "reserved"
+        #         - 0x000000300000-0x000008000000 : "ubi"
+
         networkInterfaces =
           let
             inherit (config.system.service.network) link;
