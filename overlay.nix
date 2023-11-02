@@ -183,5 +183,12 @@ extraPkgs // {
           "\nsed -i.bak 's/linux.*-mips/linux-mops/' Configure\n");
   });
 
+  qemu = prev.qemu.overrideAttrs (o: {
+    patches = o.patches ++ [
+      ./pkgs/qemu/arm-image-friendly-load-addr.patch
+
+    ];
+  });
+
   pppBuild = prev.ppp;
 }

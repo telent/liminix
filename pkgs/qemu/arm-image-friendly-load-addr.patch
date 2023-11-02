@@ -1,0 +1,31 @@
+Loading kernel at offset 0x10000 works only for zImage, but not for Image,
+because the kernel expect the start of decompressed kernel (.head.text) to be
+at an address that's a distance that's 16MB aligned from  PAGE_OFFSET +
+TEXT_OFFSET (see vmlinux.lds.S). This check is enfornced in __fixup_pv_table in
+arch/arm/kernel/head.S TEXT_OFFSET is 0x00008000, so a 16MB alignment needs to
+have a "0x8000" in the lower 16 bits so that they cancel out. Currently the
+offset Qemu loads it at is 0x10000.
+
+With zImage, this need is met because zImage loads the uncompressed Image
+correctly, however when loading an Image and executing directly Qemu is
+required it to load it at the correct location. Doing so, doesn't break Qemu's
+zImage loading. With this patch, both zImage and Image work correctly.
+
+Original patch from https://patchwork.kernel.org/project/linux-arm-kernel/patch/1395718484-20424-1-git-send-email-joelf@ti.com/ was
+Signed-off-by: Joel Fernandes <joelf@ti.com>
+
+(Edited by Daniel Barlow to apply cleanly to more recent QEMU)
+
+diff --git a/hw/arm/boot.c b/hw/arm/boot.c
+index ada2717f76..18bcdd45d2 100644
+--- a/hw/arm/boot.c
++++ b/hw/arm/boot.c
+@@ -32,7 +32,7 @@
+  */
+ #define KERNEL_ARGS_ADDR   0x100
+ #define KERNEL_NOLOAD_ADDR 0x02000000
+-#define KERNEL_LOAD_ADDR   0x00010000
++#define KERNEL_LOAD_ADDR   0x00008000
+ #define KERNEL64_LOAD_ADDR 0x00080000
+ 
+ #define ARM64_TEXT_OFFSET_OFFSET    8
