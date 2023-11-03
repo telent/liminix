@@ -50,8 +50,13 @@ int main(int argc, char *argv[], char *envp[])
     if(cmdline>=0) {
 	int len = read(cmdline, buf, sizeof buf - 1);
 	buf[len]='\0';
-	write(1, "cmdline ", 8);
+	while(buf[len-1]=='\n') {
+	    buf[len-1]='\0';
+	    len--;
+	}
+	write(1, "cmdline: \"", 10);
 	write(1, buf, len);
+	write(1, "\"\n", 2);
     };
 
     parseopts(buf, &rootdevice, &rootfstype);
