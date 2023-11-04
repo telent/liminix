@@ -1,3 +1,5 @@
+#include <unistd.h>
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -12,6 +14,33 @@ static int begins_with(char * str, char * prefix)
 	return 1;
 }
 
+char * pr_u32(int32_t input) {
+    static char buf[9];
+    const char *digits = "0123456789abcdef";
+    int i=0;
+
+    buf[i] = digits[(input & 0xf0000000) >> 28];
+    buf[i+1] = digits[(input & 0x0f000000) >> 24];
+    if(buf[i] != '0' || buf[i+1] != '0') i+=2;
+
+    buf[i] = digits[(input & 0x00f00000) >> 20];
+    buf[i+1] = digits[(input & 0x000f0000) >> 16];
+    if(buf[i] != '0' || buf[i+1] != '0') i+=2;
+
+    buf[i] = digits[(input & 0x0000f000) >> 12];
+    buf[i+1] = digits[(input & 0x00000f00) >> 8];
+    if(buf[i] != '0' || buf[i+1] != '0') i+=2;
+
+    buf[i] = digits[(input & 0x000000f0) >> 4];
+    buf[i+1] = digits[(input & 0x0000000f)];
+    i+=2;
+
+    buf[i] ='\0';
+    write(2, buf, i);
+
+    return buf;
+}
+
 
 void parseopts(char * cmdline, char **root, char **rootfstype) {
     *root = 0;
@@ -21,7 +50,7 @@ void parseopts(char * cmdline, char **root, char **rootfstype) {
 	if(begins_with(p, "root=")) {
 	    *root = p + strlen("root=");
 	    while(*p && (*p != ' ')) p++;
-	    
+
 	    if(*p) {
 		*p = '\0';
 		p++;
@@ -42,6 +71,8 @@ void parseopts(char * cmdline, char **root, char **rootfstype) {
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+// cc -DTESTS  -o parseopts parseopts.c && ./parseopts
 
 #define die(fmt, ...) do { printf(fmt, __VA_ARGS__); exit(1); } while(0)
 #define S(x) #x
@@ -91,7 +122,11 @@ int main()
     if(strlen(rootfstype)) die("expected empty rootfstype, got \"%s\"", rootfstype);
     if(strlen(root)) die("expected null root, got \"%s\"", root);
 
+    expect_equal("01", pr_u32(1));
+    expect_equal("ab", pr_u32(0xab));
+    expect_equal("0abc", pr_u32(0xabc));
+    expect_equal("aabc", pr_u32(0xaabc));
+    expect_equal("deadcafe", pr_u32(0xdeadcafe));
 }
-
 
 #endif

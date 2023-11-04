@@ -13,7 +13,9 @@
 void parseopts(char * cmdline, char **root, char **rootfstype);
 
 #define ERR(x) write(2, x, strlen(x))
-#define AVER(c) do { if(c < 0) ERR("failed: "  #c); } while(0)
+#define AVER(c) do { if(c < 0) { ERR("failed: "  #c ": error=0x" ); pr_u32(errno); ERR("\n"); } } while(0)
+
+char * pr_u32(int32_t input);
 
 static void die() {
     /* if init exits, it causes a kernel panic. On the Turris
@@ -52,7 +54,7 @@ int main(int argc, char *argv[], char *envp[])
 
     write(1, banner, strlen(banner));
 
-    mount("none", "/proc", "proc", 0, NULL);
+    AVER(mount("none", "/proc", "proc", 0, NULL));
 
     int cmdline = open("/proc/cmdline", O_RDONLY, 0);
 
@@ -66,18 +68,19 @@ int main(int argc, char *argv[], char *envp[])
 	write(1, "cmdline: \"", 10);
 	write(1, buf, len);
 	write(1, "\"\n", 2);
-    };
-
+    } else {
+	ERR("failed: open(\"/proc/cmdline\")\n");
+	die();
+    }
     parseopts(buf, &rootdevice, &rootfstype);
-	
+
     if(rootdevice) {
 	if(!rootfstype) rootfstype = "jffs2"; /* backward compatibility */
 	write(1, "rootdevice ", 11);
 	write(1, rootdevice, strlen(rootdevice));
 	write(1, " (", 2);
 	write(1, rootfstype, strlen(rootfstype));
-	write(1, ")\n", 1);
-
+	write(1, ")\n", 2);
 	AVER(mount(rootdevice, "/target/persist", rootfstype, 0, NULL));
 	AVER(mount("/target/persist/nix", "/target/nix",
 		   "bind", MS_BIND, NULL));
@@ -87,7 +90,7 @@ int main(int argc, char *argv[], char *envp[])
 	AVER(chdir("/target"));
 
 	AVER(mount("/target", "/", "bind", MS_BIND | MS_REC, NULL));
-	AVER(chroot(".")); 
+	AVER(chroot("."));
 
 	argv[0] = "init";
 	argv[1] = NULL;
