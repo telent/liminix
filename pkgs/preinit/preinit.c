@@ -15,6 +15,21 @@ void parseopts(char * cmdline, char **root, char **rootfstype);
 #define ERR(x) write(2, x, strlen(x))
 #define AVER(c) do { if(c < 0) ERR("failed: "  #c); } while(0)
 
+static void die() {
+    /* if init exits, it causes a kernel panic. On the Turris
+     * Omnia (and maybe other hardware, I don't know), the kernel
+     * panics _before_ any of the messages from AVER are printed,
+     * which makes it really hard to tell what went wrong.  So
+     * let's wait a little here to give the console a chance to
+     * catch up.
+     *
+     * Yes, I know that file descriptor IO is supposedly
+     * non-buffered. Empirical observation suggests that there
+     * must be a buffer of some kind somewhere though.
+     */
+
+    sleep(10);
+    exit(1);
 }
 
 static int fork_exec(char * command, char *args[])
@@ -78,4 +93,5 @@ int main(int argc, char *argv[], char *envp[])
 	argv[1] = NULL;
 	AVER(execve("/persist/init", argv, envp));
     }
+    die();
 }
