@@ -1,9 +1,12 @@
 #include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/mount.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <stdint.h>
+#include <errno.h>
 
 #include <asm/setup.h>		/* for COMMAND_LINE_SIZE */
 
@@ -12,15 +15,6 @@ void parseopts(char * cmdline, char **root, char **rootfstype);
 #define ERR(x) write(2, x, strlen(x))
 #define AVER(c) do { if(c < 0) ERR("failed: "  #c); } while(0)
 
-static int begins_with(char * str, char * prefix)
-{
-    while(*prefix) {
-	if(*str == '\0') return 0;
-	if(*str != *prefix) return 0;
-	str++;
-	prefix++;
-    }
-    return 1;
 }
 
 static int fork_exec(char * command, char *args[])
@@ -28,7 +22,7 @@ static int fork_exec(char * command, char *args[])
     int fork_pid = fork();
     AVER(fork_pid);
     if(fork_pid > 0)
-	wait(NULL);
+	return wait(NULL);
     else
 	return execve(command, args, NULL);
 }
@@ -40,7 +34,7 @@ int main(int argc, char *argv[], char *envp[])
 {
     char *rootdevice = 0;
     char *rootfstype = 0;
-    char *p = buf;
+
     write(1, banner, strlen(banner));
 
     mount("none", "/proc", "proc", 0, NULL);
