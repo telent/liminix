@@ -52,6 +52,14 @@ case "$arch" in
     aarch64)
 	QEMU="qemu-system-aarch64 -M virt -semihosting -cpu cortex-a72"
 	;;
+    arm)
+	# https://bugs.launchpad.net/qemu/+bug/1790975
+	QEMU="qemu-system-arm -M virt,highmem=off -cpu cortex-a15"
+	;;
+    *)
+	echo "unrecognised arch $arch"
+	exit 1;
+	;;
 esac
 
 phram="mtdparts=phram0:16M(rootfs) phram.phram=phram0,${PHRAM_ADDRESS},16Mi,65536 root=/dev/mtdblock0";

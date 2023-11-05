@@ -9,7 +9,7 @@ let
   borderVmConf =  ./bordervm.conf-example.nix;
   inherit (pkgs.lib.attrsets) genAttrs;
   devices = {
-    virt = [ "qemu" "qemu-aarch64" ];
+    virt = [ "qemu" "qemu-aarch64" "qemu-armv7l" ];
     hw = [ "gl-ar750" "gl-mt300n-v2" "gl-mt300a"  ];
   };
   vanilla = ./vanilla-configuration.nix;
