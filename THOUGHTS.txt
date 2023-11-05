@@ -2691,3 +2691,242 @@ to provide a commandline in that case, but maybe also no need to.
 
 For tftpboot, am undecided. We could use the dtb rewriting thing
 everywhere, in the interest of consistency.
+
+Mon Oct  9 20:45:54 BST 2023
+
+we bumped the kernel entry point to the 32MB mark, as
+
+(1) when using jffs2 (big rootfs image) it was clobbering the dtb at
+the end of the filesystem
+
+(2) it should be 2MB aligned anyway and wasn't
+
+However, this has given us the next problem:
+
+OF: fdt: Reserved memory: failed to reserve memory for node 'secmon@43000000': base 0x00000000430B
+OF: reserved mem: OVERLAP DETECTED!
+phram-rootfs (0x0000000040400000--0x0000000053a31488) overlaps with ramoops@42ff0000 (0x000000004)
+Zone ranges:
+  DMA      [mem 0x0000000040000000-0x000000005fffffff]
+  DMA32    empty
+  Normal   empty
+Movable zone start for each node
+
+the end of that phram-rootfs region looks well sus.
+
+[ turns out that decimal is not hex ]
+
+Tue Oct 10 21:37:31 BST 2023
+
+UBI bleurgh ...
+
+The DTB for this device, and/or the OpenWrt installer,  seems to
+expect already that mtd4 is a UBI thing
+
+mtdinfo -a says:
+mtd4
+Name:                           ubi
+Type:                           nand
+Eraseblock size:                131072 bytes, 128.0 KiB
+Amount of eraseblocks:          1000 (131072000 bytes, 125.0 MiB)
+Minimum input/output unit size: 2048 bytes
+Sub-page size:                  2048 bytes
+OOB size:                       64 bytes
+Character device major/minor:   90:8
+Bad blocks are allowed:         true
+Device is writable:             true
+
+<5>UBI: auto-attach mtd4
+<5>ubi0: attaching mtd4
+<5>ubi0: scanning is finished
+<5>ubi0: attached mtd4 (name "ubi", size 125 MiB)
+<5>ubi0: PEB size: 131072 bytes (128 KiB), LEB size: 126976 bytes
+<5>ubi0: min./max. I/O unit sizes: 2048/2048, sub-page size 2048
+
+we made a volume using "ubimkvol /dev/ubi0 -N liminix -S 825"
+
+and from ubinfo -a we can see
+
+0 ubootenv
+1 ubootenv2
+2 recovery
+3 boot_backup
+4 liminix
+
+Now we could use "ubiupdatevol /dev/ubi0_4 /path/to/ubifs.img"
+to put a ubifs on that volume, but obviously we'd have to boot the
+device into Liminix somehow first.
+
+Alternatively in the build environment we could use ubinize to
+create the entire image that can be flashed to MTD, but
+
+- this will overwrite erase counters.
+- we have to give it a config file that describes all the volumes,
+ and I'm guessing they need to match up with the existing ones
+ otherwise we trash the uboot env
+
+
+Wed Oct 11 17:37:09 BST 2023
+
+We can write ubi volumes from u-boot.  Let's for the moment use
+mkfs.ubifs and tftp those files to u-boot - we can figure out the
+ubinize dance later
+
+We need either
+
+(a) to write an analogue of our jffs2 graft option for mkfs.ubifs, or
+(b) to have a "cpio-like" mkfs.ubifs variant that reads filenames on stdin
+  and writes only those, or
+(c) to create a "staging" directory during build with all the store folders that need to go into the filesystem
+
+although the least elegant, option (c) is the simplest and probably
+not even slow, at least by comparison with unpacking the kernel source
+tarball
+
+we used
+uboot> tftpboot 0x40400000 result/rootfs
+uboot> ubi write 40400000 liminix $filesize
+
+then can use ubifsmount ubi0:liminix ; ubifsls / to check that it wrote
+something valid. To boot this:
+
+setenv serverip 10.0.0.1
+setenv ipaddr 10.0.0.8
+setenv bootargs 'liminix console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 root=ubi0:liminix  rootfstype=ubifs fw_devlink=off'
+tftpboot 0x4007ff28 result/uimage
+bootm 0x4007ff28
+
+The other thing we had to fix here is that activate wasn't being built
+statically. Have to add -Xlinker -static to CFLAGS - I don't know if
+this is a no-op on MIPS
+
+Mon Oct 16 20:51:08 BST 2023
+
+Here's a thing: the u-boot installed by openwrt on this device has a
+ubifsload command, and it has a writable ubootenv. So instead of
+having a separate partition for the kernel we could put the kernel in
+the actual filesystem
+
+I think we should do this by excluding flashimage and including some
+other module (to be written) instead. ubimage or somesuch, perhaps.
+
+So the image we wish to create is a ubifs with a kernel inside it in
+/boot and we also need to change the u-boot env value of
+
+boot_production=led $bootled_pwr on ; run ubi_read_production && bootm $loadaddr#$bootconf ; led $bootled_pwr off
+
+so that it mounts the rootfs and finds /boot/uimage inside it
+
+From uboot this is setenv and saveenv; from a running linux this is fw_setenv
+
+Thu Oct 19 09:34:15 BST 2023
+
+setenv bootargs 'liminix console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 root=ubi0:liminix  rootfstype=ubifs fw_devlink=off'
+
+
+ubifsmount ubi0:liminix
+ubifsload 4007ff28 boot/uimage
+bootm 0x4007ff28
+
+
+Thu Oct 19 23:11:17 BST 2023
+
+Assuming you've done the openwrt installer to repartion the device,
+what are the steps to install Liminix?
+
+1) build rootfs, which incorporates kernel
+
+2) from u-boot:
+
+uboot> ubimkvol /dev/ubi0 -N liminix -S 825
+uboot> tftpboot 0x40400000 result/rootfs
+uboot> ubi write 40400000 liminix $filesize
+uboot> setenv boot_production 'led $bootled_pwr on ; ubifsmount ubi0:liminix; ubifsload 4007ff28 boot/uimage; bootm 4007ff28'
+
+What if we don't have a serial console? can we do all this from openwrt?
+
+Fri Oct 27 23:21:08 BST 2023
+
+setenv serverip 10.0.0.1
+setenv ipaddr 10.0.0.8
+setenv bootargs 'liminix earlyprintk earlycon=uart8250,mmio32,0xf1012000 ramoops.mem_address=0x8000000 ramoops.mem_size=0x40000 ramoops=max_reason=2 mem=128M earlycon=ttyS0 console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 root=ubi0:liminix  rootfstype=ubifs fw_devlink=off'
+setenv bootargs 'liminix  ramoops.mem_address=0x8000000 ramoops.mem_size=0x40000 ramoops=max_reason=2 mem=128M console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 root=ubi0:liminix  rootfstype=ubifs fw_devlink=off'
+tftpboot ${kernel_addr_r} result
+bootm ${kernel_addr_r}
+
+
+---
+this is potentially worth checkng out because we do have very slow
+decompress speed
+
+https://scm.linefinity.com/common/u-boot/commit/5818198e6a184963c6afc82178b23a64435ace6a
+
+Commit 5bb2c550b1 ("arm: mvebu: Move internal registers in
+arch_very_early_init() function") implemented code movement according to
+(now incomplete) comments which resulted in semi-broken code.
+
+The result is that I-cache is currently disabled for all Armada 38x boards
+and maybe there are some other (unreported / undetected) issues.
+
+[...] After this change lzmadec command with lzma image of 0x7000000 bytes is
+doing decompression just 5 seconds. Before this change it was 30 seconds.
+
+
+Mon Oct 30 21:03:55 GMT 2023
+
+We have a kernel that boots on the Omnia, now we need to build a
+rootfs. Given this device uses mmc for its primary storage, we should
+use a block filesystem not a flash filesystem.
+
+
+setenv serverip 10.0.0.1
+setenv ipaddr 10.0.0.8
+setenv bootargs 'liminix console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 root=/dev/mtdblock0 rootfstype=ext4fs fw_devlink=off mtdparts=phram0:22M(rootfs) phram.phram=phram0,0x1300000,23068672,65536 root=/dev/mtdblock0'
+tftpboot 0x1000000 tftpboot/uimage ; tftpboot 0x1300000 tftpboot/dtb ; tftpboot 0x29b0000 tftpboot/dtb; tftpboot 0x29c0000 initrd.img
+
+
+Sat Nov  4 12:22:37 GMT 2023
+
+setenv serverip 10.0.0.1
+setenv ipaddr 10.0.0.8
+setenv bootargs 'liminix console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 root=/dev/mtdblock0 rootfstype=ext4 fw_devlink=off mtdparts=phram0:22M(rootfs) phram.phram=phram0,0x40300000,23068672,65536 root=/dev/mtdblock0'
+tftpboot 0x40000800 tftpboot/uimage ; tftpboot 0x419b0800 tftpboot/dtb ; tftpboot 0x41a00000 initrd.img  ; tftpboot 0x40300000 tftpboot/rootfs
+bootm 0x40000800  0x41a00000 0x419b0800
+
+kernel  0x40000800 + 2af400 = "402afc00"
+rootfs  0x40300000 + 15f9400 = "418f9400"
+dtb     0x419b0800 + 4e00 = "419b5600"
+
+Sun Nov  5 00:01:56 GMT 2023
+
+Open questions
+
+1) using -device loader for qemu phram, how do we choose appropriate
+start address for all architectures? we could try to unify this
+with the tftpboot approach, but that would mean providing the dtb
+ourselves somehow which seems silly when qemu already does it
+
+2) flash erase block size for tftpboot phram, it need to match the hardware
+ - we don't use it at all for squashfs
+ - for jffs2 it needs to match if tftpboot is to use same rootfs image
+   as flash
+ - we don't have any way to do a tftpboot ubifs
+ - ext4 doesn't care
+
+
+3) the rootfstype needs thought.
+
+- for all but squashfs it implies an initramfs
+- jffs2 can be flashed naively
+- ubifs needs an installer to not clobber erase counts
+- ext4 (for omnia) needs a block device and can't be flashed along
+  with the kernel/initramfs because it's a separate disk. or maybe
+  the omnia can load kernel from mmc?
+
+phram plus mtd_block is ok for ext4 for qemu, so that's one thing
+fewer to deal with
+
+4) for tftpboot with a separate initramfs, is there any way to
+make address selection easier?
+
+5) ubifs needs a different set of flash parameters (PEB, LEB etc)
