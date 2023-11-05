@@ -29,6 +29,12 @@ in {
         description = "\"Default\" output: what gets built for this device when outputs.default is requested. Typically this is \"flashimage\" or \"vmroot\"";
         type = types.nonEmptyStr;
       };
+      ram = {
+        startAddress = mkOption {
+          type = types.int;
+        };
+      };
+
       flash = {
         # start address and size of whichever partition (often
         # called "firmware") we're going to overwrite with our

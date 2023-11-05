@@ -10,6 +10,7 @@
       OF = "y";
       USE_OF = "y";
     };
+    hardware.ram.startAddress = 0;
     boot.commandLine = [
       "console=ttyS0,115200" # true of all mips we've yet encountered
     ];
