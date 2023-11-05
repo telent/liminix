@@ -1,4 +1,4 @@
-{ lib, pkgs, config, ...}:
+{ lib, lim, pkgs, config, ...}:
 {
   config = {
     kernel.config = {
@@ -12,5 +12,6 @@
       OF = "y";
       # USE_OF = "y";
     };
+    hardware.ram.startAddress = lim.parseInt "0x40000000";
   };
 }
