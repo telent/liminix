@@ -54,13 +54,14 @@ case "$arch" in
 	;;
 esac
 
-INIT=${INIT-/bin/init}
+phram="mtdparts=phram0:16M(rootfs) phram.phram=phram0,${PHRAM_ADDRESS},16Mi,65536 root=/dev/mtdblock0";
+
 set -x
 $QEMU \
-    -m 256 \
+    -m 272 \
     -echr 16 \
-    -append "$CMDLINE liminix root=/dev/mtdblock0 block2mtd.block2mtd=/dev/vda,65536" \
-    -drive file=$rootfs,format=raw,readonly=off,if=virtio,index=0 \
+    -append "$CMDLINE liminix $phram" \
+    -device loader,file=$rootfs,addr=$PHRAM_ADDRESS \
     ${initramfs} \
     -netdev socket,id=access,mcast=230.0.0.1:1234,localaddr=127.0.0.1 \
     -device virtio-net,disable-legacy=on,disable-modern=off,netdev=access,mac=ba:ad:1d:ea:21:02 \

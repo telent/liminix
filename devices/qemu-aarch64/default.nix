@@ -26,8 +26,9 @@
         PCI_HOST_GENERIC="y";
 
         MTD = "y";
-        MTD_BLOCK2MTD = "y";
         MTD_BLOCK = "y";
+        MTD_CMDLINE_PARTS = "y";
+        MTD_PHRAM = "y";
 
         VIRTIO_MENU = "y";
         PCI = "y";
