@@ -7,12 +7,6 @@
 let
   inherit (lib) mkOption types concatStringsSep;
   inherit (pkgs) liminix callPackage writeText;
-  arch = let s = pkgs.stdenv; in
-         if s.isAarch64
-         then "aarch64"
-         else if s.isMips
-         then "mips"
-         else throw "can't determine arch";
 in
 {
   imports = [
@@ -87,8 +81,8 @@ in
         let
           cmdline = builtins.toJSON (concatStringsSep " " config.boot.commandLine);
           makeBootableImage = pkgs.runCommandCC "objcopy" {}
-            (if pkgs.stdenv.isAarch64
-             then "${pkgs.stdenv.cc.targetPrefix}objcopy -O binary -S ${kernel} $out"
+            (if pkgs.stdenv.hostPlatform.isAarch
+             then "${pkgs.stdenv.cc.targetPrefix}objcopy -O binary -R .comment -S ${kernel} $out"
              else "cp ${kernel} $out");
         in pkgs.runCommandCC "vmroot" {} ''
           mkdir $out
@@ -100,7 +94,7 @@ in
           echo ${cmdline} > commandline
           cat > run.sh << EOF
           #!${pkgs.runtimeShell}
-          CMDLINE=${cmdline} ${pkgs.pkgsBuildBuild.run-liminix-vm}/bin/run-liminix-vm --arch ${arch} \$* ${makeBootableImage} ${config.system.outputs.rootfs}
+          CMDLINE=${cmdline} ${pkgs.pkgsBuildBuild.run-liminix-vm}/bin/run-liminix-vm --arch ${pkgs.stdenv.hostPlatform.qemuArch} \$* ${makeBootableImage} ${config.system.outputs.rootfs}
           EOF
           chmod +x run.sh
        '';
