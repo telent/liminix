@@ -7,7 +7,7 @@ let img = (import liminix {
       liminix-config = ./configuration.nix;
     }).outputs.default;
     pkgs = import <nixpkgs> { overlays = [(import ../../overlay.nix)]; };
-    inherit (pkgs.pkgsBuildBuild) routeros run-liminix-vm;
+    inherit (pkgs.pkgsBuildBuild) routeros;
 in pkgs.runCommand "check" {
   nativeBuildInputs = with pkgs; [
     python3Packages.scapy

@@ -7,7 +7,6 @@ let img = (import liminix {
       liminix-config = ./configuration.nix;
     }).outputs.default;
     pkgs = import <nixpkgs> { overlays = [(import ../../overlay.nix)]; };
-    inherit (pkgs.pkgsBuildBuild)  run-liminix-vm;
 in pkgs.runCommand "check" {
   nativeBuildInputs = with pkgs; [
     expect socat
