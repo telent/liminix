@@ -19,7 +19,7 @@ let
 
   config = (pkgs.lib.evalModules {
     modules = [
-      { _module.args = { inherit pkgs; lib = pkgs.lib; }; }
+      { _module.args = { inherit pkgs; inherit (pkgs) lim; }; }
       ./modules/hardware.nix
       ./modules/base.nix
       ./modules/busybox.nix

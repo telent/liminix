@@ -191,4 +191,9 @@ extraPkgs // {
   });
 
   pppBuild = prev.ppp;
+
+  # liminix library functions
+  lim = {
+    parseInt = s : (builtins.fromTOML "r=${s}").r;
+  };
 }

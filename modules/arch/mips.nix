@@ -1,4 +1,4 @@
-{ lib, pkgs, config, ...}:
+{ lib, pkgs, config, lim, ...}:
 {
   config = {
     kernel.config = {
@@ -10,7 +10,7 @@
       OF = "y";
       USE_OF = "y";
     };
-    hardware.ram.startAddress = 0;
+    hardware.ram.startAddress = lim.parseInt "0x0";
     boot.commandLine = [
       "console=ttyS0,115200" # true of all mips we've yet encountered
     ];
