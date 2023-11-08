@@ -11,6 +11,7 @@ in
 {
   imports = [
     ./squashfs.nix
+    ./outputs/vmroot.nix
   ];
   options = {
     system.outputs = {
@@ -30,13 +31,6 @@ in
         type = types.package;
         description = ''
           Combined kernel and FDT in uImage (U-Boot compatible) format
-        '';
-      };
-      vmroot = mkOption {
-        type = types.package;
-        description = ''
-          Directory containing separate kernel and rootfs image for
-          use with QEMU
         '';
       };
       manifest = mkOption {
@@ -76,30 +70,6 @@ in
         inherit kernel;
         inherit dtb;
       };
-      # could use trivial-builders.linkFarmFromDrvs here?
-      vmroot =
-        let
-          cmdline = builtins.toJSON (concatStringsSep " " config.boot.commandLine);
-          makeBootableImage = pkgs.runCommandCC "objcopy" {}
-            (if pkgs.stdenv.hostPlatform.isAarch
-             then "${pkgs.stdenv.cc.targetPrefix}objcopy -O binary -R .comment -S ${kernel} $out"
-             else "cp ${kernel} $out");
-          phram_address = lib.toHexString (config.hardware.ram.startAddress + 256 * 1024 * 1024);
-        in pkgs.runCommandCC "vmroot" {} ''
-          mkdir $out
-          cd $out
-          ln -s ${config.system.outputs.rootfs} rootfs
-          ln -s ${kernel} vmlinux
-          ln -s ${manifest} manifest
-          ln -s ${kernel.headers} build
-          echo ${cmdline} > commandline
-          cat > run.sh << EOF
-          #!${pkgs.runtimeShell}
-          CMDLINE=${cmdline} PHRAM_ADDRESS=0x${phram_address} ${pkgs.pkgsBuildBuild.run-liminix-vm}/bin/run-liminix-vm --arch ${pkgs.stdenv.hostPlatform.qemuArch} \$* ${makeBootableImage} ${config.system.outputs.rootfs}
-          EOF
-          chmod +x run.sh
-       '';
-
       manifest = writeText "manifest.json" (builtins.toJSON config.filesystem.contents);
     };
   };
