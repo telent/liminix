@@ -37,7 +37,6 @@
         VIRTIO_BLK = "y";
         VIRTIO_NET = "y";
 
-        SERIAL_EARLYCON_ARM_SEMIHOST = "y"; # earlycon=smh
         SERIAL_AMBA_PL011 = "y";
         SERIAL_AMBA_PL011_CONSOLE = "y";
       };
