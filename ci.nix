@@ -26,30 +26,39 @@ let
     tests //
     {
       buildEnv = (import liminix {
-        inherit nixpkgs  borderVmConf;
+        inherit nixpkgs borderVmConf;
         device = import (liminix + "/devices/qemu");
         liminix-config = vanilla;
       }).buildEnv;
-      doc = pkgs.stdenv.mkDerivation {
-        name = "liminix-doc";
-        nativeBuildInputs = with pkgs; [
-          gnumake sphinx
-          fennel luaPackages.lyaml
-        ];
-        src = ./doc;
-        buildPhase = ''
-          cat ${(import ./doc/extract-options.nix).doc} > options.json
-          cat options.json | fennel --correlate parse-options.fnl > modules-generated.rst
-          cp ${(import ./doc/hardware.nix)} hardware.rst
-          make html
-        '';
-        installPhase = ''
-          mkdir -p $out/nix-support $out/share/doc/
-          cp modules.rst options.json $out
-          cp -a _build/html $out/share/doc/liminix
-          echo "file source-dist \"$out/share/doc/liminix\"" \
-              > $out/nix-support/hydra-build-products
-        '';
+      doc =
+        let json =
+              (import liminix {
+                inherit nixpkgs borderVmConf;
+                device = import (liminix + "/devices/qemu");
+                liminix-config = {...} : {
+                  imports = [ ./modules/all-modules.nix ];
+                };
+              }).outputs.optionsJson;
+        in pkgs.stdenv.mkDerivation {
+          name = "liminix-doc";
+          nativeBuildInputs = with pkgs; [
+            gnumake sphinx fennel luaPackages.lyaml
+          ];
+          src = ./.;
+          buildPhase = ''
+            cat ${json} | fennel --correlate doc/parse-options.fnl > doc/modules-generated.rst
+            cp ${(import ./doc/hardware.nix)} doc/hardware.rst
+            make -C doc html
+          '';
+          installPhase = ''
+            mkdir -p $out/nix-support $out/share/doc/
+            cd doc
+            cp modules-generated.rst  $out
+            ln -s ${json} $out/options.json
+            cp -a _build/html $out/share/doc/liminix
+            echo "file source-dist \"$out/share/doc/liminix\"" \
+                > $out/nix-support/hydra-build-products
+          '';
       };
       with-unstable = (import liminix {
         nixpkgs = unstable;

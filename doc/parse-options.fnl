@@ -2,21 +2,25 @@
 
 (local { : view } (require :fennel))
 
+(fn basename [str ext]
+  (-> str
+      (string.gsub "(.*/)(.*)" "%2")
+      (string.gsub (.. ext "$") "")))
+
 (fn headline [name]
-  (let [(_ _ basename) (string.find name ".*/([^/].*).nix")
-        len (basename:len)]
-    (.. basename "\n" (string.rep "=" len))))
+  (let [title (assert (basename name ".nix"))
+        len (title:len)]
+    (.. title "\n" (string.rep "=" len))))
 
 (fn read-preamble [pathname]
-  (if (= (pathname:sub 1 1) "/")
-      (let [pathname (if (string.match pathname ".nix$")
-                         pathname
-                         (.. pathname "/default.nix"))]
-        (with-open [f (assert (io.open pathname :r))]
-          (accumulate [lines nil
-                       l (f:lines)
-                       :until (not (= (string.sub l 1 2) "##"))]
-            (.. (or lines "") (string.gsub l "^## *" "") "\n"))))))
+  (let [pathname (if (string.match pathname ".nix$")
+                     pathname
+                     (.. pathname "/default.nix"))]
+    (with-open [f (assert (io.open pathname :r))]
+      (accumulate [lines nil
+                   l (f:lines)
+                   :until (not (= (string.sub l 1 2) "##"))]
+        (.. (or lines "") (string.gsub l "^## *" "") "\n")))))
 
 (fn relative-pathname [pathname]
   (let [pathname

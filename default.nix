@@ -17,7 +17,7 @@ let
     };
   });
 
-  config = (pkgs.lib.evalModules {
+  eval = pkgs.lib.evalModules {
     modules = [
       { _module.args = { inherit pkgs; inherit (pkgs) lim; }; }
       ./modules/hardware.nix
@@ -30,7 +30,8 @@ let
       ./modules/users.nix
       ./modules/outputs.nix
     ];
-  }).config;
+  };
+  config = eval.config;
 
   borderVm = ((import <nixpkgs/nixos/lib/eval-config.nix>) {
     system = builtins.currentSystem;
@@ -43,6 +44,12 @@ let
 in {
   outputs = config.system.outputs // {
     default = config.system.outputs.${config.hardware.defaultOutput};
+    optionsJson =
+      let o = import ./doc/extract-options.nix {
+            inherit pkgs eval;
+            lib = pkgs.lib;
+          };
+      in pkgs.writeText "options.json" (builtins.toJSON o);
   };
 
   # this is just here as a convenience, so that we can get a
