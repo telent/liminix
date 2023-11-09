@@ -5,8 +5,18 @@ let
     builtins.readDir ../devices;
   texts = lib.mapAttrsToList (n: t:
     let d = import  ../devices/${n}/default.nix;
-        d' = { description = "no description for ${n}"; } // d;
-    in d'.description )
+        d' = {
+          description = "no description for ${n}";
+        } // d;
+        installer =
+          if d ? installer
+          then ''
+
+            The default installation route for this device is
+            :ref:`system-outputs-${d.installer}`
+          ''
+          else "";
+    in (d'.description + installer))
     devices;
 in
 writeText "hwdoc" ''

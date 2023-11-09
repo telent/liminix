@@ -7,5 +7,5 @@
 
 (each [_ option (ipairs (yaml.load (io.read "*a")))]
   (when (. outputs option.name)
-    (print (.. ".. _" option.name) "\n")
+    (print (.. ".. _" (string.gsub option.name "%." "-") ":") "\n")
     (print option.description)))

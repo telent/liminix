@@ -6,7 +6,7 @@
 # Mainline linux 5.19 doesn't have device-tree support for this device
 # or even for the SoC, so we use the extensive OpenWrt kernel patches
 
-{
+rec {
   system = {
     crossSystem = {
       config = "mips-unknown-linux-musl";
@@ -51,6 +51,7 @@
     OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-ar750
 
   '';
+  installer = "flashimage";
 
   module = {pkgs, config, ... }:
     let
@@ -102,7 +103,7 @@
         FEATURE_DD_IBS_OBS = "y"; # ath10k_cal_data needs skip_bytes,fullblock
       };
       hardware = {
-        defaultOutput = "flashimage";
+        defaultOutput = installer;
         loadAddress = "0x80060000";
         entryPoint  = "0x80060000";
         flash = {

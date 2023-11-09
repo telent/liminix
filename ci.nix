@@ -59,7 +59,7 @@ let
           installPhase = ''
             mkdir -p $out/nix-support $out/share/doc/
             cd doc
-            cp modules-generated.rst  $out
+            cp *-generated.rst  $out
             ln -s ${json} $out/options.json
             cp -a _build/html $out/share/doc/liminix
             echo "file source-dist \"$out/share/doc/liminix\"" \
