@@ -12,6 +12,7 @@ Liminix
    development
    modules
    hardware
+   installers
 
 
 Indices and tables

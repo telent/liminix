@@ -47,6 +47,7 @@ let
           src = ./.;
           buildPhase = ''
             cat ${json} | fennel --correlate doc/parse-options.fnl > doc/modules-generated.rst
+            cat ${json} | fennel --correlate doc/parse-options-outputs.fnl system.outputs.vmroot  > doc/installers-generated.rst
             cp ${(import ./doc/hardware.nix)} doc/hardware.rst
             make -C doc html
           '';
