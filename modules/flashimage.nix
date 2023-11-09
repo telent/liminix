@@ -28,8 +28,31 @@ in {
     flashimage = mkOption {
       type = types.package;
       description = ''
-        Flashable image for the target device, and the script to
-        install it
+        flashimage
+        **********
+
+        This creates an image called :file:`firmware.bin` suitable for
+        squashfs or jffs2 systems. It can be flashed from U-Boot (if
+        you have a serial console connection), or on some devices from
+        the vendor firmware, or from a Liminix kexecboot system.
+
+        If you are flashing from U-Boot, the file
+        :file:`flash.scr` is a sequence of commands
+        which you can paste at the U-Boot prompt to
+        to transfer the firmware file from a TFTP server and
+        write it to flash. **Please read the script before
+        running it: flash operations carry the potential to
+        brick your device**
+
+        .. NOTE::
+
+           TTL serial connections typically have no form of flow
+           control and so don't always like having massive chunks of
+           text pasted into them - and U-Boot may drop characters
+           while it's busy. So don't necessarily expect to copy-paste
+           the whole of :file:`flash.scr` into a terminal emulator and
+           have it work just like that. You may need to paste each
+           line one at a time, or even retype it.
       '';
     };
   };

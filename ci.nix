@@ -39,6 +39,11 @@ let
                   imports = [ ./modules/all-modules.nix ];
                 };
               }).outputs.optionsJson;
+            installers = map (f: "system.outputs.${f}") [
+              "vmroot"
+              "flashimage"
+            ];
+            inherit (pkgs.lib) concatStringsSep;
         in pkgs.stdenv.mkDerivation {
           name = "liminix-doc";
           nativeBuildInputs = with pkgs; [
@@ -47,7 +52,7 @@ let
           src = ./.;
           buildPhase = ''
             cat ${json} | fennel --correlate doc/parse-options.fnl > doc/modules-generated.rst
-            cat ${json} | fennel --correlate doc/parse-options-outputs.fnl system.outputs.vmroot  > doc/installers-generated.rst
+            cat ${json} | fennel --correlate doc/parse-options-outputs.fnl ${concatStringsSep " " installers}  > doc/installers-generated.rst
             cp ${(import ./doc/hardware.nix)} doc/hardware.rst
             make -C doc html
           '';
