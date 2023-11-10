@@ -1,7 +1,4 @@
-# This "device" generates images that can be used with the QEMU
-# emulator. The default output is a directory containing separate
-# kernel (uncompressed vmlinux) and initrd (squashfs) images
-{
+rec {
   system = {
     crossSystem = {
       config = "mips-unknown-linux-musl";
@@ -13,24 +10,21 @@
   };
 
   description = ''
-    QEMU
-    ****
+    QEMU MIPS
+    *********
 
-    This is not a hardware device. This target produces an image for
+    This target produces an image for
     QEMU, the "generic and open source machine emulator and
     virtualizer".
-
-    Liminix can build QEMU for both MIPS (:code:`qemu` device) and Aarch64 (:code:`qemu-aarch64` device)
 
     MIPS QEMU emulates a "Malta" board, which was an ATX form factor
     evaluation board made by MIPS Technologies, but mostly in Liminix
     we use paravirtualized devices (Virtio) instead of emulating
-    hardware. For Aarch64 we use the QEMU "virt" board.
+    hardware.
 
     Building an image for QEMU results in a :file:`result/` directory
-    containing ``run.sh`` ``vmlinux``, ``rootfs`` and possibly
-    (architecture-dependent) ``Image``. To invoke the emulator,
-    run ``run.sh``.
+    containing ``run.sh`` ``vmlinux``, and ``rootfs`` files. To invoke
+    the emulator, run ``run.sh``.
 
     The configuration includes two emulated "hardware" ethernet
     devices and the kernel :code:`mac80211_hwsim` module to
@@ -39,6 +33,8 @@
     in the Development manual.
 
   '';
+  installer = "vmroot";
+
   module = {pkgs, config, ... }: {
     imports = [ ../../modules/arch/mipseb.nix ];
     kernel = {
@@ -74,7 +70,7 @@
           klibBuild = config.system.outputs.kernel.modulesupport;
         };
       in {
-        defaultOutput = "vmroot";
+        defaultOutput = installer;
         rootDevice = "/dev/mtdblock0";
         flash.eraseBlockSize = "65536"; # c.f. pkgs/run-liminix-vm/run-liminix-vm.sh
         networkInterfaces =

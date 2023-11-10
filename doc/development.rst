@@ -56,6 +56,8 @@ Any VM started by a :command:`run.sh` script is connected to "lan" and
 "access", and the emulated border network gateway (see below) runs
 PPPoE and is connected to "access" and "world".
 
+.. _border-network-gateway:
+
 Border Network Gateway
 ----------------------
 

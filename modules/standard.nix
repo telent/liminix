@@ -5,7 +5,7 @@
   imports = [
     ./tftpboot.nix
     ./kexecboot.nix
-    ./flashimage.nix
+    ./outputs/flashimage.nix
     ./jffs2.nix
     ./ubifs.nix
   ];

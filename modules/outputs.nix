@@ -12,6 +12,8 @@ in
   imports = [
     ./squashfs.nix
     ./outputs/vmroot.nix
+    ./outputs/flashimage.nix
+    ./outputs/ubimage.nix
   ];
   options = {
     system.outputs = {

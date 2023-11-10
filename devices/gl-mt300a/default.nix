@@ -1,6 +1,6 @@
 # GL.iNet GL-MT300A
 
-{
+rec {
   system = {
     crossSystem = {
       config = "mipsel-unknown-linux-musl";
@@ -54,6 +54,7 @@
     OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-mt300a
 
   '';
+  installer = "flashimage";
 
   module = { pkgs, config, lib, ...}:
     let
@@ -66,7 +67,7 @@
     in {
       imports = [ ../../modules/arch/mipsel.nix ];
       hardware = {
-        defaultOutput = "flashimage";
+        defaultOutput = installer;
         loadAddress = "0x80000000";
         entryPoint  = "0x80000000";
 

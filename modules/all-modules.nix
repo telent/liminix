@@ -11,7 +11,6 @@
    ./dnsmasq
    ./ext4fs.nix
    ./firewall
-   ./flashimage.nix
    ./hardware.nix
    ./hostapd
    ./hostname.nix
@@ -24,6 +23,8 @@
    ./ntp
    ./outputs.nix
    ./outputs/vmroot.nix
+   ./outputs/ubimage.nix
+   ./outputs/flashimage.nix
    ./ppp
    ./ramdisk.nix
    ./squashfs.nix
@@ -31,7 +32,6 @@
    ./standard.nix
    ./tftpboot.nix
    ./ubifs.nix
-   ./ubimage.nix
    ./users.nix
    ./vlan
    ./watchdog

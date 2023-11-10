@@ -42,6 +42,7 @@ let
             installers = map (f: "system.outputs.${f}") [
               "vmroot"
               "flashimage"
+              "ubimage"
             ];
             inherit (pkgs.lib) concatStringsSep;
         in pkgs.stdenv.mkDerivation {

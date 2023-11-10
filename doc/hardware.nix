@@ -1,15 +1,15 @@
 with import <nixpkgs> {} ;
 
 let
-  devices =
-    builtins.readDir ../devices;
+  devices = builtins.readDir ../devices;
+  inherit (builtins) stringLength;
   texts = lib.mapAttrsToList (n: t:
     let d = import  ../devices/${n}/default.nix;
         d' = {
-          description = "no description for ${n}";
+          description = "${n}\n${substring 0 (stringLength n) "********************************"}\n";
         } // d;
         installer =
-          if d ? installer
+          if d ? description && d ? installer
           then ''
 
             The default installation route for this device is
