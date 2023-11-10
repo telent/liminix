@@ -2930,3 +2930,28 @@ fewer to deal with
 make address selection easier?
 
 5) ubifs needs a different set of flash parameters (PEB, LEB etc)
+
+Tue Nov  7 23:19:10 GMT 2023
+
+We can flash the turris omnia from a USB stick
+https://docs.turris.cz/hw/omnia/rescue-modes/
+
+it looks for omnia-medkit-latest.tar.gz and (I'm guessing) just
+unpacks it onto the emmc.
+
+Perhaps we need per-device installation instructions in the docs.
+
+* rename defaultOutput to installerOutput
+* attach some docs to the various options for installerOutput
+* add a link from the device's rendered manual section to the
+ relevant installer output doc
+
+do we expect that outputs will build on each other? e.g.
+turris omnia output is basically a tarball (other devices
+might want this too) but with docs describing how to reset the
+device and hold the button down until the led flashes four times
+(other devices probably won't want this). maybe the model here
+is that the turris output is a directory with a symlink to the
+tarball and an informative README containing the instructions.
+Although we also want the instructions in the manual where people
+can read them before building anything.
