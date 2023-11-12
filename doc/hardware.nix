@@ -16,7 +16,7 @@ let
             :ref:`system-outputs-${d.installer}`
           ''
           else "";
-    in (d'.description + installer))
+    in d'.description)
     devices;
 in
 writeText "hwdoc" ''

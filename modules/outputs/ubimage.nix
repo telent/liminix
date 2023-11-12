@@ -20,18 +20,17 @@ in {
 ubimage
 *******
 
-First-time installation of a UBIFS Liminix system presently can only
-be done from the U-Boot command line (or from a ramdisk-based recovery
-system: see "kexecboot" but we don't have detailed instructions for
-this process yet).
+This output provides a UBIFS filesystem image and a small U-Boot script
+to make the manual installation process very slightly simpler. You will
+need a serial connection and a network connection to a TFTP server
+containing the filesystem image it creates.
 
-These steps were tested on a Belkin RT3200 (also known as Linksys
-E8450).  Other devices may be set up differently, so use them as
-inspiration and don't just paste them blindly. Consult the Liminix
-manual for how to connect a serial cable to your device and get into
-U-Boot
+.. warning:: These steps were tested on a Belkin RT3200 (also known as
+             Linksys E8450).  Other devices may be set up differently,
+             so use them as inspiration and don't just paste them
+             blindly.
 
-1) determine which MTD device is being used for UBI and the partition name:
+1) determine which MTD device is being used for UBI, and the partition name:
 
 .. code-block:: console
 

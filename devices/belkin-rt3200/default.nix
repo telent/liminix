@@ -6,17 +6,31 @@
     This device is based on a 64 bit Mediatek MT7622 ARM platform,
     and is "work in progress" in Liminix.
 
-    The factory flash image contains ECC errors that make it incompatible
-    with Liminix: you need to use the `OpenWrt UBI Installer <https://github.com/dangowrt/owrt-ubi-installer>`_ to rewrite the partition layout before
-    you can flash Liminix onto it (or even use it with "tftpboot",
-    if you want the wireless to work).
+    .. note:: The factory flash image contains ECC errors that make it
+              incompatible with Liminix: you need to use the `OpenWrt
+              UBI Installer <https://github.com/dangowrt/owrt-ubi-installer>`_ to
+              rewrite the partition layout before you can flash
+              Liminix onto it (or even use it with
+              :ref:`system-outputs-tftpboot`, if you want the wireless
+              to work).
+
+    Hardware summary
+    ================
 
     - MediaTek MT7622BV (1350MHz)
     - 128MB NAND flash
     - 512MB	RAM
     - b/g/n wireless using MediaTek MT7622BV (MT7615E driver)
     - a/n/ac/ax wireless using  MediaTek MT7915E
-  '';
+
+
+    Installation
+    ============
+
+    Installation is currently a manual process (you need a :ref:`serial <serial>` conection and
+    TFTP) following the instructions at :ref:`system-outputs-ubimage`
+
+'';
 
   system = {
     crossSystem = {

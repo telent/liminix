@@ -25,6 +25,17 @@
     - assuming we want to use the wireless - we need to build MTD
     support into the kernel even if we're using TFTP root.
 
+    Installation
+    ============
+
+    The stock vendor firmware is a fork of OpenWrt, meaning that the
+    binary created by :ref:`system-outputs-flashimage` can be flashed
+    using the vendor web UI or the U-Boot emergency "unbrick" routine.
+
+    For flashing from an existing Liminix system (we think) it
+    is necessary to first boot into a :ref:`system-outputs-kexecboot`
+    system, otherwise you'll be overwriting flash partitions while
+    they're in use - and that might not end well.
 
     Vendor web page: https://www.gl-inet.com/products/gl-mt300a/
 

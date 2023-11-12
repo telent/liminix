@@ -1,4 +1,4 @@
-rec {
+{
   system = {
     crossSystem = {
       config = "mips-unknown-linux-musl";
@@ -13,6 +13,9 @@ rec {
     GL.iNet GL-AR750
     ****************
 
+    Hardware summary
+    ================
+
     The GL-AR750 "Creta" travel router features:
 
      - QCA9531 @650Mhz SoC
@@ -22,28 +25,32 @@ rec {
      - 16MB NOR Flash
      - supported in OpenWrt by the "ath79" SoC family
 
-    As with many GL.iNet devices, the stock vendor firmware
-    is a fork of OpenWrt, meaning that the plain binary
-    ``firmware.bin`` that Liminix builds can be flashed using the
-    vendor web UI and the U-Boot emergency "unbrick" routine
-
     The GL-AR750 has two distinct sets of wifi hardware. The 2.4GHz
     radio is part of the QCA9531 SoC, i.e. it's on the same silicon as
     the CPU, the Ethernet, the USB etc. The device is connected to the
-    host via AHB, the "Advanced High-Performance Bus" and it is
-    supported in Linux using the ath9k driver. The 5GHz support, on the
-    other hand, is provided by a QCA9887 PCIe (PCI embedded) WLAN chip:
-    I haven't looked closely at the router innards to see if this is
-    actually physically a separate board that could be unplugged, but
-    as far as Linux is concerned it behaves as one. This is
+    host via `AHB <https://en.wikipedia.org/wiki/Advanced_Microcontroller_Bus_Architecture>`_ and it is
+    supported in Linux using the ath9k driver. 5GHz wifi
+    is provided by a QCA9887 PCIe (PCI embedded) WLAN chip,
     supported by the ath10k driver.
+
+    Installation
+    ============
+
+    As with many GL.iNet devices, the stock vendor firmware
+    is a fork of OpenWrt, meaning that the binary created by
+    :ref:`system-outputs-flashimage` can be flashed using the
+    vendor web UI or the U-Boot emergency "unbrick" routine.
+
+    For flashing from an existing Liminix system (we believe that) it
+    is necessary to first boot into a :ref:`system-outputs-kexecboot`
+    system, otherwise you'll be overwriting flash partitions while
+    they're in use - and that might not end well.
 
     Vendor web page: https://www.gl-inet.com/products/gl-ar750/
 
     OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-ar750
 
   '';
-  installer = "flashimage";
 
   module = {pkgs, config, ... }:
     let
@@ -95,7 +102,7 @@ rec {
         FEATURE_DD_IBS_OBS = "y"; # ath10k_cal_data needs skip_bytes,fullblock
       };
       hardware = {
-        defaultOutput = installer;
+        defaultOutput = "flashimage";
         loadAddress = "0x80060000";
         entryPoint  = "0x80060000";
         flash = {
@@ -145,9 +152,14 @@ rec {
           url = "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.71.tar.gz";
           hash = "sha256-yhO2cXIeIgUxkSZf/4aAsF11uxyh+UUZu6D1h92vCD8=";
         };
+
+        # Mainline linux 5.19 doesn't have device-tree support for
+        # this device or even for the SoC, so we use the extensive
+        # OpenWrt kernel patches
         extraPatchPhase = ''
           ${openwrt.applyPatches.ath79}
         '';
+
         config = {
           ATH79 = "y";
           PCI = "y";

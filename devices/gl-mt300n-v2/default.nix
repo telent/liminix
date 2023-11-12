@@ -13,10 +13,22 @@
     GL.iNet GL-MT300N-v2
     ********************
 
-    The GL-MT300N-v2 "Mango" is is very similar to the MT300A, but is
-    based on MT7628 instead of MT7620.  It's also marginally cheaper
-    and comes in a yellow case not a blue one.  It's different again
-    to the v1, which has only half the RAM.
+    The GL-MT300N-v2 "Mango" is is very similar to the :ref:`MT300A <GL.iNet GL-MT300A>, but is
+    based on the MT7628 chipset instead of MT7620.  It's also marginally cheaper
+    and comes in a yellow case not a blue one.  Be sure your device is
+    v2 not v1, which is a different animal and has only half as much RAM.
+
+    Installation
+    ============
+
+    The stock vendor firmware is a fork of OpenWrt, meaning that the
+    binary created by :ref:`system-outputs-flashimage` can be flashed
+    using the vendor web UI or the U-Boot emergency "unbrick" routine.
+
+    For flashing from an existing Liminix system (we think) it
+    is necessary to first boot into a :ref:`system-outputs-kexecboot`
+    system, otherwise you'll be overwriting flash partitions while
+    they're in use - and that might not end well.
 
     Vendor web page: https://www.gl-inet.com/products/gl-mt300n-v2/
 

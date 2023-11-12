@@ -17,26 +17,42 @@ in
   ];
   options = {
     system.outputs = {
+      # the convention here is to mark an output as "internal" if
+      # it's not a complete system (kernel plus userland, or installer)
+      # but only part of one.
       kernel = mkOption {
         type = types.package;
+        internal  = true;
         description = ''
+          kernel
+          ******
+
           Kernel vmlinux file (usually ELF)
         '';
       };
       dtb = mkOption {
         type = types.package;
+        internal  = true;
         description = ''
+          dtb
+          ***
+
           Compiled device tree (FDT) for the target device
         '';
       };
       uimage = mkOption {
         type = types.package;
+        internal  = true;
         description = ''
+          uimage
+          ******
+
           Combined kernel and FDT in uImage (U-Boot compatible) format
         '';
       };
       manifest = mkOption {
         type = types.package;
+        internal  = true;
         description = ''
           Debugging aid. JSON rendition of config.filesystem, on
           which can run "nix-store -q --tree" on it and find
@@ -45,10 +61,10 @@ in
       };
       rootfs = mkOption {
         type = types.package;
+        internal = true;
         description = ''
           root filesystem (squashfs or jffs2) image
         '';
-        internal = true;
       };
     };
   };

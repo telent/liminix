@@ -17,11 +17,27 @@ in {
     tftpboot = mkOption {
       type = types.package;
       description = ''
-        Directory containing files needed for TFTP booting
+        tftpboot
+        ********
+
+        This output is intended for developing on a new device.
+        It assumes you have a serial connection and a
+        network connection to the device and that your
+        build machine is running a TFTP server.
+
+        The output is a directory containing kernel and
+        root filesystem image, and a script :file:`boot.scr` of U-Boot
+        commands that will load the images into memory and
+        run them directly,
+        instead of first writing them to flash. This saves
+        time and erase cycles.
+
+        It uses the Linux `phram <https://github.com/torvalds/linux/blob/master/drivers/mtd/devices/phram.c>`_ driver to emulate a flash device using a segment of physical RAM.
       '';
     };
     boot-scr = mkOption {
       type = types.package;
+      internal = true;
       description = ''
         U-Boot commands to load and boot a kernel and rootfs over TFTP.
         Copy-paste into the device boot monitor
