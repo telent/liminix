@@ -52,7 +52,7 @@
 
   '';
 
-  module = {pkgs, config, ... }:
+  module = {pkgs, config, lim, ... }:
     let
       openwrt = pkgs.openwrt;
       firmwareBlobs = pkgs.pkgsBuildBuild.fetchFromGitHub {
@@ -77,8 +77,8 @@
       };
       ath10k_cal_data =
         let
-          offset = 1024 * 20; # 0x5000
-          size = 2048 + 68; # 0x844
+          offset = lim.parseInt "0x5000";
+          size = lim.parseInt "0x844";
         in pkgs.liminix.services.oneshot rec  {
           name = "ath10k_cal_data";
           up = ''
