@@ -66,7 +66,7 @@
       in {
         defaultOutput = "vmroot";
         loadAddress = lim.parseInt "0x0";
-        entryPoint  = "0x0";
+        entryPoint = lim.parseInt "0x0";
         rootDevice = "/dev/mtdblock0";
 
         flash.eraseBlockSize = "65536"; # c.f. pkgs/mips-vm/mips-vm.sh

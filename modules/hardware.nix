@@ -60,7 +60,7 @@ in {
         };
       };
       loadAddress = mkOption { type = types.ints.unsigned; default = null; };
-      entryPoint = mkOption { };
+      entryPoint = mkOption { type = types.ints.unsigned; };
       radios = mkOption {
         description = ''
           Kernel modules (from mac80211 package) required for the

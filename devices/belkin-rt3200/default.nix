@@ -181,7 +181,7 @@
         # image and DTB underneath, but maybe this is a terrible waste of
         # RAM unless the kernel is able to reuse it later. Oh well
         loadAddress = lim.parseInt "0x42000000";
-        entryPoint  = "0x42000000";
+        entryPoint = lim.parseInt "0x42000000";
         rootDevice = "ubi0:liminix";
         dts = {
           src = "${openwrt.src}/target/linux/mediatek/dts/mt7622-linksys-e8450-ubi.dts";

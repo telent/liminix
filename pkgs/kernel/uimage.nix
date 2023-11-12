@@ -46,7 +46,7 @@ in {
   buildPhaseUImage = ''
     test -f tmp.dtb && ${objcopy} --update-section .appended_dtb=tmp.dtb vmlinux.elf || ${objcopy} --add-section .appended_dtb=tmp.dtb vmlinux.elf
     ${stripAndZip}
-    mkimage -A ${arch} -O linux -T kernel -C lzma -a 0x${lib.toHexString loadAddress} -e ${entryPoint} -n '${lib.toUpper arch} Liminix Linux ${extraName}' -d vmlinux.bin.lzma kernel.uimage
+    mkimage -A ${arch} -O linux -T kernel -C lzma -a 0x${lib.toHexString loadAddress} -e 0x${lib.tohexString entryPoint} -n '${lib.toUpper arch} Liminix Linux ${extraName}' -d vmlinux.bin.lzma kernel.uimage
   '';
 
   buildPhaseFIT = ''
@@ -58,7 +58,7 @@ in {
             kernel {
                 data = /incbin/("./vmlinux.bin.lzma");
                 load = <0x${lib.toHexString loadAddress}>;
-                entry = <${entryPoint}>;
+                entry = <0x${lib.toHexString entryPoint}>;
                 arch = "${arch}";
                 compression = "lzma";
             };

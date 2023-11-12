@@ -104,7 +104,7 @@
       hardware = {
         defaultOutput = "flashimage";
         loadAddress = lim.parseInt "0x80060000";
-        entryPoint  = "0x80060000";
+        entryPoint = lim.parseInt "0x80060000";
         flash = {
           address = "0x9F060000";
           size ="0xfa0000";
