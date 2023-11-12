@@ -1,4 +1,4 @@
-rec {
+{
   description = ''
     Belkin RT-3200 / Linksys E8450
     ******************************
@@ -17,7 +17,6 @@ rec {
     - b/g/n wireless using MediaTek MT7622BV (MT7615E driver)
     - a/n/ac/ax wireless using  MediaTek MT7915E
   '';
-  installer = "ubimage";
 
   system = {
     crossSystem = {
@@ -161,7 +160,7 @@ rec {
           maxLEBcount = "1024"; # guessing
         };
 
-        defaultOutput = installer;
+        defaultOutput = "ubimage";
         # the kernel expects this to be on a 2MB boundary. U-Boot
         # (I don't know why) has a default of 0x41080000, which isn't.
         # We put it at the 32MB mark so that tftpboot can put its rootfs

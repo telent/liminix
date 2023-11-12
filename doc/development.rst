@@ -88,6 +88,68 @@ time with configurations for RP-PPPoE and/or Accel PPP.`
 Hardware devices
 ****************
 
+.. _serial:
+
+U-Boot and serial shenanigans
+=============================
+
+Every device that we have so far encountered in Liminix uses `U-Boot,
+the "Universal Boot Loader" <https://docs.u-boot.org/en/latest/>`_ so
+it's worth knowing a bit about it. "Universal" is in this context a
+bit of a misnomer, though: encountering *mainline* U-Boot is very rare
+and often you'll find it is a fork from some version last updated
+in 2008. Upgrading U-Boot is more or less complicated depending on the
+device and is outside scope for Liminix.
+
+To speak to U-Boot on your device you'll usually need a serial
+connection to it.  This is device-specific. Usually it involves
+opening the box, locating the serial header pins (TX, RX and GND) and
+connecting a USB TTL converter to them.
+
+The Rolls Royce of USB/UART cables is the `FTDI cable
+<https://cpc.farnell.com/ftdi/ttl-232r-rpi/cable-debug-ttl-232-usb-rpi/dp/SC12825?st=usb%20to%20uart%20cable>`_,
+but there are cheaper alternatives based on the PL2303 and CP2102 chipsets.  Or
+get creative and use the `UART GPIO pins <https://pinout.xyz/>`_ on a Raspberry Pi. Whatever you do, make sure
+that the voltages are compatible: if your device is 3.3V (this is
+typical but not universal), you don't want to be sending it 5v or
+(even worse) 12v.
+
+Run a terminal emulator such as Minicom on the computer at other end
+of the link. 115200 8N1 is the typical speed.
+
+.. NOTE::
+
+   TTL serial connections typically have no form of flow control and
+   so don't always like having massive chunks of text pasted into
+   them - and U-Boot may drop characters while it's busy. So don't
+   necessarily expect to copy-paste large chunks of text into the
+   terminal emulator and have it work just like that.
+
+   If using Minicom, you may find it helps to bring up the "Termimal
+   settings" dialog (C^A T), then configure "Newline tx delay" to
+   some small but non-zero value.
+
+When you turn the router on you should be greeted with some messages
+from U-Boot, followed by the instruction to hit some key to stop
+autoboot. Do this and you will get to the prompt. If you didn't see
+anything, the strong likelihood is that TX and RX are the wrong way
+around. If you see garbage, try a different speed.
+
+Interesting commands to try first in U-Boot are :command:`help` and
+:command:`printenv`.
+
+To do anything useful with U-Boot you will probably need a way to get
+large binary files onto the device, and the usual way to do this is by
+adding a network connection and using TFTP to download them. It's
+quite common that the device's U-Boot doesn't speak DHCP so it will
+need a static LAN address. You might also want to keep it away from
+your "real" LAN: see :ref:`bng` for some potentially useful tooling
+to use it on an isolated network.
+
+
+TFTP
+====
+
 .. _tftp server:
 
 How you get your image onto hardware will vary according to the
@@ -150,6 +212,8 @@ and then build ``outputs.tftpboot``. This creates a file in
 U-Boot to transfer the kernel and filesystem over TFTP and boot the
 kernel from RAM.
 
+
+.. _bng:
 
 Networking
 ==========

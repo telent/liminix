@@ -1,4 +1,4 @@
-rec {
+{
   system = {
     crossSystem = {
       config = "mipsel-unknown-linux-musl";
@@ -23,7 +23,6 @@ rec {
     OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-mt300n_v2
 
   '';
-  installer = "flashimage";
 
   module = { pkgs, config, lib, ...}:
     let
@@ -50,7 +49,7 @@ rec {
         };
       };
       hardware = {
-        defaultOutput = installer;
+        defaultOutput = "flashimage";
         loadAddress = "0x80000000";
         entryPoint  = "0x80000000";
 

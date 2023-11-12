@@ -1,4 +1,7 @@
-rec {
+# This "device" generates images that can be used with the QEMU
+# emulator. The default output is a directory containing separate
+# kernel (uncompressed vmlinux) and initrd (squashfs) images
+{
   system = {
     crossSystem = {
       config = "mips-unknown-linux-musl";
@@ -33,8 +36,6 @@ rec {
     in the Development manual.
 
   '';
-  installer = "vmroot";
-
   module = {pkgs, config, ... }: {
     imports = [ ../../modules/arch/mipseb.nix ];
     kernel = {
@@ -70,7 +71,7 @@ rec {
           klibBuild = config.system.outputs.kernel.modulesupport;
         };
       in {
-        defaultOutput = installer;
+        defaultOutput = "vmroot";
         rootDevice = "/dev/mtdblock0";
         flash.eraseBlockSize = "65536"; # c.f. pkgs/run-liminix-vm/run-liminix-vm.sh
         networkInterfaces =

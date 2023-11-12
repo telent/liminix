@@ -117,7 +117,7 @@ If you are prepared to open the device and have a TTL serial adaptor
 of some kind to connect it to, you can probably use U-Boot and a TFTP
 server to download and flash the image.  This is quite
 hardware-specific, and sometimes involves soldering: please refer
-to the :ref:`development manual <tftp server>`.
+to :ref:`serial`.
 
 
 Flashing from OpenWrt

@@ -2,7 +2,7 @@
 # emulator. The default output is a directory containing separate
 # kernel ("Image" format) and root filesystem (squashfs or jffs2)
 # images
-rec {
+{
   system = {
     crossSystem = {
       config =  "armv7l-unknown-linux-musleabihf";
@@ -66,7 +66,7 @@ rec {
           klibBuild = config.system.outputs.kernel.modulesupport;
         };
       in {
-        defaultOutput = installer;
+        defaultOutput = "vmroot";
         loadAddress = "0x00010000";
         entryPoint  = "0x00010000";
         rootDevice = "/dev/mtdblock0";

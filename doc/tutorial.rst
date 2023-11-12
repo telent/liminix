@@ -137,20 +137,12 @@ unbrick if necessary.
 	     work here, but you accept the slightly greater bricking
 	     risk if it doesn't.
 
-You may want to acquire a `USB TTL serial cable
-<https://cpc.farnell.com/ftdi/ttl-232r-rpi/cable-debug-ttl-232-usb-rpi/dp/SC12825?st=usb%20to%20uart%20cable>`_
-when you start working with Liminix on real hardware. You
-won't *need* it for this example, assuming it works, but it
+You may want to read and inwardly digest the Develoment Manual section
+:ref:`serial` when you start working with Liminix on real hardware. You
+won't *need* serial access for this example, assuming it works, but it
 allows you
 to see the boot monitor and kernel messages, and to login directly to
-the device if for some reason it doesn't bring its network up. You have options
-here: the FTDI-based cables are the Rolls Royce of serial cables,
-whereas the ones based on PL2303 and CP2102 chipsets are cheaper but
-also fussier - or you could even get creative and use e.g. a
-`Raspberry Pi <https://pinout.xyz/#>`_ or other SBC with a UART and
-TX/RX/GND header pins. Make sure that the voltages are compatible:
-this is a 3.3v device and you don't want to be sending it 5v or (even
-worse) 12v.
+the device if for some reason it doesn't bring its network up.
 
 Now we can build Liminix. Although we could use the same example
 configuration as we did for Qemu, you might not want to plug a DHCP

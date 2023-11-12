@@ -1,11 +1,3 @@
-
-# I like GL.iNet devices because they're relatively accessible to
-# DIY users: the serial port connections have headers preinstalled
-# and don't need soldering
-
-# Mainline linux 5.19 doesn't have device-tree support for this device
-# or even for the SoC, so we use the extensive OpenWrt kernel patches
-
 rec {
   system = {
     crossSystem = {
