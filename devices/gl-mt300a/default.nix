@@ -55,7 +55,7 @@
       imports = [ ../../modules/arch/mipsel.nix ];
       hardware = {
         defaultOutput = "flashimage";
-        loadAddress = "0x80000000";
+        loadAddress = lim.parseInt  "0x80000000";
         entryPoint  = "0x80000000";
 
         # Creating 5 MTD partitions on "spi0.0":

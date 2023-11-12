@@ -10,7 +10,7 @@ let
   instructions = pkgs.writeText "env.scr" ''
     setenv serverip ${cfg.serverip}
     setenv ipaddr ${cfg.ipaddr}
-    setenv loadaddr ${cfg.loadAddress}
+    setenv loadaddr ${lib.toHexString cfg.loadAddress}
 '';
 in {
   options.system.outputs = {

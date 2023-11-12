@@ -180,7 +180,7 @@
         # We put it at the 32MB mark so that tftpboot can put its rootfs
         # image and DTB underneath, but maybe this is a terrible waste of
         # RAM unless the kernel is able to reuse it later. Oh well
-        loadAddress = "0x42000000";
+        loadAddress = lim.parseInt "0x42000000";
         entryPoint  = "0x42000000";
         rootDevice = "ubi0:liminix";
         dts = {

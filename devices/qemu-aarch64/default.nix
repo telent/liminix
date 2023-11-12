@@ -65,7 +65,7 @@
         };
       in {
         defaultOutput = "vmroot";
-        loadAddress = "0x0";
+        loadAddress = lim.parseInt "0x0";
         entryPoint  = "0x0";
         rootDevice = "/dev/mtdblock0";
 

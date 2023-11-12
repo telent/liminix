@@ -70,13 +70,13 @@ in {
         in
           pkgs.buildPackages.runCommand "boot-scr" { nativeBuildInputs = [ pkgs.pkgsBuildBuild.dtc ];  } ''
             uimageSize=$(($(stat -L -c %s ${o.uimage}) + 0x1000 &(~0xfff)))
-            rootfsStart=0x$(printf %x $((${cfg.loadAddress} + 0x100000 + $uimageSize   &(~0xfffff) )))
+            rootfsStart=0x$(printf %x $((${toString cfg.loadAddress} + 0x100000 + $uimageSize   &(~0xfffff) )))
             rootfsBytes=$(($(stat -L -c %s ${o.rootfs}) + 0x100000 &(~0xfffff)))
             rootfsBytes=$(($rootfsBytes + ${toString cfg.freeSpaceBytes} ))
             rootfsMb=$(($rootfsBytes >> 20))
             cmd="mtdparts=phram0:''${rootfsMb}M(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsBytes},${config.hardware.flash.eraseBlockSize} root=/dev/mtdblock0";
 
-            dtbStart=$(printf %x $((${cfg.loadAddress} + $rootfsBytes + 0x100000 + $uimageSize )))
+            dtbStart=$(printf %x $((${toString cfg.loadAddress} + $rootfsBytes + 0x100000 + $uimageSize )))
 
             mkdir $out
             cat ${o.dtb} > $out/dtb
@@ -89,8 +89,8 @@ in {
             setenv serverip ${cfg.serverip}
             setenv ipaddr ${cfg.ipaddr}
             setenv bootargs 'liminix ${cmdline} $cmd'
-            tftpboot 0x$(printf %x ${cfg.loadAddress}) result/uimage ; tftpboot 0x$(printf %x $rootfsStart) result/rootfs ; tftpboot 0x$dtbStart result/dtb
-            bootm 0x$(printf %x ${cfg.loadAddress}) - 0x$dtbStart
+            tftpboot 0x${lib.toHexString cfg.loadAddress} result/uimage ; tftpboot 0x$(printf %x $rootfsStart) result/rootfs ; tftpboot 0x$dtbStart result/dtb
+            bootm 0x$${lib.toHexString cfg.loadAddress} - 0x$dtbStart
             EOF
           '';
     };

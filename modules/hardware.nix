@@ -59,7 +59,7 @@ in {
           type = types.str;
         };
       };
-      loadAddress = mkOption { default = null; };
+      loadAddress = mkOption { type = types.ints.unsigned; default = null; };
       entryPoint = mkOption { };
       radios = mkOption {
         description = ''
