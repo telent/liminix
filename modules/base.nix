@@ -58,7 +58,7 @@ in {
       };
       tftp = {
         loadAddress = mkOption {
-          type = types.str;
+          type = types.ints.unsigned;
           description = ''
             RAM address at which to load data when transferring via
             TFTP. This is not the address of the flash storage,

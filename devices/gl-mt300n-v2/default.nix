@@ -36,7 +36,7 @@
 
   '';
 
-  module = { pkgs, config, lib, ...}:
+  module = { pkgs, config, lib, lim, ...}:
     let
       inherit (pkgs.liminix.networking) interface;
       inherit (pkgs.liminix.services) oneshot;
@@ -116,7 +116,7 @@
       boot.tftp = {
         # 20MB seems to give enough room to uncompress the kernel
         # without anything getting trodden on. 10MB was too small
-        loadAddress = "0x1400000";
+        loadAddress = lim.parseInt "0x1400000";
       };
 
       kernel = {

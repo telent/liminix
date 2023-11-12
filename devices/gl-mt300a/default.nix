@@ -43,7 +43,7 @@
 
   '';
 
-  module = { pkgs, config, lib, ...}:
+  module = { pkgs, config, lib, lim, ...}:
     let
       inherit (pkgs.liminix.networking) interface;
       inherit (pkgs) openwrt;
@@ -120,7 +120,7 @@
           };
       };
       boot.tftp = {
-        loadAddress = "0x00A00000";
+        loadAddress = lim.parseInt "0x00A00000";
       };
 
       kernel = {

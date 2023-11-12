@@ -144,7 +144,7 @@
         };
       };
       boot.tftp = {
-        loadAddress = "0x00A00000";
+        loadAddress = lim.parseInt "0x00A00000";
       };
       kernel = {
         src = pkgs.pkgsBuildBuild.fetchurl {

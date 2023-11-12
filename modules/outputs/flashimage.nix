@@ -106,9 +106,9 @@ in {
             cat > $out << EOF
             setenv serverip ${tftp.serverip}
             setenv ipaddr ${tftp.ipaddr}
-            tftp 0x$(printf %x ${tftp.loadAddress}) result/firmware.bin
+            tftp 0x${toHexString tftp.loadAddress} result/firmware.bin
             erase 0x$(printf %x ${flash.address}) +${flash.size}
-            cp.b 0x$(printf %x ${tftp.loadAddress}) 0x$(printf %x ${flash.address}) \''${filesize}
+            cp.b 0x${toHexString tftp.loadAddress} 0x$(printf %x ${flash.address}) \''${filesize}
             echo command line was ${builtins.toJSON (concatStringsSep " " config.boot.commandLine)}
             EOF
           '';

@@ -38,7 +38,7 @@
     };
   };
 
-  module = {pkgs, config, lib, ... }:
+  module = {pkgs, config, lib, lim, ... }:
     let firmware = pkgs.stdenv.mkDerivation {
           name = "wlan-firmware";
           phases = ["installPhase"];
@@ -143,7 +143,7 @@
     };
     boot = {
       commandLine = [ "console=ttyS0,115200" ];
-      tftp.loadAddress =  "0x4007ff28";
+      tftp.loadAddress = lim.parseInt "0x4007ff28";
       imageFormat = "fit";
     };
     filesystem =
