@@ -73,7 +73,7 @@
       in {
         defaultOutput = "vmroot";
         rootDevice = "/dev/mtdblock0";
-        flash.eraseBlockSize = "65536"; # c.f. pkgs/run-liminix-vm/run-liminix-vm.sh
+        flash.eraseBlockSize = 65536;
         networkInterfaces =
           let inherit (config.system.service.network) link;
           in {

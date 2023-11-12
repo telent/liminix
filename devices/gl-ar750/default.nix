@@ -106,9 +106,9 @@
         loadAddress = lim.parseInt "0x80060000";
         entryPoint = lim.parseInt "0x80060000";
         flash = {
-          address = "0x9F060000";
-          size ="0xfa0000";
-          eraseBlockSize = "65536";
+          address = lim.parseInt "0x9F060000";
+          size = lim.parseInt "0xfa0000";
+          eraseBlockSize = 65536;
         };
         rootDevice = "/dev/mtdblock5";
         dts = {

@@ -69,7 +69,7 @@
         entryPoint = lim.parseInt "0x0";
         rootDevice = "/dev/mtdblock0";
 
-        flash.eraseBlockSize = "65536"; # c.f. pkgs/mips-vm/mips-vm.sh
+        flash.eraseBlockSize = 65536; # c.f. pkgs/mips-vm/mips-vm.sh
         networkInterfaces =
           let inherit (config.system.service.network) link;
           in {

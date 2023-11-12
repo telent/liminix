@@ -37,7 +37,7 @@ in
           cp ${systemConfiguration}/bin/activate $TMPDIR/empty/activate
           ln -s ${pkgs.s6-init-bin}/bin/init $TMPDIR/empty/init
           grafts=$(sed < ${systemConfiguration}/etc/nix-store-paths 's/^\(.*\)$/--graft \1:\1/g')
-          mkfs.jffs2 --compression-mode=size ${endian} -e ${config.hardware.flash.eraseBlockSize} --enable-compressor=lzo --pad --root $TMPDIR/empty --output $out  $grafts --squash --faketime
+          mkfs.jffs2 --compression-mode=size ${endian} -e ${toString config.hardware.flash.eraseBlockSize} --enable-compressor=lzo --pad --root $TMPDIR/empty --output $out  $grafts --squash --faketime
         '';
     };
   };

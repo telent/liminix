@@ -48,15 +48,15 @@ in {
             kernel uimage and root fs. Usually not the entire flash, as
             we don't want to clobber the bootloader, calibration data etc
           '';
-          type = types.str;
+          type = types.ints.unsigned;
         };
         size = mkOption {
-          type = types.str;
+          type = types.ints.unsigned;
           description = "Size in bytes of the firmware partition";
         };
         eraseBlockSize = mkOption {
           description = "Flash erase block size in bytes";
-          type = types.str;
+          type = types.ints.unsigned;
         };
       };
       loadAddress = mkOption { type = types.ints.unsigned; default = null; };

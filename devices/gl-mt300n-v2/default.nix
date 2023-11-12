@@ -66,9 +66,9 @@
         entryPoint = lim.parseInt "0x80000000";
 
         flash = {
-          address = "0xbc050000";
-          size = "0xfb0000";
-          eraseBlockSize = "65536";
+          address = lim.parseInt "0xbc050000";
+          size = lim.parseInt "0xfb0000";
+          eraseBlockSize = 65536;
         };
         rootDevice = "/dev/mtdblock5";
 

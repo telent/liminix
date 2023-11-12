@@ -69,9 +69,9 @@
         # 0x000000260000-0x000000f80000 : "rootfs"
 
         flash = {
-          address = "0xbc050000";
-          size ="0xf80000";
-          eraseBlockSize = "65536";
+          address = lim.parseInt "0xbc050000";
+          size = lim.parseInt "0xf80000";
+          eraseBlockSize = 65536;
         };
         rootDevice = "/dev/mtdblock5";
 

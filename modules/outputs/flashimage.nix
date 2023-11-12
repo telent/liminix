@@ -75,7 +75,7 @@ in {
       firmware =
         let
           o = config.system.outputs;
-          bs = config.hardware.flash.eraseBlockSize;
+          bs = toString config.hardware.flash.eraseBlockSize;
         in pkgs.runCommand "firmware" {} ''
           dd if=${o.uimage} of=$out bs=${bs} conv=sync
           dd if=${o.rootfs} of=$out bs=${bs} conv=sync,nocreat,notrunc oflag=append
@@ -107,8 +107,8 @@ in {
             setenv serverip ${tftp.serverip}
             setenv ipaddr ${tftp.ipaddr}
             tftp 0x${toHexString tftp.loadAddress} result/firmware.bin
-            erase 0x$(printf %x ${flash.address}) +${flash.size}
-            cp.b 0x${toHexString tftp.loadAddress} 0x$(printf %x ${flash.address}) \''${filesize}
+            erase 0x${toHexString flash.address} +0x${toHexString flash.size}
+            cp.b 0x${toHexString tftp.loadAddress} 0x${toHexString flash.address} \''${filesize}
             echo command line was ${builtins.toJSON (concatStringsSep " " config.boot.commandLine)}
             EOF
           '';
