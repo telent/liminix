@@ -24,7 +24,7 @@
   '';
   installer = "vmroot";
 
-  module = {pkgs, config, ... }: {
+  module = {pkgs, config, lim, ... }: {
     imports = [ ../../modules/arch/arm.nix ];
     kernel = {
       src = pkgs.pkgsBuildBuild.fetchurl {

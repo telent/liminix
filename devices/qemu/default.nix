@@ -36,7 +36,7 @@
     in the Development manual.
 
   '';
-  module = {pkgs, config, ... }: {
+  module = {pkgs, config, lim, ... }: {
     imports = [ ../../modules/arch/mipseb.nix ];
     kernel = {
       src = pkgs.pkgsBuildBuild.fetchurl {

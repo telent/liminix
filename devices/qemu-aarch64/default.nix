@@ -26,7 +26,7 @@
   # this device is described by the "qemu" device
   installer = "vmroot";
 
-  module = {pkgs, config, ... }: {
+  module = {pkgs, config, lim, ... }: {
     imports = [ ../../modules/arch/aarch64.nix ];
     kernel = {
       src = pkgs.pkgsBuildBuild.fetchurl {
