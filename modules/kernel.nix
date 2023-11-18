@@ -15,7 +15,7 @@ let
 in {
   options = {
     kernel = {
-      src = mkOption { type = types.package; } ;
+      src = mkOption { type = types.path; } ;
       modular = mkOption {
         type = types.bool;
         default = true;
