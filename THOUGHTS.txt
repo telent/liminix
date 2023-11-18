@@ -2913,7 +2913,6 @@ ourselves somehow which seems silly when qemu already does it
  - we don't have any way to do a tftpboot ubifs
  - ext4 doesn't care
 
-
 3) the rootfstype needs thought.
 
 - for all but squashfs it implies an initramfs
@@ -2955,3 +2954,120 @@ is that the turris output is a directory with a symlink to the
 tarball and an informative README containing the instructions.
 Although we also want the instructions in the manual where people
 can read them before building anything.
+
+Fri Nov 10 21:27:50 GMT 2023
+
+Realising now that outputs and installers aren't the same thing.
+
+e.g. flashimage can be installed from u-boot or from kexecboot
+
+perhaps we distinguish between the
+
+"installation image":
+- firmware.bin
+- tarball
+- ubifs image
+- kernel + rootfs
+
+and "installer"
+- kexecboot script
+- u-boot script to flash squashfs image
+
+Sun Nov 12 17:17:30 GMT 2023
+
+What TODO?
+
+- "does the kernel live on the filesystem" depends on the bootloader
+  not the filesystem
+   - could we implement this with a module that adds to config.filesystem ?
+     it would depend on whether the bootloader can follow symlinks to
+     files not in /boot (probably fine unless crossing filesystems)
+   - the other question is how much futzing around in u-boot can/do we do
+     to tell u-boot how to boot? for grown-up u-boot it's not a
+     problem as we can saveenv but are there broken u-boots that would
+     prevent this?
+
+- kexecboot is unloved and documented in the wrong place. do we have a
+  test for it even?
+   - it won't work on aarch64 because it needs memmap=
+   - hardcodes memory size, which we should probably work out dynamically
+
+- how to put device name into the device docs
+  maybe devices
+
+- make config.boot.commandLine a single string
+- finish omnia
+- for installation on turris omnia we need tarball not ext4 image
+  (but keep the ext4 image anyway for tftpboot and possibly kexecboot)
+[done] - now we have lim.parseInt should we use it consistently?
+- usefulness tiers for devices ("stable", "experimental", "wip")
+- params for ubi(fs) are a mess
+- create an l2tp configuration
+- iperf and tuning
+- wlan country code
+
+
+Fri Nov 17 17:30:39 GMT 2023
+
+kexec is fraught. I spent some time trying (unsuccesfully) to get a
+kexecboot test running, but it doesn't work in qemu for the reason
+that the kernel I built for qemu has SMP support but does not have
+kexec_nonboot_cpu_func() - which is the needed function to stop
+non-boot CPUs before jumping into the new kernel.  That this code is
+all MIPS-specific (I have to assume that other architectures have
+entirely different ways to stop non-boot CPUs?) is a bit worrisome: how
+many other ways is kexec hardware-dependent?
+
+We have two scenarios where we may want to use it:
+
+1) the "installer": e.g. for UBI platforms, we want to plonk
+a new ubifs on the device without clobbering the erase counters, which
+means either doing it from U-Boot - needs serial connection -
+or doing it from a Linux of some kind that is not running on the
+filesystem we're toasting.
+
+2) reinstalling after the initial install - this is a big deal for
+squashfs where there is no other way to change data, and an only slightly
+smaller deal for jffs2, where there isn't much room to change much
+data.
+
+Maybe instead of kexec we could do this by stopping services and then
+pivot_root into a ramfs. We would, I assume, need to stop any processes
+that have open files on the root fs, but we would need to have network
+interfaces running. So we need a subset of services that run in recovery:
+can make this a bundle
+
+* mount a ramfs
+* copy the closure of the bundle into the ramfs
+* stop all processes (including init?)
+
+sending pid 1 a signal FOO will cause it to run .s6-svscan/SIGFOO
+
+Fri Nov 17 23:53:43 GMT 2023
+
+So we need to extend .s6-svscan/finish to
+
+if test -e /maintenance/bin/init
+  cd /maintenance
+  mount --bind /maintenance/ /
+  chroot .
+  exec /bin/init -D maintenance
+fi
+
+
+foreground {
+  if { test -e /maintenance/bin/init }
+    cd /maintenance
+    foreground { mount --move /maintenance/ / }
+    foreground { chroot . }
+    redirfd -r 0 /dev/console
+    redirfd -w 1 /dev/console
+    fdmove -c 2 1
+    emptyenv /bin/init -D maintenance
+}
+${s6-linux-init}/bin/s6-linux-init-hpr -fr
+
+
+
+
+https://openwrt.org/docs/techref/sysupgrade
