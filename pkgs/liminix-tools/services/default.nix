@@ -18,8 +18,7 @@ let
     ${commands}
   '';
   cleanupScript = name : ''
-    #!/bin/sh
-    test -d ${prefix}/${name} && rm -rf ${prefix}/${name}
+    if test -d ${prefix}/${name} ; then rm -rf ${prefix}/${name} ; fi
   '';
   service = {
     name
