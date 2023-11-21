@@ -94,17 +94,20 @@ let
     };
     ".s6-svscan" =
       let
+        openConsole = ''
+          #!${execline}/bin/execlineb -P
+          ${execline}/bin/redirfd -w 2 /dev/console
+          ${execline}/bin/fdmove -c 1 2
+        '';
         quit = message: ''
-              #!${execline}/bin/execlineb -P
-              ${execline}/bin/redirfd -w 2 /dev/console
-              ${execline}/bin/fdmove -c 1 2
-              ${execline}/bin/foreground { ${s6-linux-init}/bin/s6-linux-init-echo -- ${message} }
-              ${s6-linux-init}/bin/s6-linux-init-hpr -fr
-            '';
+          ${openConsole}
+          ${execline}/bin/foreground { ${s6-linux-init}/bin/s6-linux-init-echo -- ${message} }
+          ${s6-linux-init}/bin/s6-linux-init-hpr -fr
+        '';
         shutdown = action: ''
-              #!${execline}/bin/execlineb -P
-              ${s6-linux-init}/bin/s6-linux-init-shutdown -a #{action} -- now
-            '';
+          #!${execline}/bin/execlineb -P
+          ${s6-linux-init}/bin/s6-linux-init-shutdown -a #{action} -- now
+        '';
         empty = "#!${execline}/bin/execlineb -P\n";
       in dir {
         crash = {
