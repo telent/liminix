@@ -103,7 +103,7 @@ let
             '';
         shutdown = action: ''
               #!${execline}/bin/execlineb -P
-              ${s6-linux-init}/bin/s6-linux-init-hpr -a #{action} -- now
+              ${s6-linux-init}/bin/s6-linux-init-shutdown -a #{action} -- now
             '';
         empty = "#!${execline}/bin/execlineb -P\n";
       in dir {
