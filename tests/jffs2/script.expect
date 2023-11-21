@@ -2,7 +2,6 @@ set timeout 10
 
 spawn socat unix-connect:vm/console -
 send "\r\n"
-expect "login:" {  send "root\r\n" }
 expect "#"
 send "echo HELLO WORLD > /hello\r\n"
 expect "#"

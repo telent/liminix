@@ -8,7 +8,7 @@ in rec {
     ../modules/network
     ../modules/ssh
     ../modules/vlan
-    ../modules/flashimage.nix
+    ../modules/outputs/flashimage.nix
   ];
 
   boot.tftp = {

@@ -69,10 +69,11 @@ device's serial console and the `QEMU monitor
 stdin/stdout.
 
 You should now see Linux boot messages and after a few seconds be
-presented with a login prompt. You can login on the console as
-``root`` (password is "secret") and poke around to see what processes are
-running. To kill the emulator, press ^P (Control P) then c to enter the
-"QEMU Monitor", then type ``quit`` at the ``(qemu)`` prompt.
+presented with a root shell prompt.  You can run commands to look at
+the filesystem, see what processes are running, view log messages (in
+:file:/run/uncaught-logs.current), etc. To kill the emulator, press ^P
+(Control P) then c to enter the "QEMU Monitor", then type ``quit`` at
+the ``(qemu)`` prompt.
 
 To see that it's running network services we need to connect to its
 emulated network. Start the machine again, if you had stopped it, and

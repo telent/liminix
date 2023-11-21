@@ -80,9 +80,16 @@ let
       run = {
         file = ''
               #!${execline}/bin/execlineb -P
-              /bin/getty -l /bin/login 115200 /dev/console
+              ${execline}/bin/redirfd -w 2 /dev/console
+              ${execline}/bin/fdmove -c 1 2
+              ${execline}/bin/redirfd -r 0 /dev/console
+              ${execline}/bin/cd /
+              /bin/ash -l
           '';
         mode = "0755";
+      };
+      down-signal = {
+        file = "HUP\n";
       };
     };
     ".s6-svscan" =
