@@ -55,6 +55,9 @@ let
       run = {
         file = ''
               #!${execline}/bin/execlineb -P
+              importas PATH PATH
+              export PATH ${s6}/bin:''${PATH}
+              foreground { echo path is  ''${PATH} }
               ${s6-linux-init}/bin/s6-linux-init-shutdownd -c  "/etc/s6-linux-init/current" -g 3000
             '';
         mode = "0755";
