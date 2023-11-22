@@ -1,18 +1,22 @@
 #!/bin/sh -e
 
-### Things to do *right before* the machine gets rebooted or
-### powered off, at the very end of the shutdown sequence,
-### when all the filesystems are unmounted.
+##  s6-linux-init-shutdownd never tells s6-svscan to exit, so if
+##  you're running s6-linux-init, it's normal that your
+##  .s6-svscan/finish script is not executed.
 
-### This is a last resort hook; normally nothing should be
-### done here (your rc.shutdown script should have taken care
-### of everything) and you should leave this script empty.
+##  The place where you want to hack things is /etc/rc.shutdown.final,
+##  which is run by the stage 4 script right before the hard reboot.
+##  So you can do dirty stuff [...] which should clean up the
+##  s6-supervise and the foreground, and give control to
+##  .s6-svscan/finish.
 
-### Some distributions, however, may need to perform some
-### actions after unmounting the filesystems: typically if
-### an additional teardown action is required on a filesystem
-### after unmounting it, or if the system needs to be
-### pivot_rooted before it can be shut down, etc.
+## -- Laurent Bercot on skaware mailing list,
+##    https://skarnet.org/lists/skaware/1913.html
 
-### Those are all exceptional cases. If you don't know for
-### certain that you need to do something here, you don't.
+exec >/dev/console 2>&1
+
+# down, exit supervisor, wait, stay down
+s6-svc -dxwD /run/service/s6-linux-init-shutdownd
+# HUP, exit supervisor, wait, down
+s6-svc -hxwd /run/service/s6-svscan-log
+s6-svscanctl -b /run/service # abort

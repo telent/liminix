@@ -118,7 +118,13 @@ let
           mode = "0755";
         };
         finish = {
-          file = quit "s6-svscan exited. Rebooting.";
+          file = ''
+            ${openConsole}
+            ifelse { test -x /run/maintenance/exec } { /run/maintenance/exec }
+            foreground { echo "s6-svscan exited. Rebooting." }
+            wait { }
+            ${s6-linux-init}/bin/s6-linux-init-hpr -fr
+          '';
           mode = "0755";
         };
         SIGINT = {
