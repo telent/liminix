@@ -160,7 +160,6 @@ let
   };
 in {
   config = {
-    programs.busybox.applets = [ "login" "getty" ];
     filesystem = dir {
       etc = dir {
         s6-rc = dir {
