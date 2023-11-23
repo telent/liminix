@@ -102,4 +102,6 @@ in {
   fennel = callPackage ./fennel {};
   fennelrepl = callPackage ./fennelrepl {};
   anoia = callPackage ./anoia {};
+
+  levitate = callPackage ./levitate {};
 }
