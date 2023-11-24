@@ -34,4 +34,5 @@ in {
   applyPatches.ath79 = doPatch "ath79";
   applyPatches.ramips = doPatch "ramips";
   applyPatches.mediatek = doPatch "mediatek"; # aarch64
+  applyPatches.mvebu = doPatch "mvebu"; # arm
 }
