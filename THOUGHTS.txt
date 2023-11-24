@@ -3068,6 +3068,82 @@ foreground {
 ${s6-linux-init}/bin/s6-linux-init-hpr -fr
 
 
-
-
 https://openwrt.org/docs/techref/sysupgrade
+
+s6-svscanctl -t /run/service
+
+Sun Nov 19 10:23:17 GMT 2023
+
+# cat `type -p reboot`
+#!/nix/store/0v3q2lnh7bwg0ldk24lzmsdnmidmdvm6-execline-mips-unknown-linux-musl-2.9.3.0-bin/bin/execlineb -S0
+/nix/store/j41b85ccx0rmf7lm5g13zqb7fs68l8y2-s6-linux-init-mips-unknown-linux-musl-1.1.1.0-bin/bin/s6-linux-init-hpr -r \$@
+
+
+s6-linux-init-hpr calls hpr_send("", 0)
+then
+hpr_shutdown(what, &tain_zero, 0))
+which sends "Shpr"[what] to  SCANDIRFULL "/" SHUTDOWND_SERVICEDIR "/" SHUTDOWND_FIFO
+
+which I assume is s6-linux-init-shutdownd.c
+
+it calls prepare_shutdown on socket read, which sets deadline, grace_time.
+later (when?) it calls
+
+  run_stage3(basedir) ; # we can see this by adding a message to rc.shutdown
+                        # this causes s6-rc services to be downed gently
+  s6-rc -v2 -bDa change
+
+  prepare_stage4(basedir, what)
+
+    creates a file STAGE4_FILE  with the contents:
+     s6-linux-init-umountall
+     scripts/rc.shutdown.final
+     s6-linux-init-hpr -f -r
+
+  unsupervise_tree() ;
+
+     goes through /run/service/*/supervise/control fifos
+     except shutdownd and logger, sending
+     "d" to each
+
+     then does
+     s6_svc_write(SCANDIRFULL "/" S6_SVSCAN_CTLDIR "/control", "an", 2)
+     (this is a rescan not a terminate)
+
+#define SCANDIRFULL S6_LINUX_INIT_TMPFS "/" S6_LINUX_INIT_SCANDIR
+      (works out to be /run/service "/" ".s6-svscan")
+
+ls
+  kill(-1, SIGTERM) ;
+
+s6-rc -v2 -bDa change
+cd /run/service
+for i in s6-linux-init-runleveld s6rc-oneshot-runner s6rc-fdholder eth* getty ; do  s6-svc -d /run/service/$i; done
+
+
+s6-rc -v2 -bDa change
+cd /run/service
+for i in  s6-linux-init-runleveld s6rc-oneshot-runner s6rc-fdholder eth*  ; do  s6-svc -d /run/service/$i; done
+s6-svscanctl -an /run/service
+
+Wed Nov 22 22:01:02 GMT 2023
+
+- define a subset of services that run in maintenance mode.
+- write a command that copies the closure of this bundle into
+  /run/maintenance
+- create enough non-store filesystem (proc dev etc) to make it run
+
+Thu Nov 23 00:09:44 GMT 2023
+
+I was as surprised as anybody that this seems to work, at least
+insofar as it has started a busybox sh process. there is a serious
+deficit of symlinks to busybox, so almost no shell scripts work. and I
+think we need an rc.init
+
+It would be worth tidying up the main s6 run-image quite a lot before
+we go further with this
+
+We'd like to be able to reuse the s6 pseudofile structure (/etc/s6-rc
+and /etc/s6-linux-init) but we can't make it a derivation because it's
+pseudofiles (with funny permissions) not real files. Maybe we can
+invoke the module as a function?
