@@ -90,7 +90,7 @@ in {
             setenv ipaddr ${cfg.ipaddr}
             setenv bootargs 'liminix ${cmdline} $cmd'
             tftpboot 0x${lib.toHexString cfg.loadAddress} result/uimage ; tftpboot 0x$(printf %x $rootfsStart) result/rootfs ; tftpboot 0x$dtbStart result/dtb
-            bootm 0x$${lib.toHexString cfg.loadAddress} - 0x$dtbStart
+            bootm 0x${lib.toHexString cfg.loadAddress} - 0x$dtbStart
             EOF
           '';
     };
