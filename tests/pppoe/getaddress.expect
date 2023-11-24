@@ -10,7 +10,7 @@ while { $FINISHED < 10 } {
   expect {
     "192.168.100.1" { set FINISHED 20; set EXIT 0; }
     "can't find device" { send_user "waiting ..." ; send "\r\n"; sleep 3 }
-    "DOWN" { send_user "waiting ..." ; send "\r\n"; sleep 2 }
+    "DOWN" { send_user "waiting ..." ; send "\r\n"; sleep 3 }
   }
   set FINISHED [ expr $FINISHED + 1 ]
 }
