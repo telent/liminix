@@ -25,47 +25,52 @@ let
   inherit (liminix.services) oneshot longrun;
   inherit (lib.lists) foldl;
   configs = {
-    ath9k = {
+    ath9k.kconfig = {
       WLAN_VENDOR_ATH = "y";
       ATH_COMMON = "m";
       ATH9K = "m";
       ATH9K_AHB = "y";
-      # ATH9K_DEBUGFS = "y";
-      # ATH_DEBUG = "y";
       BACKPORTED_ATH9K_AHB = "y";
     };
-    ath10k_pci = {
+    ath9k_pci = {
+      module = "ath9k";
+      kconfig = {
+        WLAN_VENDOR_ATH = "y";
+        ATH_COMMON = "m";
+        ATH9K = "m";
+        ATH9K_PCI = "y";
+      };
+    };
+    ath10k_pci.kconfig = {
       WLAN_VENDOR_ATH = "y";
       ATH_COMMON = "m";
       ATH10K = "m";
-      # BACKPORTED_ATH10K_AHB = "y";
-      # ATH10K_AHB = "y";
       ATH10K_PCI = "y";
       ATH10K_DEBUG = "y";
     };
-    rt2800soc = {
+    rt2800soc.kconfig = {
       WLAN_VENDOR_RALINK = "y";
       RT2800SOC = "m";
       RT2X00 = "m";
     };
-    mt7603e = {                     # XXX find a better name for this
+    mt7603e.kconfig = {                     # XXX find a better name for this
       WLAN_VENDOR_RALINK = "y";
       WLAN_VENDOR_MEDIATEK = "y";
       MT7603E = "y";
     };
 
-    mt7915e = {
+    mt7915e.kconfig = {
       MT7915E = "m";
     };
-    mt7615e = {
+    mt7615e.kconfig = {
       MT7615E = "m";
       MT7622_WMAC = "y";
     };
-    mac80211_hwsim = {
+    mac80211_hwsim.kconfig = {
       MAC80211_HWSIM = "y";
     };
   };
-  kconfig = (foldl (config: d: (config // configs.${d})) {
+  kconfig = (foldl (config: d: (config // configs.${d}.kconfig)) {
     WLAN = "y";
     CFG80211 = "m";
     MAC80211 = "m";
@@ -82,7 +87,6 @@ let
     CFG80211_CRDA_SUPPORT = "n";
 
     MAC80211_MESH = "y";
-
   } drivers) // extraConfig;
 
   writeConfig = name : config: writeText name
@@ -162,7 +166,11 @@ let
       find . -name \*.ko | cpio --make-directories -p $out/lib/modules/0.0
       depmod -b $out -v 0.0
       touch $out/load.sh
-      for i in ${lib.concatStringsSep " " drivers}; do
+      for i in ${lib.concatStringsSep " "
+        (map
+          (d: let c = { module = d; } // configs.${d} ;
+              in c.module)
+          drivers)}; do
         modprobe -S 0.0 -d $out --show-depends $i >> $out/load.sh
       done
       tac < $out/load.sh | sed 's/^insmod/rmmod/g' > $out/unload.sh
