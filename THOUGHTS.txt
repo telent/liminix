@@ -3147,3 +3147,48 @@ We'd like to be able to reuse the s6 pseudofile structure (/etc/s6-rc
 and /etc/s6-linux-init) but we can't make it a derivation because it's
 pseudofiles (with funny permissions) not real files. Maybe we can
 invoke the module as a function?
+
+Fri Nov 24 23:29:48 GMT 2023
+
+Turris TODO
+
+- see if network works (eth[012], which is which?)
+- wireless drivers
+  [DONE] ath9k and ath10k, it's like old times
+
+- [DONE] feed the watchdog
+   it looks like compiling watchdog support is sufficient to stop the
+   thing from rebooting after three minutes, there is no need to actually
+   feed it from userspace.
+
+- "does the kernel live on the filesystem" depends on the bootloader
+  not the filesystem
+   - could we implement this with a module that adds to config.filesystem ?
+     it would depend on whether the bootloader can follow symlinks to
+     files not in /boot (probably fine unless crossing filesystems)
+   - the other question is how much futzing around in u-boot can/do we do
+     to tell u-boot how to boot? for grown-up u-boot it's not a
+     problem as we can saveenv but are there broken u-boots that would
+     prevent this?
+   - perhaps we need different boot "recipes" - e.g. some device
+     might want boot.scr and another something different
+
+- create installable tarball and test
+- gpio thingy for SFP switching
+- iperf
+
+- document the watchdog
+- remove kexecboot? it's unloved and documented in the wrong place. do we have a
+  test for it even?
+   - it won't work on aarch64 because it needs memmap=
+   - hardcodes memory size, which we should probably work out dynamically
+
+- how to put device name into the device docs
+
+- make config.boot.commandLine a single string
+
+- usefulness tiers for devices ("stable", "experimental", "wip")
+- params for ubi(fs) are a mess
+- iperf and tuning
+- wlan country code
+- create an l2tp configuration
