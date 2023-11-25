@@ -14,11 +14,7 @@
 , lib
 }:
 let
-  arch = if stdenv.isMips
-         then "mips"
-         else if stdenv.isAarch64
-         then "arm64"
-         else throw "unknown arch";
+  arch = stdenv.hostPlatform.linuxArch;
   openwrtSrc = fetchFromGitHub {
     name = "openwrt-source";
     repo = "openwrt";
