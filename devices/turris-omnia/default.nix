@@ -75,6 +75,9 @@
         OF_ADDRESS= "y";
         OF_MDIO= "y";
 
+        WATCHDOG = "y";        # watchdog is enabled by u-boot
+        ORION_WATCHDOG = "y";  # so is non-optional to keep feeding
+
         MVEBU_DEVBUS = "y"; # "Device Bus controller ...  flash devices such as NOR, NAND, SRAM, and FPGA"
         MVMDIO = "y";
         MVNETA = "y";
