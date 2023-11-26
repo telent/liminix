@@ -87,12 +87,39 @@
         MV_XOR = "y";
       };
     };
+
     boot = {
-      commandLine = [ "console=ttyS0,115200" ];
+      commandLine = [
+        "console=ttyS0,115200"
+        "pcie_aspm=off" # ath9k pci incompatible with PCIe ASPM
+      ];
       imageFormat = "fit";
     };
+    filesystem =
+      let
+        inherit (pkgs.pseudofile) dir symlink;
+        firmware = pkgs.stdenv.mkDerivation {
+          name = "wlan-firmware";
+          phases = ["installPhase"];
+          installPhase = ''
+            mkdir $out
+            cp -r ${pkgs.linux-firmware}/lib/firmware/ath10k/QCA988X $out
+          '';
+        };
+        in dir {
+          lib = dir {
+            firmware = dir {
+              ath10k = symlink firmware;
+            };
+          };
+        };
 
-    hardware = {
+    hardware = let
+      mac80211 = pkgs.mac80211.override {
+        drivers = ["ath9k_pci" "ath10k_pci"];
+        klibBuild = config.system.outputs.kernel.modulesupport;
+      };
+      in {
         defaultOutput = "flashimage";
         loadAddress = lim.parseInt "0x00008000";
         entryPoint = lim.parseInt "0x00008000";
@@ -110,6 +137,14 @@
             inherit (config.system.service) bridge;
           in rec {
             lan = link.build { ifname = "eth0"; };
+            wlan = link.build {
+              ifname = "wlan0";
+              dependencies = [ mac80211 ];
+            };
+            wlan5 = link.build {
+              ifname = "wlan1";
+              dependencies = [ mac80211 ];
+            };
           };
       };
 
