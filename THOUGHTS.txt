@@ -3155,6 +3155,9 @@ Turris TODO
 - see if network works (eth[012], which is which?)
 - wireless drivers
   [DONE] ath9k and ath10k, it's like old times
+  https://docs.turris.cz/hw/omnia/omnia/#turris-omnia-wi-fi-6
+  (note: other variant of the device has a MT7915AN, should we add
+   support for that as well?)
 
 - [DONE] feed the watchdog
    it looks like compiling watchdog support is sufficient to stop the
@@ -3192,3 +3195,63 @@ Turris TODO
 - iperf and tuning
 - wlan country code
 - create an l2tp configuration
+
+Sun Nov 26 15:37:07 GMT 2023
+
+hatching a plan ... we could do "predictable" network interfaces like this:
+
+ . add a devpath attr to network/link.nix
+ . get the kernel-issued name from "/sys${devpath}/net"
+ . use ip link set ${oldname} name ${newname}
+
+if we had the full iproute2 thng we could keep the old name as well:
+# ip link property add dev wan altname eth1
+
+maybe we could do this with lua/netlink? no support in there currently
+for RTM_NEWLINKPROP though
+
+Maybe we'll skip doing the altname. The attraction of it is that it
+means the existing name isn't removed, so there's no possibility of a
+race.
+
+The kernel will allocate eth0 when asked for eth%d and there is no
+eth0. This might be the case where eth0 previously existed but it
+just got renamed to lan
+
+Sun Nov 26 21:20:23 GMT 2023
+
+The wrinkle here is ifwait: using netlink we can't wait for an
+interface by devpath but have to do it by name - which is a problem if
+the interface is not yet present, because there won't be a devpath
+in which to look up the name until it is.
+
+So we need a new flow
+
+ - wait for devpath to exist
+ - get the ifindex (which shouldn't change, even if the name does)
+ - churn rtnetlink messages for that index
+
+We don't want to poll the sysfs file, but we can check it whenever
+we get a netlink message
+
+Sun Nov 26 22:33:16 GMT 2023
+
+There is no way to refer to the hardware device for a bridge interface
+by sysfs path because it has none. This is probably true of other
+virtual devices as well.
+
+ls: cannot access '/sys/class/net/vbridge0/device': No such file or directory
+
+Also, there is no way to refer to the _netdevice_ of a hardware
+interface without also knowing its default name, which doesn't help us
+if enumeration changes
+
+ls /sys/devices/pci0000:00/0000:00:01.0/0000:01:00.0/net/
+enp1s0
+
+So we should only be specifying devices by devpath if they're
+hardware devices discovered by the kernel, not synthetic devices (that
+we pick the name of anyway).
+
+So maybe we don't need to rewrite ifwait, we just do it after renaming
+the device
