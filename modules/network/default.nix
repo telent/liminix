@@ -68,7 +68,21 @@ in {
         ifname = mkOption {
           type = types.str;
           example = "eth0";
+          description = ''
+            Device name as used by the kernel (as seen in "ip link"
+            or "ifconfig" output). If devpath is also specified, the
+            device will be renamed to the name provided.
+          '';
         };
+        devpath = mkOption {
+          type = types.nullOr types.str;
+          default = null;
+          example = "/devices/platform/soc/soc:internal-regs/f1070000.ethernet";
+          description = ''
+            Path to the sysfs node of the device. If you provide this
+            and the ifname option, the device will be renamed to the
+            name given by ifname.
+          ''; };
         # other "ip link add" options could go here as well
         mtu = mkOption {
           type = types.nullOr types.int;

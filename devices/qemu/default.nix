@@ -77,8 +77,14 @@
         networkInterfaces =
           let inherit (config.system.service.network) link;
           in {
-            wan = link.build { ifname = "eth0"; };
-            lan = link.build { ifname = "eth1"; };
+            wan = link.build {
+              devpath = "/devices/pci0000:00/0000:00:13.0/virtio0";
+              ifname = "wan";
+            };
+            lan = link.build {
+              devpath = "/devices/pci0000:00/0000:00:14.0/virtio1";
+              ifname = "lan";
+            };
 
             wlan_24 = link.build {
               ifname = "wlan0";
