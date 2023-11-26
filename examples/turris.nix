@@ -8,6 +8,9 @@ in rec {
     ../modules/network
     ../modules/ssh
     ../modules/vlan
+    ../modules/wlan.nix
+    ../modules/hostapd
+    ../modules/bridge
 
     ../modules/ext4fs.nix
     ../modules/tftpboot.nix
@@ -24,14 +27,72 @@ in rec {
     loadAddress = lim.parseInt "0x40000800";
   };
 
-  hostname = "hello";
+  hostname = "omnia";
+
+  services.hostap =
+    let secrets = {
+          ssid = "not-the-internet";
+          channel = 4;
+          wpa_passphrase = "diamond dogs";
+        };
+    in svc.hostapd.build {
+      interface = config.hardware.networkInterfaces.wlan;
+      params = {
+        country_code = "GB";
+        hw_mode = "g";
+        wmm_enabled = 1;
+        ieee80211n = 1;
+        inherit (secrets) ssid channel wpa_passphrase;
+        auth_algs = 1; # 1=wpa2, 2=wep, 3=both
+        wpa = 2; # 1=wpa, 2=wpa2, 3=both
+        wpa_key_mgmt = "WPA-PSK";
+        wpa_pairwise = "TKIP CCMP"; # auth for wpa (may not need this?)
+        rsn_pairwise = "CCMP"; # auth for wpa2
+      };
+    };
+
+  services.hostap5 =
+    let secrets = {
+          ssid = "not-the-internet";
+          channel = 36;
+          wpa_passphrase = "diamond dogs";
+        };
+    in svc.hostapd.build {
+      interface = config.hardware.networkInterfaces.wlan5;
+      params = {
+        country_code = "GB";
+        hw_mode = "a";
+
+        ht_capab = "[HT40+]";
+        vht_oper_chwidth = 1;
+        vht_oper_centr_freq_seg0_idx = secrets.channel + 6;
+        ieee80211ac = 1;
+
+        wmm_enabled = 1;
+        inherit (secrets) ssid channel wpa_passphrase;
+        auth_algs = 1; # 1=wpa2, 2=wep, 3=both
+        wpa = 2; # 1=wpa, 2=wpa2, 3=both
+        wpa_key_mgmt = "WPA-PSK";
+        wpa_pairwise = "TKIP CCMP"; # auth for wpa (may not need this?)
+        rsn_pairwise = "CCMP"; # auth for wpa2
+      };
+    };
+
+  services.int = svc.bridge.primary.build {
+    ifname = "int";
+  };
 
   services.dhcpc = svc.network.dhcp.client.build {
-    interface = config.hardware.networkInterfaces.lan;
-
-    # don't start DHCP until the hostname is configured,
-    # so it can identify itself to the DHCP server
+    interface = services.int;
     dependencies = [ config.services.hostname ];
+  };
+
+  services.bridge = svc.bridge.members.build {
+    primary = services.int;
+    members = with config.hardware.networkInterfaces; [
+      lan
+      wlan
+    ];
   };
 
   services.sshd = svc.ssh.build { };
@@ -43,6 +104,6 @@ in rec {
   };
 
   defaultProfile.packages = with pkgs; [
-    figlet
+    figlet pciutils
   ];
 }
