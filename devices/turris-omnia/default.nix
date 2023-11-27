@@ -85,6 +85,9 @@
         MVNETA_BM_ENABLE = "y";
         MVPP2 = "y";
         MV_XOR = "y";
+
+        NET_DSA = "y";
+        NET_DSA_MV88E6XXX = "y"; # depends on PTP_1588_CLOCK_OPTIONAL
       };
     };
 
@@ -136,7 +139,34 @@
             inherit (config.system.service.network) link;
             inherit (config.system.service) bridge;
           in rec {
-            lan = link.build { ifname = "eth0"; };
+            en70000 = link.build {
+              # in armada-38x.dtsi this is eth0.
+              # It's connected to port 5 of the 88E6176 switch
+              devpath = "/devices/platform/soc/soc:internal-regs/f1070000.ethernet";
+              # name is unambiguous but not very semantic
+              ifname = "en70000";
+            };
+            en30000 = link.build {
+              # in armada-38x.dtsi this is eth1
+              # It's connected to port 6 of the 88E6176 switch
+              devpath = "/devices/platform/soc/soc:internal-regs/f1030000.ethernet";
+              # name is unambiguous but not very semantic
+              ifname = "en30000";
+            };
+            # the default (from the dts? I'm guessing) behavour for
+            # lan ports on the switch is to attach them to
+            # en30000. It should be possible to do something better,
+            # per
+            # https://www.kernel.org/doc/html/latest/networking/dsa/configuration.html#affinity-of-user-ports-to-cpu-ports
+            # but apparently OpenWrt doesn't either so maybe it's more
+            # complicated than it looks
+
+            wan = link.build {
+              # in armada-38x.dtsi this is eth2. It may be connected to
+              # an ethernet phy or to the SFP cage, depending on a gpio
+              devpath = "/devices/platform/soc/soc:internal-regs/f1034000.ethernet";
+              ifname = "wan";
+            };
             wlan = link.build {
               ifname = "wlan0";
               dependencies = [ mac80211 ];
