@@ -83,6 +83,9 @@
         MVNETA = "y";
         MVNETA_BM = "y";
         MVNETA_BM_ENABLE = "y";
+        SRAM = "y"; # mmio-sram is "compatible" for bm_bppi reqd by BM
+        PHY_MVEBU_A38X_COMPHY = "y"; # for eth2
+
         MVPP2 = "y";
         MV_XOR = "y";
 
