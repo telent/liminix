@@ -81,14 +81,22 @@ let
     };
     getty = dir {
       run = {
+        # We can't run a useful shell on /dev/console because
+        # /dev/console is not allowed to be the controlling
+        # tty of any process, which means ^C ^Z etc don't work.
+        # So we work out what the *actual* console device is
+        # using sysfs and open our shell there instead.
         file = ''
-              #!${execline}/bin/execlineb -P
-              ${execline}/bin/redirfd -w 2 /dev/console
-              ${execline}/bin/fdmove -c 1 2
-              ${execline}/bin/redirfd -r 0 /dev/console
-              ${execline}/bin/cd /
-              /bin/ash -l
-          '';
+          #!${execline}/bin/execlineb -P
+          ${execline}/bin/cd /
+          redirfd -r 0 /sys/devices/virtual/tty/console/active
+          withstdinas CONSOLETTY
+          importas CONSOLETTY CONSOLETTY
+          redirfd -w 2 /dev/''${CONSOLETTY}
+          fdmove -c 1 2
+          redirfd -r 0 /dev/''${CONSOLETTY}
+          /bin/ash -l
+        '';
         mode = "0755";
       };
       down-signal = {
