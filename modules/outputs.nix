@@ -12,6 +12,7 @@ in
   imports = [
     ./squashfs.nix
     ./outputs/vmroot.nix
+    ./outputs/extlinux.nix
   ];
   options = {
     system.outputs = {
