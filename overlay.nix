@@ -44,20 +44,12 @@ let
   lua = let s = lua_no_readline.override { self = s; }; in s;
 in
 extraPkgs // {
-  mtdutils = prev.mtdutils.overrideAttrs(o: {
-    patches = (if o ? patches then o.patches else []) ++ [
-      ./pkgs/mtdutils/0001-mkfs.jffs2-add-graft-option.patch
-    ];
-  });
+  # liminix library functions
+  lim = {
+    parseInt = s : (builtins.fromTOML "r=${s}").r;
+  };
 
-  rsyncSmall =
-    let r = prev.rsync.overrideAttrs(o: {
-          configureFlags = o.configureFlags ++ [
-            "--disable-openssl"
-          ];
-        });
-    in r.override { openssl = null; };
-
+  # keep these alphabetical
   chrony =
     let chrony' = prev.chrony.overrideAttrs(o: {
           configureFlags = [
@@ -79,49 +71,6 @@ extraPkgs // {
 
     };
 
-  strace = prev.strace.override { libunwind = null; };
-
-  kexec-tools-static = prev.kexec-tools.overrideAttrs(o: {
-    # For kexecboot we copy kexec into a ramdisk on the system being
-    # upgraded from. This is more likely to work if kexec is
-    # statically linked so doesn't have dependencies on store paths that
-    # may not exist on that machine. (We can't nix-copy-closure as
-    # the store may not be on a writable filesystem)
-    LDFLAGS = "-static";
-
-    patches = o.patches ++ [
-      (fetchpatch {
-        # merge user command line options into DTB chosen
-        url = "https://patch-diff.githubusercontent.com/raw/horms/kexec-tools/pull/3.patch";
-        hash = "sha256-MvlJhuex9dlawwNZJ1sJ33YPWn1/q4uKotqkC/4d2tk=";
-      })
-      pkgs/kexec-map-file.patch
-    ];
-  });
-
-  luaFull = prev.lua;
-  inherit lua;
-
-  inherit s6;
-  s6-linux-init = prev.s6-linux-init.override {
-    skawarePackages = prev.skawarePackages // {
-      inherit s6;
-    };
-  };
-  s6-rc = prev.s6-rc.override {
-    skawarePackages = prev.skawarePackages // {
-      inherit s6;
-    };
-  };
-
-  nftables = prev.nftables.overrideAttrs(o: {
-    configureFlags = [
-      "--disable-debug"
-      "--disable-python"
-      "--with-mini-gmp"
-      "--without-cli"
-    ];
-  });
 
   dnsmasq =
     let d =  prev.dnsmasq.overrideAttrs(o: {
@@ -133,6 +82,15 @@ extraPkgs // {
       dbusSupport = false;
       nettle = null;
     };
+
+  dropbear = prev.dropbear.overrideAttrs (o: {
+    postPatch = ''
+     (echo '#define DSS_PRIV_FILENAME "/run/dropbear/dropbear_dss_host_key"'
+      echo '#define RSA_PRIV_FILENAME "/run/dropbear/dropbear_rsa_host_key"'
+      echo '#define ECDSA_PRIV_FILENAME "/run/dropbear/dropbear_ecdsa_host_key"'
+      echo '#define ED25519_PRIV_FILENAME "/run/dropbear/dropbear_ed25519_host_key"') > localoptions.h
+    '';
+  });
 
   hostapd =
     let
@@ -161,13 +119,40 @@ extraPkgs // {
       });
     in h.override { openssl = null; sqlite = null; };
 
-  dropbear = prev.dropbear.overrideAttrs (o: {
-    postPatch = ''
-     (echo '#define DSS_PRIV_FILENAME "/run/dropbear/dropbear_dss_host_key"'
-      echo '#define RSA_PRIV_FILENAME "/run/dropbear/dropbear_rsa_host_key"'
-      echo '#define ECDSA_PRIV_FILENAME "/run/dropbear/dropbear_ecdsa_host_key"'
-      echo '#define ED25519_PRIV_FILENAME "/run/dropbear/dropbear_ed25519_host_key"') > localoptions.h
-    '';
+  kexec-tools-static = prev.kexec-tools.overrideAttrs(o: {
+    # For kexecboot we copy kexec into a ramdisk on the system being
+    # upgraded from. This is more likely to work if kexec is
+    # statically linked so doesn't have dependencies on store paths that
+    # may not exist on that machine. (We can't nix-copy-closure as
+    # the store may not be on a writable filesystem)
+    LDFLAGS = "-static";
+
+    patches = o.patches ++ [
+      (fetchpatch {
+        # merge user command line options into DTB chosen
+        url = "https://patch-diff.githubusercontent.com/raw/horms/kexec-tools/pull/3.patch";
+        hash = "sha256-MvlJhuex9dlawwNZJ1sJ33YPWn1/q4uKotqkC/4d2tk=";
+      })
+      pkgs/kexec-map-file.patch
+    ];
+  });
+
+  luaFull = prev.lua;
+  inherit lua;
+
+  mtdutils = prev.mtdutils.overrideAttrs(o: {
+    patches = (if o ? patches then o.patches else []) ++ [
+      ./pkgs/mtdutils/0001-mkfs.jffs2-add-graft-option.patch
+    ];
+  });
+
+  nftables = prev.nftables.overrideAttrs(o: {
+    configureFlags = [
+      "--disable-debug"
+      "--disable-python"
+      "--with-mini-gmp"
+      "--without-cli"
+    ];
   });
 
   openssl = prev.openssl.overrideAttrs (o: {
@@ -183,6 +168,8 @@ extraPkgs // {
           "\nsed -i.bak 's/linux.*-mips/linux-mops/' Configure\n");
   });
 
+  pppBuild = prev.ppp;
+
   qemu = prev.qemu.overrideAttrs (o: {
     patches = o.patches ++ [
       ./pkgs/qemu/arm-image-friendly-load-addr.patch
@@ -190,10 +177,26 @@ extraPkgs // {
     ];
   });
 
-  pppBuild = prev.ppp;
+  rsyncSmall =
+    let r = prev.rsync.overrideAttrs(o: {
+          configureFlags = o.configureFlags ++ [
+            "--disable-openssl"
+          ];
+        });
+    in r.override { openssl = null; };
 
-  # liminix library functions
-  lim = {
-    parseInt = s : (builtins.fromTOML "r=${s}").r;
+
+  inherit s6;
+  s6-linux-init = prev.s6-linux-init.override {
+    skawarePackages = prev.skawarePackages // {
+      inherit s6;
+    };
   };
+  s6-rc = prev.s6-rc.override {
+    skawarePackages = prev.skawarePackages // {
+      inherit s6;
+    };
+  };
+
+  strace = prev.strace.override { libunwind = null; };
 }
