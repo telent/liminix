@@ -3176,6 +3176,9 @@ Turris TODO
    - perhaps we need different boot "recipes" - e.g. some device
      might want boot.scr and another something different
 
+
+
+
 - create installable tarball and test
 - gpio thingy for SFP switching
 - iperf
@@ -3188,7 +3191,9 @@ Turris TODO
 
 - how to put device name into the device docs
 
-- make config.boot.commandLine a single string
+- [WONT] make config.boot.commandLine a single string
+  this sounds sensible but it just makes it harder to put useful comments
+  against command line fragments so that we know why they're there
 
 - usefulness tiers for devices ("stable", "experimental", "wip")
 - params for ubi(fs) are a mess
@@ -3255,3 +3260,63 @@ we pick the name of anyway).
 
 So maybe we don't need to rewrite ifwait, we just do it after renaming
 the device
+
+Wed Nov 29 21:28:37 GMT 2023
+
+How do we name outputs?
+
+fileystem image
+with-boot filesystem image (e.g. ubifs for belkin)
+tarball
+with-boot tarball (e.g. omnia)
+flashable combined image of kernel + filesystem (e.g. gl-mt*)
+kernel + filesystem image + dtb + tftpboot glue
+kernel + filesystem image + qemu script
+
+we could add initramfs as a separate thing for tftpboot and qemu
+(and FIT images) but it would mean not sharing a kernel with
+the outputs that require embedded initramfs
+
+we can enable with-boot variants of outputs by adding a
+boot.loader config option. if we go that route, can we
+use config options to drive the whole output thingy?
+We could have a config option that just changes "defaultOutput"
+but is that useful?
+
+Maybe the question is: we can choose a different output at build time
+rather than editing configuration - how often is this useful? I think
+tftpboot vs installable is about the only case.
+
+adding a /boot to a filesystem differs from making a combined
+flashable image because it is a config change and not a composition
+of two other already-built outputs.
+
+we could have done tftpboot that way as well, but we chose to unpack
+and repack the fdt so we don't have to build two kernels - and also so
+that we can have both outputs from the same configuration without
+editing any files.
+
+for tftpboot we don't want to make the filesystem embed the kernel
+if we need a separate kernel for booting (guessing we can't usually make
+u-boot loopback mount a downloaded filesystem image). so that points to
+not making it a config option,  _or_ to making the inclusion logic
+(hardware wants a kernel in filesystem) && !(output == tftpboot)
+which itself means the output somehow needs to be injected into the
+config
+
+nix-build  -I liminix-config=./examples/hello-from-mt300.nix  --arg device "import ./devices/my-device" --arg output=tftpboot
+
+let's see if we can not do that?
+
+repacking a ubifs to add /boot is awkward and unpleasant
+
+Thu Nov 30 14:33:08 GMT 2023
+
+We need a new boot-in-rootfs output which calls rootfs with
+(config.filesystem  // { /boot ... }) when the device
+type is extlinux
+
+
+can conditionally augment the config.filesystem in the outputs
+that produce filesystems. The condition is "device boots using the
+filesystem, and this is not a tftpboot"
