@@ -90,7 +90,7 @@ stdenv.mkDerivation rec {
   '';
 
   buildPhase = ''
-    make vmlinux modules_prepare
+    make vmlinux modules_prepare -j$NIX_BUILD_CORES
   '';
 
   installPhase = ''
@@ -103,5 +103,4 @@ stdenv.mkDerivation rec {
     make clean modules_prepare
     cp -a . $modulesupport
   '';
-
 }
