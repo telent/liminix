@@ -54,7 +54,7 @@ in
              then "${pkgs.stdenv.cc.targetPrefix}objcopy -O binary -R .comment -S ${kernel} $out"
              else "cp ${kernel} $out");
           phram_address = lib.toHexString (config.hardware.ram.startAddress + 256 * 1024 * 1024);
-        in pkgs.runCommandCC "vmroot" {} ''
+        in pkgs.runCommand "vmroot" {} ''
           mkdir $out
           cd $out
           ln -s ${rootfs} rootfs
@@ -64,7 +64,7 @@ in
           echo ${cmdline} > commandline
           cat > run.sh << EOF
           #!${pkgs.runtimeShell}
-          CMDLINE=${cmdline} PHRAM_ADDRESS=0x${phram_address} ${pkgs.pkgsBuildBuild.run-liminix-vm}/bin/run-liminix-vm --arch ${pkgs.stdenv.hostPlatform.qemuArch} \$* ${makeBootableImage} ${config.system.outputs.rootfs}
+          ${pkgs.pkgsBuildBuild.run-liminix-vm}/bin/run-liminix-vm --command-line ${builtins.toJSON cmdline} --arch ${pkgs.stdenv.hostPlatform.qemuArch} --phram-address 0x${phram_address} \$* ${makeBootableImage} ${config.system.outputs.rootfs}
           EOF
           chmod +x run.sh
        '';

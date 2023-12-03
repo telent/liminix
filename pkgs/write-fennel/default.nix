@@ -27,6 +27,7 @@ name :
        echo "#!${lua}/bin/lua ${luaFlags}"
        echo "package.path = ${lib.strings.escapeShellArg (builtins.concatStringsSep "" luapath)} .. package.path"
        echo "package.cpath = ${lib.strings.escapeShellArg (builtins.concatStringsSep "" luacpath)} .. package.cpath"
+       echo "require('posix.stdlib').setenv('PATH',${lib.escapeShellArg (lib.makeBinPath packages)} .. \":\" .. os.getenv('PATH'))"
        fennel ${if correlate then "--correlate" else ""} --compile ${source}
       ) >  ${name}.lua
     '';
