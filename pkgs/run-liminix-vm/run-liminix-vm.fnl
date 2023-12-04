@@ -4,7 +4,7 @@
 (local { : fdopen } (require :posix.stdio))
 
 (fn pad-file [name kb chr]
-  (let [(fd out) (mkstemp "run-vm-XXXXXXX")
+  (let [(fd out) (mkstemp "run-vm-XXXXXX")
         pad-string (string.rep (or chr "\0") 1024)]
     (with-open [f (fdopen fd :w)]
       (for [i 1 kb] (f:write pad-string))
@@ -75,15 +75,7 @@
 
 (fn bootable [cmdline uboot]
   (if uboot
-      (let [pflash (os.tmpname)
-            ffs (string.rep  "\xff" 1024)]
-        (with-open [f (assert (io.open pflash :wb))]
-          (for [i 1 (* 4 1024)] (f:write ffs))
-          (f:seek :set 0)
-          (with-open [uboot-bin (assert (io.open uboot :rb))]
-            (f:write (uboot-bin:read "*a")))
-          (f:seek :end 0))
-        ["-drive" (.. "if=pflash,format=raw,file=\"" pflash "\"")])
+      ["-drive" (.. "if=pflash,format=raw,file=" uboot )]
       (let [cmdline (.. cmdline " liminix mtdparts=phram0:16M(rootfs) phram.phram=phram0," options.phram-address ",16Mi,65536 root=/dev/mtdblock0")]
         ["-kernel" options.kernel "-append" cmdline])))
 
