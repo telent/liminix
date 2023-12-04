@@ -79,6 +79,7 @@ in {
   lzma = callPackage ./lzma {};
 
   mac80211 = callPackage ./mac80211 {};
+  zyxel-bootconfig = callPackage ./zyxel-bootconfig {};
   min-collect-garbage = callPackage ./min-collect-garbage {};
   min-copy-closure = callPackage ./min-copy-closure {};
   netlink-lua = callPackage ./netlink-lua {};
