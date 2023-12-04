@@ -1,0 +1,12 @@
+diff --git a/include/configs/qemu-arm.h b/include/configs/qemu-arm.h
+index 535762ecb2..a947bae2e8 100644
+--- a/include/configs/qemu-arm.h
++++ b/include/configs/qemu-arm.h
+@@ -72,6 +72,7 @@
+ 	BOOT_TARGET_SCSI(func) \
+ 	BOOT_TARGET_VIRTIO(func) \
+ 	BOOT_TARGET_NVME(func) \
++	func(UBIFS, ubifs, 0, UBI, boot) \
+ 	BOOT_TARGET_DHCP(func)
+ 
+ #include <config_distro_bootcmd.h>

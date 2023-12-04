@@ -199,4 +199,17 @@ extraPkgs // {
   };
 
   strace = prev.strace.override { libunwind = null; };
+
+  ubootQemuArm = final.buildUBoot {
+    defconfig = "qemu_arm_defconfig";
+    extraMeta.platforms = ["armv7l-linux"];
+    filesToInstall = ["u-boot.bin"];
+    # enable looking for boot files on ubifs. this is unused at
+    # present, but added in the expectation of a future test
+    extraPatches = [ ./pkgs/u-boot/0001-add-ubifs-to-boot-targets.patch ];
+    extraConfig = ''
+      CONFIG_CMD_UBI=y
+      CONFIG_CMD_UBIFS=y
+    '';
+  };
 }
