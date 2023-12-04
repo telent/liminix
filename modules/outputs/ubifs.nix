@@ -12,9 +12,16 @@ in
   imports = [
     ./initramfs.nix
   ];
+
+  options.system.outputs.rootubifs = mkOption {
+    type = types.package;
+    internal = true;
+  };
+
   options.hardware.ubi = {
     minIOSize = mkOption { type = types.str; };
-    eraseBlockSize = mkOption { type = types.str; }; # LEB
+    logicalEraseBlockSize = mkOption { type = types.str; }; # LEB
+    physicalEraseBlockSize = mkOption { type = types.str; }; # PEB
     maxLEBcount = mkOption { type = types.str; }; # LEB
   };
 
@@ -35,7 +42,7 @@ in
         } ''
           mkdir tmp
           tree=${o.bootablerootdir}
-          mkfs.ubifs -x favor_lzo -c ${cfg.maxLEBcount} -m ${cfg.minIOSize} -e ${cfg.eraseBlockSize}  -y -r $tree --output $out  --squash-uids -o $out
+          mkfs.ubifs -x favor_lzo -c ${cfg.maxLEBcount} -m ${cfg.minIOSize} -e ${cfg.logicalEraseBlockSize}  -y -r $tree --output $out  --squash-uids -o $out
         '';
     };
   };
