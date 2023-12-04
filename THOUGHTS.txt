@@ -3312,11 +3312,62 @@ repacking a ubifs to add /boot is awkward and unpleasant
 
 Thu Nov 30 14:33:08 GMT 2023
 
-We need a new boot-in-rootfs output which calls rootfs with
+~~We need a new boot-in-rootfs output which calls rootfs with
 (config.filesystem  // { /boot ... }) when the device
-type is extlinux
+boot type is extlinux~~
 
+~~Do we need to put it in systemConfiguration as well? Yes,
+otherwise liminix-rebuild won't install it~~
 
-can conditionally augment the config.filesystem in the outputs
-that produce filesystems. The condition is "device boots using the
-filesystem, and this is not a tftpboot"
+We may have a problem here actually: if /boot is only set up after
+reboot, by adding a link while running the initramfs, how did the
+bootloader  find the kernel to boot in the first place? So
+we need /boot to exist and to point to the new kernel before rebooting
+into it, so we need to create it as a real directory along with /nix/store
+when making the filesystem,
+instead of relying on activate which will be too late.
+
+maybe we could extract the root directory structure creation
+as a separate output from rootfs, then there is a single place
+to put "and also add /boot"
+
+we will need to update pkgs/min-copy-closure/liminix-rebuild.sh
+to add /boot
+
+we could make the contents of /boot a derivation and then
+/boot itself is just a symlink to it. we would need to ensure that
+the derivation is part of the system closure, though
+
+Sat Dec  2 15:33:07 GMT 2023
+
+- make rootfs the directory structure
+
+Sun Dec  3 23:31:35 GMT 2023
+
+Spent too much of the weekend first fighting run-liminix-vm.sh and
+then rewriting it in Fennel, but we are now at the point that we can
+boot u-boot in qemu. However, it maps the rootfs into high memory
+where phram can find it, instead of putting it into a flash that
+_qemu_ can see as flash, so u-boot is not able to boot the kernel or
+at least not in a similar-to-hardware fashion. Once we've added that,
+we need to write a test for boots-a-kernel-in-the-filesystem
+
+Mon Dec  4 19:46:58 GMT 2023
+
+We wanted a test that we are creating an image that u-boot can boot
+using extlinux. Turns out that u-boot only has scripts to do this in
+the case that the storage device has a partition table. Which is
+representative of the Omnia mmc, but maybe not going to work for
+jffs2/ubifs
+
+(For ubifs it might be OK, there's some concept of partitions
+
+ubifs_boot=if ubi part ${bootubipart} ${bootubioff} && ubifsmount ubi0:${bootubivol}; then devtype=ubi; devnum=ubi0; bootfstype=ubifs; distro_bootpart=${bootubivol}; run scan_dev_for_boot; ubifsumount; fi
+
+)
+
+So what do we need? a disk image with a partition table and an ext4fs
+image in the only partition, and that partition to be bootable. Then
+run-liminix-vm gets a --disk-image option which causes it to use
+U-Boot instead of direct load (can we wrap it with something that sets
+up the paths so it can find u-boot and qemu?)
