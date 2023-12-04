@@ -20,6 +20,7 @@ in {
 , extraName ? ""                # e.g. socFamily
 , loadAddress
 , imageFormat
+, alignment ? null
 , dtb ? null
 } : stdenv.mkDerivation {
   name = "kernel.image";
@@ -70,7 +71,7 @@ in {
         };
     };
     _VARS
-    mkimage -f mkimage.its kernel.uimage
+    mkimage -f mkimage.its ${lib.optionalString (alignment != null) "-B 0x${lib.toHexString alignment}"} kernel.uimage
     mkimage -l kernel.uimage
   '';
 
