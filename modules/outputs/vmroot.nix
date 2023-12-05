@@ -64,7 +64,7 @@ in
           echo ${cmdline} > commandline
           cat > run.sh << EOF
           #!${pkgs.runtimeShell}
-          ${pkgs.pkgsBuildBuild.run-liminix-vm}/bin/run-liminix-vm --command-line ${builtins.toJSON cmdline} --arch ${pkgs.stdenv.hostPlatform.qemuArch} --phram-address 0x${phram_address} \$* ${makeBootableImage} ${config.system.outputs.rootfs}
+          ${pkgs.pkgsBuildBuild.run-liminix-vm}/bin/run-liminix-vm --command-line ${cmdline} --arch ${pkgs.stdenv.hostPlatform.qemuArch} --phram-address 0x${phram_address} \$* ${makeBootableImage} ${config.system.outputs.rootfs}
           EOF
           chmod +x run.sh
        '';
