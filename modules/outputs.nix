@@ -7,6 +7,7 @@
 let
   inherit (lib) mkOption types concatStringsSep;
   inherit (pkgs) liminix callPackage writeText;
+  o = config.system.outputs;
 in
 {
   imports = [
@@ -58,6 +59,13 @@ in
           out what's in the image, which is nice if it's unexpectedly huge
         '';
       };
+      rootfsFiles = mkOption {
+        type = types.package;
+        internal = true;
+        description = ''
+          directory of files to package into root filesystem
+        '';
+      };
       rootfs = mkOption {
         type = types.package;
         internal = true;
@@ -69,7 +77,6 @@ in
   };
   config = {
     system.outputs = rec {
-      # tftpd = pkgs.buildPackages.tufted;
       kernel = liminix.builders.kernel.override {
         inherit (config.kernel) config src extraPatchPhase;
       };
@@ -87,6 +94,18 @@ in
         inherit kernel;
         inherit dtb;
       };
+      rootfsFiles =
+        let
+          inherit (pkgs.pkgsBuildBuild) runCommand;
+        in runCommand "mktree" { } ''
+          mkdir -p $out/nix/store/ $out/secrets $out/boot
+          cp ${o.systemConfiguration}/bin/activate $out/activate
+          ln -s ${pkgs.s6-init-bin}/bin/init $out/init
+          mkdir -p $out/nix/store
+          for path in $(cat ${o.systemConfiguration}/etc/nix-store-paths) ; do
+            (cd $out && cp -a $path .$path)
+          done
+        '';
       manifest = writeText "manifest.json" (builtins.toJSON config.filesystem.contents);
     };
   };

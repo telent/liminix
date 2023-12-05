@@ -6,6 +6,7 @@
 }:
 let
   inherit (lib) mkIf mkOption types;
+  o = config.system.outputs;
 in
 {
   imports = [
@@ -22,7 +23,7 @@ in
       JFFS2_CMODE_SIZE = "y";
     };
     boot.initramfs.enable = true;
-    system.outputs = rec {
+    system.outputs = {
       systemConfiguration =
         pkgs.systemconfig config.filesystem.contents;
       rootfs =
@@ -33,11 +34,12 @@ in
         in runCommand "make-jffs2" {
           depsBuildBuild = [ mtdutils ];
         } ''
-          mkdir -p $TMPDIR/empty/nix/store/ $TMPDIR/empty/secrets
-          cp ${systemConfiguration}/bin/activate $TMPDIR/empty/activate
-          ln -s ${pkgs.s6-init-bin}/bin/init $TMPDIR/empty/init
-          grafts=$(sed < ${systemConfiguration}/etc/nix-store-paths 's/^\(.*\)$/--graft \1:\1/g')
-          mkfs.jffs2 --compression-mode=size ${endian} -e ${toString config.hardware.flash.eraseBlockSize} --enable-compressor=lzo --pad --root $TMPDIR/empty --output $out  $grafts --squash --faketime
+          cp -a ${o.rootfsFiles} tmp
+          ${if config.boot.loader.extlinux.enable
+            then "(cd tmp && ln -s ${o.extlinux} boot)"
+            else ""
+          }
+          (cd tmp && mkfs.jffs2 --compression-mode=size ${endian} -e ${toString config.hardware.flash.eraseBlockSize} --enable-compressor=lzo --pad --root . --output $out --squash --faketime )
         '';
     };
   };

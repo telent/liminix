@@ -6,6 +6,7 @@
 }:
 let
   inherit (lib) mkIf mkOption types;
+  o = config.system.outputs;
 in
 {
   imports = [
@@ -18,7 +19,7 @@ in
       FS_ENCRYPTION = "y";
     };
     boot.initramfs.enable = true;
-    system.outputs = rec {
+    system.outputs = {
       systemConfiguration =
         pkgs.systemconfig config.filesystem.contents;
       rootfs =
@@ -27,18 +28,16 @@ in
         in runCommand "mkfs.ext4" {
           depsBuildBuild = [ e2fsprogs ];
         } ''
-          mkdir -p $TMPDIR/empty/nix/store/ $TMPDIR/empty/secrets
-          cp ${systemConfiguration}/bin/activate $TMPDIR/empty/activate
-          ln -s ${pkgs.s6-init-bin}/bin/init $TMPDIR/empty/init
-          mkdir -p $TMPDIR/empty/nix/store
-          for path in $(cat ${systemConfiguration}/etc/nix-store-paths) ; do
-            (cd $TMPDIR/empty && cp -a $path .$path)
-          done
-          size=$(du -s --apparent-size --block-size 1024 $TMPDIR/empty |cut -f1)
+          cp -a ${o.rootfsFiles} tmp
+          ${if config.boot.loader.extlinux.enable
+            then "(cd tmp && ln -s ${o.extlinux} boot)"
+            else ""
+          }
+          size=$(du -s --apparent-size --block-size 1024 tmp |cut -f1)
           # add 25% for filesystem overhead
           size=$(( 5 * $size / 4))
           dd if=/dev/zero of=$out bs=1024 count=$size
-          mke2fs -t ext4 -j -d $TMPDIR/empty $out
+          mke2fs -t ext4 -j -d tmp $out
         '';
     };
   };

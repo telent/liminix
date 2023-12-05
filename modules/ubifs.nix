@@ -6,6 +6,7 @@
 }:
 let
   inherit (lib) mkIf mkOption types;
+  o = config.system.outputs;
 in
 {
   imports = [
@@ -20,12 +21,11 @@ in
   config = mkIf (config.rootfsType == "ubifs") {
     kernel.config = {
       MTD_UBI="y";
-
       UBIFS_FS = "y";
       UBIFS_FS_SECURITY = "n";
     };
     boot.initramfs.enable = true;
-    system.outputs = rec {
+    system.outputs = {
       systemConfiguration =
         pkgs.systemconfig config.filesystem.contents;
       rootfs =
@@ -35,15 +35,13 @@ in
         in runCommand "mkfs.ubifs" {
           depsBuildBuild = [ mtdutils ];
         } ''
-          mkdir -p $TMPDIR/empty/nix/store/ $TMPDIR/empty/secrets $TMPDIR/empty/boot
-          cp ${systemConfiguration}/bin/activate $TMPDIR/empty/activate
-          ln -s ${pkgs.s6-init-bin}/bin/init $TMPDIR/empty/init
-          cp ${config.system.outputs.uimage} $TMPDIR/empty/boot/uimage
-          mkdir -p $TMPDIR/empty/nix/store
-          for path in $(cat ${systemConfiguration}/etc/nix-store-paths) ; do
-            (cd $TMPDIR/empty && cp -a $path .$path)
-          done
-          mkfs.ubifs -x favor_lzo -c ${cfg.maxLEBcount} -m ${cfg.minIOSize} -e ${cfg.eraseBlockSize}  -y -r $TMPDIR/empty --output $out  --squash-uids -o $out
+          mkdir tmp
+          cp -a ${o.rootfsFiles} tmp
+          ${if config.boot.loader.extlinux.enable
+            then "(cd tmp && ln -s ${o.extlinux} boot)"
+            else ""
+           }
+          mkfs.ubifs -x favor_lzo -c ${cfg.maxLEBcount} -m ${cfg.minIOSize} -e ${cfg.eraseBlockSize}  -y -r tmp --output $out  --squash-uids -o $out
         '';
     };
   };
