@@ -36,7 +36,9 @@
   (match args
     ["--background" dir & rest] (assoc (parse-args rest) :background dir)
     ["--u-boot" bin & rest]
-    (assoc (parse-args rest) :u-boot (pad-file bin (* 4 1024) "\xff"))
+    (assoc (parse-args rest) :u-boot (pad-file bin (* 64 1024) "\xff"))
+    ["--disk-image" image & rest ] (assoc (parse-args rest)
+                                          :disk-image (pad-file image 1024))
     ["--arch" arch & rest] (assoc (parse-args rest) :arch arch)
     ["--phram-address" addr & rest] (assoc (parse-args rest) :phram-address addr)
     ["--lan" spec & rest] (assoc (parse-args rest) :lan spec)
@@ -73,9 +75,12 @@
    ])
 
 
-(fn bootable [cmdline uboot]
+(fn bootable [cmdline uboot disk]
   (if uboot
-      ["-drive" (.. "if=pflash,format=raw,file=" uboot )]
+      ["-drive" (.. "if=pflash,format=raw,file=" uboot )
+       "-drive" (.. "if=none,format=raw,id=hd0,file=" disk)
+       "-device" "virtio-blk-device,drive=hd0"
+       ]
       (let [cmdline (.. cmdline " mem=256M liminix mtdparts=phram0:16M(rootfs) phram.phram=phram0," options.phram-address ",16Mi,65536 root=/dev/mtdblock0")]
         ["-kernel" options.kernel "-append" cmdline])))
 
@@ -94,13 +99,13 @@
                      "-echr" "16"
                      "-device"
                      (.. "loader,file=" options.rootfs ",addr=" options.phram-address)
-
                      ])
            (appendm
             (if options.background
                 (background options.background)
                 ["-serial" "mon:stdio"]))
-           (appendm (bootable (or options.command-line "") options.u-boot))
+           (appendm (bootable (or options.command-line "")
+                              options.u-boot options.disk-image))
            (appendm (access-net))
            (appendm (local-net options.lan))
            (appendm ["-display" "none"])))
@@ -113,3 +118,4 @@
 
 (if options.rootfs (unlink options.rootfs))
 (if options.u-boot (unlink options.u-boot))
+(if options.disk-image (unlink options.disk-image))

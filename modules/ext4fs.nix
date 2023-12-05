@@ -30,7 +30,7 @@ in
         } ''
           cp -a ${o.rootfsFiles} tmp
           ${if config.boot.loader.extlinux.enable
-            then "(cd tmp && ln -s ${o.extlinux} boot)"
+            then "(cd tmp && chmod -R +w . && rmdir boot && cp -a ${o.extlinux} boot)"
             else ""
           }
           size=$(du -s --apparent-size --block-size 1024 tmp |cut -f1)

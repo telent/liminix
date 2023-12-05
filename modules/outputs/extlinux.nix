@@ -20,17 +20,18 @@ in {
     system.outputs.extlinux = pkgs.runCommand "extlinux" {} ''
       mkdir $out
       cd $out
-      ln -s ${o.dtb} dtb
-      ln -s ${o.initramfs} initramfs
+      # cp {o.dtb} dtb
+      cp ${o.initramfs} initramfs
       gzip -9f < ${o.kernel} > kernel.gz
-      cat > extlinux.conf << _EOF
+      mkdir extlinux
+      cat > extlinux/extlinux.conf << _EOF
       menu title Liminix
       timeout 100
       label Liminix
-        kernel kernel.gz
-        initrd initramfs
-        fdt dtb
+        kernel /boot/kernel.gz
+        initrd /boot/initramfs
         append ${cmdline}
+        # fdt /boot/dtb
       _EOF
     '';
   };

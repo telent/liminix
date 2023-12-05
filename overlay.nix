@@ -210,6 +210,8 @@ extraPkgs // {
     extraConfig = ''
       CONFIG_CMD_UBI=y
       CONFIG_CMD_UBIFS=y
+      CONFIG_BOOTSTD=y
+      CONFIG_BOOTMETH_DISTRO=y
     '';
   };
 }
