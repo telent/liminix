@@ -76,7 +76,7 @@
 (fn bootable [cmdline uboot]
   (if uboot
       ["-drive" (.. "if=pflash,format=raw,file=" uboot )]
-      (let [cmdline (.. cmdline " liminix mtdparts=phram0:16M(rootfs) phram.phram=phram0," options.phram-address ",16Mi,65536 root=/dev/mtdblock0")]
+      (let [cmdline (.. cmdline " mem=256M liminix mtdparts=phram0:16M(rootfs) phram.phram=phram0," options.phram-address ",16Mi,65536 root=/dev/mtdblock0")]
         ["-kernel" options.kernel "-append" cmdline])))
 
 (local bin {
