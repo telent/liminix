@@ -105,6 +105,9 @@
            (appendm (local-net options.lan))
            (appendm ["-display" "none"])))
 
+(each [n a (ipairs exec-args)]
+  (print (.. (if (> n  1) "     " "") (string.format "%q" a))))
+
 (match exec-args
   [cmd & params] (print  (spawn cmd params)))
 
