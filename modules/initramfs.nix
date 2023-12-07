@@ -47,12 +47,6 @@ in
           dir /proc 0755 0 0
           dir /dev 0755 0 0
           nod /dev/console 0600 0 0 c 5 1
-          nod /dev/mtdblock0 0600 0 0 b 31 0
-          nod /dev/mtdblock1 0600 0 0 b 31 1
-          nod /dev/mtdblock2 0600 0 0 b 31 2
-          nod /dev/mtdblock3 0600 0 0 b 31 3
-          nod /dev/mtdblock4 0600 0 0 b 31 4
-          nod /dev/mtdblock5 0600 0 0 b 31 5
           dir /target 0755 0 0
           dir /target/persist 0755 0 0
           dir /target/nix 0755 0 0

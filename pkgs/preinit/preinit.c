@@ -55,6 +55,7 @@ int main(int argc, char *argv[], char *envp[])
     write(1, banner, strlen(banner));
 
     AVER(mount("none", "/proc", "proc", 0, NULL));
+    AVER(mount("none", "/dev", "devtmpfs", 0, NULL));
 
     int cmdline = open("/proc/cmdline", O_RDONLY, 0);
 
