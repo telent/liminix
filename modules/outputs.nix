@@ -30,6 +30,16 @@ in
           Kernel vmlinux file (usually ELF)
         '';
       };
+      zimage = mkOption {
+        type = types.package;
+        internal = true;
+        description = ''
+          zimage
+          ******
+
+          Kernel in compressed self-extracting package
+        '';
+      };
       dtb = mkOption {
         type = types.package;
         internal  = true;
@@ -78,6 +88,10 @@ in
   config = {
     system.outputs = rec {
       kernel = liminix.builders.kernel.override {
+        inherit (config.kernel) config src extraPatchPhase;
+      };
+      zimage = liminix.builders.kernel.override {
+        targets = ["arch/arm/boot/zImage"];
         inherit (config.kernel) config src extraPatchPhase;
       };
       dtb = liminix.builders.dtb {

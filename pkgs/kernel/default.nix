@@ -7,6 +7,7 @@
  , config
  , src
  , extraPatchPhase ? "echo"
+ , targets ? ["vmlinux"]
 } :
 let
   writeConfig = import ./write-kconfig.nix { inherit lib writeText; };
@@ -90,12 +91,12 @@ stdenv.mkDerivation rec {
   '';
 
   buildPhase = ''
-    make vmlinux modules_prepare -j$NIX_BUILD_CORES
+    make ${lib.concatStringsSep " " (map baseNameOf targets)} modules_prepare -j$NIX_BUILD_CORES
   '';
 
   installPhase = ''
     ${CROSS_COMPILE}strip -d vmlinux
-    cp vmlinux $out
+    cp ${lib.concatStringsSep " " targets} $out
     mkdir -p $headers
     cp -a include .config $headers/
     mkdir -p $modulesupport
