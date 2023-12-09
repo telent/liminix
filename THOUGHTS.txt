@@ -3371,3 +3371,50 @@ image in the only partition, and that partition to be bootable. Then
 run-liminix-vm gets a --disk-image option which causes it to use
 U-Boot instead of direct load (can we wrap it with something that sets
 up the paths so it can find u-boot and qemu?)
+
+ok, we're going to define outputs.diskimage which is like
+outputs.flashimage but it has a partition table. Then we can make a
+qemu configuration with an ext4 filesystem and defaultOutput="diskimage"
+and config.boot.loader.extlinux.enable = true
+
+sfdisk default behaviour for GPT partitioned disk is to start at sector 2048
+(sectors are 512 bytes)
+
+Device     Start   End Sectors Size Type
+disk.bin1   2048 14335   12288   6M Linux filesystem
+
+Tue Dec  5 23:54:22 GMT 2023
+
+Need mbr not gpt. At least, it takes up less space and it doesn't
+inveigle us into EFI boot.
+
+This is close to working except that it doesn't want to boot a uimage
+
+Enter choice: 1
+1:      Liminix
+Retrieving file: /boot/initramfs
+Retrieving file: /boot/kernel.gz
+append: console=ttyAMA0 panic=10 oops=panic init=/bin/init loglevel=8 root=/dev/mtdblock0 rootfstype=ext4 fw_devlink=off
+zimage: Bad magic!
+
+Thu Dec  7 19:33:02 GMT 2023
+
+virtio devices don't have standard major/minor so we can't create
+device nodes for them at build time. Either we mount devtmpfs in the
+initramfs (do we then have to move it to /target?) or we parse the
+/sys/block/vda/vda1/dev node to get 253:1 or whatever
+
+Fri Dec  8 16:36:07 GMT 2023
+
+We'd like to remove the ugly special handling of qemu dtb. Here are
+some thoughts
+
+1) qemu provides its guest the correct DTB for the configured hardware.
+This is a desirable thing and we wish more platforms did it, so would
+like not to replace it with a static dtb if we can avoid that
+
+2) so we need some kind of config option that says "platform provides the
+device tree" (or alternatively, "we need a static dtb, platform doesn't
+provide it").
+
+config.boot.platformProvidesDeviceTree
