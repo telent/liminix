@@ -1,9 +1,10 @@
 with import <nixpkgs> {} ;
 
 let
-  devices = builtins.readDir ../devices;
-  inherit (builtins) stringLength;
-  texts = lib.mapAttrsToList (n: t:
+  inherit (builtins) stringLength readDir filter;
+  devices = filter (n: n != "families")
+    (lib.mapAttrsToList (n: t: n) (readDir ../devices));
+  texts = map (n:
     let d = import  ../devices/${n}/default.nix;
         d' = {
           description = "${n}\n${substring 0 (stringLength n) "********************************"}\n";
