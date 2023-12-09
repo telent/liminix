@@ -79,7 +79,7 @@
   (if uboot
       ["-drive" (.. "if=pflash,format=raw,file=" uboot )
        "-drive" (.. "if=none,format=raw,id=hd0,file=" disk)
-       "-device" "virtio-blk-device,drive=hd0"
+       "-device" "virtio-blk-pci,drive=hd0"
        ]
       (let [cmdline (.. cmdline " mem=256M liminix mtdparts=phram0:16M(rootfs) phram.phram=phram0," options.phram-address ",16Mi,65536 root=/dev/mtdblock0")]
         ["-kernel" options.kernel "-append" cmdline])))
