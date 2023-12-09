@@ -16,8 +16,14 @@ in {
     hardware = {
       dts = {
         src = mkOption {
-          type = types.path;
-          description = "Path to the device tree source (usually from OpenWrt)";
+          type = types.nullOr types.path;
+          description = ''
+            If the device requires an external device tree to be loaded
+            alongside the kernel, this is the path to the device tree source
+            (we usually get these from OpenWrt). This value may be null if the
+            platform creates the device tree - currently this is the case
+            only for QEMU.
+          '';
         };
         includes = mkOption {
           default = [];

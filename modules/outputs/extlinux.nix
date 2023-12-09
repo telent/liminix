@@ -9,6 +9,7 @@ let
   cfg = config.boot.loader.extlinux;
   o = config.system.outputs;
   cmdline = concatStringsSep " " config.boot.commandLine;
+  wantsDtb = config.hardware.dts ? src && config.hardware.dts.src != null;
 in {
   options.system.outputs.extlinux = mkOption {
     type = types.package;
@@ -20,18 +21,18 @@ in {
     system.outputs.extlinux = pkgs.runCommand "extlinux" {} ''
       mkdir $out
       cd $out
-      # cp {o.dtb} dtb
+      ${if wantsDtb then "cp ${o.dtb} dtb" else "true"}
       cp ${o.initramfs} initramfs
-      gzip -9f < ${o.kernel} > kernel.gz
+      cp ${o.zimage}  kernel
       mkdir extlinux
       cat > extlinux/extlinux.conf << _EOF
       menu title Liminix
       timeout 100
       label Liminix
-        kernel /boot/kernel.gz
-        initrd /boot/initramfs
-        append ${cmdline}
-        # fdt /boot/dtb
+        kernel /boot/kernel
+        # initrd /boot/initramfs
+        append ${cmdline} root=/dev/vda1
+        ${if wantsDtb then "fdt /boot/dtb" else ""}
       _EOF
     '';
   };
