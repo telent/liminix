@@ -20,7 +20,7 @@ in pkgs.runCommand "check" {
 . ${../test-helpers.sh}
 
 mkdir vm
-LAN=user,hostfwd=tcp::2022-:22 ${img}/run.sh --background ./vm
+${img}/run.sh --lan user,hostfwd=tcp::2022-:22  --background ./vm
 expect ${./wait-until-ready.expect}
 export SSH_COMMAND="ssh -o StrictHostKeyChecking=no -p 2022 -i ${./id}"
 $SSH_COMMAND root@localhost echo ready
