@@ -5,7 +5,7 @@ in {
   imports = [
     ../../vanilla-configuration.nix
     ../../modules/squashfs.nix
-    ../../modules/jffs2.nix
+    ../../modules/outputs/jffs2.nix
   ];
   config.rootfsType = "jffs2";
   config.filesystem = dir {

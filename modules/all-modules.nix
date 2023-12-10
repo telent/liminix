@@ -9,15 +9,15 @@
    ./busybox.nix
    ./dhcp6c
    ./dnsmasq
-   ./ext4fs.nix
+   ./outputs/ext4fs.nix
    ./firewall
    ./hardware.nix
    ./hostapd
    ./hostname.nix
-   ./initramfs.nix
-   ./jffs2.nix
+   ./outputs/initramfs.nix
+   ./outputs/jffs2.nix
    ./kernel.nix
-   ./kexecboot.nix
+   ./outputs/kexecboot.nix
    ./mount
    ./network
    ./ntp

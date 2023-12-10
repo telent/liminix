@@ -13,7 +13,7 @@ let
 in {
   imports = [
     ../../vanilla-configuration.nix
-    ../../modules/jffs2.nix
+    ../../modules/outputs/jffs2.nix
   ];
   config =  {
     services.sshd = longrun {
