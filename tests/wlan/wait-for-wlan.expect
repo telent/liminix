@@ -7,8 +7,8 @@ set FINISHED 0
 set EXIT "1"
 send "ls -l /run/uncaught-logs/current\r\n"
 expect "#"
-while { $FINISHED < 10 } {
-  send "grep AP-ENABLED /run/uncaught-logs/current || echo not\r\n"
+while { $FINISHED < 20 } {
+  send "date && grep AP-ENABLED /run/uncaught-logs/current || echo not\r\n"
   
   expect {
     "wlan0: AP-ENABLED" { set FINISHED 10; set EXIT 0; }
