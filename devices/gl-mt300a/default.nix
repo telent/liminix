@@ -52,7 +52,12 @@
         klibBuild = config.system.outputs.kernel.modulesupport;
       };
     in {
-      imports = [ ../../modules/arch/mipsel.nix ];
+      imports = [
+        ../../modules/arch/mipsel.nix
+        ../../modules/outputs/tftpboot.nix
+        ../../modules/outputs/flashimage.nix
+        ../../modules/outputs/jffs2.nix
+      ];
       hardware = {
         defaultOutput = "flashimage";
         loadAddress = lim.parseInt "0x80000000";

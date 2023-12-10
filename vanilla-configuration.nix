@@ -5,7 +5,6 @@ let
   svc = config.system.service;
 in rec {
   imports = [
-    ./modules/tftpboot.nix
     ./modules/wlan.nix
     ./modules/network
     ./modules/ntp

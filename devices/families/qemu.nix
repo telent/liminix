@@ -1,5 +1,8 @@
 { config, pkgs, ... }:
 {
+  imports = [
+    ../../modules/outputs/jffs2.nix
+  ];
   config = {
     kernel = {
       src = pkgs.pkgsBuildBuild.fetchurl {

@@ -52,7 +52,12 @@
         hash = "sha256:1dkhfznmdz6s50kwc841x3wj0h6zg6icg5g2bim9pvg66as2vmh9";
       };
     in {
-      imports = [ ../../modules/arch/mipsel.nix ];
+      imports = [
+        ../../modules/arch/mipsel.nix
+        ../../modules/outputs/tftpboot.nix
+        ../../modules/outputs/flashimage.nix
+        ../../modules/outputs/jffs2.nix
+      ];
       filesystem = dir {
         lib = dir {
           firmware = dir {

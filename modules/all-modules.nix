@@ -29,8 +29,8 @@
    ./ramdisk.nix
    ./squashfs.nix
    ./ssh
-   ./tftpboot.nix
-   ./ubifs.nix
+   ./outputs/tftpboot.nix
+   ./outputs/ubifs.nix
    ./users.nix
    ./vlan
    ./watchdog

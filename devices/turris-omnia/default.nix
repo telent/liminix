@@ -12,7 +12,13 @@
 
   module = {pkgs, config, lib, lim, ... }:
     let openwrt = pkgs.openwrt; in {
-    imports = [ ../../modules/arch/arm.nix ];
+          imports = [
+            ../../modules/arch/arm.nix
+            ../modules/outputs/tftpboot.nix
+            ../modules/outputs/diskimage.nix
+            ../modules/outputs/extlinux.nix
+            ../modules/outputs/ext4fs.nix
+          ];
     kernel = {
       src = pkgs.pkgsBuildBuild.fetchurl {
         name = "linux.tar.gz";
@@ -46,10 +52,6 @@
         # WARNING: unmet direct dependencies detected for ARCH_WANT_LIBATA_LEDS
         ATA = "y";
 
-        # switch is DSA
-        # CONFIG_NET_DSA_MV88E6060=y
-        #   CONFIG_NET_DSA_MV88E6XXX=y
-        #     CONFIG_NET_DSA_MV88E6XXX_GLOBAL2=y
 
         #         CONFIG_REGMAP=y
         # CONFIG_REGMAP_I2C=y

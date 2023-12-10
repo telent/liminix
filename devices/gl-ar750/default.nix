@@ -96,6 +96,9 @@
       imports = [
         ../../modules/network
         ../../modules/arch/mipseb.nix
+        ../../modules/outputs/tftpboot.nix
+        ../../modules/outputs/flashimage.nix
+        ../../modules/outputs/jffs2.nix
       ];
 
       programs.busybox.options = {

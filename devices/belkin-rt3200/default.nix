@@ -48,7 +48,12 @@
           '';
         };
     in {
-    imports = [ ../../modules/arch/aarch64.nix ];
+      imports = [
+        ../../modules/arch/aarch64.nix
+        ../../modules/outputs/tftpboot.nix
+        ../../modules/outputs/ubifs.nix
+      ];
+      config = {
     kernel = {
       src = pkgs.pkgsBuildBuild.fetchurl {
         name = "linux.tar.gz";
@@ -220,6 +225,6 @@
             };
           };
       };
-
+      };
   };
 }
