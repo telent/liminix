@@ -34,7 +34,6 @@ in rec {
 
   imports = [
     ../modules/wlan.nix
-    ../modules/standard.nix
     ../modules/network
     ../modules/ppp
     ../modules/dnsmasq
@@ -44,6 +43,11 @@ in rec {
     ../modules/bridge
     ../modules/ntp
     ../modules/ssh
+    ../modules/outputs/tftpboot.nix
+    ../modules/outputs/kexecboot.nix
+    ../modules/outputs/flashimage.nix
+    ../modules/outputs/jffs2.nix
+    ../modules/outputs/ubifs.nix
   ];
   rootfsType = "jffs2";
   hostname = "rotuer";

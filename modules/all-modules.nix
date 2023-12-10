@@ -29,7 +29,6 @@
    ./ramdisk.nix
    ./squashfs.nix
    ./ssh
-   ./standard.nix
    ./tftpboot.nix
    ./ubifs.nix
    ./users.nix

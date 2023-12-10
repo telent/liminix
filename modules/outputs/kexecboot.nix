@@ -7,7 +7,7 @@
 let
   inherit (lib) mkOption mkForce types concatStringsSep;
 in {
-  imports = [ ./ramdisk.nix ];
+  imports = [ ../ramdisk.nix ];
   options.system.outputs = {
     kexecboot = mkOption {
       type = types.package;

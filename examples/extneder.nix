@@ -30,7 +30,11 @@ in rec {
     ../modules/hostapd
     ../modules/bridge
     ../modules/ssh
-    ../modules/standard.nix
+    ../modules/outputs/tftpboot.nix
+    ../modules/outputs/kexecboot.nix
+    ../modules/outputs/flashimage.nix
+    ../modules/outputs/jffs2.nix
+    ../modules/outputs/ubifs.nix
   ];
 
   hostname = "extneder";

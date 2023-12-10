@@ -8,7 +8,7 @@ let
   inherit (lib) mkOption types concatStringsSep;
   cfg = config.boot.tftp;
 in {
-  imports = [ ./ramdisk.nix ];
+  imports = [ ../ramdisk.nix ];
   options.boot.tftp.freeSpaceBytes = mkOption {
     type = types.int;
     default = 0;
