@@ -18,22 +18,14 @@ outside word goes across it.
 
 Liminix is pre-1.0. We are still finding new and better ways to do things,
 and there is no attempt to maintain backward compatibility with the old
-ways. This will change when it settles down.
+ways.
 
-_In general:_ development mostly happens on the `main` branch, which is
-therefore not guaranteed to build or to work on every commit. For the
-latest functioning version, see [the CI system](https://build.liminix.org/jobset/liminix/build) and pick a revision with all jobs green.
+The [NEWS](NEWS) file (available wherever you found this README) is
+a high-level overview of breaking changes.
 
-_In particular:_ as of July 2023, a significant re-arrangement of
-modules and services is ongoing:
-
-* if you are using out-of-tree configurations created before commit
-  2e50368, especially if they reference things under pkgs.liminix,
-  they will need updating. Look at changes to examples/rotuer.nix
-  for guidance
-
-* the same is intermittently true for examples/{extensino,arhcive}.nix
-  where I've updated rotuer and not updated them to match.
+Development mostly happens on the `main` branch, which is therefore
+not guaranteed to build or to work on every commit. For the latest
+functioning version, see [the CI system](https://build.liminix.org/jobset/liminix/build) and pick a revision with all jobs green.
 
 
 ## Documentation

@@ -1,6 +1,13 @@
 A brief guide to backward-incompatible changes
 that are likely to break configurations or workflows
 
+2023-07-13
+
+* a significant re-arrangement of modules and services, which will
+probably break any configuration written before this time. For a
+detailed explanation, see
+https://www.liminix.org/doc/configuration.html#modules
+
 2023-12-10
 
 * configurations (usually) need no longer import modules from
