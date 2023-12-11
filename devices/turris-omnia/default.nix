@@ -15,7 +15,7 @@
           imports = [
             ../../modules/arch/arm.nix
             ../modules/outputs/tftpboot.nix
-            ../modules/outputs/diskimage.nix
+            ../modules/outputs/mbrimage.nix
             ../modules/outputs/extlinux.nix
             ../modules/outputs/ext4fs.nix
           ];

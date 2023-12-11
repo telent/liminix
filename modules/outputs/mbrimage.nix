@@ -10,10 +10,10 @@ let
   phram_address = lib.toHexString (config.hardware.ram.startAddress + 256 * 1024 * 1024);
 in {
   options.system.outputs = {
-    diskimage = mkOption {
+    mbrimage = mkOption {
       type = types.package;
       description = ''
-        diskimage
+        mbrimage
         *********
 
         This creates a disk image file with a partition table containing
@@ -25,10 +25,10 @@ in {
 
   config = {
     system.outputs = {
-      diskimage =
+      mbrimage =
         let
           o = config.system.outputs;
-        in pkgs.runCommand "diskimage" {
+        in pkgs.runCommand "mbrimage" {
           depsBuildBuild = [ pkgs.pkgsBuildBuild.util-linux ];
         } ''
           # leave 4 sectors at start for partition table
@@ -39,10 +39,10 @@ in {
       vmdisk = pkgs.runCommand "vmdisk" {} ''
         mkdir $out
         cd $out
-        ln -s ${o.diskimage} ./diskimage
+        ln -s ${o.mbrimage} ./mbrimage
         cat > run.sh <<EOF
         #!${pkgs.runtimeShell}
-        ${pkgs.pkgsBuildBuild.run-liminix-vm}/bin/run-liminix-vm  --arch ${pkgs.stdenv.hostPlatform.qemuArch} --u-boot ${pkgs.ubootQemuArm}/u-boot.bin --phram-address 0x${phram_address} --disk-image ${o.diskimage} /dev/null /dev/null
+        ${pkgs.pkgsBuildBuild.run-liminix-vm}/bin/run-liminix-vm  --arch ${pkgs.stdenv.hostPlatform.qemuArch} --u-boot ${pkgs.ubootQemuArm}/u-boot.bin --phram-address 0x${phram_address} --disk-image ${o.mbrimage} /dev/null /dev/null
         EOF
         chmod +x run.sh
       '';
