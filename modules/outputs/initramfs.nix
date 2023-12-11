@@ -53,6 +53,8 @@ in
           file /init ${pkgs.preinit}/bin/preinit 0755 0 0
           SPECIALS
         '';
+      systemConfiguration =
+        pkgs.systemconfig config.filesystem.contents;
     };
   };
 }

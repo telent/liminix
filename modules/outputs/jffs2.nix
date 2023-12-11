@@ -24,8 +24,6 @@ in
     };
     boot.initramfs.enable = true;
     system.outputs = {
-      systemConfiguration =
-        pkgs.systemconfig config.filesystem.contents;
       rootfs =
         let
           inherit (pkgs.pkgsBuildBuild) runCommand mtdutils;
