@@ -36,12 +36,8 @@ in
           depsBuildBuild = [ mtdutils ];
         } ''
           mkdir tmp
-          cp -a ${o.rootfsFiles} tmp
-          ${if config.boot.loader.extlinux.enable
-            then "(cd tmp && ln -s ${o.extlinux} boot)"
-            else ""
-           }
-          mkfs.ubifs -x favor_lzo -c ${cfg.maxLEBcount} -m ${cfg.minIOSize} -e ${cfg.eraseBlockSize}  -y -r tmp --output $out  --squash-uids -o $out
+          tree=${o.bootablerootdir}
+          mkfs.ubifs -x favor_lzo -c ${cfg.maxLEBcount} -m ${cfg.minIOSize} -e ${cfg.eraseBlockSize}  -y -r $tree --output $out  --squash-uids -o $out
         '';
     };
   };

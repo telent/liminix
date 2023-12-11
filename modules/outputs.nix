@@ -69,11 +69,20 @@ in
           out what's in the image, which is nice if it's unexpectedly huge
         '';
       };
-      rootfsFiles = mkOption {
+      rootdir = mkOption {
         type = types.package;
         internal = true;
         description = ''
           directory of files to package into root filesystem
+        '';
+      };
+      bootablerootdir = mkOption {
+        type = types.package;
+        internal = true;
+        description = ''
+          directory of files to package into root filesystem, including
+          a kernel and appropriate associated gubbins for the
+          selected bootloader
         '';
       };
       rootfs = mkOption {
@@ -108,7 +117,7 @@ in
         inherit kernel;
         inherit dtb;
       };
-      rootfsFiles =
+      rootdir =
         let
           inherit (pkgs.pkgsBuildBuild) runCommand;
         in runCommand "mktree" { } ''
@@ -120,6 +129,15 @@ in
             (cd $out && cp -a $path .$path)
           done
         '';
+      bootablerootdir =
+        let inherit (pkgs.pkgsBuildBuild) runCommand;
+        in runCommand "add-slash-boot" { } ''
+          cp -a ${o.rootdir} $out
+          ${if config.boot.loader.extlinux.enable
+            then "(cd $out && chmod -R +w . && rmdir boot && cp -a ${o.extlinux} boot)"
+            else ""
+           }
+         '';
       manifest = writeText "manifest.json" (builtins.toJSON config.filesystem.contents);
     };
   };

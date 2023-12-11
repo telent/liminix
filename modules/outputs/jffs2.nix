@@ -34,12 +34,8 @@ in
         in runCommand "make-jffs2" {
           depsBuildBuild = [ mtdutils ];
         } ''
-          cp -a ${o.rootfsFiles} tmp
-          ${if config.boot.loader.extlinux.enable
-            then "(cd tmp && ln -s ${o.extlinux} boot)"
-            else ""
-          }
-          (cd tmp && mkfs.jffs2 --compression-mode=size ${endian} -e ${toString config.hardware.flash.eraseBlockSize} --enable-compressor=lzo --pad --root . --output $out --squash --faketime )
+          tree=${o.bootablerootdir}
+          (cd $tree && mkfs.jffs2 --compression-mode=size ${endian} -e ${toString config.hardware.flash.eraseBlockSize} --enable-compressor=lzo --pad --root . --output $out --squash --faketime )
         '';
     };
   };

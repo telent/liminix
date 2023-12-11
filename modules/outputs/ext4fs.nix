@@ -28,16 +28,12 @@ in
         in runCommand "mkfs.ext4" {
           depsBuildBuild = [ e2fsprogs ];
         } ''
-          cp -a ${o.rootfsFiles} tmp
-          ${if config.boot.loader.extlinux.enable
-            then "(cd tmp && chmod -R +w . && rmdir boot && cp -a ${o.extlinux} boot)"
-            else ""
-          }
-          size=$(du -s --apparent-size --block-size 1024 tmp |cut -f1)
+          tree=${o.bootablerootdir}
+          size=$(du -s --apparent-size --block-size 1024 $tree |cut -f1)
           # add 25% for filesystem overhead
           size=$(( 5 * $size / 4))
           dd if=/dev/zero of=$out bs=1024 count=$size
-          mke2fs -t ext4 -j -d tmp $out
+          mke2fs -t ext4 -j -d $tree $out
         '';
     };
   };
