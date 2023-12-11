@@ -1,6 +1,0 @@
-{ ... }:
-{
-  imports = [
-    ./vanilla-configuration.nix
-  ];
-}

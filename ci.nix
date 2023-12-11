@@ -8,21 +8,20 @@ let
   pkgs = (import nixpkgs {});
   borderVmConf =  ./bordervm.conf-example.nix;
   inherit (pkgs.lib.attrsets) genAttrs;
-  devices = {
-    virt = [ "qemu" "qemu-aarch64" "qemu-armv7l" ];
-    hw = [ "gl-ar750" "gl-mt300n-v2" "gl-mt300a"  ];
-  };
+  devices = [
+    "gl-ar750" "gl-mt300n-v2" "gl-mt300a"
+    "qemu" "qemu-aarch64" "qemu-armv7l"
+  ];
   vanilla = ./vanilla-configuration.nix;
-  for-device = cfg: name:
+  for-device = name:
     (import liminix {
       inherit nixpkgs borderVmConf;
       device = import (liminix + "/devices/${name}");
-      liminix-config = cfg;
+      liminix-config = vanilla;
     }).outputs.default;
   tests = import ./tests/ci.nix;
   jobs =
-    (genAttrs devices.hw (name: for-device ./vanilla-configuration-hw.nix name)) //
-    (genAttrs devices.virt (name: for-device vanilla name)) //
+    (genAttrs devices for-device) //
     tests //
     {
       buildEnv = (import liminix {
