@@ -3418,3 +3418,40 @@ device tree" (or alternatively, "we need a static dtb, platform doesn't
 provide it").
 
 config.boot.platformProvidesDeviceTree
+
+
+
+Monday
+
+so where are we? we've removed the need for every hardware device to
+be able to build flashimage, because not every hw device (looking at you,
+bellkin/turris) works like that.
+
+for the belkin we can have imports = [ modules/outputs/ubimage ]
+and extlinux enabled
+
+for the nwa from Raito we'd like to have imports = [ modules/outputs/ubimage ]
+but the bootloader is mtd partition-based (or ubi volume? check?) -
+so ubimage needs to know how to do that
+
+perhaps we need an output for "smash together a kernel and a
+filesystem image that does not also contain a kernel, and don't
+put a partition table on the front"
+
+diskimage {
+  partitionType = "mtd" ;  # or "mbr" or maybe "gpt"
+  partitions = [ o.uimage o.rootfs ];
+}
+    
+
+
+
+for the turris we need to check but proceeding on the assumption
+it wants a tarball with extlinux enabled 
+
+https://docs.turris.cz/geek/schnapps/schnapps/#export-and-import
+https://wiki.turris.cz/en/howto/omnia_booting_from_external_storage
+
+if we adopt this as our installation format then we are not
+reformatting the flash and will keep the btrfs that the device
+was shipped with. 
