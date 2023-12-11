@@ -40,7 +40,7 @@ let
               }).outputs.optionsJson;
             installers = map (f: "system.outputs.${f}") [
               "vmroot"
-              "flashimage"
+              "mtdimage"
               "ubimage"
             ];
             inherit (pkgs.lib) concatStringsSep;

@@ -38,7 +38,7 @@
 
     As with many GL.iNet devices, the stock vendor firmware
     is a fork of OpenWrt, meaning that the binary created by
-    :ref:`system-outputs-flashimage` can be flashed using the
+    :ref:`system-outputs-mtdimage` can be flashed using the
     vendor web UI or the U-Boot emergency "unbrick" routine.
 
     For flashing from an existing Liminix system (we believe that) it
@@ -97,7 +97,7 @@
         ../../modules/network
         ../../modules/arch/mipseb.nix
         ../../modules/outputs/tftpboot.nix
-        ../../modules/outputs/flashimage.nix
+        ../../modules/outputs/mtdimage.nix
         ../../modules/outputs/jffs2.nix
       ];
 
@@ -105,7 +105,7 @@
         FEATURE_DD_IBS_OBS = "y"; # ath10k_cal_data needs skip_bytes,fullblock
       };
       hardware = {
-        defaultOutput = "flashimage";
+        defaultOutput = "mtdimage";
         loadAddress = lim.parseInt "0x80060000";
         entryPoint = lim.parseInt "0x80060000";
         flash = {

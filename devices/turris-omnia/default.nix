@@ -128,7 +128,7 @@
         klibBuild = config.system.outputs.kernel.modulesupport;
       };
       in {
-        defaultOutput = "flashimage";
+        defaultOutput = "mtdimage";
         loadAddress = lim.parseInt "0x00008000";
         entryPoint = lim.parseInt "0x00008000";
         rootDevice = "/dev/mtdblock0";

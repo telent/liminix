@@ -9,7 +9,6 @@ let
   o = config.system.outputs;
   phram_address = lib.toHexString (config.hardware.ram.startAddress + 256 * 1024 * 1024);
 in {
-#  imports = [ ./flashimage.nix ];
   options.system.outputs = {
     diskimage = mkOption {
       type = types.package;

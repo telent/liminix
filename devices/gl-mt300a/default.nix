@@ -29,7 +29,7 @@
     ============
 
     The stock vendor firmware is a fork of OpenWrt, meaning that the
-    binary created by :ref:`system-outputs-flashimage` can be flashed
+    binary created by :ref:`system-outputs-mtdimage` can be flashed
     using the vendor web UI or the U-Boot emergency "unbrick" routine.
 
     For flashing from an existing Liminix system (we think) it
@@ -55,11 +55,11 @@
       imports = [
         ../../modules/arch/mipsel.nix
         ../../modules/outputs/tftpboot.nix
-        ../../modules/outputs/flashimage.nix
+        ../../modules/outputs/mtdimage.nix
         ../../modules/outputs/jffs2.nix
       ];
       hardware = {
-        defaultOutput = "flashimage";
+        defaultOutput = "mtdimage";
         loadAddress = lim.parseInt "0x80000000";
         entryPoint = lim.parseInt "0x80000000";
 

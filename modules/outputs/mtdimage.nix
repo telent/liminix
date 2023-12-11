@@ -11,7 +11,7 @@ in {
   options.system.outputs = {
     firmware = mkOption {
       type = types.package;
-      internal = true;          # component of flashimage
+      internal = true;          # component of mtdimage
       description = ''
         Binary image (combining kernel, FDT, rootfs, initramfs
         if needed, etc) for the target device.
@@ -19,16 +19,16 @@ in {
     };
     flash-scr = mkOption {
       type = types.package;
-      internal = true;          # component of flashimage
+      internal = true;          # component of mtdimage
       description = ''
         Copy-pastable U-Boot commands to TFTP download the
         image and write it to flash
       '';
     };
-    flashimage = mkOption {
+    mtdimage = mkOption {
       type = types.package;
       description = ''
-        flashimage
+        mtdimage
         **********
 
         This creates an image called :file:`firmware.bin` suitable for
@@ -80,10 +80,10 @@ in {
           dd if=${o.uimage} of=$out bs=${bs} conv=sync
           dd if=${o.rootfs} of=$out bs=${bs} conv=sync,nocreat,notrunc oflag=append
         '';
-      flashimage =
+      mtdimage =
         let o = config.system.outputs; in
         # could use trivial-builders.linkFarmFromDrvs here?
-        pkgs.runCommand "flashimage" {} ''
+        pkgs.runCommand "mtdimage" {} ''
           mkdir $out
           cd $out
           ln -s ${o.firmware} firmware.bin

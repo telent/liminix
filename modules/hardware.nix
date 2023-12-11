@@ -32,7 +32,7 @@ in {
         };
       };
       defaultOutput = mkOption {
-        description = "\"Default\" output: what gets built for this device when outputs.default is requested. Typically this is \"flashimage\" or \"vmroot\"";
+        description = "\"Default\" output: what gets built for this device when outputs.default is requested. Typically this is \"mtdimage\" or \"vmroot\"";
         type = types.nonEmptyStr;
       };
       ram = {

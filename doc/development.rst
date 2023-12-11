@@ -180,7 +180,7 @@ Now add the device and server IP addresses to your configuration:
   };
 
 and then build the derivation for ``outputs.default`` or
-``outputs.flashimage`` (for which it will be an alias on any device
+``outputs.mtdimage`` (for which it will be an alias on any device
 where this is applicable). You should find it has created
 
 * :file:`result/firmware.bin` which is the file you are going to flash

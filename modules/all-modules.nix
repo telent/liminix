@@ -24,7 +24,7 @@
    ./outputs.nix
    ./outputs/vmroot.nix
    ./outputs/ubimage.nix
-   ./outputs/flashimage.nix
+   ./outputs/mtdimage.nix
    ./ppp
    ./ramdisk.nix
    ./squashfs.nix
