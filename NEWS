@@ -1,0 +1,20 @@
+A brief guide to backward-incompatible changes
+that are likely to break configurations or workflows
+
+2023-12-10
+
+* configurations (usually) need no longer import modules from
+modules/outputs because devices are expected to do this instead. This
+change is because the outputs that make sense in any given context are
+usually a property of the device being installed onto.
+
+2023-12-11
+
+* rename outputs.flashimage to outputs.mtdimage (and also diskimage to
+mbrimage). This change is made in the expectation that "fooimage" is
+the name of an outputs that gloms together other filesystem-like
+outputs with some kind of partition table - so we might in future have
+gptimage or lvmimage or ubimage.
+
+
+
