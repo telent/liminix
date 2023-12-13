@@ -14,10 +14,10 @@
     let openwrt = pkgs.openwrt; in {
           imports = [
             ../../modules/arch/arm.nix
-            ../modules/outputs/tftpboot.nix
-            ../modules/outputs/mbrimage.nix
-            ../modules/outputs/extlinux.nix
-            ../modules/outputs/ext4fs.nix
+            ../../modules/outputs/tftpboot.nix
+            ../../modules/outputs/ext4fs.nix
+            ../../modules/outputs/mbrimage.nix
+            ../../modules/outputs/extlinux.nix
           ];
     kernel = {
       src = pkgs.pkgsBuildBuild.fetchurl {
@@ -51,12 +51,6 @@
 
         # WARNING: unmet direct dependencies detected for ARCH_WANT_LIBATA_LEDS
         ATA = "y";
-
-
-        #         CONFIG_REGMAP=y
-        # CONFIG_REGMAP_I2C=y
-        # CONFIG_REGMAP_SPI=y
-        # CONFIG_REGMAP_MMIO=y
 
         PSTORE = "y";
         PSTORE_RAM = "y";
@@ -172,6 +166,11 @@
               devpath = "/devices/platform/soc/soc:internal-regs/f1034000.ethernet";
               ifname = "wan";
             };
+
+            lan = link.build {
+              ifname = "lan1";
+            };
+
             wlan = link.build {
               ifname = "wlan0";
               dependencies = [ mac80211 ];
