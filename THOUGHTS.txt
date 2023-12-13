@@ -3442,16 +3442,88 @@ diskimage {
   partitionType = "mtd" ;  # or "mbr" or maybe "gpt"
   partitions = [ o.uimage o.rootfs ];
 }
-    
+
 
 
 
 for the turris we need to check but proceeding on the assumption
-it wants a tarball with extlinux enabled 
+it wants a tarball with extlinux enabled
 
 https://docs.turris.cz/geek/schnapps/schnapps/#export-and-import
 https://wiki.turris.cz/en/howto/omnia_booting_from_external_storage
 
 if we adopt this as our installation format then we are not
 reformatting the flash and will keep the btrfs that the device
-was shipped with. 
+was shipped with.
+
+https://forum.turris.cz/t/update-to-5-1-x-by-medkit/13986/12
+suggests that we could install a custom medkit from the
+vendor OS
+
+=> btrsubvol mmc 0:1
+ID 257 parent 5 name /@
+ID 259 parent 5 name /@factory
+
+there don't seem to be any other btr commands in u-boot
+
+Tue Dec 12 14:38:53 GMT 2023
+
+
+        env_set_ulong("omnia_reset", reset_status);
+    const char * const vars[3] = {
+                        "bootcmd",
+                        "bootdelay",
+                        "distro_bootcmd",
+                };
+
+                /*
+                 * Set the above envs to their default values, in case the user
+                 * managed to break them.
+                 */
+                env_set_default_vars(3, (char * const *)vars, 0);
+
+                      env_set("boot_targets", "rescue");
+// reset boot_targets to default value.
+
+Tue Dec 12 22:44:34 GMT 2023
+
+The hold-down-reset-until-n-leds-flash support depends quite heavily
+on the post-boot Linux environment, in that it appears to be passing
+omniarescue=3 rescue_mode=3 to the kernel command line -> pid 1
+cmdline
+
+On the other hand, it is described as being able to boot from usb
+stick if there's a boot.scr on the usb stick, so maybe we just do
+that. The installation process could then be "boot usb, dd the
+disk image to mmc, reboot, remove usb, realise we got the wrong root=".
+Hmm.
+
+* Could we edit extlinux.conf for first boot? But bear in mind it's a
+link to a store file.
+
+* Could we have extlinux.conf point at mmc0 and somehow override it for the
+usb stick boot?
+
+* Could preinit try multiple root mounts until it gets one that works?
+
+* maybe we could detect omniarescue on kernel command line and switch to
+usb root?
+
+* maybe outputs.usbstick could generate a customised rootfs image?
+it might be unworkable to
+
+(narrator: it boots from mmc0 first and usb stick second, so that's not
+particularly useful)
+
+
+
+
+Device 0: Vendor: SanDisk Rev: 1.00 Prod: Cruzer Blade
+            Type: Removable Hard Disk
+            Capacity: 7632.0 MB = 7.4 GB (15630336 x 512)
+... is now current device
+Scanning usb 0:1...
+No EFI system partition
+fdt_find_or_add_subnode: chosen: FDT_ERR_BADSTRUCTURE
+ERROR: /chosen node create failed
+ - must RESET the board to recover.

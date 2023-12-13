@@ -89,7 +89,7 @@
         NET_DSA_MV88E6XXX = "y"; # depends on PTP_1588_CLOCK_OPTIONAL
       };
     };
-
+    rootfsType = "ext4";
     boot = {
       commandLine = [
         "console=ttyS0,115200"
@@ -115,7 +115,7 @@
             };
           };
         };
-
+    boot.tftp.loadAddress = lim.parseInt "0x01800000";
     hardware = let
       mac80211 = pkgs.mac80211.override {
         drivers = ["ath9k_pci" "ath10k_pci"];
@@ -124,6 +124,7 @@
       in {
         defaultOutput = "mtdimage";
         loadAddress = lim.parseInt "0x00008000";
+
         entryPoint = lim.parseInt "0x00008000";
         rootDevice = "/dev/mtdblock0";
         dts = {

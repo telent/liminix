@@ -214,4 +214,18 @@ extraPkgs // {
       CONFIG_BOOTMETH_DISTRO=y
     '';
   };
+
+  # gnufdisk = prev.gnufdisk.override {
+  #   guile = null;
+  # };
+
+  # util-linux = prev.util-linux.override {
+  #   ncursesSupport = false;
+  #   pamSupport = false;
+  #   systemdSupport = false;
+  #   nlsSupport = false;
+  #   translateManpages = false;
+  #   capabilitiesSupport = false;
+  # };
+
 }

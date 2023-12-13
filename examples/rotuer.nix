@@ -44,7 +44,6 @@ in rec {
     ../modules/ntp
     ../modules/ssh
   ];
-  rootfsType = "jffs2";
   hostname = "rotuer";
 
   services.hostap = svc.hostapd.build {
@@ -181,5 +180,9 @@ in rec {
 
   defaultProfile.packages = with pkgs; [
     min-collect-garbage
+  ];
+
+  programs.busybox.applets = [
+    "fdisk" "sfdisk"
   ];
 }
