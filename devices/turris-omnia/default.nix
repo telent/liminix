@@ -14,7 +14,7 @@
     let openwrt = pkgs.openwrt; in {
           imports = [
             ../../modules/arch/arm.nix
-            ../../modules/outputs/tftpboot.nix
+            ../../modules/outputs/tftpbootlz.nix
             ../../modules/outputs/ext4fs.nix
             ../../modules/outputs/mbrimage.nix
             ../../modules/outputs/extlinux.nix
@@ -115,7 +115,9 @@
             };
           };
         };
-    boot.tftp.loadAddress = lim.parseInt "0x01800000";
+
+    boot.tftp.loadAddress = lim.parseInt "0x1000000";
+
     hardware = let
       mac80211 = pkgs.mac80211.override {
         drivers = ["ath9k_pci" "ath10k_pci"];
@@ -123,9 +125,9 @@
       };
       in {
         defaultOutput = "mtdimage";
-        loadAddress = lim.parseInt "0x00008000";
+        loadAddress = lim.parseInt "0x00800000"; # "0x00008000";
 
-        entryPoint = lim.parseInt "0x00008000";
+        entryPoint = lim.parseInt "0x00800000"; # "0x00008000";
         rootDevice = "/dev/mtdblock0";
         dts = {
           src = "${config.system.outputs.kernel.modulesupport}/arch/arm/boot/dts/armada-385-turris-omnia.dts";
