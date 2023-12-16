@@ -3468,21 +3468,12 @@ there don't seem to be any other btr commands in u-boot
 
 Tue Dec 12 14:38:53 GMT 2023
 
+from the source code, to get to the various omnia revovery modes
 
-        env_set_ulong("omnia_reset", reset_status);
-    const char * const vars[3] = {
-                        "bootcmd",
-                        "bootdelay",
-                        "distro_bootcmd",
-                };
+uboot> setenv omnia_reset 3 # or 1..n
+uboot> setenv boot_targets rescue
+uboot> boot
 
-                /*
-                 * Set the above envs to their default values, in case the user
-                 * managed to break them.
-                 */
-                env_set_default_vars(3, (char * const *)vars, 0);
-
-                      env_set("boot_targets", "rescue");
 // reset boot_targets to default value.
 
 Tue Dec 12 22:44:34 GMT 2023
@@ -3527,3 +3518,71 @@ No EFI system partition
 fdt_find_or_add_subnode: chosen: FDT_ERR_BADSTRUCTURE
 ERROR: /chosen node create failed
  - must RESET the board to recover.
+
+Thu Dec 14 15:32:39 GMT 2023
+
+from the omnia rescue image, we have
+
+## Loading kernel from FIT Image at 01700000 ...
+
+     Load Address: 0x00800000
+     Entry Point:  0x00800000
+
+
+int lzmaBuffToBuffDecompress(unsigned char *outStream, SizeT *uncompressedSize,
+                             const unsigned char *inStream, SizeT length)
+
+    err = image_decomp(os.comp, load, os.image_start, os.type,
+                           load_buf, image_buf, image_len,
+                           CONFIG_SYS_BOOTM_LEN, &load_end);
+
+configs/mvebu_db_armada8k_defconfig:CONFIG_SYS_BOOTM_LEN=0x800000
+   default 0x4000000 if PPC || ARM64
+   default 0x1000000 if X86 || ARCH_MX6 || ARCH_MX7
+   default 0x800000
+
+Fri Dec 15 19:21:53 GMT 2023
+
+Let's put some English words on the page to explain the above
+gibberish. Since I upgraded the U-Boot on my Turris Omnia, it has
+stopped being able to tftpboot.
+
+Uncompressing Kernel Image
+lzma compressed: uncompress error 7
+Must RESET board to recover
+
+"uncompress error 7" means there is not enough space in the output
+buffer, and the output buffer is set by CONFIG_SYS_BOOTM_LEN which is
+8192k, smaller than the uncompressed 12104200 of our kernel.
+
+So how can we fix?
+
+* one possibility is to do what the turris rescue mode does: build an
+uncompressed uimage and then lzma the result.  u-boot can uncompress
+the received file using lzmadec command. we'd want to do this without
+breaking tftpboot on every other device that might not have an lzmadec
+command
+
+* is there bloat in the kernel we could trim? probably not 4MB of it
+
+* we could build a custom u-boot with a bigger buffer. this _might_
+not be a completely stupid idea as it's only the people prepared to
+open the box that would be doing tftp workflows anyway, so provided
+it's possible to replace u-boot without bricking it
+
+* we could try building zimage instead of uimage and use bootz to
+start it
+
+Sat Dec 16 11:15:56 GMT 2023
+
+there is another use case for weird tftpboot derivation, which is the
+device Raito has ported to where you need to wave a magic chicken at
+u-boot on each command line
+
+Sat Dec 16 23:32:11 GMT 2023
+
+Turns out that even when using an uncompressed uimage, u-boot runs the
+code to check the decompressed size, so that doesn't help at all.  But
+booting a zImage works fine. I am committing a first pass of
+modules/outputs/tftpbootlz.nix which does this using a lot of
+copy-paste and (ironically) no lzma stuff at all.
