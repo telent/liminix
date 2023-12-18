@@ -1,0 +1,31 @@
+"qemu-system-arm" \
+     "-M" \
+     "virt,highmem=off" \
+     "-cpu" \
+     "cortex-a15" \
+     "-m" \
+     "272" \
+     "-echr" \
+     "16" \
+     "-device" \
+     "loader,file=run-vm-FwJ0aL,addr=0x3c00000" \
+     "-serial" \
+     "mon:stdio" \
+     "-drive" \
+     "if=pflash,format=raw,file=run-vm-duvYIP" \
+     "-drive" \
+     "if=none,format=raw,id=hd0,file=run-vm-FwJ0aL" \
+     "-device" \
+     "virtio-blk-pci,drive=hd0" \
+     "-netdev" \
+     "socket,id=access,mcast=230.0.0.1:1234,localaddr=127.0.0.1" \
+     "-device" \
+     "virtio-net,disable-legacy=on,disable-modern=off,netdev=access,mac=ba:ad:1d: \
+ea:21:02" \
+     "-netdev" \
+     "user,tftp=/build,id=lan" \
+     "-device" \
+     "virtio-net,disable-legacy=on,disable-modern=off,netdev=lan,mac=ba:ad:1d:ea: \
+21:01" \
+     "-display" \
+     "none"

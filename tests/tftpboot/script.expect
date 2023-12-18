@@ -1,0 +1,21 @@
+set timeout 10
+
+spawn socat unix-connect:vm/console -
+expect "stop autoboot"
+send "\r"
+expect "=>"
+send "setenv ethact eth1\r"
+set fh [open "result/boot.scr"]
+while {[gets $fh line] >= 0} {
+      expect "=>"
+      send "$line\r"
+}
+
+close $fh
+
+expect {
+   "s6-linux-init" { exit 0 }
+   timeout { exit 1 }
+}
+
+

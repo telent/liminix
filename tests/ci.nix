@@ -7,4 +7,5 @@
   ext4 = import ./ext4/test.nix;
   min-copy-closure =  import ./min-copy-closure/test.nix;
   fennel = import ./fennel/test.nix;
+  tftpboot = import ./tftpboot/test.nix;
 }

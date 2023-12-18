@@ -212,6 +212,9 @@ extraPkgs // {
       CONFIG_CMD_UBIFS=y
       CONFIG_BOOTSTD=y
       CONFIG_BOOTMETH_DISTRO=y
+      CONFIG_LZMA=y
+      CONFIG_CMD_LZMADEC=y
+      CONFIG_SYS_BOOTM_LEN=0x1000000
     '';
   };
 
