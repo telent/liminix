@@ -36,7 +36,7 @@
   (match args
     ["--background" dir & rest] (assoc (parse-args rest) :background dir)
     ["--u-boot" bin & rest]
-    (assoc (parse-args rest) :u-boot (pad-file bin (* 64 1024) "\xff"))
+    (assoc (parse-args rest) :u-boot bin)
     ["--disk-image" image & rest ] (assoc (parse-args rest)
                                           :disk-image (pad-file image 1024))
     ["--arch" arch & rest] (assoc (parse-args rest) :arch arch)
@@ -47,9 +47,24 @@
     { :kernel kernel :rootfs (pad-file rootfsimg (* 16 1024)) }
     ))
 
+(fn pad-u-boot [options]
+  (if options.u-boot
+      (let [size (.
+                  {
+                   :mips (* 4 1024)
+                   :aarch64 (* 64 1024)
+                   :arm (* 64 1024)
+                   }
+                  options.arch)]
+        (assoc options
+               :u-boot
+               (pad-file options.u-boot size "\xff")))
+      options))
+
 (local options
        (assert
-        (merge { :arch "mips" } (parse-args arg))
+        (pad-u-boot
+         (merge { :arch "mips" } (parse-args arg)))
         (.. "Usage: " (. arg 0) " blah bah")))
 
 (fn background [dir]
