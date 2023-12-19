@@ -1,4 +1,4 @@
-set timeout 10
+set timeout 30
 
 spawn socat unix-connect:vm/console -
 expect "stop autoboot"

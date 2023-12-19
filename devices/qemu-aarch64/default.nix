@@ -43,5 +43,9 @@
     boot.commandLine = [
       "console=ttyAMA0,38400"
     ];
+    hardware = let addr = lim.parseInt "0x40010000"; in {
+      loadAddress = addr;
+      entryPoint = addr;
+    };
   };
 }

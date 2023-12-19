@@ -200,6 +200,12 @@ extraPkgs // {
 
   strace = prev.strace.override { libunwind = null; };
 
+  ubootQemuAarch64 = final.buildUBoot {
+    defconfig = "qemu_arm64_defconfig";
+    extraMeta.platforms = ["aarch64-linux"];
+    filesToInstall = ["u-boot.bin"];
+  };
+
   ubootQemuArm = final.buildUBoot {
     defconfig = "qemu_arm_defconfig";
     extraMeta.platforms = ["armv7l-linux"];

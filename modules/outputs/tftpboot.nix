@@ -70,26 +70,30 @@ in {
         in
           pkgs.buildPackages.runCommand "boot-scr" { nativeBuildInputs = [ pkgs.pkgsBuildBuild.dtc ];  } ''
             uimageSize=$(($(stat -L -c %s ${o.uimage}) + 0x1000 &(~0xfff)))
-            rootfsStart=0x$(printf %x $((${toString cfg.loadAddress} + 0x100000 + $uimageSize   &(~0xfffff) )))
+            rootfsStart=$(printf %x $((${toString cfg.loadAddress} + 0x100000 + $uimageSize   &(~0xfffff) )))
             rootfsBytes=$(($(stat -L -c %s ${o.rootfs}) + 0x100000 &(~0xfffff)))
             rootfsBytes=$(($rootfsBytes + ${toString cfg.freeSpaceBytes} ))
             rootfsMb=$(($rootfsBytes >> 20))
-            cmd="mtdparts=phram0:''${rootfsMb}M(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsBytes},${toString config.hardware.flash.eraseBlockSize} root=/dev/mtdblock0";
+            cmd="mtdparts=phram0:''${rootfsMb}M(rootfs) phram.phram=phram0,0x''${rootfsStart},''${rootfsBytes},${toString config.hardware.flash.eraseBlockSize} root=/dev/mtdblock0";
 
             dtbStart=$(printf %x $((${toString cfg.loadAddress} + $rootfsBytes + 0x100000 + $uimageSize )))
 
             mkdir $out
             cat ${o.dtb} > $out/dtb
-            fdtput -p -t s $out/dtb /reserved-memory/phram-rootfs compatible phram
-            fdtput -p -t lx $out/dtb /reserved-memory/phram-rootfs reg 0 $rootfsStart 0 $(printf %x $rootfsBytes)
+            fdtput -p  $out/dtb /reserved-memory '#address-cells' 2
+            fdtput -p  $out/dtb /reserved-memory '#size-cells' 2
+            fdtput -p  $out/dtb /reserved-memory ranges
+            fdtput -p -t s $out/dtb /reserved-memory/phram-rootfs@$rootfsStart  compatible phram
+            fdtput -p -t lx $out/dtb /reserved-memory/phram-rootfs@$rootfsStart reg 0 0x$rootfsStart 0 $(printf %x $rootfsBytes)
 
+            # dtc -I dtb -O dts -o /dev/stdout $out/dtb; exit 1
             dtbBytes=$(($(stat -L -c %s $out/dtb) + 0x1000 &(~0xfff)))
 
             cat > $out/script << EOF
             setenv serverip ${cfg.serverip}
             setenv ipaddr ${cfg.ipaddr}
             setenv bootargs 'liminix ${cmdline} $cmd'
-            tftpboot 0x${lib.toHexString cfg.loadAddress} result/uimage ; tftpboot 0x$(printf %x $rootfsStart) result/rootfs ; tftpboot 0x$dtbStart result/dtb
+            tftpboot 0x${lib.toHexString cfg.loadAddress} result/uimage ; tftpboot 0x$rootfsStart result/rootfs ; tftpboot 0x$dtbStart result/dtb
             bootm 0x${lib.toHexString cfg.loadAddress} - 0x$dtbStart
             EOF
           '';

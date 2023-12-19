@@ -87,7 +87,7 @@
 (local bin {
             :mips ["qemu-system-mips" "-M" "malta"]
             :aarch64 ["qemu-system-aarch64" "-M" "virt"
-                      "-semihosting" "-cpu" "cortex-a72"]
+                      "-cpu" "cortex-a72"]
             :arm ["qemu-system-arm" "-M" "virt,highmem=off"
                   "-cpu" "cortex-a15"]
             })

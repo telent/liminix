@@ -4,8 +4,13 @@ let
   dts = pkgs.runCommand "qemu.dts" {
     nativeBuildInputs = with pkgs.pkgsBuildBuild; [ dtc qemu ];
   } ''
-      qemu-system-arm -machine virt -machine dumpdtb=tmp.dtb
+      qemu-system-${pkgs.stdenv.hostPlatform.qemuArch} \
+        -machine virt -machine dumpdtb=tmp.dtb
       dtc -I dtb -O dts -o $out tmp.dtb
+      # https://stackoverflow.com/a/69890137,
+      # XXX try fdtput $out -p -t s /pl061@9030000 status disabled
+      # instead of using sed
+      sed -i $out -e 's/compatible = "arm,pl061.*/status = "disabled";/g'
     '';
 in {
   imports = [
@@ -15,7 +20,7 @@ in {
   config = {
     hardware.dts.src = lib.mkForce dts;
     boot.tftp = {
-      loadAddress = lim.parseInt "0x42000000";
+      loadAddress = lim.parseInt "0x44000000";
       serverip = "10.0.2.2";
       ipaddr = "10.0.2.15";
     };
