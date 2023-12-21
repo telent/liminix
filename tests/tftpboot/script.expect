@@ -15,6 +15,7 @@ close $fh
 
 expect {
    "s6-linux-init" { exit 0 }
+   "Reserved memory: unsupported node format, ignoring" { exit 1 }
    timeout { exit 1 }
 }
 
