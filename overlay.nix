@@ -224,6 +224,34 @@ extraPkgs // {
     '';
   };
 
+  ubootQemuMips = final.buildUBoot {
+    defconfig = "malta_defconfig";
+    extraMeta.platforms = ["mips-linux"];
+    filesToInstall = ["u-boot.bin"];
+    # define the prompt to be the same as arm{32,64} so
+    # we can use the same expect script for both
+    extraPatches = [ ./pkgs/u-boot/0002-virtio-init-for-malta.patch ];
+    extraConfig = ''
+      CONFIG_SYS_PROMPT="=> "
+      CONFIG_VIRTIO=y
+      CONFIG_AUTOBOOT=y
+      CONFIG_DM_PCI=y
+      CONFIG_VIRTIO_PCI=y
+      CONFIG_VIRTIO_NET=y
+      CONFIG_VIRTIO_BLK=y
+      CONFIG_VIRTIO_MMIO=y
+      CONFIG_QFW_MMIO=y
+      CONFIG_FIT=y
+      CONFIG_LZMA=y
+      CONFIG_CMD_LZMADEC=y
+      CONFIG_SYS_BOOTM_LEN=0x1000000
+      CONFIG_SYS_MALLOC_LEN=0x400000
+      CONFIG_MIPS_BOOT_FDT=y
+      CONFIG_OF_LIBFDT=y
+      CONFIG_OF_STDOUT_VIA_ALIAS=y
+   '';
+  };
+
   # gnufdisk = prev.gnufdisk.override {
   #   guile = null;
   # };

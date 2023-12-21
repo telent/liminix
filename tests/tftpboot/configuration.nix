@@ -18,9 +18,17 @@ in {
     ../../modules/outputs/tftpboot.nix
   ];
   config = {
-    hardware.dts.src = lib.mkForce dts;
+    # use extracted dts if it was null in the device
+    # definition, use actual dts if provided
+    hardware.dts.src = lib.mkOverride 500 dts;
     boot.tftp = {
-      loadAddress = lim.parseInt "0x44000000";
+      loadAddress =
+        let offsets = {
+              mips = "0x88000000";
+              arm = "0x44000000";
+              aarch64 = "0x44000000";
+            };
+        in lim.parseInt offsets.${pkgs.stdenv.hostPlatform.qemuArch} ;
       serverip = "10.0.2.2";
       ipaddr = "10.0.2.15";
     };

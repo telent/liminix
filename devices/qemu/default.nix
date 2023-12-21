@@ -36,7 +36,7 @@
     in the Development manual.
 
   '';
-  module = {pkgs, config, lim, ... }: {
+  module = {pkgs, config, lib, lim, ... }: {
     imports = [
       ../../modules/arch/mipseb.nix
       ../families/qemu.nix
@@ -50,5 +50,24 @@
         SERIAL_8250_CONSOLE= "y";
       };
     };
+    hardware =
+      # from arch/mips/mti-malta/Platform:load-$(CONFIG_MIPS_MALTA)  += 0xffffffff80100000
+      let addr = lim.parseInt "0x80100000";
+      in {
+        loadAddress = addr;
+        entryPoint = addr;
+
+        # Unlike the arm qemu targets, we need a static dts when
+        # running u-boot-using tests, qemu dumpdtb command doesn't
+        # work for this board. I am not at all sure this dts is
+        # *correct* but it does at least boot
+        dts = lib.mkForce {
+          src = "${config.system.outputs.kernel.modulesupport}/arch/mips/boot/dts/mti/malta.dts";
+          includes =  [
+            "${config.system.outputs.kernel.modulesupport}/arch/mips/boot/dts/"
+          ];
+        };
+
+      };
   };
 }

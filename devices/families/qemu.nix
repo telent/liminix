@@ -33,7 +33,7 @@
       in {
         defaultOutput = "vmroot";
         rootDevice = "/dev/mtdblock0";
-        dts.src = null;
+        dts.src = pkgs.lib.mkDefault null;
         flash.eraseBlockSize = 65536;
         networkInterfaces =
           let inherit (config.system.service.network) link;

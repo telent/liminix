@@ -1,0 +1,15 @@
+diff --git a/board/imgtec/malta/malta.c b/board/imgtec/malta/malta.c
+index 9853a0ba82..d95e332d6d 100644
+--- a/board/imgtec/malta/malta.c
++++ b/board/imgtec/malta/malta.c
+@@ -169,7 +169,9 @@ int board_early_init_f(void)
+ int misc_init_r(void)
+ {
+ 	rtc_reset();
+-
++#if IS_ENABLED(CONFIG_VIRTIO)
++	virtio_init();
++#endif
+ 	return 0;
+ }
+ 

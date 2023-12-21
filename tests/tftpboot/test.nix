@@ -30,6 +30,7 @@ run-liminix-vm \
 expect ${./script.expect} 2>&1 |tee $out
 '';
 in {
-  arm = check  "qemu-armv7l" "ubootQemuArm";
   aarch64 = check "qemu-aarch64" "ubootQemuAarch64";
+  arm = check  "qemu-armv7l" "ubootQemuArm";
+  mips = check  "qemu" "ubootQemuMips";
 }
