@@ -1,18 +1,15 @@
 diff --git a/arch/mips/mti-malta/malta-setup.c b/arch/mips/mti-malta/malta-setup.c
-index 21cb3ac1237b..f11409ae9583 100644
+index 21cb3ac1237b..52e731f9b4e2 100644
 --- a/arch/mips/mti-malta/malta-setup.c
 +++ b/arch/mips/mti-malta/malta-setup.c
-@@ -192,7 +192,12 @@ static void __init bonito_quirks_setup(void)
+@@ -192,7 +192,9 @@ static void __init bonito_quirks_setup(void)
  
  void __init *plat_get_fdt(void)
  {
 -	return (void *)__dtb_start;
-+    void *r=0;
-+    if(fw_arg0 == -2)
-+	r = (void *) KSEG1ADDR(fw_arg1);
-+    else
-+	r = (void *)  __dtb_start;
-+    return r;
++	return (fw_arg0 == -2) ?
++		(void *) (KSEG1ADDR(fw_arg1)) :
++		(void *) __dtb_start;
  }
  
  void __init plat_mem_setup(void)
