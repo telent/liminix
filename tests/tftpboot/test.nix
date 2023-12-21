@@ -9,7 +9,6 @@ let derivation = (import liminix {
     img = derivation.outputs.tftpboot;
     uboot = derivation.pkgs.${ubootName};
     pkgsBuild = derivation.pkgs.pkgsBuildBuild;
-    phram = 240 * 1024 * 1024;
 in pkgsBuild.runCommand "check" {
   nativeBuildInputs = with pkgsBuild; [
     expect
@@ -24,7 +23,6 @@ run-liminix-vm \
  --background ./vm \
  --u-boot ${uboot}/u-boot.bin \
  --arch ${derivation.pkgs.stdenv.hostPlatform.qemuArch} \
- --phram-address $(printf "0x%x" ${toString phram} ) \
  --lan "user,tftp=`pwd`" \
  --disk-image result/rootfs \
  result/uimage result/rootfs
