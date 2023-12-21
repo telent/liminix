@@ -42,6 +42,7 @@
     ["--arch" arch & rest] (assoc (parse-args rest) :arch arch)
     ["--phram-address" addr & rest] (assoc (parse-args rest) :phram-address addr)
     ["--lan" spec & rest] (assoc (parse-args rest) :lan spec)
+    ["--wan" spec & rest] (assoc (parse-args rest) :wan spec)
     ["--command-line" cmd & rest] (assoc (parse-args rest) :command-line cmd)
     [kernel rootfsimg]
     { :kernel kernel :rootfs (pad-file rootfsimg (* 16 1024)) }
@@ -76,9 +77,11 @@
      "-serial" (.. "unix:" sock ",server,nowait")
      "-monitor" (.. "unix:" monitor ",server,nowait")]))
 
-(fn access-net []
+(fn access-net [override]
   [
-   "-netdev" "socket,id=access,mcast=230.0.0.1:1234,localaddr=127.0.0.1"
+   "-netdev"  (.. (or override
+                      "socket,mcast=230.0.0.1:1234,localaddr=127.0.0.1")
+                  ",id=access")
    "-device" "virtio-net,disable-legacy=on,disable-modern=off,netdev=access,mac=ba:ad:1d:ea:21:02"
    ])
 
@@ -121,7 +124,7 @@
                 ["-serial" "mon:stdio"]))
            (appendm (bootable (or options.command-line "")
                               options.u-boot options.disk-image))
-           (appendm (access-net))
+           (appendm (access-net options.wan))
            (appendm (local-net options.lan))
            (appendm ["-display" "none"])))
 

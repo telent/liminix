@@ -23,7 +23,7 @@ run-liminix-vm \
  --background ./vm \
  --u-boot ${uboot}/u-boot.bin \
  --arch ${derivation.pkgs.stdenv.hostPlatform.qemuArch} \
- --lan "user,tftp=`pwd`" \
+ --wan "user,tftp=`pwd`" \
  --disk-image result/rootfs \
  result/uimage result/rootfs
 
