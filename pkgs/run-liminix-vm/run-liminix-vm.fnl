@@ -113,11 +113,14 @@
 (local exec-args
        (-> []
            (appendm (. bin options.arch))
-           (appendm ["-m" "272"
-                     "-echr" "16"
-                     "-device"
-                     (.. "loader,file=" options.rootfs ",addr=" options.phram-address)
-                     ])
+           (appendm ["-echr" "16"])
+           (appendm (if options.phram-address
+                        [
+                         "-m" "272"
+                         "-device"
+                         (.. "loader,file=" options.rootfs ",addr=" options.phram-address)
+                         ]
+                        ["-m" "256"]))
            (appendm
             (if options.background
                 (background options.background)
