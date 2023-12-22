@@ -101,14 +101,14 @@ in {
             fdtput -p -t s dtb /reserved-memory/$node compatible phram
             fdtput -p -t lx dtb /reserved-memory/$node reg $ac_prefix $(hex $rootfsStart) $sz_prefix $(hex $rootfsSize)
 
-            cmd="mtdparts=phram0:''${rootfsSize}(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsSize},${toString config.hardware.flash.eraseBlockSize} root=/dev/mtdblock0";
+            cmd="liminix ${cmdline} mtdparts=phram0:''${rootfsSize}(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsSize},${toString config.hardware.flash.eraseBlockSize} root=/dev/mtdblock0";
+            fdtput -t s dtb /chosen bootargs "$cmd"
 
-            # dtc -I dtb -O dts -o /dev/stdout dtb | grep -A10 reserved-mem ; exit 1
+            # dtc -I dtb -O dts -o /dev/stdout dtb | grep -A10 chosen ; exit 1
 
             cat > boot.scr << EOF
             setenv serverip ${cfg.serverip}
             setenv ipaddr ${cfg.ipaddr}
-            setenv bootargs 'liminix ${cmdline} $cmd'
             tftpboot $(hex $imageStart) result/image ; ${
               if cfg.compressRoot
               then "tftpboot $(hex $rootfsLzStart) result/rootfs.lz"
