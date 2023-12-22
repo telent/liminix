@@ -82,15 +82,16 @@ in {
             cat ${o.dtb} > $out/dtb
             address_cells=$(fdtget $out/dtb / '#address-cells')
             size_cells=$(fdtget $out/dtb / '#size-cells')
-            if [ address_cells -gt 1 ]; then ac_prefix=0; fi
-            if [ size_cells -gt 1 ]; then sz_prefix=0; fi
+            if [ $address_cells -gt 1 ]; then ac_prefix=0; fi
+            if [ $size_cells -gt 1 ]; then sz_prefix=0; fi
+
             fdtput -p  $out/dtb /reserved-memory '#address-cells' $address_cells
             fdtput -p  $out/dtb /reserved-memory '#size-cells' $size_cells
             fdtput -p  $out/dtb /reserved-memory ranges
             fdtput -p -t s $out/dtb /reserved-memory/phram-rootfs@$rootfsStart compatible phram
             fdtput -p -t lx $out/dtb /reserved-memory/phram-rootfs@$rootfsStart reg $ac_prefix 0x$rootfsStart $sz_prefix $(printf %x $rootfsBytes)
 
-            # dtc -I dtb -O dts -o /dev/stdout $out/dtb; exit 1
+            # dtc -I dtb -O dts -o /dev/stdout $out/dtb | grep -A10 reserved-mem ; exit 1
             dtbBytes=$(($(stat -L -c %s $out/dtb) + 0x1000 &(~0xfff)))
 
             cat > $out/script << EOF
