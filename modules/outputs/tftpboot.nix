@@ -9,9 +9,15 @@ let
   cfg = config.boot.tftp;
 in {
   imports = [ ../ramdisk.nix ];
-  options.boot.tftp.freeSpaceBytes = mkOption {
-    type = types.int;
-    default = 0;
+  options.boot.tftp = {
+    freeSpaceBytes = mkOption {
+      type = types.int;
+      default = 0;
+    };
+    kernelFormat = mkOption {
+      type = types.enum [ "zimage" "uimage" ];
+      default = "uimage";
+    };
   };
   options.system.outputs = {
     tftpboot = mkOption {
@@ -44,6 +50,14 @@ in {
         let
           inherit (pkgs.lib.trivial) toHexString;
           o = config.system.outputs;
+          image = let choices = {
+            uimage = o.uimage;
+            zimage = o.zimage;
+          }; in choices.${cfg.kernelFormat};
+          bootCommand = let choices = {
+            uimage = "bootm";
+            zimage = "bootz";
+          }; in choices.${cfg.kernelFormat};
           cmdline = concatStringsSep " " config.boot.commandLine;
         in
           pkgs.runCommand "tftpboot" { nativeBuildInputs = [ pkgs.pkgsBuildBuild.dtc ];  } ''
@@ -53,8 +67,8 @@ in {
             ln -s ${o.kernel} vmlinux
             ln -s ${o.manifest} manifest
             ln -s ${o.kernel.headers} build
-            ln -s ${o.uimage} uimage
-            uimageSize=$(($(stat -L -c %s ${o.uimage}) + 0x1000 &(~0xfff)))
+            ln -s ${image} image
+            uimageSize=$(($(stat -L -c %s ${image}) + 0x1000 &(~0xfff)))
             rootfsStart=$(printf %x $((${toString cfg.loadAddress} + 0x100000 + $uimageSize   &(~0xfffff) )))
             rootfsBytes=$(($(stat -L -c %s ${o.rootfs}) + 0x100000 &(~0xfffff)))
             rootfsBytes=$(($rootfsBytes + ${toString cfg.freeSpaceBytes} ))
@@ -82,8 +96,8 @@ in {
             setenv serverip ${cfg.serverip}
             setenv ipaddr ${cfg.ipaddr}
             setenv bootargs 'liminix ${cmdline} $cmd'
-            tftpboot 0x${lib.toHexString cfg.loadAddress} result/uimage ; tftpboot 0x$rootfsStart result/rootfs ; tftpboot 0x$dtbStart result/dtb
-            bootm 0x${lib.toHexString cfg.loadAddress} - 0x$dtbStart
+            tftpboot 0x${lib.toHexString cfg.loadAddress} result/image ; tftpboot 0x$rootfsStart result/rootfs ; tftpboot 0x$dtbStart result/dtb
+            ${bootCommand} 0x${lib.toHexString cfg.loadAddress} - 0x$dtbStart
             EOF
          '';
 

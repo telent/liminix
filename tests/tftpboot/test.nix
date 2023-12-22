@@ -1,10 +1,13 @@
 {
   liminix
 }:
-let check = deviceName : ubootName :
+let check = deviceName : ubootName : config :
 let derivation = (import liminix {
       device = import "${liminix}/devices/${deviceName}/";
-      liminix-config = ./configuration.nix;
+      liminix-config = { pkgs, ... } : {
+        imports = [./configuration.nix];
+        inherit config;
+      };
     });
     img = derivation.outputs.tftpboot;
     uboot = derivation.pkgs.${ubootName};
@@ -30,7 +33,10 @@ run-liminix-vm \
 expect ${./script.expect} 2>&1 |tee $out
 '';
 in {
-  aarch64 = check "qemu-aarch64" "ubootQemuAarch64";
-  arm = check  "qemu-armv7l" "ubootQemuArm";
-  mips = check  "qemu" "ubootQemuMips";
+  aarch64 = check "qemu-aarch64" "ubootQemuAarch64" {};
+  arm = check  "qemu-armv7l" "ubootQemuArm" {};
+  armZimage = check  "qemu-armv7l" "ubootQemuArm" {
+    boot.tftp.kernelFormat = "zimage";
+  };
+  mips = check  "qemu" "ubootQemuMips" {};
 }
