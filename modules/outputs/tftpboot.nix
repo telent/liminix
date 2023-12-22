@@ -35,40 +35,25 @@ in {
         It uses the Linux `phram <https://github.com/torvalds/linux/blob/master/drivers/mtd/devices/phram.c>`_ driver to emulate a flash device using a segment of physical RAM.
       '';
     };
-    boot-scr = mkOption {
-      type = types.package;
-      internal = true;
-      description = ''
-        U-Boot commands to load and boot a kernel and rootfs over TFTP.
-        Copy-paste into the device boot monitor
-      '';
-    };
   };
   config = {
     boot.ramdisk.enable = true;
 
     system.outputs = rec {
       tftpboot =
-        let o = config.system.outputs; in
-        pkgs.runCommand "tftpboot" {} ''
-          mkdir $out
-          cd $out
-          ln -s ${o.rootfs} rootfs
-          ln -s ${o.kernel} vmlinux
-          ln -s ${o.manifest} manifest
-          ln -s ${o.kernel.headers} build
-          ln -s ${o.uimage} uimage
-          ln -s ${o.boot-scr}/dtb dtb
-          ln -s ${o.boot-scr}/script boot.scr
-       '';
-
-      boot-scr =
         let
           inherit (pkgs.lib.trivial) toHexString;
           o = config.system.outputs;
           cmdline = concatStringsSep " " config.boot.commandLine;
         in
-          pkgs.buildPackages.runCommand "boot-scr" { nativeBuildInputs = [ pkgs.pkgsBuildBuild.dtc ];  } ''
+          pkgs.runCommand "tftpboot" { nativeBuildInputs = [ pkgs.pkgsBuildBuild.dtc ];  } ''
+            mkdir $out
+            cd $out
+            ln -s ${o.rootfs} rootfs
+            ln -s ${o.kernel} vmlinux
+            ln -s ${o.manifest} manifest
+            ln -s ${o.kernel.headers} build
+            ln -s ${o.uimage} uimage
             uimageSize=$(($(stat -L -c %s ${o.uimage}) + 0x1000 &(~0xfff)))
             rootfsStart=$(printf %x $((${toString cfg.loadAddress} + 0x100000 + $uimageSize   &(~0xfffff) )))
             rootfsBytes=$(($(stat -L -c %s ${o.rootfs}) + 0x100000 &(~0xfffff)))
@@ -78,7 +63,6 @@ in {
 
             dtbStart=$(printf %x $((${toString cfg.loadAddress} + $rootfsBytes + 0x100000 + $uimageSize )))
 
-            mkdir $out
             cat ${o.dtb} > $out/dtb
             address_cells=$(fdtget $out/dtb / '#address-cells')
             size_cells=$(fdtget $out/dtb / '#size-cells')
@@ -94,14 +78,15 @@ in {
             # dtc -I dtb -O dts -o /dev/stdout $out/dtb | grep -A10 reserved-mem ; exit 1
             dtbBytes=$(($(stat -L -c %s $out/dtb) + 0x1000 &(~0xfff)))
 
-            cat > $out/script << EOF
+            cat > $out/boot.scr << EOF
             setenv serverip ${cfg.serverip}
             setenv ipaddr ${cfg.ipaddr}
             setenv bootargs 'liminix ${cmdline} $cmd'
             tftpboot 0x${lib.toHexString cfg.loadAddress} result/uimage ; tftpboot 0x$rootfsStart result/rootfs ; tftpboot 0x$dtbStart result/dtb
             bootm 0x${lib.toHexString cfg.loadAddress} - 0x$dtbStart
             EOF
-          '';
+         '';
+
     };
   };
 }
