@@ -1,20 +1,30 @@
 set timeout 60
 
-spawn socat unix-connect:vm/console -
-send "\r\n"
-expect "#"
 set FINISHED 0
 set EXIT "1"
-send "ls -l /run/uncaught-logs/current\r\n"
+
+spawn socat unix-connect:vm/console -
+expect {
+  "BusyBox" { }
+  "#" { }
+}
+send "\r\n"
+expect {
+  "#"  { send "NOT=not_present\r" }
+}
 expect "#"
-while { $FINISHED < 20 } {
-  send "date && grep AP-ENABLED /run/uncaught-logs/current || echo not\r\n"
+while { $FINISHED < 10 } {
+  send "date && grep AP-ENABLED /run/uncaught-logs/* || echo \$NOT\r\n"
   
   expect {
-    "wlan0: AP-ENABLED" { set FINISHED 10; set EXIT 0; }
-    "not" { send_user "waiting ..." ; sleep 5 }
+    "wlan0: AP-ENABLED" { set FINISHED 999; set EXIT 0; }
+    "not_present" { send_user "waiting ...\n" ; sleep 5 }
   }
   set FINISHED [ expr $FINISHED + 1 ]
 }
 
+if { $EXIT > 0 } {
+  send "tail -40 /run/uncaught-logs/current\r\n"
+  expect "#"
+}
 exit $EXIT
