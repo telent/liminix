@@ -22,13 +22,15 @@ in pkgsBuild.runCommand "check" {
 mkdir vm
 ln -s ${img} result
 
+touch empty empty2
+
 run-liminix-vm \
  --background ./vm \
  --u-boot ${uboot}/u-boot.bin \
  --arch ${derivation.pkgs.stdenv.hostPlatform.qemuArch} \
  --wan "user,tftp=`pwd`" \
- --disk-image result/rootfs \
- result/uimage result/rootfs
+ --disk-image empty2 \
+ empty empty2
 
 expect ${./script.expect} 2>&1 |tee $out
 '';
@@ -39,4 +41,7 @@ in {
     boot.tftp.kernelFormat = "zimage";
   };
   mips = check  "qemu" "ubootQemuMips" {};
+  mipsLz = check  "qemu" "ubootQemuMips" {
+    boot.tftp.compressRoot = true;
+  };
 }

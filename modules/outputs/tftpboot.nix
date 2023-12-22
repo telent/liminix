@@ -18,6 +18,10 @@ in {
       type = types.enum [ "zimage" "uimage" ];
       default = "uimage";
     };
+    compressRoot = mkOption {
+      type = types.bool;
+      default = false;
+    };
   };
   options.system.outputs = {
     tftpboot = mkOption {
@@ -74,9 +78,16 @@ in {
             dtbSize=$(binsize ${o.dtb} )
 
             ln -s ${o.manifest} manifest
-            ln -s ${o.rootfs} rootfs
             ln -s ${image} image
 
+            ${if cfg.compressRoot
+              then ''
+                lzma -z9cv ${o.rootfs} > rootfs.lz
+                rootfsLzStart=$(($dtbStart + $dtbSize))
+                rootfsLzSize=$(binsize rootfs.lz)
+              ''
+              else "ln -s ${o.rootfs} rootfs"
+             }
             cat ${o.dtb} > dtb
             address_cells=$(fdtget dtb / '#address-cells')
             size_cells=$(fdtget dtb / '#size-cells')
@@ -98,7 +109,15 @@ in {
             setenv serverip ${cfg.serverip}
             setenv ipaddr ${cfg.ipaddr}
             setenv bootargs 'liminix ${cmdline} $cmd'
-            tftpboot $(hex $imageStart) result/image ; tftpboot $(hex $rootfsStart) result/rootfs ; tftpboot $(hex $dtbStart) result/dtb
+            tftpboot $(hex $imageStart) result/image ; ${
+              if cfg.compressRoot
+              then "tftpboot $(hex $rootfsLzStart) result/rootfs.lz"
+              else "tftpboot $(hex $rootfsStart) result/rootfs"
+            }; tftpboot $(hex $dtbStart) result/dtb
+            ${if cfg.compressRoot
+              then "lzmadec $(hex $rootfsLzStart)  $(hex $rootfsStart)"
+              else ""
+             }
             ${bootCommand} $(hex $imageStart) - $(hex $dtbStart)
             EOF
          '';
