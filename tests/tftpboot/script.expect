@@ -20,11 +20,11 @@ expect {
 }
 
 expect {
-   "#" { send "test -f /proc/device-tree/reserved-memory/phram-rootfs*/name && tty \r" }
+   "#" { send "test -f /proc/device-tree/reserved-memory/phram-rootfs*/name && hostname \r" }
    timeout { exit 1 }
 }
 
 expect {
-   "/dev/ttyS0" { exit 0 }
+   "tftpboot-test" { exit 0 }
    timeout { exit 1 }
 }

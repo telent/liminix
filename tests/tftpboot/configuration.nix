@@ -17,7 +17,9 @@ in {
     ../../modules/outputs/ext4fs.nix
     ../../modules/outputs/tftpboot.nix
   ];
+
   config = {
+    hostname = "tftpboot-test";
     # use extracted dts if it was null in the device
     # definition, use actual dts if provided
     hardware.dts.src = lib.mkOverride 500 dts;
