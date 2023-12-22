@@ -60,43 +60,46 @@ in {
           }; in choices.${cfg.kernelFormat};
           cmdline = concatStringsSep " " config.boot.commandLine;
         in
-          pkgs.runCommand "tftpboot" { nativeBuildInputs = [ pkgs.pkgsBuildBuild.dtc ];  } ''
+          pkgs.runCommand "tftpboot" { nativeBuildInputs = with pkgs.pkgsBuildBuild; [ lzma dtc ];  } ''
             mkdir $out
             cd $out
-            ln -s ${o.rootfs} rootfs
-            ln -s ${o.kernel} vmlinux
+            binsize() { local s=$(stat -L -c %s $1); echo $(($s + 0x1000 &(~0xfff))); }
+            binsize64k() { local s=$(stat -L -c %s $1); echo $(($s + 0x10000 &(~0xffff))); }
+            hex() { printf "0x%x" $1; }
+            rootfsStart=${toString cfg.loadAddress}
+            rootfsSize=$(binsize64k ${o.rootfs} )
+            imageStart=$(($rootfsStart + $rootfsSize))
+            imageSize=$(binsize ${image})
+            dtbStart=$(($imageStart + $imageSize))
+            dtbSize=$(binsize ${o.dtb} )
+
             ln -s ${o.manifest} manifest
-            ln -s ${o.kernel.headers} build
+            ln -s ${o.rootfs} rootfs
             ln -s ${image} image
-            uimageSize=$(($(stat -L -c %s ${image}) + 0x1000 &(~0xfff)))
-            rootfsStart=$(printf %x $((${toString cfg.loadAddress} + 0x100000 + $uimageSize   &(~0xfffff) )))
-            rootfsBytes=$(($(stat -L -c %s ${o.rootfs}) + 0x100000 &(~0xfffff)))
-            rootfsBytes=$(($rootfsBytes + ${toString cfg.freeSpaceBytes} ))
-            cmd="mtdparts=phram0:''${rootfsBytes}(rootfs) phram.phram=phram0,0x''${rootfsStart},''${rootfsBytes},${toString config.hardware.flash.eraseBlockSize} root=/dev/mtdblock0";
 
-            dtbStart=$(printf %x $((${toString cfg.loadAddress} + $rootfsBytes + 0x100000 + $uimageSize )))
-
-            cat ${o.dtb} > $out/dtb
-            address_cells=$(fdtget $out/dtb / '#address-cells')
-            size_cells=$(fdtget $out/dtb / '#size-cells')
+            cat ${o.dtb} > dtb
+            address_cells=$(fdtget dtb / '#address-cells')
+            size_cells=$(fdtget dtb / '#size-cells')
             if [ $address_cells -gt 1 ]; then ac_prefix=0; fi
             if [ $size_cells -gt 1 ]; then sz_prefix=0; fi
 
-            fdtput -p  $out/dtb /reserved-memory '#address-cells' $address_cells
-            fdtput -p  $out/dtb /reserved-memory '#size-cells' $size_cells
-            fdtput -p  $out/dtb /reserved-memory ranges
-            fdtput -p -t s $out/dtb /reserved-memory/phram-rootfs@$rootfsStart compatible phram
-            fdtput -p -t lx $out/dtb /reserved-memory/phram-rootfs@$rootfsStart reg $ac_prefix 0x$rootfsStart $sz_prefix $(printf %x $rootfsBytes)
+            fdtput -p dtb /reserved-memory '#address-cells' $address_cells
+            fdtput -p dtb /reserved-memory '#size-cells' $size_cells
+            fdtput -p dtb /reserved-memory ranges
+            node=$(printf "phram-rootfs@%x" $rootfsStart)
+            fdtput -p -t s dtb /reserved-memory/$node compatible phram
+            fdtput -p -t lx dtb /reserved-memory/$node reg $ac_prefix $(hex $rootfsStart) $sz_prefix $(hex $rootfsBytes)
 
-            # dtc -I dtb -O dts -o /dev/stdout $out/dtb | grep -A10 reserved-mem ; exit 1
-            dtbBytes=$(($(stat -L -c %s $out/dtb) + 0x1000 &(~0xfff)))
+            cmd="mtdparts=phram0:''${rootfsSize}(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsSize},${toString config.hardware.flash.eraseBlockSize} root=/dev/mtdblock0";
 
-            cat > $out/boot.scr << EOF
+            # dtc -I dtb -O dts -o /dev/stdout dtb | grep -A10 reserved-mem ; exit 1
+
+            cat > boot.scr << EOF
             setenv serverip ${cfg.serverip}
             setenv ipaddr ${cfg.ipaddr}
             setenv bootargs 'liminix ${cmdline} $cmd'
-            tftpboot 0x${lib.toHexString cfg.loadAddress} result/image ; tftpboot 0x$rootfsStart result/rootfs ; tftpboot 0x$dtbStart result/dtb
-            ${bootCommand} 0x${lib.toHexString cfg.loadAddress} - 0x$dtbStart
+            tftpboot $(hex $imageStart) result/image ; tftpboot $(hex $rootfsStart) result/rootfs ; tftpboot $(hex $dtbStart) result/dtb
+            ${bootCommand} $(hex $imageStart) - $(hex $dtbStart)
             EOF
          '';
 
