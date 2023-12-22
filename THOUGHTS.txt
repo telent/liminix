@@ -3586,3 +3586,58 @@ code to check the decompressed size, so that doesn't help at all.  But
 booting a zImage works fine. I am committing a first pass of
 modules/outputs/tftpbootlz.nix which does this using a lot of
 copy-paste and (ironically) no lzma stuff at all.
+
+Sun Dec 17 16:25:30 GMT 2023
+
+it's started failing to mount root on arm32 because it's not recognising
+the reserved-memory and something is trashing the phram filesystem
+
+        reserved-memory {
+
+                phram-rootfs {
+                        reg = <0x1400000 0x1900000>;
+                        compatible = "phram";
+                };
+        };
+
+Sun Dec 17 17:13:54 GMT 2023
+
+* We need to write the fdt phram differently on 64 bit vs 32 bit
+  (address-cells and size-cells should be 2 or 1)
+
+* this might be why it wasn't working on mips (can we test this
+somehow in qemu or do we need to plug a device in?)
+
+qemu user-mode networking has a builtin tftp server.
+
+so we need a test that builds the tftpboot target for each qemu arch,
+and then does run-liminix-vm with the --lan and --u-boot options, then
+drives it with expect
+
+
+* maybe tftpboot[lz] could be reintegrated with the regular one somehow
+
+Fri Dec 22 15:11:35 GMT 2023
+
+We have a working test for tftpboot, on all platforms, which took a
+while.
+
+* tftpbootlz needs to be updated with what we learned, or merged
+back into it
+
+* omnia install
+
+- build a stripped-down installer image which can be put on a
+ usb stick
+- from openwrt on the device, use fw_setenv to set boot order
+- boot into the installer image
+- reformat the emmc as per requirements
+- ???
+- profit
+
+the missing step might be to do a cpio from installer onto
+the emmc
+
+or something with chroot
+
+is levitate useful here?
