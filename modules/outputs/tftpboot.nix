@@ -88,7 +88,7 @@ in {
             fdtput -p dtb /reserved-memory ranges
             node=$(printf "phram-rootfs@%x" $rootfsStart)
             fdtput -p -t s dtb /reserved-memory/$node compatible phram
-            fdtput -p -t lx dtb /reserved-memory/$node reg $ac_prefix $(hex $rootfsStart) $sz_prefix $(hex $rootfsBytes)
+            fdtput -p -t lx dtb /reserved-memory/$node reg $ac_prefix $(hex $rootfsStart) $sz_prefix $(hex $rootfsSize)
 
             cmd="mtdparts=phram0:''${rootfsSize}(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsSize},${toString config.hardware.flash.eraseBlockSize} root=/dev/mtdblock0";
 
