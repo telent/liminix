@@ -29,6 +29,9 @@ let
       # can't calculate the actual address here until we know how
       # big the dtb will be
       fdtput -t lx $out/dtb /reserved-memory/phram-rootfs reg 0xdead 0xcafe
+      cmd="liminix ${cmdline} mtdparts=phram0:999999999999(rootfs) phram.phram=phram0,999999999999,999999999999,${toString config.hardware.flash.eraseBlockSize} root=/dev/mtdblock0";
+      fdtput -t s $out/dtb /chosen bootargs "$cmd"
+
       dtbStart=$(($kernelStart + $kernelSize))
       dtbSize=$(binsize $out/dtb)
       rootfsOrigSize=$(binsize64k ${o.rootfs})
@@ -38,9 +41,11 @@ let
       rootfsLzStart=$(($dtbStart + $dtbSize))
       rootfsOrigStart=$(($rootfsLzStart + $rootfsLzSize))
       fdtput -t lx $out/dtb /reserved-memory/phram-rootfs reg $(printf "%x" $rootfsOrigStart) $(printf "%x"  $rootfsOrigSize)
-      #  dtc -I dtb  -O dts  -o /dev/stdout $out/dtb ; exit 1
 
-      cmd="mtdparts=phram0:''${rootfsOrigSize}(rootfs) phram.phram=phram0,''${rootfsOrigStart},''${rootfsOrigSize},${toString config.hardware.flash.eraseBlockSize} root=/dev/mtdblock0";
+      cmd="liminix ${cmdline} mtdparts=phram0:''${rootfsOrigSize}(rootfs) phram.phram=phram0,''${rootfsOrigStart},''${rootfsOrigSize},${toString config.hardware.flash.eraseBlockSize} root=/dev/mtdblock0";
+      fdtput -t s $out/dtb /chosen bootargs "$cmd"
+
+      # dtc -I dtb  -O dts  -o /dev/stdout $out/dtb | grep -A10 reserved-memory; exit 1
 
       (cd $out;
       ln -s ${o.zimage} zImage
@@ -50,7 +55,6 @@ let
       cat > $out/boot.scr << EOF
       setenv serverip ${cfg.serverip}
       setenv ipaddr ${cfg.ipaddr}
-      setenv bootargs "liminix ${cmdline} $cmd"
       tftpboot $(hex $kernelStart) result/zImage; tftpboot $(hex $dtbStart) result/dtb ; tftpboot $(hex $rootfsLzStart) result/rootfs.lz
       lzmadec $(hex $rootfsLzStart) $(hex $rootfsOrigStart)
       bootz $(hex $kernelStart) - $(hex $dtbStart)
