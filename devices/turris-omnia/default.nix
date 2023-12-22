@@ -11,14 +11,15 @@
   };
 
   module = {pkgs, config, lib, lim, ... }:
-    let openwrt = pkgs.openwrt; in {
-          imports = [
-            ../../modules/arch/arm.nix
-            ../../modules/outputs/tftpbootlz.nix
-            ../../modules/outputs/ext4fs.nix
-            ../../modules/outputs/mbrimage.nix
-            ../../modules/outputs/extlinux.nix
-          ];
+    let openwrt = pkgs.openwrt;
+    in {
+      imports = [
+        ../../modules/arch/arm.nix
+        ../../modules/outputs/tftpboot.nix
+        ../../modules/outputs/ext4fs.nix
+        ../../modules/outputs/mbrimage.nix
+        ../../modules/outputs/extlinux.nix
+      ];
     kernel = {
       src = pkgs.pkgsBuildBuild.fetchurl {
         name = "linux.tar.gz";
@@ -116,7 +117,11 @@
           };
         };
 
-    boot.tftp.loadAddress = lim.parseInt "0x1000000";
+    boot.tftp = {
+      loadAddress = lim.parseInt "0x1000000";
+      kernelFormat = "zimage";
+      compressRoot = true;
+    };
 
     hardware = let
       mac80211 = pkgs.mac80211.override {
