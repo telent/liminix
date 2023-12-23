@@ -44,8 +44,10 @@
     ["--lan" spec & rest] (assoc (parse-args rest) :lan spec)
     ["--wan" spec & rest] (assoc (parse-args rest) :wan spec)
     ["--command-line" cmd & rest] (assoc (parse-args rest) :command-line cmd)
+    ["--flag" flag & rest] (let [o (parse-args rest)]
+                             (assoc o :flags (doto o.flags (table.insert flag))))
     [kernel rootfsimg]
-    { :kernel kernel :rootfs (pad-file rootfsimg (* 16 1024)) }
+    { :flags [] :kernel kernel :rootfs (pad-file rootfsimg (* 16 1024)) }
     ))
 
 (fn pad-u-boot [options]
@@ -114,6 +116,7 @@
        (-> []
            (appendm (. bin options.arch))
            (appendm ["-echr" "16"])
+           (appendm options.flags)
            (appendm (if options.phram-address
                         [
                          "-m" "272"
