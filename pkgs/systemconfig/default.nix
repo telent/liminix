@@ -80,5 +80,10 @@ in attrset:
       cp $closure/store-paths $out/etc/nix-store-paths
       $STRIP --remove-section=.note  --remove-section=.comment --strip-all makedevs -o $out/bin/activate
       ln -s ${s6-init-bin}/bin/init $out/bin/init
+      cat > $out/bin/install <<EOF
+      #!/bin/sh
+      cp -v -fP $out/bin/* $out/etc/* \''${1-/}/persist
+      EOF
+      chmod +x $out/bin/install
     '';
   }
