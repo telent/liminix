@@ -72,18 +72,19 @@ in {
             hex() { printf "0x%x" $1; }
             rootfsStart=${toString cfg.loadAddress}
             rootfsSize=$(binsize64k ${o.rootfs} )
-            imageStart=$(($rootfsStart + $rootfsSize))
-            imageSize=$(binsize ${image})
-            dtbStart=$(($imageStart + $imageSize))
+            dtbStart=$(($rootfsStart + $rootfsSize))
             dtbSize=$(binsize ${o.dtb} )
+            imageStart=$(($dtbStart + $dtbSize))
+            imageSize=$(binsize ${image})
 
             ln -s ${o.manifest} manifest
             ln -s ${image} image
+            ln -s ${o.kernel} vmlinux  # handy for gdb
 
             ${if cfg.compressRoot
               then ''
                 lzma -z9cv ${o.rootfs} > rootfs.lz
-                rootfsLzStart=$(($dtbStart + $dtbSize))
+                rootfsLzStart=$(($imageStart + $imageSize))
                 rootfsLzSize=$(binsize rootfs.lz)
               ''
               else "ln -s ${o.rootfs} rootfs"
