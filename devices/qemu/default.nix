@@ -46,6 +46,9 @@
         MIPS_MALTA= "y";
         CPU_MIPS32_R2= "y";
 
+        POWER_RESET = "y";
+        POWER_RESET_SYSCON = "y";
+
         SERIAL_8250= "y";
         SERIAL_8250_CONSOLE= "y";
       };
