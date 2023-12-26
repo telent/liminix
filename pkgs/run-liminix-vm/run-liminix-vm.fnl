@@ -45,7 +45,7 @@
     ["--wan" spec & rest] (assoc (parse-args rest) :wan spec)
     ["--command-line" cmd & rest] (assoc (parse-args rest) :command-line cmd)
     ["--flag" flag & rest] (let [o (parse-args rest)]
-                             (assoc o :flags (doto o.flags (table.insert flag))))
+                             (assoc o :flags (doto o.flags (table.insert 1 flag))))
     [kernel rootfsimg]
     { :flags [] :kernel kernel :rootfs (pad-file rootfsimg (* 16 1024)) }
     ))
