@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
 
 ssh_command=${SSH_COMMAND-ssh}
+if [ "$1" = "--no-reboot" ] ; then
+    reboot="true"
+    shift
+else
+    reboot="reboot"
+fi
+
 target_host=$1
 shift
 
 if [ -z "$target_host" ] ; then
-    echo Usage: liminix-rebuild target-host params
+    echo Usage: liminix-rebuild [--no-reboot] target-host params
     exit 1
 fi
 
