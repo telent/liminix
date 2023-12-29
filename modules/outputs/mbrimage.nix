@@ -42,7 +42,7 @@ in {
         ln -s ${o.mbrimage} ./mbrimage
         cat > run.sh <<EOF
         #!${pkgs.runtimeShell}
-        ${pkgs.pkgsBuildBuild.run-liminix-vm}/bin/run-liminix-vm  --arch ${pkgs.stdenv.hostPlatform.qemuArch} --u-boot ${o.u-boot}/u-boot.bin --phram-address 0x${phram_address} --disk-image ${o.mbrimage} /dev/null /dev/null
+        ${pkgs.pkgsBuildBuild.run-liminix-vm}/bin/run-liminix-vm --arch ${pkgs.stdenv.hostPlatform.qemuArch} --u-boot ${o.u-boot}/u-boot.bin --phram-address 0x${phram_address} --disk-image ${o.mbrimage} \$* /dev/null /dev/null
         EOF
         chmod +x run.sh
       '';
