@@ -1,0 +1,18 @@
+set timeout 60
+
+spawn socat unix-connect:vm/console -
+
+expect {
+       "s6-svscan exited" {  }
+       timeout { exit 1 }
+}
+expect {
+       "s6-linux-init" { send "\r\n" };
+       "# " { send "\r\n" };
+}
+
+expect {
+       "# " { send "echo \$PATH; md5sum /persist/activate; figlet Yes\r\n" };
+}
+
+expect "#"

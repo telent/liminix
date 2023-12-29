@@ -2,3 +2,7 @@ set timeout 60
 
 spawn socat unix-connect:vm/console -
 send "\r\n"
+expect {
+       "# " { send "hostname\r\n" };
+}
+expect  "(none)"

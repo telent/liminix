@@ -101,7 +101,7 @@
        "-drive" (.. "if=none,format=raw,id=hd0,file=" disk)
        "-device" "virtio-blk-pci,drive=hd0"
        ]
-      (let [cmdline (.. cmdline " mem=256M liminix mtdparts=phram0:16M(rootfs) phram.phram=phram0," options.phram-address ",16Mi,65536 root=/dev/mtdblock0")]
+      (let [cmdline (.. "root=/dev/mtdblock0" " " cmdline " mem=256M liminix mtdparts=phram0:16M(rootfs) phram.phram=phram0," options.phram-address ",16Mi,65536")]
         ["-kernel" options.kernel "-append" cmdline])))
 
 (local bin {
