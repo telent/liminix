@@ -3176,9 +3176,6 @@ Turris TODO
    - perhaps we need different boot "recipes" - e.g. some device
      might want boot.scr and another something different
 
-
-
-
 - create installable tarball and test
 - gpio thingy for SFP switching
 - iperf
@@ -3630,14 +3627,129 @@ back into it
 - build a stripped-down installer image which can be put on a
  usb stick
 - from openwrt on the device, use fw_setenv to set boot order
-- boot into the installer image
-- reformat the emmc as per requirements
-- ???
+- boot into the installer image-
+ reformat the emmc as per requirements
+- PREFIX=/mnt  liminix-rebuild
 - profit
 
-the missing step might be to do a cpio from installer onto
-the emmc
+Could we liminix-rebuild into /some/prefix/nix/store this would
+actually be useful both for this boot-from-usb scenario and for
+levitate. Looks like min-copy-closure doesn't need anything much on
+the destination system except a working sshd and maybe an empty
+/nix/store and /persist. Potentially we could even do it without
+chroot (which would save running a second sshd), just add a prefix on
+the paths
 
-or something with chroot
+what's the fallback? we're not touching the turris rescue
+system (which is in nor flash) so we can expect all the
+knightrider modes to continue to workto be able to
+boot back into that and restore the vendor os? I think so
 
-is levitate useful here?
+Fri Dec 22 16:56:40 GMT 2023
+
+If we're going to use fw_setenv to change boot order,
+we could equally well boot from tftp and not need the
+usb stick
+
+fw_setenv boot_targets "tftp mmc0 nvme0 scsi0 usb0 pxe dhcp"
+setenv bootcmd_tftp "echo TFTP BOOT"
+
+how can we get a tftp boot into few enough characters to reasonably
+put it in an environment variable?
+- use dhcp?
+- embed bootargs into the fdt
+
+Fri Dec 22 21:10:53 GMT 2023
+
+* dtb needs size and offset of uncompressed root filesystem to add
+reserved-memory and cmdline params
+
+* setting these in the dtb will change the size of the dtb
+
+* am assuming that we don't want the kernel to relocate into
+ ram that clashes with the root fs
+
+* should we care about phys mem fragmentation?
+
+conclusion:
+
+hardware.loadAddress
+		  <uncompressed/relocated kernel>
+tftp.loadAddress
+		  <space for uncompressed root>
+		  uimage or zimage
+		  dtb
+		  compressed root
+
+
+[ should we rename hardware.loadAddress to something that expresses
+more clearly it's the _kernel_ load address? ]
+
+[ another thing we need to do is stop building two kernels
+ because the uimage and zimage derivations are different ]
+
+Sat Dec 23 18:07:43 GMT 2023
+
+Addendum: for a zimage we need the compressed kernel to be at the
+highest address, otherwise it prints "Starting" and then hangs
+indefinitely.
+
+I believe this to be because the kernel decompressor sets up a stack
+directly after the compressed payload, so will trash the fdt if it was
+also there. The bug didn't exhibit on Turris Omnia with the same
+layout, but maybe that was just luck.
+
+Sat Dec 23 18:11:04 GMT 2023
+
+Here is scope of work for Turris:
+
+(I) we need to build a suitable tftpboot image for
+recovery/install.
+
+- disk partitioning tools and mkfs stuff
+- dhcp client for connecting to wired network
+
+(II) we need insttuctions for building the real system
+and using min-copy-closure to copy and install the system
+configuration of the real one into /mnt
+
+(III) probably try the same recovery image as a USB stick
+
+(IV) I've lost track of what we're doing with /boot, does that work?
+
+(V) gpio thingy for SFP switching
+
+(VI) iperf, performance testing
+
+(VII) put device name and usefulness tiers ("stable", "experimental", "wip") in the docs
+
+(VIII) params for ubi(fs) are a mess
+
+(IX) wlan country code
+
+Tue Dec 26 16:23:37 GMT 2023
+
+I seem to have lost a chunk of notes here. Have added
+systemConfiguration/bin/install which does the stuff to copy the right
+files into /bin and wherever. There is currently no test for it though
+
+We could further simplify liminix-rebuild by adding --reboot as a flag
+to install
+
+Tue Dec 26 21:38:43 GMT 2023
+
+To be any use, the test needs to be end-to-end - as in, rather than
+just checking some files are copied, test that the machine rebooted
+successfully
+
+
+
+COPYING /nix/store/dlz86nip271ybaz0cip7bgkbzijk0cr7-make-stuff-mips-unknown-linux-musl TO //persist
+
+
+/nix/store/gr255qjxijksf9361glsj5lz0cklassx-profile
+
+md5sum /persist/activate
+8eb0760c39cdee0b141b15bbafbc94a0  /persist/activate BAD
+6c27b75cbe9f2ce87c1fd1425362108f  /persist/activate GOOD
+8eb0760c39cdee0b141b15bbafbc94a0  /persist/activate
