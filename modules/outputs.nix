@@ -60,6 +60,9 @@ in
           Combined kernel and FDT in uImage (U-Boot compatible) format
         '';
       };
+      u-boot = mkOption {
+        type = types.package;
+      };
       manifest = mkOption {
         type = types.package;
         internal  = true;

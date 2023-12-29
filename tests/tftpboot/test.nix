@@ -1,7 +1,7 @@
 {
   liminix
 }:
-let check = deviceName : ubootName : config :
+let check = deviceName  : config :
 let derivation = (import liminix {
       device = import "${liminix}/devices/${deviceName}/";
       liminix-config = { pkgs, ... } : {
@@ -10,7 +10,7 @@ let derivation = (import liminix {
       };
     });
     img = derivation.outputs.tftpboot;
-    uboot = derivation.pkgs.${ubootName};
+    uboot = derivation.outputs.u-boot;
     pkgsBuild = derivation.pkgs.pkgsBuildBuild;
 in pkgsBuild.runCommand "check" {
   nativeBuildInputs = with pkgsBuild; [
@@ -35,13 +35,13 @@ run-liminix-vm \
 expect ${./script.expect} 2>&1 |tee $out
 '';
 in {
-  aarch64 = check "qemu-aarch64" "ubootQemuAarch64" {};
-  arm = check  "qemu-armv7l" "ubootQemuArm" {};
-  armZimage = check  "qemu-armv7l" "ubootQemuArm" {
+  aarch64 = check "qemu-aarch64" {};
+  arm = check  "qemu-armv7l" {};
+  armZimage = check  "qemu-armv7l" {
     boot.tftp.kernelFormat = "zimage";
   };
-  mips = check  "qemu" "ubootQemuMips" {};
-  mipsLz = check  "qemu" "ubootQemuMips" {
+  mips = check  "qemu" {};
+  mipsLz = check  "qemu" {
     boot.tftp.compressRoot = true;
   };
 }
