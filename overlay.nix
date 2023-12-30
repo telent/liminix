@@ -256,13 +256,13 @@ extraPkgs // {
   #   guile = null;
   # };
 
-  # util-linux = prev.util-linux.override {
-  #   ncursesSupport = false;
-  #   pamSupport = false;
-  #   systemdSupport = false;
-  #   nlsSupport = false;
-  #   translateManpages = false;
-  #   capabilitiesSupport = false;
-  # };
+  util-linux = prev.util-linux.override {
+    ncursesSupport = false;
+    pamSupport = false;
+    systemdSupport = false;
+    nlsSupport = false;
+    translateManpages = false;
+    capabilitiesSupport = false;
+  };
 
 }
