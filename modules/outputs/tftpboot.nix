@@ -116,10 +116,9 @@ in {
               else "tftpboot $(hex $rootfsStart) result/rootfs"
             }; tftpboot $(hex $dtbStart) result/dtb
             ${if cfg.compressRoot
-              then "lzmadec $(hex $rootfsLzStart)  $(hex $rootfsStart)"
+              then "lzmadec $(hex $rootfsLzStart)  $(hex $rootfsStart); "
               else ""
-             }
-            ${bootCommand} $(hex $imageStart) - $(hex $dtbStart)
+             } ${bootCommand} $(hex $imageStart) - $(hex $dtbStart)
             EOF
          '';
 
