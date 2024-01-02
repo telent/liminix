@@ -104,4 +104,6 @@ in {
   anoia = callPackage ./anoia {};
 
   levitate = callPackage ./levitate {};
+
+  libubootenv = callPackage ./libubootenv {};
 }
