@@ -9,6 +9,7 @@ let
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs.liminix.networking) address interface;
   inherit (pkgs.liminix.services) bundle;
+  inherit (pkgs) liminix;
 
   type_service = pkgs.liminix.lib.types.service;
 
@@ -41,11 +42,25 @@ in {
           };
         '';
       };
+      makeTargets = mkOption {
+        type = types.listOf types.str;
+      };
     };
   };
   config = {
+    system.outputs =
+      let k = liminix.builders.kernel.override {
+            inherit (config.kernel) config src extraPatchPhase;
+            targets = config.kernel.makeTargets;
+          };
+      in {
+        kernel = k.vmlinux;
+        zimage = k.zImage;
+      };
+
     kernel = rec {
       modular = true; # disabling this is not yet supported
+      makeTargets = ["vmlinux"];
       config = {
         IKCONFIG = "y";
         IKCONFIG_PROC = "y";

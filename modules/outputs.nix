@@ -99,26 +99,18 @@ in
   };
   config = {
     system.outputs = rec {
-      kernel = liminix.builders.kernel.override {
-        inherit (config.kernel) config src extraPatchPhase;
-      };
-      zimage = liminix.builders.kernel.override {
-        targets = ["arch/arm/boot/zImage"];
-        inherit (config.kernel) config src extraPatchPhase;
-      };
       dtb = liminix.builders.dtb {
         inherit (config.boot) commandLine;
         dts = config.hardware.dts.src;
         includes = config.hardware.dts.includes ++ [
-          "${kernel.headers}/include"
+          "${o.kernel.headers}/include"
         ];
       };
       uimage = liminix.builders.uimage {
         commandLine = concatStringsSep " " config.boot.commandLine;
         inherit (config.hardware) loadAddress entryPoint;
         inherit (config.boot) imageFormat;
-        inherit kernel;
-        inherit dtb;
+        inherit (o) kernel dtb;
       };
       rootdir =
         let

@@ -13,6 +13,7 @@ let
   writeConfig = import ./write-kconfig.nix { inherit lib writeText; };
   kconfigFile = writeConfig "kconfig" config;
   arch = stdenv.hostPlatform.linuxArch;
+  targetNames =  map baseNameOf targets;
   inherit lib; in
 stdenv.mkDerivation rec {
   name = "kernel";
@@ -35,7 +36,7 @@ stdenv.mkDerivation rec {
 
   dontStrip = true;
   dontPatchELF = true;
-  outputs = ["out" "headers" "modulesupport"];
+  outputs = ["out" "headers" "modulesupport"] ++ targetNames;
   phases = [
     "unpackPhase"
     "butcherPkgconfig"
@@ -92,12 +93,13 @@ stdenv.mkDerivation rec {
   '';
 
   buildPhase = ''
-    make ${lib.concatStringsSep " " (map baseNameOf targets)} modules_prepare -j$NIX_BUILD_CORES
+    make ${lib.concatStringsSep " " targetNames} modules_prepare -j$NIX_BUILD_CORES
   '';
 
   installPhase = ''
     ${CROSS_COMPILE}strip -d vmlinux
-    cp ${lib.concatStringsSep " " targets} $out
+    ${lib.concatStringsSep "\n" (map (f: "cp ${f} \$${baseNameOf f}") targets)}
+    cp vmlinux $out
     mkdir -p $headers
     cp -a include .config $headers/
     mkdir -p $modulesupport
