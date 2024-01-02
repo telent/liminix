@@ -11,7 +11,21 @@
   };
 
   module = {pkgs, config, lib, lim, ... }:
-    let openwrt = pkgs.openwrt;
+    let
+      openwrt = pkgs.openwrt;
+      inherit (lib) mkOption types;
+      inherit (pkgs.liminix.services) oneshot;
+      inherit (pkgs) liminix;
+      mtd_by_name_links = pkgs.liminix.services.oneshot rec  {
+        name = "mtd_by_name_links";
+        up = ''
+          mkdir -p /dev/mtd/by-name
+          cd /dev/mtd/by-name
+          for i in /sys/class/mtd/mtd*[0-9]; do
+            ln -s ../../$(basename $i) $(cat $i/name)
+          done
+        '';
+      };
     in {
       imports = [
         ../../modules/arch/arm.nix
@@ -20,7 +34,9 @@
         ../../modules/outputs/mbrimage.nix
         ../../modules/outputs/extlinux.nix
       ];
+
       config = {
+        services.mtd-name-links = mtd_by_name_links;
         kernel = {
           src = pkgs.pkgsBuildBuild.fetchurl {
             name = "linux.tar.gz";
@@ -87,6 +103,15 @@
             MVPP2 = "y";
             MV_XOR = "y";
 
+            # there is NOR flash on this device, which is used for U-Boot
+            # and the rescue system (which we don't interfere with) but
+            # also for the U-Boot environment variables (which we might
+            # need to meddle with)
+            MTD_SPI_NOR = "y";
+            SPI = "y";
+            SPI_MASTER = "y";
+            SPI_ORION = "y";
+
             NET_DSA = "y";
             NET_DSA_MV88E6XXX = "y"; # depends on PTP_1588_CLOCK_OPTIONAL
           };
@@ -115,6 +140,13 @@
               firmware = dir {
                 ath10k = symlink firmware;
               };
+            };
+            etc = dir {
+              "fw_env.config" =
+                let f = pkgs.writeText "fw_env.config" ''
+                  /dev/mtd/by-name/u-boot-env 0x0 0x10000 0x10000
+                '';
+                in symlink f;
             };
           };
 
