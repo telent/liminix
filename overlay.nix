@@ -252,10 +252,6 @@ extraPkgs // {
    '';
   };
 
-  # gnufdisk = prev.gnufdisk.override {
-  #   guile = null;
-  # };
-
   util-linux = prev.util-linux.override {
     ncursesSupport = false;
     pamSupport = false;
