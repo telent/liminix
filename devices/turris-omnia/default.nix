@@ -75,6 +75,17 @@
             PSTORE_CONSOLE = "y";
             PSTORE_DEFLATE_COMPRESS = "n";
 
+            BLOCK = "y";
+            MMC="y";
+            PWRSEQ_EMMC="y";        # ???
+            PWRSEQ_SIMPLE="y";      # ???
+            MMC_BLOCK="y";
+
+            MMC_SDHCI= "y";
+            MMC_SDHCI_PLTFM= "y";
+            MMC_SDHCI_PXAV3= "y";
+            MMC_MVSDIO= "y";
+
             SERIAL_8250 = "y";
             SERIAL_8250_CONSOLE = "y";
             SERIAL_OF_PLATFORM="y";
