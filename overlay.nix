@@ -170,12 +170,11 @@ extraPkgs // {
 
   pppBuild = prev.ppp;
 
-  qemu = prev.qemu.overrideAttrs (o: {
+  qemu = let q = prev.qemu.overrideAttrs (o: {
     patches = o.patches ++ [
       ./pkgs/qemu/arm-image-friendly-load-addr.patch
-
     ];
-  });
+  }); in q.override { sdlSupport = false; };
 
   rsyncSmall =
     let r = prev.rsync.overrideAttrs(o: {
