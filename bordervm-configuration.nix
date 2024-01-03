@@ -99,14 +99,16 @@ in {
         };
       };
     };
-    environment.systemPackages = with pkgs; [
-      tcpdump
-      wireshark
-      socat
-      tufted
-      iptables
-      usbutils
-    ];
+    environment.systemPackages =
+      let wireshark-nogui = pkgs.wireshark.override { withQt = false ; };
+          in with pkgs; [
+            tcpdump
+            wireshark-nogui
+            socat
+            tufted
+            iptables
+            usbutils
+          ];
     security.sudo.wheelNeedsPassword = false;
     networking = {
       hostName = "border";
