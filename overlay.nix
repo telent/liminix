@@ -251,7 +251,7 @@ extraPkgs // {
    '';
   };
 
-  util-linux = prev.util-linux.override {
+  util-linux-small = prev.util-linux.override {
     ncursesSupport = false;
     pamSupport = false;
     systemdSupport = false;
