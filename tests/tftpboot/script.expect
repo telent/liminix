@@ -20,11 +20,11 @@ expect {
 }
 
 expect {
-   "#" { send "test -f /proc/device-tree/reserved-memory/phram-rootfs*/name && hostname \r" }
+   "#" { send "test -f /proc/device-tree/reserved-memory/phram-rootfs*/name && uname \r" }
    timeout { exit 1 }
 }
 
 expect {
-   "tftpboot-test" { exit 0 }
+   "Linux" { exit 0 }
    timeout { exit 1 }
 }
