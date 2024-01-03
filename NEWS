@@ -23,5 +23,13 @@ the name of an outputs that gloms together other filesystem-like
 outputs with some kind of partition table - so we might in future have
 gptimage or lvmimage or ubimage.
 
+2024-01-03
+
+Liminix is now targeted to Nixpkgs 23.11 (not 23.05 as previously).
+Upstream changes that have led to incompatible Liminix changes are:
+
+* newer U-Boot version
+* util-linux can now be built (previously depended on systemd)
+
 
 
