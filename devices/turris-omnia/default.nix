@@ -127,7 +127,7 @@
             NET_DSA_MV88E6XXX = "y"; # depends on PTP_1588_CLOCK_OPTIONAL
           };
         };
-        rootfsType = "ext4";
+
         boot = {
           commandLine = [
             "console=ttyS0,115200"
