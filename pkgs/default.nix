@@ -10,10 +10,7 @@ let
       type' = types.submodule { options = type; };
     in (mergeDefinitions [] type' defs).mergedValue;
 in {
-  pseudofile = callPackage ./pseudofile {};
   liminix = {
-    services = callPackage ./liminix-tools/services {};
-    networking =  callPackage ./liminix-tools/networking {};
     builders =  {
       squashfs = callPackage ./liminix-tools/builders/squashfs.nix {};
       dtb = callPackage ./kernel/dtb.nix {};
@@ -52,32 +49,26 @@ in {
         };
       inherit typeChecked;
     };
+    networking =  callPackage ./liminix-tools/networking {};
+    services = callPackage ./liminix-tools/services {};
   };
-  writeFennelScript = callPackage ./write-fennel-script {};
-  writeFennel = callPackage ./write-fennel {};
-  writeAshScript = callPackage ./write-ash-script {};
-  systemconfig = callPackage ./systemconfig {};
-  s6-init-bin =  callPackage ./s6-init-bin {};
-  s6-rc-database = callPackage ./s6-rc-database {};
-  run-liminix-vm = callPackage ./run-liminix-vm {};
-  ppp = callPackage ./ppp {};
-  pppoe = callPackage ./pppoe {};
 
-  kernel-backport = callPackage ./kernel-backport {};
-  mac80211 = callPackage ./mac80211 {};
-  netlink-lua = callPackage ./netlink-lua {};
-  linotify = callPackage ./linotify {};
-  ifwait = callPackage ./ifwait {};
+  # please keep the rest of this list alphabetised :-)
 
+  anoia = callPackage ./anoia {};
+  fennel = callPackage ./fennel {};
+  fennelrepl = callPackage ./fennelrepl {};
+  firewallgen  = callPackage ./firewallgen {};
   gen_init_cpio = callPackage ./gen_init_cpio {};
-
-  serviceFns = callPackage ./service-fns {};
-
-  # these are packages for the build system not the host/target
-
-  tufted = callPackage ./tufted {};
-  routeros = callPackage ./routeros {};
   go-l2tp = callPackage ./go-l2tp {};
+  hi = callPackage ./hi {};
+  ifwait = callPackage ./ifwait {};
+  initramfs-peek = callPackage ./initramfs-peek {};
+  kernel-backport = callPackage ./kernel-backport {};
+  kernel-modules  = callPackage ./kernel-modules {};
+  levitate = callPackage ./levitate {};
+  libubootenv = callPackage ./libubootenv {};
+  linotify = callPackage ./linotify {};
 
   # we need to build real lzma instead of using xz, because the lzma
   # decoder in u-boot doesn't understand streaming lzma archives
@@ -86,24 +77,26 @@ in {
   # https://sourceforge.net/p/squashfs/mailman/message/26599379/
   lzma = callPackage ./lzma {};
 
-  preinit = callPackage ./preinit {};
-  swconfig = callPackage ./swconfig {};
-  odhcp6c = callPackage ./odhcp6c {};
-
-  openwrt = callPackage ./openwrt {};
-
-  initramfs-peek = callPackage ./initramfs-peek {};
+  mac80211 = callPackage ./mac80211 {};
   min-collect-garbage = callPackage ./min-collect-garbage {};
   min-copy-closure = callPackage ./min-copy-closure {};
-  hi = callPackage ./hi {};
-  firewallgen  = callPackage ./firewallgen {};
-  kernel-modules  = callPackage ./kernel-modules {};
+  netlink-lua = callPackage ./netlink-lua {};
   odhcp-script = callPackage ./odhcp-script {};
-  fennel = callPackage ./fennel {};
-  fennelrepl = callPackage ./fennelrepl {};
-  anoia = callPackage ./anoia {};
-
-  levitate = callPackage ./levitate {};
-
-  libubootenv = callPackage ./libubootenv {};
+  odhcp6c = callPackage ./odhcp6c {};
+  openwrt = callPackage ./openwrt {};
+  ppp = callPackage ./ppp {};
+  pppoe = callPackage ./pppoe {};
+  preinit = callPackage ./preinit {};
+  pseudofile = callPackage ./pseudofile {};
+  routeros = callPackage ./routeros {};
+  run-liminix-vm = callPackage ./run-liminix-vm {};
+  s6-init-bin =  callPackage ./s6-init-bin {};
+  s6-rc-database = callPackage ./s6-rc-database {};
+  serviceFns = callPackage ./service-fns {};
+  swconfig = callPackage ./swconfig {};
+  systemconfig = callPackage ./systemconfig {};
+  tufted = callPackage ./tufted {};
+  writeAshScript = callPackage ./write-ash-script {};
+  writeFennel = callPackage ./write-fennel {};
+  writeFennelScript = callPackage ./write-fennel-script {};
 }
