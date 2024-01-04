@@ -134,6 +134,7 @@ in {
       proc = dir {};
       run = dir {};
       sys = dir {};
+      tmp = dir {};
     };
   };
 }
