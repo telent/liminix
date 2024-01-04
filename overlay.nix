@@ -50,6 +50,12 @@ extraPkgs // {
   };
 
   # keep these alphabetical
+
+  btrfs-progs = prev.btrfs-progs.override {
+    udevSupport = false;
+    udev = null;
+  };
+
   chrony =
     let chrony' = prev.chrony.overrideAttrs(o: {
           configureFlags = [
