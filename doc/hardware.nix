@@ -24,6 +24,15 @@ writeText "hwdoc" ''
   Supported hardware
   ##################
 
+  For development, the `GL.iNet GL-MT300A <https://www.gl-inet.com/products/gl-mt300a/>`_
+  is an attractive choice as it has a builtin "debrick" procedure in the
+  boot monitor and is also comparatively simple to
+  attach serial cables to (soldering not required), so it
+  is lower-risk than some devices.
+
+  For a more powerful device, something with an ath10k would be the safe bet,
+  or the Linksys E8450 which seems popular in the openwrt community.
+
   ${lib.concatStringsSep "\n\n" texts}
 
 ''

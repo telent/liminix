@@ -33,7 +33,7 @@ functioning version, see [the CI system](https://build.liminix.org/jobset/limini
 Documentation is in the [doc](doc/) directory. You can build it
 by running
 
-    nix-shell -p sphinx --run "make -C doc html"
+    nix-shell -p sphinx --run "make -C doc hardware.rst html"
 
 Rendered documentation corresponding to the latest commit on `main`
 is published to [https://www.liminix.org/doc/](https://www.liminix.org/doc/)
