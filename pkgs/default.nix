@@ -92,6 +92,13 @@ in {
   run-liminix-vm = callPackage ./run-liminix-vm {};
   s6-init-bin =  callPackage ./s6-init-bin {};
   s6-rc-database = callPackage ./s6-rc-database {};
+
+  # schnapps is written by Turris and provides a high-level interface
+  # to btrfs snapshots. It may be useful on the Turris Omnia to
+  # install Liminix while retaining the ability to rollback to the
+  # vendor OS, or even to derisk Liminix updates on that device
+  schnapps = callPackage ./schnapps {};
+
   serviceFns = callPackage ./service-fns {};
   swconfig = callPackage ./swconfig {};
   systemconfig = callPackage ./systemconfig {};
