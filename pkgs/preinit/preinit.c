@@ -10,7 +10,7 @@
 
 #include <asm/setup.h>		/* for COMMAND_LINE_SIZE */
 
-void parseopts(char * cmdline, char **root, char **rootfstype);
+#include "opts.h"
 
 #define ERR(x) write(2, x, strlen(x))
 #define AVER(c) do { if(c < 0) { ERR("failed: "  #c ": error=0x" ); pr_u32(errno); ERR("\n"); } } while(0)
@@ -49,8 +49,11 @@ char buf[COMMAND_LINE_SIZE];
 
 int main(int argc, char *argv[], char *envp[])
 {
-    char *rootdevice = 0;
-    char *rootfstype = 0;
+    struct root_opts opts = {
+	.device = NULL,
+	.fstype = NULL,
+	.mount_opts = NULL
+    };
 
     write(1, banner, strlen(banner));
 
@@ -73,16 +76,20 @@ int main(int argc, char *argv[], char *envp[])
 	ERR("failed: open(\"/proc/cmdline\")\n");
 	die();
     }
-    parseopts(buf, &rootdevice, &rootfstype);
+    parseopts(buf, &opts);
 
-    if(rootdevice) {
-	if(!rootfstype) rootfstype = "jffs2"; /* backward compatibility */
+    if(opts.device) {
+	if(!opts.fstype) opts.fstype = "jffs2"; /* backward compatibility */
 	write(1, "rootdevice ", 11);
-	write(1, rootdevice, strlen(rootdevice));
+	write(1, opts.device, strlen(opts.device));
 	write(1, " (", 2);
-	write(1, rootfstype, strlen(rootfstype));
+	write(1, opts.fstype, strlen(opts.fstype));
+	if(opts.mount_opts) {
+	    write(1, ", opts=", 6);
+	    write(1, opts.mount_opts, strlen(opts.mount_opts));
+	}
 	write(1, ")\n", 2);
-	AVER(mount(rootdevice, "/target/persist", rootfstype, 0, NULL));
+	AVER(mount(opts.device, "/target/persist", opts.fstype, 0, opts.mount_opts));
 	AVER(mount("/target/persist/nix", "/target/nix",
 		   "bind", MS_BIND, NULL));
 
