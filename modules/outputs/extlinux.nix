@@ -31,7 +31,7 @@ in {
       label Liminix
         kernel /boot/kernel
         # initrd /boot/initramfs
-        append ${cmdline} root=/dev/vda1
+        append ${cmdline} 
         ${if wantsDtb then "fdt /boot/dtb" else ""}
       _EOF
     '';
