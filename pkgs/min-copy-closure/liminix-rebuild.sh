@@ -12,7 +12,7 @@ target_host=$1
 shift
 
 if [ -z "$target_host" ] ; then
-    echo Usage: liminix-rebuild [--no-reboot] target-host params
+    echo Usage: liminix-rebuild \[--no-reboot\] target-host params
     exit 1
 fi
 
