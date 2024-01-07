@@ -81,8 +81,11 @@ in attrset:
       $STRIP --remove-section=.note  --remove-section=.comment --strip-all makedevs -o $out/bin/activate
       ln -s ${s6-init-bin}/bin/init $out/bin/init
       cat > $out/bin/install <<EOF
-      #!/bin/sh
-      cp -v -fP $out/bin/* $out/etc/* \''${1-/}/persist
+      #!/bin/sh -e
+      prefix=\''${1-/}
+      src=\''${prefix}$out
+      mkdir -p \$prefix/persist
+      cp -v -fP \$src/bin/* \$src/etc/* \$prefix/persist
       EOF
       chmod +x $out/bin/install
     '';
