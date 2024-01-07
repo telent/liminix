@@ -43,8 +43,11 @@ in rec {
     ../modules/bridge
     ../modules/ntp
     ../modules/ssh
+    ../modules/outputs/btrfs.nix
+
   ];
   hostname = "rotuer";
+  rootfsType = "btrfs";
 
   services.hostap = svc.hostapd.build {
     interface = config.hardware.networkInterfaces.wlan;

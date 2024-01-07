@@ -40,6 +40,7 @@ in {
     rootfsType =  mkOption {
       default = "squashfs";
       type = types.enum [
+        "btrfs"
         "ext4"
         "jffs2"
         "squashfs"
