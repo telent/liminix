@@ -219,9 +219,13 @@
                 ifname = "wan";
               };
 
-              lan = link.build {
-                ifname = "lan1";
-              };
+              lan0 = link.build { ifname = "lan0"; };
+              lan1 = link.build { ifname = "lan1"; };
+              lan2 = link.build { ifname = "lan2"; };
+              lan3 = link.build { ifname = "lan3"; };
+              lan4 = link.build { ifname = "lan4"; };
+              lan5 = link.build { ifname = "lan5"; };
+              lan = lan0; # maybe we should build a bridge?
 
               wlan = link.build {
                 ifname = "wlan0";
