@@ -36,9 +36,10 @@ char * pr_u32(int32_t input) {
     i+=2;
 
     buf[i] ='\0';
-    write(2, buf, i);
-
-    return buf;
+    if(write(2, buf, i))
+	return buf;
+    else
+	return NULL;
 }
 
 
