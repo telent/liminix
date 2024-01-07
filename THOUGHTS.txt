@@ -3707,9 +3707,10 @@ Here is scope of work for Turris:
 recovery/install.
 
 - disk partitioning tools and mkfs stuff
+- kernel with all the filesystems
 - dhcp client for connecting to wired network
 
-(II) we need insttuctions for building the real system
+(II) we need instructions for building the real system
 and using min-copy-closure to copy and install the system
 configuration of the real one into /mnt
 
@@ -3742,14 +3743,105 @@ To be any use, the test needs to be end-to-end - as in, rather than
 just checking some files are copied, test that the machine rebooted
 successfully
 
+Fri Dec 29 18:36:16 GMT 2023
+
+Our test for liminix-rebuild uses qemu block device and ext4 instead
+of phram because -device loader doesn't seem to survive a reboot.
+And it needs some free space in the ext4 partition inside the
+mbr image so that it can install new stuff. However, the
+filesystem is sized to be near-full.
+
+If the mbrimage output is to be much use, probably there should be
+some way of telling it how big the disk is. Maybe it should use
+hardware.flash.size?
+
+UBI also does a bad job of integrating into the hardware.flash hierarchy
+(but ubi is also more complicated as the ubi volumes are "nested" inside
+an MTD partition)
+
+To move forwards with this test I think I will make it not depend on
+mbrimage for now, but we have to come back to this. Maybe importing
+the mbrimage module provides new hardware.disk = { partitions, size etc}
+config options.
+
+Sun Dec 31 23:52:04 GMT 2023
+
+https://developer.ridgerun.com/wiki/index.php/Setting_up_fw_printenv_to_modify_u-boot_environment_variables#Preparing_the_fw_env.config_file
+
+can we extract the fw_env config data somehow to produce an appropriate
+file for the device?
+
+the device config needs to specify partition name and offset at minimum,
+possibly also size.
+
+we can create a service that writes the config based on those values. but
+if we are to be using fw_setenv from the shell, there is no service
+which depends on that service. whatever defines the service also needs
+to add it to system.services so that the recovery system can specify it
+
+Sat Jan  6 12:30:27 GMT 2024
+
+How do we min-copy-closure to the device when we don't have anything
+hooked to the LAN port? It's rather easy to break the WAN  connection
+when it involves going out to the internet and back
+
+* Don't want to plug it into the actual lan because it's doing dhcp service
+ and that is going to confuse
+
+* the machine we're copying from is loaclhost
+
+* we could do some kind of port forwarding thing? maybe a port forward on
+  run-border-vm qemu user networking ...
+
+* static route on loaclhost?
+
+  512  sudo ip netns add test-lan
+  514  sudo ip link set dev enp1s0 netns test-lan
+
+  525  sudo ip link add veth-test-lan type veth peer veth1 netns test-lan
+  533  sudo  ip netns exec test-lan ip link add name br0 type bridge
+  536  sudo  ip netns exec test-lan ip link set veth1 master br0
+  537  sudo  ip netns exec test-lan ip link set enp1s0 master br0
+       sudo  ip netns exec test-lan /nix/store/dh66q9k402pwpmmgc983xwmwb3vvvjbr-busybox-1.36.1/bin/busybox udhcpc -i br0
+
+then we could add a route to 10.8.0.1/32 with dev veth-test-lan ?
+
+Sat Jan  6 20:52:45 GMT 2024
+
+This is all beside the point right now because the _recovery_ system
+does not run all this stuff - it just has a dhcp client on the lan
+interface. We could plug it straight into the switch.
 
 
-COPYING /nix/store/dlz86nip271ybaz0cip7bgkbzijk0cr7-make-stuff-mips-unknown-linux-musl TO //persist
+As we already just plugged it into enp1s0 on loaclhost, could we
+do somethin to put it on the lan from there? add it to vbridge0?
 
+Sun Jan  7 15:30:57 GMT 2024
 
-/nix/store/gr255qjxijksf9361glsj5lz0cklassx-profile
+Turns out we should have used a working ethernet cable.
 
-md5sum /persist/activate
-8eb0760c39cdee0b141b15bbafbc94a0  /persist/activate BAD
-6c27b75cbe9f2ce87c1fd1425362108f  /persist/activate GOOD
-8eb0760c39cdee0b141b15bbafbc94a0  /persist/activate
+Sun Jan  7 15:31:14 GMT 2024
+
+OK, so
+
+# on device
+mount /dev/mmcblk0p1 /mnt
+ [ take a snapshot if needed ]
+ [ clear out the turrisos files ]
+ls /mnt/@
+
+# on build
+
+$ nix-build -I liminix-config=./examples/rotuer.nix --arg device "import ./devices/turris-omnia" -A outputs.systemConfiguration
+$ nix-shell --run "min-copy-closure -r /mnt/@  root@recovery.lan   result "
+
+# on device
+
+$ mkdir /mnt/@/persist
+$ /mnt/@/nix/store/swf3vn9bzx198c0cwp6naq0glqa9192n-make-stuff-armv7l-unknown-linux-musleabihf/bin/install /mnt/@/
+
+this fails because it tries to copy from the unprefixed nix
+store. Also probably it should mkdir $prefix/persist. Also it needs to
+create $prefix/boot: it's too late to do that with `activate`
+because u-boot will need it to exist in order to load the initramfs
+that runs activate
