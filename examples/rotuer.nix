@@ -44,11 +44,12 @@ in rec {
     ../modules/ntp
     ../modules/ssh
     ../modules/outputs/btrfs.nix
-
+    ../modules/outputs/extlinux.nix
   ];
   hostname = "rotuer";
   rootfsType = "btrfs";
   rootOptions = "subvol=@";
+  boot.loader.extlinux.enable = true;
 
   services.hostap = svc.hostapd.build {
     interface = config.hardware.networkInterfaces.wlan;

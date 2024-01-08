@@ -6,6 +6,7 @@
 }:
 let
   inherit (lib) mkIf mkEnableOption mkOption types concatStringsSep;
+  inherit (pkgs.pseudofile) dir symlink;
   cfg = config.boot.loader.extlinux;
   o = config.system.outputs;
   cmdline = concatStringsSep " " config.boot.commandLine;
@@ -17,7 +18,7 @@ in {
   };
   options.boot.loader.extlinux.enable = mkEnableOption "extlinux";
 
-  config =  { # mkIf cfg.enable {
+  config = mkIf cfg.enable {
     system.outputs.extlinux = pkgs.runCommand "extlinux" {} ''
       mkdir $out
       cd $out
@@ -27,7 +28,7 @@ in {
       mkdir extlinux
       cat > extlinux/extlinux.conf << _EOF
       menu title Liminix
-      timeout 100
+      timeout 40
       label Liminix
         kernel /boot/kernel
         # initrd /boot/initramfs
@@ -35,5 +36,8 @@ in {
         ${if wantsDtb then "fdt /boot/dtb" else ""}
       _EOF
     '';
+    filesystem = dir {
+      boot = symlink config.system.outputs.extlinux;
+    };
   };
 }

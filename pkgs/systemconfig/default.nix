@@ -84,8 +84,19 @@ in attrset:
       #!/bin/sh -e
       prefix=\''${1-/}
       src=\''${prefix}$out
-      mkdir -p \$prefix/persist
-      cp -v -fP \$src/bin/* \$src/etc/* \$prefix/persist
+      dest=\$prefix
+      ${# if we are running on a normal mounted system then
+        # the actual device root is mounted on /persist
+        # and /nix is bind mounted from /persist/nix
+        # (see the code in preinit). So we need to check for this
+        # case otherwise we will install into a ramfs/rootfs
+        ""
+      }
+      if test -d $dest/persist; then dest=$dest/persist; fi
+      cp -v -fP \$src/bin/* \$src/etc/* \$dest
+      ${if attrset ? boot then ''
+        (cd \$prefix && rm ./boot && ln -sf ${lib.strings.removePrefix "/" attrset.boot.target} ./boot)
+      '' else ""}
       EOF
       chmod +x $out/bin/install
     '';
