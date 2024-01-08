@@ -85,7 +85,7 @@ int main(int argc, char *argv[], char *envp[])
 	write(1, " (", 2);
 	write(1, opts.fstype, strlen(opts.fstype));
 	if(opts.mount_opts) {
-	    write(1, ", opts=", 6);
+	    write(1, ", opts=", 7);
 	    write(1, opts.mount_opts, strlen(opts.mount_opts));
 	}
 	write(1, ")\n", 2);

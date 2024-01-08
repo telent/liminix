@@ -95,7 +95,7 @@ int main()
     };
     char *buf;
 
-    // finds root= rootfstype= rootopts= options
+    // finds root= rootfstype= rootflags= options
     buf = strdup("liminix console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 root=/dev/ubi0_4 rootfstype=ubifs rootflags=subvol=1 fw_devlink=off mtdparts=phram0:18M(rootfs) phram.phram=phram0,0x40400000,18874368,65536 root=/dev/mtdblock0 foo");
     memset(&opts, '\0', sizeof opts); parseopts(buf, &opts);
     expect_equal(opts.device, "/dev/mtdblock0");
@@ -114,6 +114,13 @@ int main()
     memset(&opts, '\0', sizeof opts); parseopts(buf, &opts);
     expect_equal(opts.device, "/dev/hda1");
     expect_equal(opts.fstype, "ubifs");
+
+    // works when rootflags is the last option
+    buf = strdup("liminix fw_devlink=off root=/dev/hda1 rootfstype=ubifs rootflags=subvol=@");
+    memset(&opts, '\0', sizeof opts); parseopts(buf, &opts);
+    expect_equal(opts.device, "/dev/hda1");
+    expect_equal(opts.fstype, "ubifs");
+    expect_equal(opts.mount_opts, "subvol=@");
 
     buf = strdup("liminix rootfstype=ubifs fw_devlink=off root=/dev/hda1 foo");
     memset(&opts, '\0', sizeof opts); parseopts(buf, &opts);

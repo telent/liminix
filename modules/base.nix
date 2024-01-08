@@ -47,6 +47,11 @@ in {
         "ubifs"
       ];
     };
+    rootOptions =  mkOption {
+      type = types.nullOr types.str;
+      default = null;
+    };
+
     boot = {
       commandLine = mkOption {
         type = types.listOf types.nonEmptyStr;
@@ -95,7 +100,8 @@ in {
       "root=${config.hardware.rootDevice}"
       "rootfstype=${config.rootfsType}"
       "fw_devlink=off"
-    ];
+    ] ++ lib.optional (config.rootOptions != null) "rootflags=${config.rootOptions}";
+
     users.root = {
       uid = 0; gid= 0; gecos = "Root of all evaluation";
       dir = "/home/root/";

@@ -48,6 +48,7 @@ in rec {
   ];
   hostname = "rotuer";
   rootfsType = "btrfs";
+  rootOptions = "subvol=@";
 
   services.hostap = svc.hostapd.build {
     interface = config.hardware.networkInterfaces.wlan;
