@@ -2,6 +2,27 @@
   description = ''
     Turris Omnia
     ************
+
+    This is a 32 bit ARMv7 MVEBU device, which is usually shipped with
+    TurrisOS, an OpenWrt-based system. Rather than reformatting the
+    builtin storage, we install Liminix on to the existing btrfs
+    filesystem so that the vendor snapshot/recovery system continues
+    to work (and provides you an easy rollback if you decide you don't
+    like Liminix after all).
+
+    The install process is designed so that you should not need to open
+    the device and add a serial console (although it may be handy
+    for visibility  and in case anything goes wrong). In outline
+
+      1. build a "recovery" system with useful btrfs tools
+      2. boot that system using TFTP or a USB stick
+      3. once booted, mount the real root filesystem on /mnt
+      4. take a snapshot using schnapps, and then delete everything
+      5. use min-copy-closure -d /mnt/@ to copy the real configuration
+         to the device
+      6. reboot into a fully operational system
+
+    Detailed instructions to follow...
   '';
 
   system = {
@@ -30,7 +51,6 @@
       imports = [
         ../../modules/arch/arm.nix
         ../../modules/outputs/tftpboot.nix
-        ../../modules/outputs/ext4fs.nix
         ../../modules/outputs/mbrimage.nix
         ../../modules/outputs/extlinux.nix
       ];
@@ -133,7 +153,6 @@
             "console=ttyS0,115200"
             "pcie_aspm=off" # ath9k pci incompatible with PCIe ASPM
           ];
-          imageFormat = "fit";
         };
         filesystem =
           let
@@ -142,9 +161,9 @@
               name = "wlan-firmware";
               phases = ["installPhase"];
               installPhase = ''
-            mkdir $out
-            cp -r ${pkgs.linux-firmware}/lib/firmware/ath10k/QCA988X $out
-          '';
+                mkdir $out
+                cp -r ${pkgs.linux-firmware}/lib/firmware/ath10k/QCA988X $out
+              '';
             };
           in dir {
             lib = dir {
@@ -210,7 +229,7 @@
               # per
               # https://www.kernel.org/doc/html/latest/networking/dsa/configuration.html#affinity-of-user-ports-to-cpu-ports
               # but apparently OpenWrt doesn't either so maybe it's more
-              # complicated than it looks
+              # complicated than it looks.
 
               wan = link.build {
                 # in armada-38x.dtsi this is eth2. It may be connected to
