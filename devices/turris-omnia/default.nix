@@ -176,7 +176,7 @@
           defaultOutput = "mtdimage";
           loadAddress = lim.parseInt "0x00800000"; # "0x00008000";
           entryPoint = lim.parseInt "0x00800000"; # "0x00008000";
-          rootDevice = "/dev/mtdblock0";
+          rootDevice = "/dev/mmcblk0p1";
 
           dts = {
             src = "${config.system.outputs.kernel.modulesupport}/arch/arm/boot/dts/armada-385-turris-omnia.dts";
