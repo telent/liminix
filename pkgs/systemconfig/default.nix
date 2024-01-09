@@ -95,7 +95,7 @@ in attrset:
       if test -d $dest/persist; then dest=$dest/persist; fi
       cp -v -fP \$src/bin/* \$src/etc/* \$dest
       ${if attrset ? boot then ''
-        (cd \$prefix && rm ./boot && ln -sf ${lib.strings.removePrefix "/" attrset.boot.target} ./boot)
+        (cd \$dest && rm ./boot && ln -sf ${lib.strings.removePrefix "/" attrset.boot.target} ./boot)
       '' else ""}
       EOF
       chmod +x $out/bin/install
