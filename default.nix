@@ -67,6 +67,7 @@ in {
       go-l2tp
       min-copy-closure
       fennelrepl
+      lzma
     ];
   };
 }
