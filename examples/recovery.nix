@@ -4,7 +4,11 @@ let
   svc = config.system.service;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
-
+  some-util-linux = pkgs.runCommand "some-util-linux" {} ''
+    mkdir -p $out/bin
+    cd ${pkgs.util-linux-small}/bin
+    cp fdisk sfdisk mkswap $out/bin
+  '';
 in rec {
   imports = [
     ../modules/network
@@ -76,7 +80,7 @@ in rec {
     btrfs-progs
     mtdutils # mtd, jffs2, ubifs
     dtc      # you never know when you might need device tree stuff
-    util-linux-small # fdisk
+    some-util-linux
     libubootenv # fw_{set,print}env
     pciutils
   ];
