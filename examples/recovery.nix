@@ -68,7 +68,7 @@ in rec {
     };
     mnt = dir {};
   };
-  rootfsType = "squashfs";
+  rootfsType = "ext4";
   # sda is most likely correct for the boot-from-USB case. For tftp
   # it's overridden by the boot.scr anyway, so maybe it all works out
   hardware.rootDevice = "/dev/sda1";
