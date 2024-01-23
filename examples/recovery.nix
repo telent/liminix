@@ -69,6 +69,9 @@ in rec {
     mnt = dir {};
   };
   rootfsType = "squashfs";
+  # sda is most likely correct for the boot-from-USB case. For tftp
+  # it's overridden by the boot.scr anyway, so maybe it all works out
+  hardware.rootDevice = "/dev/sda1";
   users.root = {
     # the password is "secret". Use mkpasswd -m sha512crypt to
     # create this hashed password string
