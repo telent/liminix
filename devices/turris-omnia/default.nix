@@ -132,6 +132,9 @@
             PHY_MVEBU_A38X_COMPHY = "y"; # for eth2
             MARVELL_PHY = "y";
 
+            USB_XHCI_MVEBU = "y";
+            USB_XHCI_HCD = "y";
+
             MVPP2 = "y";
             MV_XOR = "y";
 

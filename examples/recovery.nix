@@ -9,6 +9,7 @@ in rec {
   imports = [
     ../modules/network
     ../modules/ssh
+    ../modules/usb.nix
     ../modules/schnapps
     ../modules/outputs/mtdimage.nix
     ../modules/outputs/mbrimage.nix
