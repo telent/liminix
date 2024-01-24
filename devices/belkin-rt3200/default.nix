@@ -144,6 +144,10 @@
         # SERIAL_8250_NR_UARTS="3";
         # SERIAL_8250_RUNTIME_UARTS="3";
         SERIAL_OF_PLATFORM="y";
+
+        # Must enble hardware watchdog drivers. Else the device reboots after several seconds
+        WATCHDOG = "y";
+        MEDIATEK_WATCHDOG = "y";
       };
     };
     boot = {
