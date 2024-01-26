@@ -3845,3 +3845,45 @@ store. Also probably it should mkdir $prefix/persist. Also it needs to
 create $prefix/boot: it's too late to do that with `activate`
 because u-boot will need it to exist in order to load the initramfs
 that runs activate
+
+Thu Jan 11 23:36:47 GMT 2024
+
+squashfs rootfsType doesn't rebuild when the kernel config is changed
+
+Mon Jan 22 19:04:45 GMT 2024
+
+setenv serverip 10.0.0.1
+setenv ipaddr 10.0.0.8
+compraddr=0x01000000
+tftpboot ${compraddr} recovery.img.lzma
+setexpr writeaddr ${filesize} + $compraddr
+lzmadec ${compraddr} $writeaddr
+usb start
+usb dev 0
+wdt dev watchdog@20300
+wdt stop
+usb write ${writeaddr} 0 ${filesize}
+
+
+Thu Jan 25 11:55:36 GMT 2024
+
+openwrt:
+CONFIG_BROADCOM_PHY=m
+CONFIG_FIXED_PHY=y
+CONFIG_GENERIC_PHY=y
+CONFIG_IP17XX_PHY=m    ?
+CONFIG_MARVELL_PHY=y
+CONFIG_MVSW61XX_PHY=y  ?
+CONFIG_RTL8366RB_PHY=m ?
+CONFIG_RTL8366S_PHY=m ?
+CONFIG_RTL8367B_PHY=m ?
+CONFIG_SWPHY=y
+CONFIG_USB_PHY=y
+
+CONFIG_FIXED_PHY=y
+CONFIG_GENERIC_PHY=y
+CONFIG_MARVELL_PHY=y
+CONFIG_PHY_MVEBU_A3700_COMPHY=y
+CONFIG_PHY_MVEBU_A38X_COMPHY=y
+CONFIG_SWPHY=y
+#
