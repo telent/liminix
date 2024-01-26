@@ -72,6 +72,7 @@ in {
             hex() { printf "0x%x" $1; }
             rootfsStart=${toString cfg.loadAddress}
             rootfsSize=$(binsize64k ${o.rootfs} )
+            rootfsSize=$(($rootfsSize + ${toString cfg.freeSpaceBytes} ))
             dtbStart=$(($rootfsStart + $rootfsSize))
             dtbSize=$(binsize ${o.dtb} )
             imageStart=$(($dtbStart + $dtbSize))

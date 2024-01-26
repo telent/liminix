@@ -31,6 +31,7 @@ in rec {
   boot.tftp = {
     ipaddr = "10.0.0.8"; # my address
     serverip = "10.0.0.1"; # build machine or other tftp server
+    freeSpaceBytes = 1024 * 1024 * 4;
   };
 
   hostname = "recovery";
