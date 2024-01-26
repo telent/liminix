@@ -127,8 +127,8 @@
       kernel = {
         src = pkgs.fetchurl {
           name = "linux.tar.gz";
-          url = "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.71.tar.gz";
-          hash = "sha256-yhO2cXIeIgUxkSZf/4aAsF11uxyh+UUZu6D1h92vCD8=";
+          url = "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.137.tar.gz";
+          hash = "sha256-PkdzUKZ0IpBiWe/RS70J76JKnBFzRblWcKlaIFNxnHQ=";
         };
         extraPatchPhase = ''
           ${openwrt.applyPatches.ramips}

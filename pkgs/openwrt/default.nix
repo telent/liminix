@@ -7,8 +7,8 @@ let
     name = "openwrt-source";
     repo = "openwrt";
     owner = "openwrt";
-    rev = "a5265497a4f6da158e95d6a450cb2cb6dc085cab";
-    hash = "sha256-YYi4gkpLjbOK7bM2MGQjAyEBuXJ9JNXoz/JEmYf8xE8=";
+    rev = "refs/tags/v23.05.2";
+    hash = "sha256-kP+cSOB6LiOMWs7g+ji7P7ehiDYDwRdmT4R5jSzw6K4=";
   };
   doPatch = family : ''
     cp -av ${src}/target/linux/generic/files/* .
