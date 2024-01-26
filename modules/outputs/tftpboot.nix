@@ -74,8 +74,6 @@ in {
             rootfsSize=$(binsize64k ${o.rootfs} )
             rootfsSize=$(($rootfsSize + ${toString cfg.freeSpaceBytes} ))
             dtbStart=$(($rootfsStart + $rootfsSize))
-            dtbSize=$(binsize ${o.dtb} )
-            imageStart=$(($dtbStart + $dtbSize))
             imageSize=$(binsize ${image})
 
             ln -s ${o.manifest} manifest
@@ -102,6 +100,9 @@ in {
             node=$(printf "phram-rootfs@%x" $rootfsStart)
             fdtput -p -t s dtb /reserved-memory/$node compatible phram
             fdtput -p -t lx dtb /reserved-memory/$node reg $ac_prefix $(hex $rootfsStart) $sz_prefix $(hex $rootfsSize)
+
+            dtbSize=$(binsize ./dtb )
+            imageStart=$(($dtbStart + $dtbSize))
 
             cmd="liminix ${cmdline} mtdparts=phram0:''${rootfsSize}(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsSize},${toString config.hardware.flash.eraseBlockSize} root=/dev/mtdblock0";
             fdtput -t s dtb /chosen bootargs "$cmd"
