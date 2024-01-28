@@ -44,13 +44,16 @@ in rec {
     dependencies = [ config.services.hostname ];
   };
 
-  services.sshd = svc.ssh.build { };
+  services.sshd = svc.ssh.build {
+    dependencies = [ config.services.growfs ];
+  };
 
   services.defaultroute4 = svc.network.route.build {
     via = "$(output ${services.dhcpc} router)";
     target = "default";
     dependencies = [services.dhcpc];
   };
+
   services.resolvconf = oneshot rec {
     dependencies = [ services.dhcpc ];
     name = "resolvconf";
@@ -63,6 +66,16 @@ in rec {
       )
     '';
   };
+
+  services.growfs = let name = "growfs"; in oneshot {
+    inherit name;
+    up = ''
+      . ${serviceFns}
+      device=$(grep /persist /proc/1/mountinfo | cut -f9 -d' ')
+      ${pkgs.e2fsprogs}/bin/resize2fs $device
+    '';
+  };
+
   filesystem = dir {
     etc = dir {
       "resolv.conf" = symlink "${services.resolvconf}/.outputs/resolv.conf";
