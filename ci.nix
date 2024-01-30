@@ -11,6 +11,7 @@ let
   devices = [
     "gl-ar750" "gl-mt300n-v2" "gl-mt300a"
     "qemu" "qemu-aarch64" "qemu-armv7l"
+    "tp-archer-ax23"
   ];
   vanilla = ./vanilla-configuration.nix;
   for-device = name:
