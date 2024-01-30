@@ -58,7 +58,8 @@ in {
   anoia = callPackage ./anoia {};
   fennel = callPackage ./fennel {};
   fennelrepl = callPackage ./fennelrepl {};
-  firewallgen  = callPackage ./firewallgen {};
+  firewallgen = callPackage ./firewallgen {};
+  firmware-utils = callPackage ./firmware-utils {};
   gen_init_cpio = callPackage ./gen_init_cpio {};
   go-l2tp = callPackage ./go-l2tp {};
   hi = callPackage ./hi {};

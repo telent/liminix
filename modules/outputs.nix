@@ -60,6 +60,9 @@ in
           Combined kernel and FDT in uImage (U-Boot compatible) format
         '';
       };
+      tplink-safeloader = mkOption {
+        type = types.package;
+      };
       u-boot = mkOption {
         type = types.package;
       };
