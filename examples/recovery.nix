@@ -22,6 +22,7 @@ in rec {
     ../modules/outputs/ubimage.nix
     ../modules/outputs/jffs2.nix
     ../modules/outputs/ext4fs.nix
+    ../modules/outputs/extlinux.nix
   ];
 
   kernel.config = {
@@ -33,6 +34,7 @@ in rec {
     serverip = "10.0.0.1"; # build machine or other tftp server
     freeSpaceBytes = 1024 * 1024 * 4;
   };
+  boot.loader.extlinux.enable = true;
 
   hostname = "recovery";
 
@@ -83,9 +85,11 @@ in rec {
     mnt = dir {};
   };
   rootfsType = "ext4";
+
   # sda is most likely correct for the boot-from-USB case. For tftp
   # it's overridden by the boot.scr anyway, so maybe it all works out
-  hardware.rootDevice = "/dev/sda1";
+  hardware.rootDevice = lib.mkForce "/dev/sda1";
+
   users.root = {
     # the password is "secret". Use mkpasswd -m sha512crypt to
     # create this hashed password string
