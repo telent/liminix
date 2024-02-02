@@ -76,7 +76,11 @@ in {
         default = [];
         example = ["ath9k" "ath10k"];
       };
-      rootDevice = mkOption { };
+      rootDevice = mkOption {
+        description = "Full path to preferred root device";
+        type = types.str;
+        example = "/dev/mtdblock3";
+      };
       networkInterfaces = mkOption {
         type = types.attrsOf types.anything;
       };
