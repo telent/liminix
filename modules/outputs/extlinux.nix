@@ -24,7 +24,7 @@ in {
       cd $out
       ${if wantsDtb then "cp ${o.dtb} dtb" else "true"}
       cp ${o.initramfs} initramfs
-      cp ${o.zimage}  kernel
+      cp ${o.zimage} kernel
       mkdir extlinux
       cat > extlinux/extlinux.conf << _EOF
       menu title Liminix

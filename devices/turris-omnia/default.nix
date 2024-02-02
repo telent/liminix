@@ -64,8 +64,8 @@
             hash = "sha256-PkdzUKZ0IpBiWe/RS70J76JKnBFzRblWcKlaIFNxnHQ=";
           };
           extraPatchPhase = ''
-          ${pkgs.openwrt.applyPatches.mvebu}
-        '';
+            ${pkgs.openwrt.applyPatches.mvebu}
+          '';
           config = {
             PCI = "y";
             OF = "y";
