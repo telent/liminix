@@ -185,7 +185,7 @@
           };
 
         boot.tftp = {
-          loadAddress = lim.parseInt "0x1000000";
+          loadAddress = lim.parseInt "0x1700000";
           kernelFormat = "zimage";
           compressRoot = true;
         };
