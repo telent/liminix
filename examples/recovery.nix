@@ -94,6 +94,14 @@ in rec {
     # the password is "secret". Use mkpasswd -m sha512crypt to
     # create this hashed password string
     passwd = "$6$y7WZ5hM6l5nriLmo$5AJlmzQZ6WA.7uBC7S8L4o19ESR28Dg25v64/vDvvCN01Ms9QoHeGByj8lGlJ4/b.dbwR9Hq2KXurSnLigt1W1";
+
+
+    openssh.authorizedKeys.keys =
+      let fromBuild =
+            (builtins.readFile
+              ((builtins.toPath (builtins.getEnv "HOME")) + "/.ssh/authorized_keys")
+            );
+      in lib.splitString "\n" fromBuild;
   };
 
   defaultProfile.packages = with pkgs; [
