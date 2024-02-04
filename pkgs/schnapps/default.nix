@@ -3,9 +3,10 @@
 , fetchFromGitLab
 , makeWrapper
 , btrfs-progs
+, util-linux-small
 , lib
 }:
-let search_path = lib.makeBinPath [btrfs-progs];
+let search_path = lib.makeBinPath [btrfs-progs util-linux-small];
 in stdenv.mkDerivation {
   pname = "schnapps";
   version = "2.13.0";
