@@ -13,6 +13,16 @@ let
 
   type_service = pkgs.liminix.lib.types.service;
 
+  mergeConditionals = conf : conditions :
+    # for each key in conditions, if it is present in conf
+    # then merge the associated value into conf
+    lib.foldlAttrs
+      (acc: name: value:
+        if (conf ? ${name}) && (conf.${name} != "n")
+        then acc // value
+        else acc)
+      conf
+      conditions;
 in {
   options = {
     kernel = {
@@ -42,6 +52,20 @@ in {
           };
         '';
       };
+      conditionalConfig = mkOption {
+        description = ''
+          Kernel config options that should only be applied when
+          some other option is present.
+        '';
+        type = types.attrsOf (types.attrsOf types.nonEmptyStr);
+        default = {};
+        example = {
+          USB = {
+            USB_XHCI_MVEBU = "y";
+            USB_XHCI_HCD = "y";
+          };
+        };
+      };
       makeTargets = mkOption {
         type = types.listOf types.str;
       };
@@ -49,10 +73,15 @@ in {
   };
   config = {
     system.outputs =
-      let k = liminix.builders.kernel.override {
-            inherit (config.kernel) config src extraPatchPhase;
-            targets = config.kernel.makeTargets;
-          };
+      let
+        mergedConfig = mergeConditionals
+          config.kernel.config
+          config.kernel.conditionalConfig;
+        k = liminix.builders.kernel.override {
+          config = mergedConfig;
+          inherit (config.kernel) src extraPatchPhase;
+          targets = config.kernel.makeTargets;
+        };
       in {
         kernel = k.vmlinux;
         zimage = k.zImage;

@@ -132,9 +132,6 @@
             PHY_MVEBU_A38X_COMPHY = "y"; # for eth2
             MARVELL_PHY = "y";
 
-            USB_XHCI_MVEBU = "y";
-            USB_XHCI_HCD = "y";
-
             MVPP2 = "y";
             MV_XOR = "y";
 
@@ -149,6 +146,12 @@
 
             NET_DSA = "y";
             NET_DSA_MV88E6XXX = "y"; # depends on PTP_1588_CLOCK_OPTIONAL
+          };
+          conditionalConfig = {
+            USB = {
+              USB_XHCI_MVEBU = "y";
+              USB_XHCI_HCD = "y";
+            };
           };
         };
 
