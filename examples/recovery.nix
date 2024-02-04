@@ -36,7 +36,7 @@ in rec {
   };
   boot.loader.extlinux.enable = true;
 
-  hostname = "recovery";
+  hostname = "liminix-recovery";
 
   services.dhcpc = svc.network.dhcp.client.build {
     interface = config.hardware.networkInterfaces.lan2;

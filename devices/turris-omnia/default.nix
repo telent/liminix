@@ -10,19 +10,119 @@
     to work (and provides you an easy rollback if you decide you don't
     like Liminix after all).
 
-    The install process is designed so that you should not need to open
-    the device and add a serial console (although it may be handy
-    for visibility  and in case anything goes wrong). In outline
+    The install process has two stages, and is intended that you
+    should not need to open the device and add a serial console
+    (although it may be handy for visibility, and in case anything
+    goes wrong). First we build a minimal installation/recovery
+    system, then we reboot into that recovery image to prepare the
+    device for the full target install.
 
-      1. build a "recovery" system with useful btrfs tools
-      2. boot that system using TFTP or a USB stick
-      3. once booted, mount the real root filesystem on /mnt
-      4. take a snapshot using schnapps, and then delete everything
-      5. use min-copy-closure -d /mnt/@ to copy the real configuration
-         to the device
-      6. reboot into a fully operational system
+    Installation using a USB stick
+    ==============================
 
-    Detailed instructions to follow...
+    First, build the image for the USB stick. Review
+    :file:`examples/recovery.nix` in order to change the default
+    root password (which is ``secret``) and/or the SSH keys, then
+    build it with
+
+        $ nix-build -I liminix-config=./examples/recovery.nix \
+          --arg device "import ./devices/turris-omnia" \
+          -A outputs.mbrimage -o mbrimage
+        $ file -L mbrimage
+        mbrimage: DOS/MBR boot sector; partition 1 : ID=0x83, active, start-CHS (0x0,0,5), end-CHS (0x6,130,26), startsector 4, 104602 sectors
+
+    Next, copy the image from your build machine to a USB storage
+    medium using :command:`dd` or your other most favoured file copying
+    tool, which might be a comand something like this:
+
+        $ dd if=mbrimage of=/dev/path/to/the/usb/stick \
+          bs=1M conv=fdatasync status=progress
+
+    The Omnia's default boot order only checks USB after it has failed
+    to boot from eMMC, which is not ideal for our purpose.  Unless you
+    have a serial cable, the easiest way to change this is by booting
+    to TurrisOS and logging in with ssh:
+
+        root@turris:/# fw_printenv boot_targets
+        boot_targets=mmc0 nvme0 scsi0 usb0 pxe dhcp
+        root@turris:/# fw_setenv boot_targets usb0 mmc0
+        root@turris:/# fw_printenv boot_targets
+        boot_targets=usb0 mmc0
+        root@turris:/# reboot -f
+
+    It should now boot into the recovery image. It expects a network
+    cable to be plugged into LAN2 with something on the other end of
+    it that serves DHCP requests.  Check your DHCP server logs for a
+    request from a ``liminix-recovery`` host and figure out what IP
+    address was assigned.
+
+        $ ssh liminix-recovery.lan
+
+    You should get a "Busybox" banner and a root prompt. Now you can
+    start preparing the device to install Liminix on it. First we'll
+    mount the root filesystem and take a snapshot:
+
+        # mkdir /dest && mount /dev/mmcblk0p1 /dest
+        # schnapps -d /dest create "pre liminix"
+        # schnapps -d /dest list
+        ERROR: not a valid btrfs filesystem: /
+            # | Type      | Size        | Date                      | Description
+        ------+-----------+-------------+---------------------------+------------------------------------
+            1 | single    |    16.00KiB | 1970-01-01 00:11:49 +0000 | pre liminix
+
+    (``not a valid btrfs filesystem: /`` is not a real error)
+
+    then we can remove all the files
+
+        # rm -r /dest/@/*
+
+    and then it's ready to install the real Liminix system onto. On
+    your build system, create the Liminix configuration you wish to
+    install: here we'll use the ``rotuer`` example.
+
+        build$ nix-build -I liminix-config=./examples/rotuer.nix \
+          --arg device "import ./devices/turris-omnia" \
+          -A outputs.systemConfiguration
+
+    and then use :command:`min-copy-closure` to copy it to the device.
+
+        build$ nix-shell --run \
+          "min-copy-closure -r /dest/@  root@liminix-recovery.lan result"
+
+    and activate it
+
+        build$ ssh root@liminix-recovery.lan \
+          "/dest/@/$(readlink result)/bin/install /dest/@"
+
+    The final steps are performed directly on the device again: add
+    a symlink so U-Boot can find :file:`/boot`, then restore the
+    default boot order and reboot into the new configuration.
+
+        # cd /dest && ln -s @/boot .
+        # fw_setenv boot_targets "mmc0 nvme0 scsi0 usb0 pxe dhcp"
+        # cd / ; umount /dest
+        # reboot
+
+
+    Installation using a TFTP server and serial console
+    ===================================================
+
+    If you have a :ref:`serial` console connection and a TFTP server,
+    and would rather use them than fiddling with USB sticks, the
+    :file:`examples/recovery.nix` configuration also works
+    using the ``tftpboot`` output. So you can do
+
+        build$ nix-build -I liminix-config=./examples/recovery.nix \
+          --arg device "import ./devices/turris-omnia" \
+          -A outputs.tftpboot
+
+    and then paste the generated :file:`result/boot.scr` into
+    U-Boot, and you will end up with the same system as you would
+    have had after booting from USB. If you don't have a serial
+    console connection you could probably even get clever with
+    elaborate use of :command:`fw_setenv`, but that is left as
+    an exercise for the reader.
+
   '';
 
   system = {
