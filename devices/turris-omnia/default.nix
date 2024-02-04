@@ -25,6 +25,8 @@
     root password (which is ``secret``) and/or the SSH keys, then
     build it with
 
+    .. code-block:: console
+
         $ nix-build -I liminix-config=./examples/recovery.nix \
           --arg device "import ./devices/turris-omnia" \
           -A outputs.mbrimage -o mbrimage
@@ -35,6 +37,8 @@
     medium using :command:`dd` or your other most favoured file copying
     tool, which might be a comand something like this:
 
+    .. code-block:: console
+
         $ dd if=mbrimage of=/dev/path/to/the/usb/stick \
           bs=1M conv=fdatasync status=progress
 
@@ -42,6 +46,8 @@
     to boot from eMMC, which is not ideal for our purpose.  Unless you
     have a serial cable, the easiest way to change this is by booting
     to TurrisOS and logging in with ssh:
+
+    .. code-block:: console
 
         root@turris:/# fw_printenv boot_targets
         boot_targets=mmc0 nvme0 scsi0 usb0 pxe dhcp
@@ -56,11 +62,15 @@
     request from a ``liminix-recovery`` host and figure out what IP
     address was assigned.
 
+    .. code-block:: console
+
         $ ssh liminix-recovery.lan
 
     You should get a "Busybox" banner and a root prompt. Now you can
     start preparing the device to install Liminix on it. First we'll
     mount the root filesystem and take a snapshot:
+
+    .. code-block:: console
 
         # mkdir /dest && mount /dev/mmcblk0p1 /dest
         # schnapps -d /dest create "pre liminix"
@@ -74,11 +84,15 @@
 
     then we can remove all the files
 
+    .. code-block:: console
+
         # rm -r /dest/@/*
 
     and then it's ready to install the real Liminix system onto. On
     your build system, create the Liminix configuration you wish to
     install: here we'll use the ``rotuer`` example.
+
+    .. code-block:: console
 
         build$ nix-build -I liminix-config=./examples/rotuer.nix \
           --arg device "import ./devices/turris-omnia" \
@@ -86,10 +100,14 @@
 
     and then use :command:`min-copy-closure` to copy it to the device.
 
+    .. code-block:: console
+
         build$ nix-shell --run \
           "min-copy-closure -r /dest/@  root@liminix-recovery.lan result"
 
     and activate it
+
+    .. code-block:: console
 
         build$ ssh root@liminix-recovery.lan \
           "/dest/@/$(readlink result)/bin/install /dest/@"
@@ -97,6 +115,8 @@
     The final steps are performed directly on the device again: add
     a symlink so U-Boot can find :file:`/boot`, then restore the
     default boot order and reboot into the new configuration.
+
+    .. code-block:: console
 
         # cd /dest && ln -s @/boot .
         # fw_setenv boot_targets "mmc0 nvme0 scsi0 usb0 pxe dhcp"
@@ -111,6 +131,8 @@
     and would rather use them than fiddling with USB sticks, the
     :file:`examples/recovery.nix` configuration also works
     using the ``tftpboot`` output. So you can do
+
+    .. code-block:: console
 
         build$ nix-build -I liminix-config=./examples/recovery.nix \
           --arg device "import ./devices/turris-omnia" \
