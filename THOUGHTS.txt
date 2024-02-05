@@ -3887,3 +3887,68 @@ CONFIG_PHY_MVEBU_A3700_COMPHY=y
 CONFIG_PHY_MVEBU_A38X_COMPHY=y
 CONFIG_SWPHY=y
 #
+
+Sat Jan 27 18:14:13 GMT 2024
+
+To make the recovery system (and tftpboot generally) more useful, it
+would be good to resize the root fs on boot. Need to do this before
+anything that writes to it
+
+Mon Jan 29 21:50:59 GMT 2024
+
+something is corrupted in the uncompressed rootfs
+
+
+$ head -c $(printf "%d" 0x2be0000) rootfs | sha1sum
+142571fe0436c18191727d1d4c2fd32163c1f2e1  -
+=> sha1sum 0x1000000 2be0000
+sha1 for 01000000 ... 03bdffff ==> 142571fe0436c18191727d1d4c2fd32163c1f2e1
+
+but!
+
+$  head -c $(printf "%d" 0x2bf0000) rootfs | sha1sum
+7aa004ba87c6772bade491fbade164e2dfe100f9  -
+=> sha1sum 0x1000000 2bf0000
+sha1 for 01000000 ... 03beffff ==> 1a0923a94784d0c0b86006c5e6fff1649770dad3
+
+something is trashing something in the range 03be0000 - 03beffff
+or else it's not being decompressed properly
+
+pxefile_addr_r=0x1900000
+ramdisk_addr_r=0x2200000
+    scriptaddr=0x1800000
+fdt_addr_r=0x2000000
+fdtcontroladdr=7fb19b30
+fdtfile=armada-385-turris-omnia.dtb
+     fdt_high=0x10000000
+  initrd_high=0x10000000
+kernel_addr_r=0x1000000
+              0x1700000;
+              0x10000000
+
+Sun Feb  4 11:55:00 GMT 2024
+
+restructuredtext headings:
+
+https://devguide.python.org/documentation/markup/#sections
+
+
+####### chapter (one per filename)
+*******
+=======
+-------
+
+Mon Feb  5 09:57:52 GMT 2024
+
+Before calling the Omnia "done" I'd like to get it to the point that
+I can actually use it as a CPE. This means
+
+- writing something down about how we handle static addresses
+  - hosts that need static ipv6 can configure it themselves as ::n
+    where n is a small number. this won't clash with slaac
+  - the `hosts` param to dnsmasq can specify static ipv4
+
+- dealing with port forwards and allowed incoming in the firewall
+
+- would be quite cool to run sniproxy instead of forwarding to
+  loaclhost (extra credit)
