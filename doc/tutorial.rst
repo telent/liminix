@@ -138,6 +138,8 @@ unbrick if necessary.
 	     work here, but you accept the slightly greater bricking
 	     risk if it doesn't.
 
+See :doc:`hardware` for device support status.
+
 You may want to read and inwardly digest the Develoment Manual section
 :ref:`serial` when you start working with Liminix on real hardware. You
 won't *need* serial access for this example, assuming it works, but it

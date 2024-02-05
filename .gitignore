@@ -6,3 +6,4 @@ result-*
 _build
 *-secrets.nix
 examples/static-leases.nix
+/doc/hardware.rst
