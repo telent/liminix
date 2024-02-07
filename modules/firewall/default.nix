@@ -55,9 +55,11 @@ in
             };
           };
       in svc // {
-        build = args : (svc.build args) // {
-          dependencies = [ loadModules ] ++ (svc.dependencies or []);
-        };
+        build = args :
+          let args' = args // {
+                dependencies = (args.dependencies or []) ++ [loadModules];
+              };
+          in svc.build args' ;
       };
 
     # For historical reasons the kernel config is split between
