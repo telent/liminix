@@ -16,14 +16,35 @@ let
     # even supposed to work?" questions
     let yes = if isModule then "m" else "y";
     in {
+      NETFILTER = "y";
+      NETFILTER_ADVANCED = "y";
+      NETFILTER_NETLINK = yes;
+      NF_CONNTRACK = yes;
+
+      IP6_NF_IPTABLES=  yes;
+      IP_NF_IPTABLES = yes;
+      IP_NF_NAT = yes;
+      IP_NF_TARGET_MASQUERADE = yes;
+
+      NFT_CT = yes;
       NFT_FIB_IPV4 = yes;
       NFT_FIB_IPV6 = yes;
-      NF_TABLES = yes;
+      NFT_LOG = yes;
+      NFT_MASQ = yes;
+      NFT_NAT = yes;
+      NFT_REJECT = yes;
+      NFT_REJECT_INET = yes;
+
       NF_CT_PROTO_DCCP = "y";
       NF_CT_PROTO_SCTP = "y";
       NF_CT_PROTO_UDPLITE = "y";
-      # NF_CONNTRACK_FTP = yes;
-      NFT_CT = yes;
+      NF_LOG_SYSLOG = yes;
+      NF_NAT = yes;
+      NF_NAT_MASQUERADE = "y";
+      NF_TABLES = yes;
+      NF_TABLES_INET = "y";
+      NF_TABLES_IPV4 = "y";
+      NF_TABLES_IPV6 = "y";
     };
   kmodules = pkgs.kernel-modules.override {
     kernelSrc = config.system.outputs.kernel.src;
@@ -31,6 +52,35 @@ let
     targets = [
       "nft_fib_ipv4"
       "nft_fib_ipv6"
+      "nf_log_syslog"
+
+      "ip6_tables"
+      "ip_tables"
+      "iptable_nat"
+      "nf_conntrack"
+      "nf_defrag_ipv4"
+      "nf_defrag_ipv6"
+      "nf_log_syslog"
+      "nf_nat"
+      "nf_reject_ipv4"
+      "nf_reject_ipv6"
+      "nf_tables"
+      "nft_chain_nat"
+      "nft_ct"
+      "nft_fib"
+      "nft_fib_ipv4"
+      "nft_fib_ipv6"
+      "nft_log"
+      "nft_masq"
+      "nft_nat"
+      "nft_reject"
+      "nft_reject_inet"
+      "nft_reject_ipv4"
+      "nft_reject_ipv6"
+      "x_tables"
+      "xt_MASQUERADE"
+      "xt_nat"
+      "xt_tcpudp"
     ];
     kconfig = kconf true;
   };
@@ -62,36 +112,6 @@ in
           in svc.build args' ;
       };
 
-    # For historical reasons the kernel config is split between
-    # monolithic options and modules. TODO: go through this list
-    # and see what can be moved into the "kconf" definiton above
-    kernel.config = {
-      NETFILTER_XT_MATCH_CONNTRACK = "y";
-
-      IP6_NF_IPTABLES= "y";
-      IP_NF_IPTABLES= "y";
-
-      IP_NF_NAT = "y";
-      IP_NF_TARGET_MASQUERADE = "y";
-      NETFILTER = "y";
-      NETFILTER_ADVANCED = "y";
-      NETFILTER_XTABLES = "y";
-
-      NFT_COMPAT = "y";
-      NFT_CT = "y";
-      NFT_LOG = "y";
-      NFT_MASQ = "y";
-      NFT_NAT = "y";
-      NFT_REJECT = "y";
-      NFT_REJECT_INET = "y";
-
-      NF_CONNTRACK = "y";
-      NF_NAT = "y";
-      NF_NAT_MASQUERADE  = "y";
-      NF_TABLES= "y";
-      NF_TABLES_INET = "y";
-      NF_TABLES_IPV4 = "y";
-      NF_TABLES_IPV6 = "y";
-    };
+    kernel.config = kconf true;
   };
 }
