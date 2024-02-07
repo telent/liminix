@@ -35,6 +35,7 @@ in {
       (drop "icmpv6 type destination-unreachable ct state invalid,untracked")
     ];
   };
+
   forward-ip6 = {
     type = "filter";
     family = "ip6";
@@ -95,9 +96,12 @@ in {
       # recognised (outbound-initiated) flow
       (accept "oifname \"int\" iifname \"ppp0\" ct state established,related")
       (accept "iifname \"int\" oifname \"ppp0\" ")
+
+      "log prefix \"denied forward-ip6 \""
     ];
   };
-  input-lan = {
+
+  input-ip6-lan = {
     type = "filter";
     family = "ip6";
 
@@ -107,7 +111,7 @@ in {
     ];
   };
 
-  input-wan = {
+  input-ip6-wan = {
     type = "filter";
     family = "ip6";
 
@@ -123,8 +127,8 @@ in {
     hook = "input";
     rules = [
       (accept "meta l4proto icmpv6")
-      "iifname int jump input-lan"
-      "iifname ppp0 jump input-wan"
+      "iifname int jump input-ip6-lan"
+      "iifname ppp0 jump input-ip6-wan"
       (if allow-incoming
        then accept "oifname \"int\" iifname \"ppp0\""
        else "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip6"
@@ -132,6 +136,7 @@ in {
       # how does this even make sense in an input chain?
       (accept "oifname \"int\" iifname \"ppp0\"  ct state established,related")
       (accept "iifname \"int\" oifname \"ppp0\" ")
+      "log prefix \"denied input-ip6 \""
     ];
   };
 
@@ -154,6 +159,7 @@ in {
       "oifname \"ppp0\" masquerade"
     ];
   };
+
   nat-rx = {
     type = "nat";
     hook = "prerouting";
@@ -167,4 +173,61 @@ in {
       # packet replies. "
     ];
   };
+
+  input-ip4-lan = {
+    type = "filter";
+    family = "ip";
+
+    rules = [
+      (accept "udp dport 547")
+      (accept "tcp dport 22")
+    ];
+  };
+
+  input-ip4-wan = {
+    type = "filter";
+    family = "ip";
+
+    rules = [
+    ];
+  };
+
+  input-ip4 = {
+    type = "filter";
+    family = "ip";
+    policy = "drop";
+    hook = "input";
+    rules = [
+      "iifname lo accept"
+      "ct state vmap { established : accept, related : accept, invalid : drop }"
+      "iifname int jump input-ip4-lan"
+      "iifname ppp0 jump input-ip4-wan"
+      "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip4"
+      "log prefix \"denied input-ip4 \""
+    ];
+  };
+
+  forward-ip4 = {
+    type = "filter";
+    family = "ip";
+    policy = "drop";
+    hook = "forward";
+    rules = [
+      "iifname \"int\" accept"
+      "ct state vmap { established : accept, related : accept, invalid : drop }"
+      "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip4"
+      "log prefix \"denied forward-ip4 \""
+    ];
+  };
+
+  incoming-allowed-ip4 = {
+    type = "filter";
+    family = "ip";
+    rules = [
+      # this is where you put permitted incoming
+      # connections. Practically there's not a lot of use for this
+      # chain unless you have routable ipv4 addresses
+    ];
+  };
+
 }
