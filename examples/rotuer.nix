@@ -76,7 +76,7 @@ in rec {
 
   services.int = svc.network.address.build {
     interface = svc.bridge.primary.build { ifname = "int"; };
-    family = "inet"; address ="10.8.0.1"; prefixLength = 16;
+    family = "inet"; address ="${secrets.lan.prefix}.1"; prefixLength = 24;
   };
 
   services.bridge =  svc.bridge.members.build {
@@ -102,7 +102,7 @@ in rec {
       resolvconf = services.resolvconf;
       inherit interface;
       ranges = [
-        "10.8.0.10,10.8.0.240"
+        "${secrets.lan.prefix}.10,${secrets.lan.prefix}.240"
         # ra-stateless: sends router advertisements with the O and A
         # bits set, and provides a stateless DHCP service. The client
         # will use a SLAAC address, and use DHCP for other
@@ -160,7 +160,9 @@ in rec {
   };
 
   services.firewall = svc.firewall.build {
-    ruleset = import ./demo-firewall.nix;
+    ruleset =
+      let defaults = import ./demo-firewall.nix;
+      in lib.recursiveUpdate defaults secrets.firewallRules;
   };
 
   services.packet_forwarding = svc.network.forward.build { };

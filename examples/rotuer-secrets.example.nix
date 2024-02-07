@@ -11,4 +11,8 @@ rec {
     ];
   };
   root_password = root.passwd;
+  lan = {
+    prefix = "10.8.0"; # "192.168.8";
+  };
+
 }
