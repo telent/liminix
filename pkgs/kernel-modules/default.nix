@@ -11,11 +11,7 @@
 }:
 let
   writeConfig = import ../kernel/write-kconfig.nix { inherit lib writeText; };
-  arch = if stdenv.isMips
-         then "mips"
-         else if stdenv.isAarch64
-         then "arm64"
-         else throw "unknown arch";
+  arch = stdenv.hostPlatform.linuxArch;
 in stdenv.mkDerivation {
   name = "kernel-modules";
 
