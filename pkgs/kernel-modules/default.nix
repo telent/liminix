@@ -34,7 +34,6 @@ in stdenv.mkDerivation {
     cat .more-config >> .config
     make olddefconfig
     for v in $(cat .more-config) ; do grep $v .config || (echo Missing $v && exit 1);done
-    # grep =m .config
     make modules
   '';
   src =  modulesupport;
