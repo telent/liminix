@@ -42,6 +42,7 @@ in rec {
     ../modules/hostapd
     ../modules/bridge
     ../modules/ntp
+    ../modules/schnapps
     ../modules/ssh
     ../modules/outputs/btrfs.nix
     ../modules/outputs/extlinux.nix
@@ -84,7 +85,12 @@ in rec {
     members = with config.hardware.networkInterfaces;
       [ wlan
         wlan5
-        lan ];
+        lan0
+        lan1
+        lan2
+        lan3
+        lan4
+      ];
   };
 
   services.ntp = svc.ntp.build {
