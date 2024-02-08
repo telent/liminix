@@ -184,8 +184,9 @@ in {
     family = "ip";
 
     rules = [
-      (accept "udp dport 547")
-      (accept "tcp dport 22")
+      (accept "udp dport 67")   # dhcp
+      (accept "udp dport 53")   # dns
+      (accept "tcp dport 22")   # ssh
     ];
   };
 
@@ -194,6 +195,7 @@ in {
     family = "ip";
 
     rules = [
+      (accept "udp sport 53")
     ];
   };
 
@@ -204,10 +206,11 @@ in {
     hook = "input";
     rules = [
       "iifname lo accept"
+      "icmp type { echo-request, echo-reply } accept"
       "iifname int jump input-ip4-lan"
       "iifname ppp0 jump input-ip4-wan"
       "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip4"
-      "ct state vmap established,related accept"
+      "ct state established,related accept"
       "log prefix \"DENIED CHAIN=input-ip4 \""
     ];
   };
@@ -219,7 +222,7 @@ in {
     hook = "forward";
     rules = [
       "iifname \"int\" accept"
-      "ct state vmap { established : accept, related : accept, invalid : drop }"
+      "ct state established,related accept"
       "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip4"
       "log prefix \"DENIED CHAIN=forward-ip4 \""
     ];
