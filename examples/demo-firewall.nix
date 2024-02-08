@@ -199,11 +199,10 @@ in {
     hook = "input";
     rules = [
       "iifname lo accept"
-      "ct state vmap { established : accept, related : accept, invalid : drop }"
       "iifname int jump input-ip4-lan"
       "iifname ppp0 jump input-ip4-wan"
       "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip4"
-      "log prefix \"denied input-ip4 \""
+      "ct state vmap established,related accept"
     ];
   };
 
