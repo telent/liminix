@@ -97,7 +97,7 @@ in {
       (accept "oifname \"int\" iifname \"ppp0\" ct state established,related")
       (accept "iifname \"int\" oifname \"ppp0\" ")
 
-      "log prefix \"denied forward-ip6 \""
+      "log prefix \"DENIED CHAIN=forward-ip6 \""
     ];
   };
 
@@ -136,7 +136,7 @@ in {
       # how does this even make sense in an input chain?
       (accept "oifname \"int\" iifname \"ppp0\"  ct state established,related")
       (accept "iifname \"int\" oifname \"ppp0\" ")
-      "log prefix \"denied input-ip6 \""
+      "log prefix \"DENIED CHAIN=input-ip6 \""
     ];
   };
 
@@ -174,6 +174,11 @@ in {
     ];
   };
 
+  # these chains are for rules that have to be present for things to
+  # basically work at all: for example, the router won't issue DHCP
+  # unless it's allowed to receive DHCP requests. For "site policy"
+  # rules you may prefer to use incoming-allowed-ip[46] instead
+
   input-ip4-lan = {
     type = "filter";
     family = "ip";
@@ -203,6 +208,7 @@ in {
       "iifname ppp0 jump input-ip4-wan"
       "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip4"
       "ct state vmap established,related accept"
+      "log prefix \"DENIED CHAIN=input-ip4 \""
     ];
   };
 
@@ -215,7 +221,7 @@ in {
       "iifname \"int\" accept"
       "ct state vmap { established : accept, related : accept, invalid : drop }"
       "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip4"
-      "log prefix \"denied forward-ip4 \""
+      "log prefix \"DENIED CHAIN=forward-ip4 \""
     ];
   };
 
