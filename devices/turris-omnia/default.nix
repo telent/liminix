@@ -199,6 +199,18 @@
             ARCH_MULTI_V7= "y";
             PCI_MVEBU = "y";
             AHCI_MVEBU = "y";
+
+            RTC_CLASS = "y";
+            RTC_DRV_ARMADA38X = "y"; # this may be useful anyway?
+
+            # dts has a compatible for this but dmesg is not
+            # showing it
+            EEPROM_AT24 = "y"; # atmel,24c64
+
+            I2C = "y";
+            I2C_MUX = "y";
+            I2C_MUX_PCA954x = "y";
+
             MACH_ARMADA_38X = "y";
             SMP = "y";
 	          # this is disabled for the moment because it relies on a GCC
