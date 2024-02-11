@@ -71,6 +71,7 @@ in rec {
       ht_capab = "[HT40+]";
       vht_oper_chwidth = 1;
       vht_oper_centr_freq_seg0_idx = channel + 6;
+      ieee80211n = 1;
       ieee80211ac = 1;
     } // wirelessConfig;
   };
