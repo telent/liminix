@@ -10,45 +10,8 @@ let
   inherit (pkgs) liminix;
   inherit (pkgs.liminix.services) oneshot;
 
-  kconf = isModule :
-    # setting isModule false is utterly untested and mostly
-    # unimplemented: I say this to preempt any "how on earth is this
-    # even supposed to work?" questions
-    let yes = if isModule then "m" else "y";
-    in {
-      NETFILTER = "y";
-      NETFILTER_ADVANCED = "y";
-      NETFILTER_NETLINK = yes;
-      NF_CONNTRACK = yes;
-
-      IP6_NF_IPTABLES=  yes;
-      IP_NF_IPTABLES = yes;
-      IP_NF_NAT = yes;
-      IP_NF_TARGET_MASQUERADE = yes;
-
-      NFT_CT = yes;
-      NFT_FIB_IPV4 = yes;
-      NFT_FIB_IPV6 = yes;
-      NFT_LOG = yes;
-      NFT_MASQ = yes;
-      NFT_NAT = yes;
-      NFT_REJECT = yes;
-      NFT_REJECT_INET = yes;
-
-      NF_CT_PROTO_DCCP = "y";
-      NF_CT_PROTO_SCTP = "y";
-      NF_CT_PROTO_UDPLITE = "y";
-      NF_LOG_SYSLOG = yes;
-      NF_NAT = yes;
-      NF_NAT_MASQUERADE = "y";
-      NF_TABLES = yes;
-      NF_TABLES_INET = "y";
-      NF_TABLES_IPV4 = "y";
-      NF_TABLES_IPV6 = "y";
-    };
-  kmodules = pkgs.kernel-modules.override {
-    kernelSrc = config.system.outputs.kernel.src;
-    modulesupport = config.system.outputs.kernel.modulesupport;
+  kmodules = pkgs.kmodloader.override {
+    inherit (config.system.outputs) kernel;
     targets = [
       "nft_fib_ipv4"
       "nft_fib_ipv6"
@@ -82,12 +45,6 @@ let
       "xt_nat"
       "xt_tcpudp"
     ];
-    kconfig = kconf true;
-  };
-  loadModules = oneshot {
-    name = "firewall-modules";
-    up = "sh ${kmodules}/load.sh";
-    down = "sh ${kmodules}/unload.sh";
   };
 in
 {
@@ -107,11 +64,41 @@ in
       in svc // {
         build = args :
           let args' = args // {
-                dependencies = (args.dependencies or []) ++ [loadModules];
+                dependencies = (args.dependencies or []) ++ [kmodules];
               };
           in svc.build args' ;
       };
 
-    kernel.config = kconf true;
+    kernel.config = {
+      NETFILTER = "y";
+      NETFILTER_ADVANCED = "y";
+      NETFILTER_NETLINK = "m";
+      NF_CONNTRACK = "m";
+
+      IP6_NF_IPTABLES=  "m";
+      IP_NF_IPTABLES = "m";
+      IP_NF_NAT = "m";
+      IP_NF_TARGET_MASQUERADE = "m";
+
+      NFT_CT = "m";
+      NFT_FIB_IPV4 = "m";
+      NFT_FIB_IPV6 = "m";
+      NFT_LOG = "m";
+      NFT_MASQ = "m";
+      NFT_NAT = "m";
+      NFT_REJECT = "m";
+      NFT_REJECT_INET = "m";
+
+      NF_CT_PROTO_DCCP = "y";
+      NF_CT_PROTO_SCTP = "y";
+      NF_CT_PROTO_UDPLITE = "y";
+      NF_LOG_SYSLOG = "m";
+      NF_NAT = "m";
+      NF_NAT_MASQUERADE = "y";
+      NF_TABLES = "m";
+      NF_TABLES_INET = "y";
+      NF_TABLES_IPV4 = "y";
+      NF_TABLES_IPV6 = "y";
+    };
   };
 }

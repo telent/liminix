@@ -80,8 +80,7 @@ in {
           config.kernel.conditionalConfig;
         k = liminix.builders.kernel.override {
           config = mergedConfig;
-          version = builtins.trace config.kernel.version config.kernel.version;
-          inherit (config.kernel)  src extraPatchPhase;
+          inherit (config.kernel) version src extraPatchPhase;
           targets = config.kernel.makeTargets;
         };
       in {

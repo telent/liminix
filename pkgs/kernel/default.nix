@@ -104,8 +104,7 @@ stdenv.mkDerivation rec {
     mkdir -p $headers
     cp -a include .config $headers/
     mkdir -p $modulesupport
-    cp modules.* $modulesupport
-    make clean modules_prepare
+    make modules
     cp -a . $modulesupport
   '';
 }
