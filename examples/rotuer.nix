@@ -197,6 +197,9 @@ in rec {
 
   defaultProfile.packages = with pkgs; [
     min-collect-garbage
+    nftables
+    strace
+    tcpdump
   ];
 
   programs.busybox.applets = [
