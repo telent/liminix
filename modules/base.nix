@@ -13,7 +13,7 @@ let
 
 in {
   imports = [
-    ./kernel.nix                # kernel is a separate module for doc purposes
+    ./kernel            # kernel is a separate module for doc purposes
   ];
   options = {
     defaultProfile = {
