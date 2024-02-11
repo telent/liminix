@@ -6,6 +6,7 @@
 
  , config
  , src
+ , version ? "0"
  , extraPatchPhase ? "echo"
  , targets ? ["vmlinux"]
 } :
@@ -51,9 +52,9 @@ stdenv.mkDerivation rec {
 
   patches = [
     ./cmdline-cookie.patch
-    ./phram-allow-cached-mappings.patch
     ./mips-malta-fdt-from-bootloader.patch
-  ];
+  ] ++ lib.optional (lib.versionOlder version "5.18.0")
+    ./phram-allow-cached-mappings.patch;
 
   # this is here to work around what I think is a bug in nixpkgs
   # packaging of ncurses: it installs pkg-config data files which
