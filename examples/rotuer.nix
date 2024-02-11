@@ -125,7 +125,7 @@ in rec {
       # You can add static addresses for the DHCP server here.  I'm
       # not putting my actual MAC addresses in a public git repo ...
       hosts = { } // lib.optionalAttrs (builtins.pathExists ./static-leases.nix) (import ./static-leases.nix);
-
+      upstreams = [ "/${secrets.domainName}/" ];
       domain = secrets.domainName;
     };
 
