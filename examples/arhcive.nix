@@ -145,7 +145,7 @@ in rec {
     };
 
   users.root = {
-    passwd = lib.mkForce secrets.root_password;
+    passwd = lib.mkForce secrets.root.passwd;
     # openssh.authorizedKeys.keys = [
     #   (builtins.readFile "/home/dan/.ssh/id_rsa.pub")
     # ];

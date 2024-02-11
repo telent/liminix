@@ -1,5 +1,6 @@
-rec {
+{
   wpa_passphrase = "you bring light in";
+  ssid = "liminix";
   l2tp = {
     name = "abcde@a.1";
     password = "NotMyIspPassword";
@@ -10,9 +11,9 @@ rec {
     openssh.authorizedKeys.keys = [
     ];
   };
-  root_password = root.passwd;
+
   lan = {
-    prefix = "10.8.0"; # "192.168.8";
+    prefix = "10.8.0";
   };
 
 }

@@ -8,7 +8,10 @@
 
 { config, pkgs, lib, ... } :
 let
-  secrets = import ./rotuer-secrets.nix;
+  secrets = {
+    domainName = "fake.liminix.org";
+    firewallRules = {};
+  } // (import ./rotuer-secrets.nix);
   inherit (pkgs.liminix.services) oneshot longrun bundle;
   inherit (pkgs) serviceFns;
   svc = config.system.service;
@@ -55,7 +58,7 @@ in rec {
   services.hostap = svc.hostapd.build {
     interface = config.hardware.networkInterfaces.wlan;
     params = {
-      ssid = "liminix";
+      ssid = secrets.ssid;
       hw_mode="g";
       channel = "2";
       ieee80211n = 1;
@@ -65,7 +68,7 @@ in rec {
   services.hostap5 = svc.hostapd.build {
     interface = config.hardware.networkInterfaces.wlan5;
     params = rec {
-      ssid = "liminix_5";
+      ssid = "${secrets.ssid}5";
       hw_mode="a";
       channel = 36;
       ht_capab = "[HT40+]";
@@ -121,7 +124,7 @@ in rec {
       # not putting my actual MAC addresses in a public git repo ...
       hosts = { } // lib.optionalAttrs (builtins.pathExists ./static-leases.nix) (import ./static-leases.nix);
 
-      domain = "fake.liminix.org";
+      domain = secrets.domainName;
     };
 
   services.wan = svc.pppoe.build {

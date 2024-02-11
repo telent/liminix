@@ -131,6 +131,6 @@ in rec {
     dependencies = [services.dhcpc];
   };
 
-  users.root.passwd = lib.mkForce secrets.root_password;
+  users.root.passwd = lib.mkForce secrets.root.passwd;
   defaultProfile.packages = with pkgs; [nftables strace tcpdump swconfig];
 }
