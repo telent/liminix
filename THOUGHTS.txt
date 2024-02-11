@@ -4009,7 +4009,7 @@ TODO
 - upgrade omnia to kernel v6
 - figure out what mdns we need for local hostname resolution
   (maybe bridging lan/wlan)?
-- slow wifi because "AP advertised VHT without HT, disabling HT/VHT/HE"
-- add local domain to secrets
+- [DONE] slow wifi because "AP advertised VHT without HT, disabling HT/VHT/HE"
+- [DONE] add local domain to secrets
 - run sniproxy instead of forwarding
 - forward some port to loaclhost 22 for inbound ipv4 ssh
