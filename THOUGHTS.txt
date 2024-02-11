@@ -3996,3 +3996,20 @@ some wireless modules, you can't do that without rebuilding the kernel
 so that it knows to expect them
 
 The moral of the story seems to be: if you have a compiled Linux kernel source tree and you change some symbol from "is not set" to m and then run  make modules, you cannot in general expect that newly compiled  module to work.
+
+AP advertised VHT without HT, disabling HT/VHT/HE
+
+TODO
+
+- support kernel version as parameter to builder pkgs/kernel/default.nix
+- extract the change in how module loading works from omnia device config,
+  and fix the other thing that uses it
+- wlan module to take 'backported' as a parameter
+  half of the omnia conditionalConfig can go into the module
+- upgrade omnia to kernel v6
+- figure out what mdns we need for local hostname resolution
+  (maybe bridging lan/wlan)?
+- slow wifi because "AP advertised VHT without HT, disabling HT/VHT/HE"
+- add local domain to secrets
+- run sniproxy instead of forwarding
+- forward some port to loaclhost 22 for inbound ipv4 ssh
