@@ -107,6 +107,7 @@ in {
 
     rules = [
       (accept "udp dport 547") # dhcp, could restrict to daddr ff02::1:2
+      (accept "udp dport 53") # dns
       (accept "tcp dport 22")
     ];
   };
