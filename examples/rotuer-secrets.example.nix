@@ -1,5 +1,6 @@
 {
   wpa_passphrase = "you bring light in";
+  ssid = "liminix";
   l2tp = {
     name = "abcde@a.1";
     password = "NotMyIspPassword";
