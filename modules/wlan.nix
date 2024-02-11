@@ -46,6 +46,10 @@ in {
         CRYPTO_SHA1 = "y";
         ENCRYPTED_KEYS = "y";
         KEYS = "y";
+
+        # see note in include/linux/netdevice.h re LL_MAX_HEADER
+        WLAN = "y";
+
       };
     };
   };

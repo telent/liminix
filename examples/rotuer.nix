@@ -26,6 +26,7 @@ let
     wmm_enabled = 1;
   };
 
+
 in rec {
   boot = {
     tftp = {
@@ -87,7 +88,8 @@ in rec {
   services.bridge =  svc.bridge.members.build {
     primary = services.int;
     members = with config.hardware.networkInterfaces;
-      [ wlan
+      [
+        wlan
         wlan5
         lan0
         lan1

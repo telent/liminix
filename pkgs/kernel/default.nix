@@ -6,6 +6,7 @@
 
  , config
  , src
+ , version ? "1"
  , extraPatchPhase ? "echo"
  , targets ? ["vmlinux"]
 } :
@@ -23,6 +24,7 @@ stdenv.mkDerivation rec {
                       (with buildPackages.pkgs; [
                         rsync bc bison flex pkg-config
                         openssl ncurses.all perl
+                        cpio
                       ]);
   CC = "${stdenv.cc.bintools.targetPrefix}gcc";
   HOSTCC = with buildPackages.pkgs;
@@ -51,9 +53,9 @@ stdenv.mkDerivation rec {
 
   patches = [
     ./cmdline-cookie.patch
-    ./phram-allow-cached-mappings.patch
     ./mips-malta-fdt-from-bootloader.patch
-  ];
+  ] ++ lib.optional (lib.versionOlder version "6.0")
+    ./phram-allow-cached-mappings.patch;
 
   # this is here to work around what I think is a bug in nixpkgs
   # packaging of ncurses: it installs pkg-config data files which
@@ -103,8 +105,8 @@ stdenv.mkDerivation rec {
     mkdir -p $headers
     cp -a include .config $headers/
     mkdir -p $modulesupport
-    cp modules.* $modulesupport
-    make clean modules_prepare
+    cp modules.* vmlinux.o $modulesupport
+    make modules
     cp -a . $modulesupport
   '';
 }

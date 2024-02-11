@@ -27,6 +27,7 @@ in {
   options = {
     kernel = {
       src = mkOption { type = types.path; } ;
+      version = mkOption { type = types.str; default = "5.15.137";} ;
       modular = mkOption {
         type = types.bool;
         default = true;
@@ -79,7 +80,8 @@ in {
           config.kernel.conditionalConfig;
         k = liminix.builders.kernel.override {
           config = mergedConfig;
-          inherit (config.kernel) src extraPatchPhase;
+          version = builtins.trace config.kernel.version config.kernel.version;
+          inherit (config.kernel)  src extraPatchPhase;
           targets = config.kernel.makeTargets;
         };
       in {
