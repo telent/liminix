@@ -3952,3 +3952,47 @@ I can actually use it as a CPE. This means
 
 - would be quite cool to run sniproxy instead of forwarding to
   loaclhost (extra credit)
+
+Sat Feb 10 12:41:12 GMT 2024
+
+  s6-linux-init version 1.1.2.0
+
+nfnetlink: module verification failed: signature and/or required key missing - tainting kernel
+------------[ cut here ]------------
+kernel BUG at net/wireless/core.h:125!
+Internal error: Oops - BUG: 0 [#1] SMP ARM
+Modules linked in: cfg80211(E+) nfnetlink(E)
+CPU: 0 PID: 197 Comm: insmod Tainted: G            E      6.7.4 #1
+Hardware name: Marvell Armada 380/385 (Device Tree)
+PC is at cfg80211_netdev_notifier_call+0x2cc/0x3e0 [cfg80211]
+LR is at call_netdevice_register_net_notifiers+0x4c/0xec
+pc : [<bf010024>]    lr : [<c0672e30>]    psr: 60000013
+sp : f0ba5c10  ip : fffffffb  fp : c328df00
+r10: c15c4170  r9 : c328df00  r8 : 00000000
+r7 : 00000000  r6 : bf04c620  r5 : c10c9000  r4 : c11ff414
+r3 : 00000000  r2 : f0ba5df4  r1 : 00000005  r0 : bf04c620
+Flags: nZCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment none
+Control: 10c5387d  Table: 0320804a  DAC: 00000051
+R
+ cfg80211_netdev_notifier_call [cfg80211] from call_netdevice_register_net_notifiers+0x4c/0xec
+
+setenv omnia_reset 1; run bootcmd_rescue
+
+Sat Feb 10 18:23:54 GMT 2024
+
+ARGH KERNEL
+
+You can't define CONFIG_NETFILTER=y in a monolithic kernel and expect
+later to separately build some modules that use it, because there are
+a bunch of symbols that only get defined if certain other CONFIG
+options are set at the time that the monolithic kernel is built.
+
+https://github.com/torvalds/linux/blob/master/net/netfilter/core.c#L689
+
+Another example is
+https://github.com/torvalds/linux/blob/master/include/linux/netdevice.h#L160
+- if you decide after building the kernel that you're going to build
+some wireless modules, you can't do that without rebuilding the kernel
+so that it knows to expect them
+
+The moral of the story seems to be: if you have a compiled Linux kernel source tree and you change some symbol from "is not set" to m and then run  make modules, you cannot in general expect that newly compiled  module to work.
