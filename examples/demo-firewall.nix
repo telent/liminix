@@ -234,8 +234,10 @@ in {
     family = "ip";
     rules = [
       # This is where you put permitted incoming connections. If
-      # you're using NAT, the rules in this chain will see the
-      # internal (RFC1918) addresses.
+      # you're using NAT and want to forward a port from outside to
+      # devices on the LAN, then you need a DNAT rule in nat-rx chain
+      # *and* to accept the packet in this chain (specifying the
+      # internal (RFC1918) address).
     ];
   };
 
