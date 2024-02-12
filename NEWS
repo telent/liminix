@@ -31,5 +31,21 @@ Upstream changes that have led to incompatible Liminix changes are:
 * newer U-Boot version
 * util-linux can now be built (previously depended on systemd)
 
+2024-01-30
+
+New port! Thanks to Arnout Engelen <arnout@bzzt.net>, Liminix
+now runs on the TP-Link Archer AX23
+
+2024-02-12
+
+* we now build wifi drivers (mac80211) from the same kernel source as
+the running kernel, instead of using drivers from the linux-backports
+project.
+
+* in general, we build kernel modules (e.g. for nftables) at the same
+time as the kernel itself instead of expecting to be able to build
+them afterwards as though they were "out of tree". Refer to commit
+b9c0d93670275e69df24902b05bf4aa4f0fcbe96 for a fuller explanation
+of how this simplifies things.
 
 
