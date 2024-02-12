@@ -233,9 +233,9 @@ in {
     type = "filter";
     family = "ip";
     rules = [
-      # this is where you put permitted incoming
-      # connections. Practically there's not a lot of use for this
-      # chain unless you have routable ipv4 addresses
+      # This is where you put permitted incoming connections. If
+      # you're using NAT, the rules in this chain will see the
+      # internal (RFC1918) addresses.
     ];
   };
 
