@@ -66,7 +66,6 @@ in {
   ifwait = callPackage ./ifwait {};
   initramfs-peek = callPackage ./initramfs-peek {};
   kernel-backport = callPackage ./kernel-backport {};
-  kernel-modules  = callPackage ./kernel-modules {};
   kmodloader = callPackage ./kmodloader {};
   levitate = callPackage ./levitate {};
   libubootenv = callPackage ./libubootenv {};
