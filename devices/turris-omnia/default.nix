@@ -182,12 +182,10 @@
         kernel = {
           src = pkgs.pkgsBuildBuild.fetchurl {
             name = "linux.tar.gz";
-            url = "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.137.tar.gz";
-            hash = "sha256-PkdzUKZ0IpBiWe/RS70J76JKnBFzRblWcKlaIFNxnHQ=";
+            url = "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.7.4.tar.gz";
+            hash = "sha256-wIrmL0BS63nRwWfm4nw+dRNVPUzGh9M4X7LaHzAn5tU=";
           };
-          extraPatchPhase = ''
-            ${pkgs.openwrt.applyPatches.mvebu}
-          '';
+          version = "6.7.4";
           config = {
             PCI = "y";
             OF = "y";
@@ -203,6 +201,10 @@
             RTC_CLASS = "y";
             RTC_DRV_ARMADA38X = "y"; # this may be useful anyway?
 
+            EXPERT = "y";
+            ALLOW_DEV_COREDUMP = "n";
+
+
             # dts has a compatible for this but dmesg is not
             # showing it
             EEPROM_AT24 = "y"; # atmel,24c64
@@ -213,9 +215,9 @@
 
             MACH_ARMADA_38X = "y";
             SMP = "y";
-	          # this is disabled for the moment because it relies on a GCC
-            # plugin that requires gmp.h to build, and I can't see right now
-            # how to confgure it to find gmp
+	          # this is disabled for the moment because it relies on a
+            # GCC plugin that requires gmp.h to build, and I can't see
+            # right now how to confgure it to find gmp
             STACKPROTECTOR_PER_TASK = "n";
             NR_CPUS = "4";
             VFP = "y";
@@ -227,7 +229,7 @@
             PSTORE = "y";
             PSTORE_RAM = "y";
             PSTORE_CONSOLE = "y";
-            PSTORE_DEFLATE_COMPRESS = "n";
+#            PSTORE_DEFLATE_COMPRESS = "n";
 
             BLOCK = "y";
             MMC="y";
@@ -347,9 +349,9 @@
           rootDevice = "/dev/mmcblk0p1";
 
           dts = {
-            src = "${config.system.outputs.kernel.modulesupport}/arch/arm/boot/dts/armada-385-turris-omnia.dts";
+            src = "${config.system.outputs.kernel.modulesupport}/arch/arm/boot/dts/marvell/armada-385-turris-omnia.dts";
             includes =  [
-              "${config.system.outputs.kernel.modulesupport}/arch/arm/boot/dts/"
+              "${config.system.outputs.kernel.modulesupport}/arch/arm/boot/dts/marvell/"
             ];
           };
           flash.eraseBlockSize = 65536; # only used for tftpboot
