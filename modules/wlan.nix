@@ -46,6 +46,14 @@ in {
         CRYPTO_SHA1 = "y";
         ENCRYPTED_KEYS = "y";
         KEYS = "y";
+
+        WLAN = "y";
+        CFG80211 = "m";
+        MAC80211 = "m";
+        EXPERT = "y";
+        CFG80211_CERTIFICATION_ONUS = "y";
+        CFG80211_REQUIRE_SIGNED_REGDB = "n"; # depends on ONUS
+        CFG80211_CRDA_SUPPORT = "n";
       };
     };
   };

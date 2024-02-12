@@ -71,9 +71,9 @@
           cp $blobdir/board.bin  $out/ath10k/QCA9887/hw1.0/
         '';
       };
-      mac80211 = pkgs.mac80211.override {
-        drivers = ["ath9k" "ath10k_pci"];
-        klibBuild = config.system.outputs.kernel.modulesupport;
+      mac80211 = pkgs.kmodloader.override {
+        targets = ["ath9k" "ath10k_pci"];
+        inherit (config.system.outputs) kernel;
       };
       ath10k_cal_data =
         let
@@ -211,13 +211,20 @@
           WATCHDOG = "y";
           ATH79_WDT = "y";  # watchdog timer
 
-          # this is all copied from nixwrt ath79 config. Clearly not all
-          # of it is device config, some of it is wifi config or
-          # installation method config or ...
-
           EARLY_PRINTK = "y";
 
           PRINTK_TIME = "y";
+        };
+        conditionalConfig = {
+          WLAN = {
+            WLAN_VENDOR_ATH = "y";
+            ATH_COMMON = "m";
+            ATH9K = "m";
+            ATH9K_AHB = "y";
+            ATH10K = "m";
+            ATH10K_PCI = "y";
+            ATH10K_DEBUG = "y";
+          };
         };
       };
     };

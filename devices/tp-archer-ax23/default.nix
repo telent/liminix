@@ -322,9 +322,14 @@
             ZSTD_COMPRESS="y";
             ZSTD_DECOMPRESS="y";
           } // lib.optionalAttrs (config.system.service ? watchdog) {
-          RALINK_WDT = "y";  # watchdog
-          MT7621_WDT = "y";  # or it might be this one
-        };
+            RALINK_WDT = "y";  # watchdog
+            MT7621_WDT = "y";  # or it might be this one
+          };
+          conditionalConfig = {
+            WLAN = {
+              MT7915E = "m";
+            };
+          };
         };
         tplink-safeloader.board = "ARCHER-AX23-V1";
         boot = {
@@ -353,11 +358,11 @@
       hardware =
         let
           openwrt = pkgs.openwrt;
-          mac80211 =  pkgs.mac80211.override {
-            drivers = [
+          mac80211 =  pkgs.kmodloader.override {
+            targets = [
               "mt7915e"
             ];
-            klibBuild = config.system.outputs.kernel.modulesupport;
+            inherit (config.system.outputs) kernel;
           };
         in {
           # from OEM bootlog (openwrt wiki):

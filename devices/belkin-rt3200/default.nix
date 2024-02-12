@@ -149,6 +149,13 @@
         WATCHDOG = "y";
         MEDIATEK_WATCHDOG = "y";
       };
+      conditionalConfig = {
+        WLAN= {
+          MT7615E = "m";
+          MT7622_WMAC = "y";
+          MT7915E = "m";
+        };
+      };
     };
     boot = {
       commandLine = [ "console=ttyS0,115200" ];
@@ -169,12 +176,9 @@
     hardware =
       let
         openwrt = pkgs.openwrt;
-        mac80211 =  pkgs.mac80211.override {
-          drivers = [
-            "mt7615e"
-            "mt7915e"
-          ];
-          klibBuild = config.system.outputs.kernel.modulesupport;
+        mac80211 =  pkgs.kmodloader.override {
+          targets = ["mt7615e" "mt7915e"];
+          inherit (config.system.outputs) kernel;
         };
       in {
         ubi = {

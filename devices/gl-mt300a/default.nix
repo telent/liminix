@@ -47,9 +47,9 @@
     let
       inherit (pkgs.liminix.networking) interface;
       inherit (pkgs) openwrt;
-      mac80211 = pkgs.mac80211.override {
-        drivers = ["rt2800soc"];
-        klibBuild = config.system.outputs.kernel.modulesupport;
+      mac80211 = pkgs.kmodloader.override {
+        targets = ["rt2800soc"];
+        inherit (config.system.outputs) kernel;
       };
     in {
       imports = [
@@ -178,6 +178,14 @@
         } // lib.optionalAttrs (config.system.service ? vlan) {
           SWCONFIG = "y";
         };
+        conditionalConfig = {
+          WLAN = {
+            WLAN_VENDOR_RALINK = "y";
+            RT2800SOC = "m";
+            RT2X00 = "m";
+          };
+        };
+
       };
     };
 }

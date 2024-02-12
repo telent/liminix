@@ -286,9 +286,17 @@
               USB_XHCI_MVEBU = "y";
               USB_XHCI_HCD = "y";
             };
+            WLAN = {
+              WLAN_VENDOR_ATH = "y";
+              ATH_COMMON = "m";
+              ATH9K = "m";
+              ATH9K_PCI = "y";
+              ATH10K = "m";
+              ATH10K_PCI = "m";
+              ATH10K_DEBUG = "y";
+            };
           };
         };
-
         boot = {
           commandLine = [
             "console=ttyS0,115200"
@@ -328,9 +336,9 @@
         };
 
         hardware = let
-          mac80211 = pkgs.mac80211.override {
-            drivers = ["ath9k_pci" "ath10k_pci"];
-            klibBuild = config.system.outputs.kernel.modulesupport;
+          mac80211 =  pkgs.kmodloader.override {
+            inherit (config.system.outputs) kernel;
+            targets = ["ath9k" "ath10k_pci"];
           };
         in {
           defaultOutput = "mtdimage";
