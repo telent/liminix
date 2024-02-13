@@ -48,4 +48,25 @@ them afterwards as though they were "out of tree". Refer to commit
 b9c0d93670275e69df24902b05bf4aa4f0fcbe96 for a fuller explanation
 of how this simplifies things.
 
+2024-02-13
+
+So that we can be more consistent about services that would like their
+state to be preserved across boots (assuming a writable filesystem)
+these changes have been made
+
+* /run/service-state has been moved to /run/services/outputs
+ to better reflect what it's used for
+* /run/services/state is either a symlink to /persist/services/state
+ (if there's a writeable fs on /persist) or a directory (if there
+ isn't)
+
+The `output` and `mkoutputs` functions defined by ${serviceFns}
+have been updated, so unless your services are hardcoding service-state
+then the change should be seamless
+
+
+
+
+
+21:02:51 GMT 2024 
 

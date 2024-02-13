@@ -13,7 +13,7 @@ in longrun {
   inherit name;
   notification-fd = 10;
   run = ''
-    export SERVICE_STATE=/run/service-state/${name}
+    export SERVICE_STATE=$SERVICE_OUTPUTS/${name}
     ${odhcp6c}/bin/odhcp6c -s ${odhcp-script} -e -v -p /run/${name}.pid -P0 $(output ${interface} ifname)
     )
   '';

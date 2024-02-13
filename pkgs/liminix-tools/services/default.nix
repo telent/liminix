@@ -9,7 +9,7 @@
 }:
 let
   inherit (builtins) concatStringsSep;
-  prefix = "/run/service-state";
+  prefix = "/run/services/outputs";
   output = service: name: "${prefix}/${service.name}/${name}";
   serviceScript = commands : ''
     #!/bin/sh

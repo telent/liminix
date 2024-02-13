@@ -15,6 +15,6 @@ for i in run notification-fd up down consumer-for producer-for pipeline-name ; d
     test -n "$(printenv $i)" && (echo "$(printenv $i)" > $out/${name}/$i)
 done
 
-( cd $out && ln -s /run/service-state/${name} ./.outputs )
+( cd $out && ln -s /run/services/outputs/${name} ./.outputs )
 for i in $out/${name}/{down,up,run} ; do test -f $i && chmod +x $i; done
 true

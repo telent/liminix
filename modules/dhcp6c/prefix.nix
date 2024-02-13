@@ -11,6 +11,6 @@ let
   script = callPackage ./acquire-delegated-prefix.nix {  };
 in longrun {
   inherit name;
-  run = "${script} /run/service-state/${client.name} $(output ${interface} ifname)";
+  run = "${script} $SERVICE_OUTPUTS/${client.name} $(output ${interface} ifname)";
   dependencies = [ client interface ];
 }

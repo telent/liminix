@@ -22,8 +22,15 @@ mount -t tmpfs none /tmp
 mkdir /dev/pts
 mount -t devpts none /dev/pts
 
-mkdir -m 0751 /run/service-state
-chgrp system /run/service-state
+mkdir -m 0751 -p /run/services/outputs
+chgrp system /run/services/outputs
+
+if test -d /persist; then
+    mkdir -m 0751  -p /persist/services/state
+    (cd /run/services && ln -s ../../persist/services/state .)
+else
+    mkdir -m 0751 -p /run/services/state
+fi
 
 ### If your services are managed by s6-rc:
 ### (replace /run/service with your scandir)
