@@ -44,7 +44,7 @@ longrun {
     --log-debug \
     --log-queries \
     --log-facility=- \
-    --dhcp-leasefile=/run/${name}.leases \
+    --dhcp-leasefile=$(mkstate ${name})/leases \
     --pid-file=/run/${name}.pid
   '';
 }
