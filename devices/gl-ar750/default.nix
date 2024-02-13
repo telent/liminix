@@ -222,7 +222,7 @@
             ATH9K = "m";
             ATH9K_AHB = "y";
             ATH10K = "m";
-            ATH10K_PCI = "y";
+            ATH10K_PCI = "m";
             ATH10K_DEBUG = "y";
           };
         };
