@@ -80,14 +80,6 @@ in {
             ln -s ${image} image
             ln -s ${o.kernel} vmlinux  # handy for gdb
 
-            ${if cfg.compressRoot
-              then ''
-                lzma -z9cv ${o.rootfs} > rootfs.lz
-                rootfsLzStart=$(($imageStart + $imageSize))
-                rootfsLzSize=$(binsize rootfs.lz)
-              ''
-              else "ln -s ${o.rootfs} rootfs"
-             }
             cat ${o.dtb} > dtb
             address_cells=$(fdtget dtb / '#address-cells')
             size_cells=$(fdtget dtb / '#size-cells')
@@ -103,6 +95,14 @@ in {
 
             dtbSize=$(binsize ./dtb )
             imageStart=$(($dtbStart + $dtbSize))
+            ${if cfg.compressRoot
+              then ''
+                lzma -z9cv ${o.rootfs} > rootfs.lz
+                rootfsLzStart=$(($imageStart + $imageSize))
+                rootfsLzSize=$(binsize rootfs.lz)
+              ''
+              else "ln -s ${o.rootfs} rootfs"
+             }
 
             cmd="liminix ${cmdline} mtdparts=phram0:''${rootfsSize}(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsSize},${toString config.hardware.flash.eraseBlockSize} root=/dev/mtdblock0";
             fdtput -t s dtb /chosen bootargs "$cmd"
