@@ -3976,18 +3976,18 @@ AP advertised VHT without HT, disabling HT/VHT/HE
 
 TODO
 
-- support kernel version as parameter to builder pkgs/kernel/default.nix
-- extract the change in how module loading works from omnia device config,
+- [done] support kernel version as parameter to builder pkgs/kernel/default.nix
+- [done] extract the change in how module loading works from omnia device config,
   and fix the other thing that uses it
-- wlan module to take 'backported' as a parameter
+- [axed] wlan module to take 'backported' as a parameter
   half of the omnia conditionalConfig can go into the module
-- upgrade omnia to kernel v6
+- [done] upgrade omnia to kernel v6
 - figure out what mdns we need for local hostname resolution
   (maybe bridging lan/wlan)?
 - [DONE] slow wifi because "AP advertised VHT without HT, disabling HT/VHT/HE"
 - [DONE] add local domain to secrets
 - run sniproxy instead of forwarding
-- forward some port to loaclhost 22 for inbound ipv4 ssh
+- [test] forward some port to loaclhost 22 for inbound ipv4 ssh
 
 
 Mon Feb 12 21:50:35 GMT 2024
@@ -4007,7 +4007,7 @@ Tue Feb 13 19:44:57 GMT 2024
 
 Before we put this back live, would be good to
 
-1) move the leases file into /persist
+[done] 1) move the leases file into /persist
 
 I think we'll do /persist/service/<name>/ and change ssh to use the same
 scheme.
@@ -4026,10 +4026,10 @@ will depend on whether there's a writable fs or not, which is unexpected)
 :  else create /run/services/state
 
 
-2) maybe change the local domain back to .lan?  setting up
+[done] 2) maybe change the local domain back to .lan?  setting up
   systemd-networkd with search domains is an awful faff
 
-3) work out what to do with incoming ssh from wan
+[done] 3) work out what to do with incoming ssh from wan
 
 - For noetbook and thinkpad we have a vpn anyway so can expect to
   reach loaclhost directly using ipv6
@@ -4041,3 +4041,11 @@ will depend on whether there's a writable fs or not, which is unexpected)
     and then there is a clear signal to Dont Do That Then
 
 - for emergency use, dnat ipv4 2200 and 2201 to rotuer and loaclhost
+
+Tue Feb 13 22:31:03 GMT 2024
+
+the reason we can't reboot is that there is a service to add each lan
+device to the bridge which does ifwait $dev running, which doesn't
+return until there's something plugged in. So s6-rc hangs indefinitely
+until the lan switch is fully populated. This is definitely a
+"next milestone" thing
