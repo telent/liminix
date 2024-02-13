@@ -16,7 +16,7 @@
    ./hostname.nix
    ./outputs/initramfs.nix
    ./outputs/jffs2.nix
-   ./kernel.nix
+   ./kernel
    ./outputs/kexecboot.nix
    ./mount
    ./network
