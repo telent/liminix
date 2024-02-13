@@ -20,7 +20,11 @@
       out))
   (let [(address len preferred valid extra)
         (string.match str "(.-)/(%d+),(%d+),(%d+)(.*)$")]
-    (merge {: address : len : preferred : valid} (parse-extra extra))))
+    (merge {: address : len
+            :preferred (or preferred "forever")
+            :valid (or valid "forever")
+            }
+           (parse-extra extra))))
 
 (fn write-addresses [prefix addresses]
   (each [_ a (ipairs (split " " addresses))]

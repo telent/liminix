@@ -17,9 +17,14 @@
 
 (fn update-addresses [wan-device addresses new-addresses]
   (let [(added deleted) (changes addresses new-addresses)]
+    ;; see comment in acquire-delegated-prefix.fnl
     (each [_ p (ipairs added)]
       (system
-       (.. "ip address add " p.address "/" p.len " dev " wan-device)))
+       (.. "ip address change " p.address "/" p.len
+           " dev " wan-device
+           " valid_lft " p.valid
+           " preferred_lft " p.preferred
+           )))
     (each [_ p (ipairs deleted)]
       (system
        (.. "ip address del " p.address "/" p.len " dev " wan-device)))
