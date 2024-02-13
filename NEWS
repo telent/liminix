@@ -60,13 +60,11 @@ these changes have been made
  (if there's a writeable fs on /persist) or a directory (if there
  isn't)
 
-The `output` and `mkoutputs` functions defined by ${serviceFns}
-have been updated, so unless your services are hardcoding service-state
-then the change should be seamless
+The change will lose your ssh host key(s) unless you copy them from
+the old location to the new one before rebooting into the new system
 
+   mkdir -m 02751 -p /run/services/state/dropbear
+   cp /persist/secrets/dropbear/* /run/services/state/dropbear
 
-
-
-
-21:02:51 GMT 2024 
-
+The `output`, `mkoutputs` functions defined by ${serviceFns}
+have been updated for the new location.

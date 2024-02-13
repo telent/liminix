@@ -29,15 +29,12 @@ let
 in
 longrun {
   name = "sshd";
+  # we need /run/dropbear to point to hostkey storage, as that
+  # pathname is hardcoded into the binary.
   # env -i clears the environment so we don't pass anything weird to
   # ssh sessions
   run = ''
-    if test -d /persist; then
-      mkdir -p /persist/secrets/dropbear
-      ln -s /persist/secrets/dropbear /run
-    else
-      mkdir -p /run/dropbear
-    fi
+    ln -s $(mkstate dropbear) /run
     . /etc/profile # sets PATH but do we need this?  it's the same file as ashrc
     exec env -i ENV=/etc/ashrc PATH=$PATH ${dropbear}/bin/dropbear ${concatStringsSep " " options}
   '';
