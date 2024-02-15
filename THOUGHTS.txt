@@ -4044,8 +4044,36 @@ will depend on whether there's a writable fs or not, which is unexpected)
 
 Tue Feb 13 22:31:03 GMT 2024
 
-the reason we can't reboot is that there is a service to add each lan
-device to the bridge which does ifwait $dev running, which doesn't
+* the reason we can't reboot is that there is a service to add each
+lan device to the bridge which does ifwait $dev running, which doesn't
 return until there's something plugged in. So s6-rc hangs indefinitely
-until the lan switch is fully populated. This is definitely a
-"next milestone" thing
+until the lan switch is fully populated. This is definitely a "next
+milestone" thing.
+
+* another example of "thing that depends on other thing but which it
+  is actually OK if neither of them happen" might be "mount a
+  filesystem if there is a usb mass storage device attached"
+
+* I don't know if failover also fits into the model we don't quite
+  have. LTE route depends on pppoe not being healthy
+
+we can have services (or bundles) that aren't part of the default target,
+and plumb them into events of some kind (netlink?) to bring them up/down?
+
+we can use s6-rc instanced services:
+https://skarnet.org/software/s6/instances.html
+
+"s6-instance-create and s6-instance-delete are relatively expensive operations, because they have to recursively copy or delete directories and use the synchronization mechanism with the instance supervisor, compared to s6-instance-control which only has to send commands to already existing supervisors. If you are going to turn instances on and off on a regular basis, it is more efficient to keep the instance existing and control it with s6-instance-control than it is to repeatedly create and delete it. "
+
+Probably we need something that reads netlink messages and converts
+them to a format that we can use to control services. Is there a
+benefit to using services here and not just running commands? it means
+the system state change we desire will stay changed.
+
+TODO items not to lose track of
+
+- speed testing (iperf)
+- make gl-ar750 tftpboot build again
+- finish belkin
+- install sniproxy
+- is there something simple we can do to make it reboot again?
