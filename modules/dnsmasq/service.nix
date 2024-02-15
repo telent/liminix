@@ -41,10 +41,11 @@ longrun {
     --no-hosts \
     --log-dhcp \
     --enable-ra \
-    --log-debug \
-    --log-queries \
     --log-facility=- \
     --dhcp-leasefile=$(mkstate ${name})/leases \
     --pid-file=/run/${name}.pid
   '';
+    # --log-debug \
+    # --log-queries \
+
 }
