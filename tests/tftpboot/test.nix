@@ -12,7 +12,7 @@ let derivation = (import liminix {
     img = derivation.outputs.tftpboot;
     uboot = derivation.outputs.u-boot;
     pkgsBuild = derivation.pkgs.pkgsBuildBuild;
-in pkgsBuild.runCommand "check" {
+in pkgsBuild.runCommand "check-${deviceName}" {
   nativeBuildInputs = with pkgsBuild; [
     expect
     socat
@@ -43,5 +43,8 @@ in {
   mips = check  "qemu" {};
   mipsLz = check  "qemu" {
     boot.tftp.compressRoot = true;
+  };
+  mipsOldUboot = check  "qemu" {
+    boot.tftp.appendDTB = true;
   };
 }
