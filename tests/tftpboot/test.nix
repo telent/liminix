@@ -12,7 +12,7 @@ let derivation = (import liminix {
     img = derivation.outputs.tftpboot;
     uboot = derivation.outputs.u-boot;
     pkgsBuild = derivation.pkgs.pkgsBuildBuild;
-in pkgsBuild.runCommand "check" {
+in pkgsBuild.runCommand "check-${deviceName}" {
   nativeBuildInputs = with pkgsBuild; [
     expect
     socat
@@ -44,4 +44,11 @@ in {
   mipsLz = check  "qemu" {
     boot.tftp.compressRoot = true;
   };
+  # this works on real hardware but I haven't figured out how
+  # to make it work on qemu: it says
+  # "OF: fdt: No chosen node found, continuing without"
+
+  # mipsOldUboot = check  "qemu" {
+  #   boot.tftp.appendDTB = true;
+  # };
 }
