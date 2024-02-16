@@ -38,9 +38,13 @@ now runs on the TP-Link Archer AX23
 
 2024-02-12
 
-* we now build wifi drivers (mac80211) from the same kernel source as
+* We now build wifi drivers (mac80211) from the same kernel source as
 the running kernel, instead of using drivers from the linux-backports
-project.
+project.  This may be a regression on some devices that depend on
+OpenWrt patches for wireless functionality: if you have a device that
+used to work and now doesn't, refer to OpenWrt
+package/kernel/mac80211/patches/ to see if there's something in there
+that needs to be applied.
 
 * in general, we build kernel modules (e.g. for nftables) at the same
 time as the kernel itself instead of expecting to be able to build
@@ -68,3 +72,11 @@ the old location to the new one before rebooting into the new system
 
 The `output`, `mkoutputs` functions defined by ${serviceFns}
 have been updated for the new location.
+
+2024-02-16
+
+New (or at least, previously unreported) port! Liminix now runs on the
+Turris Omnia and has been serving my family's internet needs for most
+of this week.  Thanks to NGI0 Entrust and the NLnet Foundation for
+sponsoring this development (and funding the hardware)
+
