@@ -4077,3 +4077,37 @@ TODO items not to lose track of
 - finish belkin
 - install sniproxy
 - is there something simple we can do to make it reboot again?
+- turn rotuer,extneder examples into "profiles" that don't embed
+  hardware specifics
+
+Thu Feb 15 11:50:56 GMT 2024
+
+1) to make tftpboot work with old bootm implementations we need
+
+- compressed root
+- uncompressed root
+- kernel with dtb
+ dtb needs to know where uncompressed rootfs is and how big
+
+2) if the image is a zImage (arm32) or an Image (arm64) we have to stick
+with the three-arg bootz, and the dtb has to be lower in ram than the kernel
+
+Fri Feb 16 15:43:32 GMT 2024
+
+DHCP6c refresh is still wrong. We get updates for an address that
+hasn't changed prefix or length, when the expiry times have changed,
+and we can't action that by remove;add because remove will wipe out
+any routes through the interface but add won't put them back
+
+We can use "change" for both adds and changes, but we need to know that
+a change is not a delete
+
+The "identity" of an address is the address itself: kernel won't
+let you add the same address with two different prefixes.
+
+Keeping it simple, we could call "change" on every address in the
+new-addresses list and "del" on every address in old-addresses
+that is no longer in new-addresses
+
+If the upstream has changed length, "ip addr change" is ignored,
+so it needs to be in deleted as well as added/changed
