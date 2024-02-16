@@ -162,6 +162,8 @@
         # OpenWrt kernel patches
         extraPatchPhase = ''
           ${openwrt.applyPatches.ath79}
+          sed -i.bak -e '\,include <linux/hw_random.h>,a #include <linux/gpio/driver.h>'  drivers/net/wireless/ath/ath9k/ath9k.h # context reqd for next patch
+          patch -p1 <  ${openwrt.src}/package/kernel/mac80211/patches/ath9k/552-ath9k-ahb_of.patch
         '';
 
         config = {
