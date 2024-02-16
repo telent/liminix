@@ -74,6 +74,7 @@
       mac80211 = pkgs.kmodloader.override {
         targets = ["ath9k" "ath10k_pci"];
         inherit (config.system.outputs) kernel;
+        dependencies = [ ath10k_cal_data ];
       };
       ath10k_cal_data =
         let
@@ -132,7 +133,7 @@
             };
             wlan5 = link.build {
               ifname = "wlan1";
-              dependencies = [ mac80211 ath10k_cal_data ];
+              dependencies = [ ath10k_cal_data mac80211  ];
             };
           };
       };

@@ -5,6 +5,7 @@
 , kernel ? null
 , runCommand
 , pkgsBuildBuild
+, dependencies ? []
 } :
 let
   inherit (liminix.services) oneshot;
@@ -38,4 +39,5 @@ in oneshot {
   name = "kmodloader-"  + (concatStringsSep "-" targets);
   up = "sh ${loader}/load.sh";
   down = "sh ${loader}/unload.sh";
+  inherit dependencies;
 }
