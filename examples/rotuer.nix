@@ -200,9 +200,15 @@ in rec {
     nftables
     strace
     tcpdump
+    s6
   ];
 
-  programs.busybox.applets = [
-    "fdisk" "sfdisk"
-  ];
+  programs.busybox = {
+    applets = [
+      "fdisk" "sfdisk"
+    ];
+    options = {
+      FEATURE_FANCY_TAIL = "y";
+    };
+  };
 }
