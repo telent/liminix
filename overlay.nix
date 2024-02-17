@@ -104,6 +104,7 @@ extraPkgs // {
         "CONFIG_DRIVER_NL80211=y"
         "CONFIG_IAPP=y"
         "CONFIG_IEEE80211AC=y"
+        "CONFIG_IEEE80211AX=y"
         "CONFIG_IEEE80211N=y"
         "CONFIG_IEEE80211W=y"
         "CONFIG_INTERNAL_LIBTOMMATH=y"
