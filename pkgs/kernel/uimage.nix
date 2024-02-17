@@ -15,6 +15,7 @@ let
 in {
   kernel
 , commandLine
+, commandLineDtbNode ? "bootargs"
 , entryPoint
 , extraName ? ""                # e.g. socFamily
 , loadAddress
@@ -39,7 +40,7 @@ in {
   '';
   mungeDtbPhase = ''
     dtc -I dtb -O dts -o tmp.dts ${dtb}
-    echo '/{ chosen { bootargs = ${builtins.toJSON commandLine}; }; };'  >> tmp.dts
+    echo '/{ chosen { ${commandLineDtbNode} = ${builtins.toJSON commandLine}; }; };'  >> tmp.dts
     dtc -I dts -O dtb -o tmp.dtb tmp.dts
   '';
 
