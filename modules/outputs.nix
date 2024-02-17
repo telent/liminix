@@ -111,6 +111,7 @@ in
       };
       uimage = liminix.builders.uimage {
         commandLine = concatStringsSep " " config.boot.commandLine;
+        inherit (config.boot) commandLineDtbNode;
         inherit (config.hardware) loadAddress entryPoint alignment;
         inherit (config.boot) imageFormat;
         inherit (o) kernel dtb;
