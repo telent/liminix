@@ -33,7 +33,7 @@ in
     };
     boot.initramfs.enable = true;
     system.outputs = {
-      rootfs =
+      rootubifs =
         let
           inherit (pkgs.pkgsBuildBuild) runCommand mtdutils;
           cfg = config.hardware.ubi;
