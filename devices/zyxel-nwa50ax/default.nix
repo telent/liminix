@@ -94,6 +94,7 @@
         ../../modules/arch/mipsel.nix
         ../../modules/outputs/tftpboot.nix
         ../../modules/outputs/zyxel-nwa-fit.nix
+        ../../modules/zyxel-dual-image
       ];
 
       filesystem = dir {
@@ -168,6 +169,7 @@
             };
           };
       };
+
       boot = {
         # Critical because NWA50AX will extend your cmdline with the image number booted.
         # and some bootloader version.
@@ -180,6 +182,15 @@
           freeSpaceBytes = 5 * 1024 * 1024;
           loadAddress = lim.parseInt "0x2000000";
         };
+      };
+
+      # Dual image management service in userspace.
+      services.zyxel-dual-image = config.boot.zyxel-dual-image.build {
+        ensureActiveImage = "primary";
+        # TODO: use mtd names rather…
+        primaryMtdPartition = "/dev/mtd3";
+        secondaryMtdPartition = "/dev/mtd6";
+        bootConfigurationMtdPartition = "/dev/mtd10";
       };
 
       #  DEVICE_VENDOR := ZyXEL
