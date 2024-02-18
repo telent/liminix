@@ -32,23 +32,21 @@ let
     (a: symlink "${busybox}/bin/busybox");
   minimalApplets = [
     # this is probably less minimal than it could be
-    "arch" "ash" "base64" "basename" "bc" "brctl" "bunzip2" "bzcat"
-    "bzip2" "cal" "cat" "chattr" "chgrp" "chmod" "chown" "chpst"
-    "chroot" "clear" "cmp" "comm" "cp" "cpio" "cut" "date" "dd" "df"
-    "dirname" "dmesg" "du" "echo" "egrep" "env" "expand" "expr"
-    "false" "fdisk" "fgrep" "find" "free" "fuser" "grep" "gunzip"
-    "gzip" "head" "hexdump" "hostname" "hwclock" "ifconfig" "ip"
-    "ipaddr" "iplink" "ipneigh" "iproute" "iprule" "kill" "killall"
-    "killall5" "less" "ln" "ls" "lsattr" "lsof" "md5sum" "mkdir"
-    "mknod" "mktemp" "mount" "mv" "nc" "netstat" "nohup" "od" "pgrep"
-    "pidof" "ping" "ping6" "pkill" "pmap" "printenv" "printf" "ps"
-    "pwd" "readlink" "realpath" "reset" "rm" "rmdir" "route" "sed"
-    "seq" "setsid" "sha1sum" "sha256sum" "sha512sum" "sleep" "sort"
-    "stat" "strings" "stty" "su" "sum" "swapoff" "swapon" "sync"
-    "tail" "tee" "test" "time" "touch" "tr" "traceroute" "traceroute6"
-    "true" "truncate" "tty" "udhcpc" "umount" "uname"
-    "unexpand" "uniq" "unlink" "unlzma" "unxz" "unzip" "uptime"
-    "watch" "wc" "whoami" "xargs" "xxd" "xz" "xzcat" "yes" "zcat"
+    "arch" "ash" "base64" "basename" "bc" "brctl" "bunzip2" "bzcat" "bzip2"
+    "cal" "cat" "chattr" "chgrp" "chmod" "chown" "chpst" "chroot" "clear" "cmp"
+    "comm" "cp" "cpio" "cut" "date" "dhcprelay" "dd" "df" "dirname" "dmesg"
+    "du" "echo" "egrep" "env" "expand" "expr" "false" "fdisk" "fgrep" "find"
+    "free" "fuser" "grep" "gunzip" "gzip" "head" "hexdump" "hostname" "hwclock"
+    "ifconfig" "ip" "ipaddr" "iplink" "ipneigh" "iproute" "iprule" "kill"
+    "killall" "killall5" "less" "ln" "ls" "lsattr" "lsof" "md5sum" "mkdir"
+    "mknod" "mktemp" "mount" "mv" "nc" "netstat" "nohup" "od" "pgrep" "pidof"
+    "ping" "ping6" "pkill" "pmap" "printenv" "printf" "ps" "pwd" "readlink"
+    "realpath" "reset" "rm" "rmdir" "route" "sed" "seq" "setsid" "sha1sum"
+    "sha256sum" "sha512sum" "sleep" "sort" "stat" "strings" "stty" "su" "sum"
+    "swapoff" "swapon" "sync" "tail" "tee" "test" "time" "touch" "tr"
+    "traceroute" "traceroute6" "true" "truncate" "tty" "udhcpc" "umount"
+    "uname" "unexpand" "uniq" "unlink" "unlzma" "unxz" "unzip" "uptime" "watch"
+    "wc" "whoami" "xargs" "xxd" "xz" "xzcat" "yes" "zcat"
   ];
 in {
   options = {
