@@ -58,6 +58,7 @@ in rec {
     ../modules/ssh
     ../modules/ntp
     ../modules/vlan
+    ../modules/bridge
   ];
 
   hostname = "zyxel";
@@ -73,8 +74,21 @@ in rec {
     ];
   };
 
+  services.int = svc.bridge.primary.build {
+    ifname = "int";
+  };
+
+  services.bridge = svc.bridge.members.build {
+    primary = services.int;
+    members = with config.hardware.networkInterfaces; [
+      lan
+      wlan0
+      wlan1
+    ];
+  };
+
   services.dhcpv4 =
-    let iface = config.hardware.networkInterfaces.lan;
+    let iface = services.int;
     in svc.network.dhcp.client.build { interface = iface; };
 
   services.defaultroute4 = svc.network.route.build {
