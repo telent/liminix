@@ -19,15 +19,28 @@
     Installation
     ============
 
-    Wow, this device is a handful.
+    This device is pretty, but, due to its A/B capabilities, can be a bit hard
+    to use completely.
 
-    The stock vendor firmware is a downstream fork of U-Boot (insert link to source code)
+    The stock vendor firmware is a downstream fork of U-Boot: <https://github.com/RaitoBezarius/uboot-nwa50ax>
     with restricted boot commands. Fortunately, OpenWrt folks figured out trivial command injections,
     so you can use most of the OpenWrt commands without trouble by just command injecting
     atns, atna or atnf, e.g. atns "; $real_command".
 
-    From factory web UI, this has not been tested yet.
+    From factory web UI, you can upload the result of the zyxel-nwa-fit output.
+    From another operating system, you need to `dumpimage -T flat_dt -p 0 $zyxel-nwa-fit -o firmware.bin`,
+    `flash_erase $(mtd partition of the target partition firmware or zy_firmware) 0 0`, then you complete by
+    `nandwrite -p $(mtd partition of the target partition firmware or zy_firmware) firmware.bin`.
+
+    How to put the firmware.bin on the machine is left to you as an exercise, e.g. SSH, TFTP, whatever.
+
     From serial, you have two choices:
+
+    - Flash this system via U-Boot:
+      same reasoning as from an existing Linux system, two choices:
+      - ymodem the binary, perform the write manually, you can inspire yourself
+      from the `script` contained in the vendor firmware, those are just a FIT containing a script.
+      - prepare a FIT containing a script executing your commands, tftpboot this.
 
     - boot from an existing Liminix system, e.g. TFTPBOOT image.
     - boot from an OpenWrt system, i.e. follow OpenWrt steps.
@@ -35,6 +48,7 @@
     Once you are in a Linux system, understand that this device has A/B boot.
 
     OpenWrt provides you with `zyxel-bootconfig` to set/unset the image status and choice.
+
     The kernel is booted with `bootImage=<number>` which tells you which slot are you on.
 
     You should find yourself with 10ish MTD partitions, the most interesting ones are two:
@@ -44,20 +58,32 @@
 
     In the current setup, they are split further into kernel (8MB) and ubi (32MB).
 
-    You will write the FIT uImage in the kernel MTD partition directly, via `mtd write kernel.uimage /dev/mtd4`
-    (if `/dev/mtd4` is the kernel MTD partition) or `flashcp` can be used similarly.
+    Once you are done with first installation, note that if you want to use the A/B feature,
+    you need to write a _secondary_ image on the slot B. There is no proper flashing code
+    that will set the being-updated slot to `new` and boot on it to verify if it's working.
+    This is a WIP.
 
-    Then, you will install the UBI image, via `ubiformat -f ubi.image /dev/mtd5` (if `/dev/mtd4` was your kernel MTD partition, 5 must be the UBI).
+    Upgrading your system can be achieved via:
 
-    Once you are done, you will have to reboot and modify your bootargs in U-Boot
-    because they are currently overridden.
+    - `liminix-rebuild` for the userspace.
+    - `flash_erase` + `nandwrite` for the kernelspace to the other slot than the one you are booted on,
+      note that you can just nandwrite the mtd partition corresponding to the *kernel* and not the whole firmware.
 
-    It is enough to do:
-    atns "; setenv bootargs 'liminix console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 fw_devlink=off ubi.mtd=ubi root=ubi0:rootfs rootfstype=ubifs'"
-    atns "; saveenv"
+    If you soft-bricked your AP, i.e. you cannot boot anything in U-Boot, no worries, just plug the serial console,
+    prepare a TFTP server (via `tufted` for example), download vendor firmware, set up `atns`, `atnf`, etc. and run `atnz`.
 
-    Once you are done, you can enjoy booting on slot A unattended for now. To make use of the A/B feature, this is a TODO :).
-    Upgrades are TODO too.
+    This will reflash everything back to normal via TFTP.
+
+    If you hard-bricked your AP, i.e. U-Boot is telling you to transfer a valid bootloader via ymodem, just extract
+    a U-Boot from the vendor OS, send it via ymodem and use the previous operations to perform a full flash this time
+    of all partitions.
+
+    Note that if you erased your MRD partition, you lost your serial and MAC address. There's no way to recover the original one
+    except by reading the physical label on your… device!
+
+    If you super-hard-bricked your AP, i.e. no output on serial console, congratulations, you reached one of the rare state
+    of this device. You need an external NAND flasher to repair it and write the first stage from Mediatek to continue the previous
+    recovery operations.
 
     Vendor web page: https://www.zyxel.com/fr/fr/products/wireless/ax1800-wifi-6-dual-radio-nebulaflex-access-point-nwa50ax
 
