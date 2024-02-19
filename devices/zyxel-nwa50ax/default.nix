@@ -91,6 +91,9 @@
       };
     in {
       imports = [ 
+        # We include it to ensure the bridge functionality
+        # is available on the target kernel.
+        ../../modules/bridge
         ../../modules/arch/mipsel.nix
         ../../modules/outputs/tftpboot.nix
         ../../modules/outputs/zyxel-nwa-fit.nix
