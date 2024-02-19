@@ -85,6 +85,15 @@
     of this device. You need an external NAND flasher to repair it and write the first stage from Mediatek to continue the previous
     recovery operations.
 
+    Development TODO list:
+
+    - Better support for upgrade automation w.r.t. to A/B, e.g. automagic scripts.
+    - Mount the logs partition, mount / as overlayfs of firmware ? rootfs and rootfs_data for extended data.
+    - Jitter-based entropy injection? Device can be slow to initialize its CRNG and hostapd will reject few clients at the start because of that.
+    - Defaults for hostapd based on MT7915 capabilities? See the example for one possible list.
+    - Remove primary/secondary hack and put it in preinit.
+    - Offer ways to reflash the *bootloader* itself to support direct boot via UBI and kernel upgrades via filesystem rewrite.
+
     Vendor web page: https://www.zyxel.com/fr/fr/products/wireless/ax1800-wifi-6-dual-radio-nebulaflex-access-point-nwa50ax
 
     OpenWrt web page: https://openwrt.org/inbox/toh/zyxel/nwa50ax
