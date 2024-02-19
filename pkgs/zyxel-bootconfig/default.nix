@@ -8,7 +8,7 @@ stdenv.mkDerivation {
   sourceRoot = "openwrt-source/package/utils/zyxel-bootconfig/src";
   installPhase = ''
     mkdir -p $out/bin
-    install -Dm644 zyxel-bootconfig $out/bin/zyxel-bootconfig
+    install -Dm544 zyxel-bootconfig $out/bin/zyxel-bootconfig
   '';
   meta = {
     mainProgram = "zyxel-bootconfig";
