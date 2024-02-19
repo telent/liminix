@@ -138,17 +138,13 @@
         # This is a FIT containing a kernel padded and
         # a UBI volume rootfs.
         defaultOutput = "zyxel-nwa-fit";
+
         loadAddress = lim.parseInt "0x80001000";
         entryPoint = lim.parseInt "0x80001000";
         # Aligned on 2kb.
         alignment = 2048;
 
-        flash = {
-          address = lim.parseInt "0xbc050000";
-          size = lim.parseInt "0xfb0000";
-          eraseBlockSize = 65536;
-        };
-        rootDevice = "ubi0:rootfs";
+        rootDevice = "ubi:rootfs";
 
         dts = {
           src = "${openwrt.src}/target/linux/ramips/dts/mt7621_zyxel_nwa50ax.dts";
