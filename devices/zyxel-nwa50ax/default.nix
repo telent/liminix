@@ -151,7 +151,16 @@
           # This DTS is insufficient.
           src = ./mt7621_zyxel_nwa50ax.dtsi;
           includes = [
-            "${./.}"
+            # Here's one weird trick to make `ubi` detection
+            # out of the box.
+            # We will write ubi on /dev/firmware_a:rootfs location
+            # and same for /dev/firmware_b:rootfs.
+            # How do we distinguish both?
+            # We can just use the DTS to point ubi at A or B.
+            # This, unfortunately, means that we have "two images".
+            # But they are really just 1 image with 2 different DTS.
+            # TODO: improve this hack in preinit?
+            (if config.boot.imageType == "primary" then "${./a_image}" else "${./b_image}")
             "${openwrt.src}/target/linux/ramips/dts"
           ];
         };

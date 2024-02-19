@@ -40,20 +40,6 @@
 			label = "factory";
 			reg = <0x100000 0x80000>;
 			read-only;
-
-			nvmem-layout {
-				compatible = "fixed-layout";
-				#address-cells = <1>;
-				#size-cells = <1>;
-
-				eeprom_factory_0: eeprom@0 {
-					reg = <0x0 0xe00>;
-				};
-
-				precal_factory_e10: precal@e10 {
-					reg = <0xe10 0x19c10>;
-				};
-			};
 		};
 
 		partition@180000 {
@@ -70,7 +56,7 @@
 			};
 
 			partition@400000 {
-				label = "ubi_a";
+				label = "ubi";
 				reg = <0x800000 0x2000000>;
 			};
 		};
@@ -142,9 +128,7 @@
 		reg = <0x0 0 0 0 0>;
 		compatible = "mediatek,mt76";
 
-    nvmem-cells = <&eeprom_factory_0>, <&precal_factory_e10>;
-		nvmem-cell-names = "eeprom", "precal";
-
+		mediatek,mtd-eeprom = <&factory 0x0>;
 		/* MAC-Address set in userspace */
 	};
 };

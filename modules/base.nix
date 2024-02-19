@@ -63,6 +63,10 @@ in {
         default = "bootargs";
         description = "Kernel command line's devicetree node";
       };
+      imageType = mkOption {
+        type = types.enum [ "primary" "secondary" ];
+        default = "primary";
+      };
       imageFormat = mkOption {
         type = types.enum ["fit" "uimage"];
         default = "uimage";
