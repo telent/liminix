@@ -235,9 +235,12 @@
       services.zyxel-dual-image = config.boot.zyxel-dual-image.build {
         ensureActiveImage = "primary";
         # TODO: use mtd names rather…
+        # primary and secondary are always /dev/mtd3 by virtue of the 
+        # dtb being not too wrong…
+        # TODO: remove this hack.
         primaryMtdPartition = "/dev/mtd3";
-        secondaryMtdPartition = "/dev/mtd6";
-        bootConfigurationMtdPartition = "/dev/mtd10";
+        secondaryMtdPartition = "/dev/mtd3";
+        bootConfigurationMtdPartition = "/dev/mtd12";
       };
 
       #  DEVICE_VENDOR := ZyXEL
