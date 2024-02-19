@@ -147,8 +147,11 @@
         rootDevice = "ubi:rootfs";
 
         dts = {
-          src = "${openwrt.src}/target/linux/ramips/dts/mt7621_zyxel_nwa50ax.dts";
+          # Actually, this is not what we want.
+          # This DTS is insufficient.
+          src = ./mt7621_zyxel_nwa50ax.dtsi;
           includes = [
+            "${./.}"
             "${openwrt.src}/target/linux/ramips/dts"
           ];
         };
