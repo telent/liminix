@@ -77,16 +77,17 @@
         drivers = [ "mt7915e" ];
         klibBuild = config.system.outputs.kernel.modulesupport;
       };
+      # v204520220929
       wlan_firmware = pkgs.fetchurl {
-        url = "https://github.com/openwrt/mt76/raw/2afc7285f75dca5a0583fd917285bf33f1429cc6/firmware/mt7915_wa.bin";
+        url = "https://github.com/openwrt/mt76/raw/1b88dd07f153b202e57fe29734806744ed006b0e/firmware/mt7915_wa.bin";
         hash = "sha256-wooyefzb0i8640+lwq3vNhcBXRFCtGuo+jiL7afZaKA=";
       };
       wlan_firmware' = pkgs.fetchurl {
-        url = "https://github.com/openwrt/mt76/raw/2afc7285f75dca5a0583fd917285bf33f1429cc6/firmware/mt7915_wm.bin";
+        url = "https://github.com/openwrt/mt76/raw/1b88dd07f153b202e57fe29734806744ed006b0e/firmware/mt7915_wm.bin";
         hash = "sha256-k62nQewRuKjBLd5R3RxU4F74YKnQx5zr6gqMMImqVQw=";
       };
       wlan_firmware'' = pkgs.fetchurl {
-        url = "https://github.com/openwrt/mt76/raw/2afc7285f75dca5a0583fd917285bf33f1429cc6/firmware/mt7915_rom_patch.bin";
+        url = "https://github.com/openwrt/mt76/raw/1b88dd07f153b202e57fe29734806744ed006b0e/firmware/mt7915_rom_patch.bin";
         hash = "sha256-ifriAjWzFACrxVWCANZpUaEZgB/0pdbhnTVQytx6ddg=";
       };
     in {
