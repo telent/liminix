@@ -73,7 +73,6 @@ in rec {
     ];
   };
 
-
   services.dhcpv4 =
     let iface = config.hardware.networkInterfaces.lan;
     in svc.network.dhcp.client.build { interface = iface; };
@@ -103,5 +102,5 @@ in rec {
   # wlan1 is the 5GHz interface, e.g. AX capable.
   services.hostap-2 = mkWifiSta (baseParams // modernParams) config.hardware.networkInterfaces.wlan1 secrets-2;
 
-  defaultProfile.packages = with pkgs; [ zyxel-bootconfig iw ];
+  defaultProfile.packages = with pkgs; [ zyxel-bootconfig iw min-collect-garbage mtdutils ];
 }
