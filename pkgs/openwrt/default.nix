@@ -14,6 +14,7 @@ let
     cp -av ${src}/target/linux/generic/files/* .
     chmod -R u+w .
     cp -av ${src}/target/linux/${family}/files/* .
+    chmod -R u+w .
     test -d ${src}/target/linux/${family}/files-5.15/ && cp -av ${src}/target/linux/${family}/files-5.15/* .
     chmod -R u+w .
     patches() {
