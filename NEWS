@@ -34,7 +34,7 @@ Upstream changes that have led to incompatible Liminix changes are:
 2024-01-30
 
 New port! Thanks to Arnout Engelen <arnout@bzzt.net>, Liminix
-now runs on the TP-Link Archer AX23
+now runs on the TP-Link Archer AX23.
 
 2024-02-12
 
@@ -80,3 +80,7 @@ Turris Omnia and has been serving my family's internet needs for most
 of this week.  Thanks to NGI0 Entrust and the NLnet Foundation for
 sponsoring this development (and funding the hardware)
 
+2024-02-21
+
+New port! Thanks to Raito Bezarius, Liminix now runs on the Zyxel NWA50AX,
+an MT7621 (MIPS EL) dual radio WiFi AP. 
