@@ -16,7 +16,7 @@
 
 (fn system [s]
   (match (os.execute s)
-    res res
+    res (do (print (.. "Executed \"" s "\", exit code " (tostring res)))  res)
     (nil err) (error (.. "Error executing \"" s "\" (" err ")"))))
 
 (fn hash [str]
