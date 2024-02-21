@@ -3,6 +3,7 @@
 , liminix-config ? <liminix-config>
 , nixpkgs ? <nixpkgs>
 , borderVmConf ? ./bordervm.conf.nix
+, imageType ? "primary"
 }:
 
 let
@@ -30,6 +31,9 @@ let
       ./modules/s6
       ./modules/users.nix
       ./modules/outputs.nix
+      {
+        boot.imageType = imageType;
+      }
     ];
   };
   config = eval.config;

@@ -15,10 +15,12 @@ let
 in {
   kernel
 , commandLine
+, commandLineDtbNode ? "bootargs"
 , entryPoint
 , extraName ? ""                # e.g. socFamily
 , loadAddress
 , imageFormat
+, alignment ? null
 , dtb ? null
 } : stdenv.mkDerivation {
   name = "kernel.image";
@@ -39,7 +41,7 @@ in {
   '';
   mungeDtbPhase = ''
     dtc -I dtb -O dts -o tmp.dts ${dtb}
-    echo '/{ chosen { bootargs = ${builtins.toJSON commandLine}; }; };'  >> tmp.dts
+    echo '/{ chosen { ${commandLineDtbNode} = ${builtins.toJSON commandLine}; }; };'  >> tmp.dts
     dtc -I dts -O dtb -o tmp.dtb tmp.dts
   '';
 
@@ -69,7 +71,7 @@ in {
         };
     };
     _VARS
-    mkimage -f mkimage.its kernel.uimage
+    mkimage -f mkimage.its ${lib.optionalString (alignment != null) "-B 0x${lib.toHexString alignment}"} kernel.uimage
     mkimage -l kernel.uimage
   '';
 
