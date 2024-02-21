@@ -4111,3 +4111,29 @@ that is no longer in new-addresses
 
 If the upstream has changed length, "ip addr change" is ignored,
 so it needs to be in deleted as well as added/changed
+
+Fri Feb 16 19:37:08 GMT 2024
+
+[    3.839775] cfg80211: module verification failed: signature and/or required key missing - tainting kernel
+[    4.156952] ath10k_pci 0000:00:00.0: enabling device (0000 -> 0002)
+[    4.165756] ath10k_pci 0000:00:00.0: pci irq legacy oper_irq_mode 1 irq_mode 0 reset_mode 0
+[    4.399285] ath10k_pci 0000:00:00.0: qca9887 hw1.0 target 0x4100016d chip_id 0x004000ff sub 0000:0000
+[    4.408906] ath10k_pci 0000:00:00.0: kconfig debug 1 debugfs 0 tracing 0 dfs 0 testmode 0
+[    4.420096] ath10k_pci 0000:00:00.0: firmware ver 10.2.4-1.0-00047 api 5 features no-p2p,ignore-otp,ski
+p-clock-init,mfp,allows-mesh-bcast crc32 62f7565f
+[    4.467443] ath10k_pci 0000:00:00.0: board_file api 1 bmi_id N/A crc32 546cca0d
+[    5.472096] ath10k_pci 0000:00:00.0: htt-ver 2.1 wmi-op 5 htt-op 2 cal file max-sta 128 raw 0 hwcrypto
+[    5.585796] ath: EEPROM regdomain: 0x0
+[    5.589712] ath: EEPROM indicates default country code should be used
+[    5.596364] ath: doing EEPROM country->regdmn map search
+[    5.601875] ath: country maps to regdmn code: 0x3a
+[    5.606831] ath: Country alpha2 being used: US
+[    5.611425] ath: Regpair used: 0x3a
+[    6.742365] ath10k_pci 0000:00:00.0: pdev param 0 not supported by firmware
+[    6.903389] random: hostapd: uninitialized urandom read (1027 bytes read)
+[    8.169901] ath10k_pci 0000:00:00.0: pdev param 0 not supported by firmware
+[   14.450193] ath10k_pci 0000:00:00.0: pdev param 0 not supported by firmware
+[   15.518682] random: hostapd: uninitialized urandom read (1027 bytes read)
+[   16.762697] ath10k_pci 0000:00:00.0: pdev param 0 not supported by firmware
+[   23.030622] ath10k_pci 0000:00:00.0: pdev param 0 not supported by firmware
+[
