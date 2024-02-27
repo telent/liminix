@@ -11,10 +11,6 @@
   ...
 }: let
   secrets = import ./extneder-secrets.nix;
-  inherit (pkgs.liminix.services) oneshot longrun bundle target;
-  inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs) dropbear ifwait serviceFns;
-  svc = config.system.service;
 in rec {
   boot = {
     tftp = {
@@ -24,12 +20,8 @@ in rec {
   };
 
   imports = [
-    ../modules/wlan.nix
+    ../modules/profiles/wap.nix
     ../modules/vlan
-    ../modules/network
-    ../modules/hostapd
-    ../modules/bridge
-    ../modules/ssh
   ];
 
   hostname = "extneder";
@@ -69,66 +61,22 @@ in rec {
     };
   };
 
-  services.hostap = svc.hostapd.build {
-    interface = config.hardware.networkInterfaces.wlan;
-    params = {
-      country_code = "GB";
-      hw_mode = "g";
-      wmm_enabled = 1;
-      ieee80211n = 1;
-      inherit (secrets) ssid channel wpa_passphrase;
-      auth_algs = 1; # 1=wpa2, 2=wep, 3=both
-      wpa = 2; # 1=wpa, 2=wpa2, 3=both
-      wpa_key_mgmt = "WPA-PSK";
-      wpa_pairwise = "TKIP CCMP"; # auth for wpa (may not need this?)
-      rsn_pairwise = "CCMP"; # auth for wpa2
-    };
-  };
-
-  services.int = svc.bridge.primary.build {
-    ifname = "int";
-  };
-
-  services.dhcpc = svc.network.dhcp.client.build {
-    interface = services.int;
-    dependencies = [ config.services.hostname ];
-  };
-
-  services.bridge = svc.bridge.members.build {
-    primary = services.int;
-    members = with config.hardware.networkInterfaces; [
+  profile.wap = {
+    interfaces =  with config.hardware.networkInterfaces; [
       lan
       wlan
     ];
-  };
 
-  services.sshd = svc.ssh.build {};
-
-  services.resolvconf = oneshot rec {
-    dependencies = [ services.dhcpc ];
-    name = "resolvconf";
-    # CHECK: https://udhcp.busybox.net/README.udhcpc says
-    # 'A list of DNS server' but doesn't say what separates the
-    # list members. Assuming it's a space or other IFS character
-    up = ''
-      . ${serviceFns}
-      ( in_outputs ${name}
-      for i in $(output ${services.dhcpc} dns); do
-        echo "nameserver $i" > resolv.conf
-      done
-      )
-    '';
-  };
-  filesystem = dir {
-    etc = dir {
-      "resolv.conf" = symlink "${services.resolvconf}/.outputs/resolv.conf";
+    wireless = {
+      networks.${secrets.ssid} = {
+        interface = config.hardware.networkInterfaces.wlan;
+        inherit (secrets) channel wpa_passphrase;
+        country_code = "GB";
+        hw_mode = "g";
+        wmm_enabled = 1;
+        ieee80211n = 1;
+      };
     };
-  };
-
-  services.defaultroute4 = svc.network.route.build {
-    via = "$(output ${services.dhcpc} router)";
-    target = "default";
-    dependencies = [services.dhcpc];
   };
 
   users.root.passwd = lib.mkForce secrets.root.passwd;
