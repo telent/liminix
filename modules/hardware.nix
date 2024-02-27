@@ -67,7 +67,7 @@ in {
       };
       loadAddress = mkOption { type = types.ints.unsigned; default = null; };
       entryPoint = mkOption { type = types.ints.unsigned; };
-      alignment = mkOption { type = types.ints.unsigned; default = null; description = "Alignment passed to `mkimage` for FIT"; };
+      alignment = mkOption { type = types.nullOr  types.ints.unsigned; default = null; description = "Alignment passed to `mkimage` for FIT"; };
       radios = mkOption {
         description = ''
           Kernel modules (from mac80211 package) required for the
