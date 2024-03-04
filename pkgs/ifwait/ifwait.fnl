@@ -34,9 +34,8 @@
       (os.exit 0))))
 
 (let [parameters
-      (or
-       (parse-args arg)
-       (assert false (.. "Usage: " (. arg 0) " [-v] ifname [present|up|running]")))]
+      (assert (parse-args arg)
+              (.. "Usage: " (. arg 0) " [-v] ifname [present|up|running]"))]
   (when parameters.verbose
     (print (.. (. arg 0) ": waiting for "
                parameters.link " to be " parameters.expecting)))
