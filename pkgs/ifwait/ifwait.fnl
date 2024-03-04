@@ -2,9 +2,7 @@
 
 ; (local { : view} (require :fennel))
 
-(fn assoc [tbl k v]
-  (tset tbl k v)
-  tbl)
+(local { : assoc } (require :anoia))
 
 (fn parse-args [args]
   (match args
