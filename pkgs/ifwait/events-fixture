@@ -1,0 +1,195 @@
+{:event "newlink"
+ :hwaddr "00:00:00:00:00:00"
+ :index 1
+ :mtu 65536
+ :name "lo"
+ :running "yes"
+ :stamp 857161382
+ :up "yes"}
+{:event "newlink"
+ :hwaddr "50:3e:aa:08:df:52"
+ :index 2
+ :mtu 1500
+ :name "enp1s0"
+ :running "no"
+ :stamp 857161382
+ :up "yes"}
+{:event "newlink"
+ :hwaddr "1c:1b:0d:9c:39:2d"
+ :index 3
+ :mtu 1500
+ :name "enp0s31f6"
+ :running "yes"
+ :stamp 857161382
+ :up "yes"}
+{:event "newlink"
+ :hwaddr "da:4d:53:c3:54:43"
+ :index 4
+ :mtu 1500
+ :name "vbridge0"
+ :running "yes"
+ :stamp 857161382
+ :up "yes"}
+{:event "newlink"
+ :hwaddr "00:28:f8:69:fa:14"
+ :index 6
+ :mtu 1500
+ :name "wlp4s0"
+ :running "no"
+ :stamp 857161382
+ :up "no"}
+{:event "newlink"
+ :hwaddr "02:42:b1:e6:e5:bd"
+ :index 7
+ :mtu 1500
+ :name "br-7ddfef4820c5"
+ :running "no"
+ :stamp 857161382
+ :up "yes"}
+{:event "newlink"
+ :hwaddr "02:42:8d:d4:36:34"
+ :index 8
+ :mtu 1500
+ :name "br-95da8b40a7cc"
+ :running "yes"
+ :stamp 857161382
+ :up "yes"}
+{:event "newlink"
+ :hwaddr "02:42:bc:cf:a8:5e"
+ :index 9
+ :mtu 1500
+ :name "docker0"
+ :running "no"
+ :stamp 857161382
+ :up "yes"}
+{:event "newlink"
+ :hwaddr "b6:66:50:69:33:a6"
+ :index 11
+ :mtu 1500
+ :name "veth2ff6ec3"
+ :running "yes"
+ :stamp 857161382
+ :up "yes"}
+{:event "newlink"
+ :hwaddr "e6:94:c8:48:f3:97"
+ :index 13
+ :mtu 1500
+ :name "veth0913974"
+ :running "yes"
+ :stamp 857161382
+ :up "yes"}
+{:event "newlink"
+ :hwaddr "9a:87:d8:f2:c6:96"
+ :index 15
+ :mtu 1500
+ :name "veth0e74156"
+ :running "yes"
+ :stamp 857161382
+ :up "yes"}
+{:event "newlink"
+ :hwaddr "5e:d2:92:b9:5f:6d"
+ :index 17
+ :mtu 1500
+ :name "veth89a36b3"
+ :running "yes"
+ :stamp 857161382
+ :up "yes"}
+{:event "newlink"
+ :hwaddr "ca:88:3f:09:bc:51"
+ :index 19
+ :mtu 1500
+ :name "veth73c1e0b"
+ :running "yes"
+ :stamp 857161382
+ :up "yes"}
+{:event "newlink"
+ :hwaddr "b6:7d:5c:38:89:1d"
+ :index 21
+ :mtu 1500
+ :name "dummy0"
+ :running "no"
+ :stamp 857161382
+ :up "no"}
+{:event "newlink"
+ :hwaddr "52:f0:46:da:0c:0c"
+ :index 22
+ :mtu 1500
+ :name "dummy1"
+ :running "yes"
+ :stamp 857161382
+ :up "yes"}
+{:event "newneigh"
+ :hwaddr "00:22:61:3d:f7:54"
+ :index 4
+ :ip "192.168.8.140"
+ :probes 1
+ :stamp 857165355
+ :state "stale"}
+{:event "delneigh"
+ :hwaddr "5c:60:ba:58:34:93"
+ :index 3
+ :stamp 857166891
+ :state "stale"}
+{:event "newneigh"
+ :hwaddr "80:64:6f:9e:15:02"
+ :index 4
+ :ip "192.168.8.161"
+ :probes 1
+ :stamp 857172523
+ :state "stale"}
+{:event "newneigh"
+ :hwaddr "e4:95:6e:42:c2:6c"
+ :index 3
+ :stamp 857174763
+ :state "reachable"}
+{:event "newneigh"
+ :hwaddr "e4:b3:18:76:1b:23"
+ :index 4
+ :ip "2001:8b0:de3a:40de:4708:c700:4de2:9264"
+ :probes 1
+ :stamp 857175595
+ :state "stale"}
+{:event "newneigh"
+ :hwaddr "80:64:6f:9e:10:c6"
+ :index 4
+ :ip "192.168.8.53"
+ :probes 1
+ :stamp 857176619
+ :state "stale"}
+{:event "newneigh"
+ :hwaddr "80:64:6f:9e:15:02"
+ :index 4
+ :ip "192.168.8.161"
+ :probes 1
+ :stamp 857177643
+ :state "probe"}
+{:event "newneigh"
+ :hwaddr "80:64:6f:9e:15:02"
+ :index 4
+ :ip "192.168.8.161"
+ :probes 1
+ :stamp 857177644
+ :state "reachable"}
+{:event "newlink"
+ :hwaddr "b6:7d:5c:38:89:1d"
+ :index 21
+ :mtu 1500
+ :name "dummy0"
+ :running "yes"
+ :stamp 857178258
+ :up "yes"}
+{:event "newlink"
+ :hwaddr "b6:7d:5c:38:89:1d"
+ :index 21
+ :mtu 1500
+ :name "dummy0"
+ :running "no"
+ :stamp 857181661
+ :up "no"}
+{:event "newneigh"
+ :hwaddr "80:64:6f:9e:10:c6"
+ :index 4
+ :ip "192.168.8.53"
+ :probes 1
+ :stamp 857182251
+ :state "probe"}
