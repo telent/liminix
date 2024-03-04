@@ -8,12 +8,14 @@
 , writeScriptBin
 , linotify
 , anoia
+, netlink-lua
 , fennel
 }:
 let packages = [
       linotify
       anoia
       fennel
+      netlink-lua
       lua.pkgs.luafilesystem
     ];
     join = ps: builtins.concatStringsSep ";" ps;
