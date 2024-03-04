@@ -1,3 +1,7 @@
+(fn assoc [tbl k v]
+  (tset tbl k v)
+  tbl)
+
 (fn merge [table1 table2]
   (collect [k v (pairs table2) &into table1]
     k v))
@@ -62,4 +66,4 @@
     (s:sub 1 (- (# s) pad))))
 
 
-{ : merge : split : file-exists? : system : hash : base64url : dup }
+{ : assoc : merge : split : file-exists? : system : hash : base64url : dup }
