@@ -4137,3 +4137,149 @@ p-clock-init,mfp,allows-mesh-bcast crc32 62f7565f
 [   16.762697] ath10k_pci 0000:00:00.0: pdev param 0 not supported by firmware
 [   23.030622] ath10k_pci 0000:00:00.0: pdev param 0 not supported by firmware
 [
+
+
+Tue Feb 27 23:16:27 GMT 2024
+
+We made it a full week with rotuer running internet chez nous and no
+need for an intervention, so I am happy to call it "production". There are
+still things that need fixing but they're mostly within scope for
+a services refresh
+
+I have embarked on "profiles" by creating a wap.nix
+
+I think we could have a service module for resolvconf
+
+It would be good to build a wap.nix example for the belkin and we
+could start looking at ubifs
+
+I've lost a chunk of notes about using events to drive desired service
+state. There is probably only going to be one udev listener, so
+what if we have udev as a config key thusly
+
+udev.rules = [
+{
+  match = {
+   SUBSYSTEM = "rpmsg";
+    ATTR.name = "DATA5_CNTL";
+  };
+
+  service = longrun {
+    name = "lte-modem";
+    run = "blah blah blah";
+  };
+}
+
+# this one would be provided by the bridge module instead of
+# adding bridge member services to the default target
+
+{
+  match = {
+    SUBSYSTEM="net";
+    ID_PATH="pci-0000:04:00.0";
+    ATTR.operstate = "up";
+  };
+
+  service = oneshot {
+    up = "ip link set dev $dev master $(output ${primary} ifname)";
+    down = "ip link set dev $(output ${member} ifname) nomaster";
+  }
+}
+]
+
+This works for udev/sysfs, but we want a similar architecture(sic) for
+user-generated target state so we could have services that run on e.g.
+"is the ppp0 service healthy" or not. Probably there isn't a top-level
+config key for each service though
+
+services.wan = svc.ppoe.build   { .... };
+services.lte = watcher.build {
+  watching = services.wan;
+  match =  {
+    # an expression matching the outputs of the service
+    # to be watched
+    health = "failing";
+  };
+  service = oneshot {
+    run = "start_lte_blah";
+  };
+}
+
+thing is, we could use this syntax also for sysfs watches, but not vice versa
+
+... but it's not quite the same because here we're doing static matches
+on contents of files, whereas the udev one is a query expression on the
+sysfs database. we might need that flexibiity to implement "mount the
+backup drive no matter _which_ damn sda_n_ device it appears as". I don't
+know if there's the same need for service outputs - postulate the
+existence of a collection of services which are all similar enough that
+some other service can watch them all and do $something when one of
+the changes state. Or a single service with very complicated outputs.
+For example, something could watch the snmp database and update service
+status depending on what it finds. Or something something mqtt...
+
+we find that the "match" needs to be interpreted differently according
+to the thing being watched. perhaps the service being watched needs to
+provide a "watch me" interface somehow which accepts match criteria and
+outputs a true/false. Something else then needs to
+
+
+services.addmember = services.udev.watch {
+  match = {
+    SUBSYSTEM = "net";
+    ID_PATH = "pci-0000:04:00.0";
+    ATTR.operstate = "up";
+  };
+
+  service = oneshot {
+    up = "ip link set dev $dev master $(output ${primary} ifname)";
+    down = "ip link set dev $(output ${member} ifname) nomaster";
+  };
+}
+
+Sat Mar  2 15:37:29 GMT 2024
+
+Simply put, what I think it boils down to is that we want a service
+which acts as an actuator or control switch for another service,
+and will start/stop that controlled service according to some
+criteria.
+
+services.addmember = svc.network.ifwatch.build {
+  interface = config.hardware.networkInterfaces.lan1;
+
+  # this should be part of the definition not the params
+  service = oneshot {
+    name = "member-${bridge}-${interface}";
+    up = "ip link set dev $dev master $(output ${primary} ifname)";
+    down = "ip link set dev $(output ${member} ifname) nomaster";
+  };
+}
+
+we could start by writing this. we need to adapt ifwait
+
+Sun Mar  3 17:09:21 GMT 2024
+
+this is annoyingly hard to test. the tests we'd like to write are
+
+1) when it gets events that don't match the requirement, nothing happens
+2) when it gets an event that should start the service, the
+  service starts
+3) when stop should stop
+4) when start and already started, nothing happens
+5) when stop and already stopped, nothing happens
+
+what do we do if service fails to start? s6-rc will eventually reset it
+to "down", I think: do we need to take action?
+
+Mon Mar  4 20:46:55 GMT 2024
+
+# relevant but not correct for this model: https://www.forked.net/forums/viewtopic.php?f=13&t=3490
+
+# power on port 5
+snmpset -v 1 -c private  192.168.5.14 .1.3.6.1.4.1.318.1.1.4.4.2.1.3.5 integer 1
+
+# power off port 5
+snmpset -v 1 -c private  192.168.5.14 .1.3.6.1.4.1.318.1.1.4.4.2.1.3.5 integer 2
+
+# toggle off/on port 5
+snmpset -v 1 -c private  192.168.5.14 .1.3.6.1.4.1.318.1.1.4.4.2.1.3.5 integer 3
