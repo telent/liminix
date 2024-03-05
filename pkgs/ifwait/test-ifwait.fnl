@@ -18,4 +18,8 @@
 
 
 
-(ifwait.run #(event-generator (file-events "events-fixture")))
+(let [gen (event-generator (file-events "events-fixture"))]
+  (ifwait.run #gen)
+  (match (pcall gen)
+    (true _) true
+    (false msg) (error "didn't detect dummy0 up event")))
