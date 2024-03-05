@@ -33,12 +33,17 @@
     (when (. got params.expecting)
       (os.exit 0))))
 
-(let [parameters
-      (assert (parse-args arg)
-              (.. "Usage: " (. arg 0) " [-v] ifname [present|up|running]"))]
-  (when parameters.verbose
-    (print (.. (. arg 0) ": waiting for "
-               parameters.link " to be " parameters.expecting)))
+(fn run []
+  (let [parameters
+        (assert (parse-args arg)
+                (.. "Usage: " (. arg 0) " [-v] ifname [present|up|running]"))]
+    (when parameters.verbose
+      (print (.. (. arg 0) ": waiting for "
+                 parameters.link " to be " parameters.expecting)))
 
-  (each [event (nl.events {:link true})]
-    (run-event parameters event)))
+    (each [event (nl.events {:link true})]
+      (run-event parameters event))))
+
+(when (not (= (. arg 0) "test")) (run))
+
+{ : run  }

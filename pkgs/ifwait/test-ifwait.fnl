@@ -11,6 +11,8 @@
 
 (tset package.loaded :anoia.nl { :events events })
 
-(set _G.arg (doto  ["-v" "dummy0" "up"] (tset 0 "ifwait")))
+(set _G.arg (doto  ["-v" "dummy0" "up"] (tset 0 "test")))
 
-(fennel.dofile "ifwait.fnl" { :correlate true })
+(local ifwait (require :ifwait))
+
+(ifwait.run)
