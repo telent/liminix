@@ -2,12 +2,13 @@
 
 ; (local { : view} (require :fennel))
 
-(local { : assoc } (require :anoia))
+(local { : assoc : system } (require :anoia))
 
 (fn parse-args [args]
   (match args
     ["-v" & rest]  (assoc (parse-args rest) :verbose true)
     ["-t" timeout & rest] (assoc (parse-args rest) :timeout (tonumber timeout))
+    ["-s" service & rest] (assoc (parse-args rest) :service service)
     [linkname "up"] {:link linkname :expecting "up"}
     [linkname "running"] {:link linkname :expecting "running"}
     [linkname "present"] {:link linkname :expecting "present"}
