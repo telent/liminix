@@ -1,8 +1,7 @@
 (local nl (require :anoia.nl))
+(local { : assoc : system } (require :anoia))
 
 ; (local { : view} (require :fennel))
-
-(local { : assoc : system } (require :anoia))
 
 (fn parse-args [args]
   (match args
@@ -31,9 +30,19 @@
 
           _
           {})]
-    (. got params.expecting)))
+    (not (not (. got params.expecting)))))
+
+(var up :unknown)
+(fn toggle-service [service wanted?]
+  (when (not (= up wanted?))
+    (set up
+         (if wanted?
+             (pcall system (.. "s6-rc -u change " service))
+             (not (pcall system (.. "s6-rc -d change " service)))))
+    ))
 
 (fn run [args event-fn]
+  (set up :unknown)
   (let [parameters
         (assert (parse-args args)
                 (.. "Usage: ifwait [-v] ifname [present|up|running]"))]
@@ -41,9 +50,13 @@
       (print (.. "ifwait: waiting for "
                  parameters.link " to be " parameters.expecting)))
 
-    (each [e (event-fn)
-           &until (event-matches? parameters e)]
-      true)))
+    (if parameters.service
+        (each [e (event-fn)]
+          (if (= e.name parameters.link)
+              (toggle-service parameters.service (event-matches? parameters e))))
+        (each [e (event-fn)
+               &until (event-matches? parameters e)]
+          true))))
 
 (when (not (= (. arg 0) "test"))
   (run arg #(nl.events {:link true})))

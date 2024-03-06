@@ -4,6 +4,14 @@
 (var fake-system (fn [s] (print "executing " s)))
 (tset anoia :system #(fake-system $1))
 
+(macro expect= [actual expected]
+  `(let [ve# (view ,expected)
+         va# (view ,actual)]
+     (when (not (= ve# va#))
+       (assert false
+               (.. "\nexpected " ve# "\ngot " va#)
+               ))))
+
 (fn event-generator [events]
   (coroutine.wrap
    (fn []
@@ -19,34 +27,93 @@
 (local ifwait (require :ifwait))
 
 (let [gen (event-generator (file-events "events-fixture"))]
-  (ifwait.run ["-v" "dummy0" "up"] #gen)
+  (ifwait.run ["dummy0" "up"] #gen)
   (match (pcall gen)
     (true _) true
     (false msg) (error "didn't detect dummy0 up event")))
 
-(var succeeded? false)
+(var upsies [])
 (set fake-system
      (fn [s]
-       (print "exec" s)
-       (if (s:match "addmember") (set succeeded? true))))
+       (if (s:match "-u change addmember")
+           (table.insert upsies :u)
+           (s:match "-d change addmember")
+           (table.insert upsies :d))))
 
-(let [events
-      [{:event "newlink"
-        :hwaddr "b6:7d:5c:38:89:1d"
-        :index 21
-        :mtu 1500
-        :name "dummy0"
-        :running "no"
-        :stamp 857161382
-        :up "no"}
-       {:event "newlink"
-        :hwaddr "52:f0:46:da:0c:0c"
-        :index 22
-        :mtu 1500
-        :name "dummy0"
-        :running "no"
-        :stamp 857161383
-        :up "yes"}]
-      gen (event-generator events)]
-  (ifwait.run ["-v" "-s" "addmember" "dummy0" "up"] #gen)
-  (assert succeeded?))
+(fn newlink [name up running]
+  {:event "newlink"
+   :hwaddr "b6:7d:5c:38:89:1d"
+   :index (string.unpack ">i2" name)
+   :mtu 1500
+   : name
+   : running
+   :stamp 857161382
+   : up })
+
+"when it gets events that don't match the interface, nothing happens"
+
+(let [gen (-> [(newlink "eth1" "no" "no")] event-generator)]
+  (set upsies [])
+  (ifwait.run [ "-s" "addmember" "dummy0" "up"] #gen)
+  (expect= upsies []))
+
+"when it gets an event that should start the service, the service starts"
+
+(let [gen (->
+           [(newlink "dummy0" "no" "no")
+            (newlink "dummy0" "yes" "no")
+            (newlink "eth1" "no" "no")]
+           event-generator)]
+  (set upsies [])
+  (ifwait.run ["-s" "addmember" "dummy0" "up"] #gen)
+  (expect= upsies [:d :u]))
+
+"when it gets an event that should stop the service, the service stops"
+
+(let [gen (->
+           [(newlink "dummy0" "no" "no")
+            (newlink "dummy0" "yes" "no")
+            (newlink "dummy0" "no" "no")
+            ]
+           event-generator)]
+  (set upsies [])
+  (ifwait.run ["-s" "addmember" "dummy0" "up"] #gen)
+  (expect= upsies [:d :u :d]))
+
+"it does not call s6-rc again if the service is already in required state"
+
+(let [gen (->
+           [(newlink "dummy0" "no" "no")
+            (newlink "dummy0" "yes" "no")
+            (newlink "dummy0" "yes" "yes")
+            (newlink "dummy0" "yes" "yes")
+            (newlink "dummy0" "yes" "no")
+            (newlink "dummy0" "no" "no")
+            ]
+           event-generator)]
+  (set upsies [])
+  (ifwait.run ["-s" "addmember" "dummy0" "up"] #gen)
+  (expect= upsies [:d :u :d]))
+
+"it handles an error return from s6-rc"
+
+(set fake-system
+     (fn [s]
+       (if (s:match "-u change addmember")
+           (table.insert upsies :u)
+           (s:match "-d change addmember")
+           (table.insert upsies :d))
+       (error "false")
+       ))
+
+(let [gen (->
+           [(newlink "dummy0" "yes" "no")
+            (newlink "dummy0" "yes" "yes")
+            (newlink "dummy0" "yes" "yes")
+            (newlink "dummy0" "yes" "no")
+            (newlink "dummy0" "no" "no")
+            ]
+           event-generator)]
+  (set upsies [])
+  (ifwait.run ["-s" "addmember" "dummy0" "up"] #gen)
+  (expect= upsies [:u :u :u :u]))
