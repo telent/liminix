@@ -15,7 +15,7 @@
     [linkname nil] {:link linkname :expecting "present"}
     _  nil))
 
-(fn run-event [params v]
+(fn event-matches? [params v]
   (let [got
         (match v
           ;; - up: Reflects the administrative state of the interface (IFF_UP)
@@ -42,7 +42,7 @@
                  parameters.link " to be " parameters.expecting)))
 
     (each [e (event-fn)
-           &until (run-event parameters e)]
+           &until (event-matches? parameters e)]
       true)))
 
 (when (not (= (. arg 0) "test"))
