@@ -11,15 +11,11 @@
     (icollect [_ ast parse]
       ast)))
 
-
-(set _G.arg (doto  ["-v" "dummy0" "up"] (tset 0 "test")))
-
+(set _G.arg (doto [] (tset 0 "test")))
 (local ifwait (require :ifwait))
 
-
-
 (let [gen (event-generator (file-events "events-fixture"))]
-  (ifwait.run #gen)
+  (ifwait.run ["-v" "dummy0" "up"] #gen)
   (match (pcall gen)
     (true _) true
     (false msg) (error "didn't detect dummy0 up event")))
