@@ -73,7 +73,7 @@
         MTK_INFRACFG = "y";
 
         MTK_PMIC_WRAP = "y";
-        MTK_EFUSE="y";
+        NVMEM_MTK_EFUSE="y";
         # MTK_HSDMA="y";
         MTK_SCPSYS="y";
         MTK_SCPSYS_PM_DOMAINS="y";
@@ -92,7 +92,6 @@
 
         MEDIATEK_GE_PHY = "y";
         # MEDIATEK_MT6577_AUXADC = "y";
-        # MEDIATEK_WATCHDOG = "y";
         NET_MEDIATEK_SOC = "y";
         NET_MEDIATEK_SOC_WED = "y";
         NET_MEDIATEK_STAR_EMAC = "y"; # this enables REGMAP_MMIO
