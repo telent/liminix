@@ -4289,3 +4289,13 @@ Wed Mar  6 18:24:29 GMT 2024
 What happens when we attempt to start the service but it fails?  We
 assume the start was successful so we won't try and restart it again
 next time we get an event that should cause it to start.
+
+Thu Mar  7 11:48:26 GMT 2024
+
+what next?
+
+- fennel script needs to know where s6-rc is
+- some nix syntax
+- update bridge module members.nix to use the new thing
+
+I can't find a ci derivation that uses the bridge.
