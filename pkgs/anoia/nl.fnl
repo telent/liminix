@@ -1,6 +1,6 @@
 (local netlink (require :netlink))
 
-(local { : view } (require :fennel))
+; (local { : view } (require :fennel))
 
 (fn events [groups]
   (let [sock (netlink.socket)]
