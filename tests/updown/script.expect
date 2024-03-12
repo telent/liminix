@@ -1,0 +1,29 @@
+set timeout 10
+
+spawn socat unix-connect:vm/monitor -
+set monitor_id $spawn_id
+
+expect "(qemu)"
+send "set_link virtio-net-pci.1 off\n"
+expect "(qemu)"
+send "set_link virtio-net-pci.0 off\n"
+expect "(qemu)"
+send "c\r\n"
+spawn socat unix-connect:vm/console -
+set console_id $spawn_id
+
+expect "BusyBox" 
+expect "#" { send "PS1=RE\\ADY_\\ \r" }
+expect "READY_" { send "sleep 3\r" }
+expect "READY_" { send "ip link\r" }
+expect "READY_" { send "cat /sys/class/net/lan/operstate\r" }
+expect {
+  "down" { }
+  "up" { exit 1 }
+}
+expect "READY_" { send "s6-rc -a -u change\r"  }
+expect {
+  "unable to take locks" { exit 1 }
+  "READY_" { send "hostname\r" }
+}
+expect "updown"
