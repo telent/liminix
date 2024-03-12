@@ -8,4 +8,5 @@
   min-copy-closure =  import ./min-copy-closure/test.nix;
   fennel = import ./fennel/test.nix;
   tftpboot = import ./tftpboot/test.nix;
+  updown = import ./updown/test.nix;
 }
