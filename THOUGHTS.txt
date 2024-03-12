@@ -4299,3 +4299,25 @@ what next?
 - update bridge module members.nix to use the new thing
 
 I can't find a ci derivation that uses the bridge.
+
+Mon Mar 11 20:31:45 GMT 2024
+
+Create a qemu config where wan and lan devices are bridged into a
+single bridge
+
+start qemu paused
+Use qemu monitor commands to no-carrier the network devices
+set_link virtio-net-pci.1 off
+set_link virtio-net-pci.0 off
+
+Boot the system
+
+See if both devices are bridge members
+
+See if reboot is possible
+
+Use qemu monitor commands to enable the network devices
+set_link virtio-net-pci.1 on
+set_link virtio-net-pci.0 on
+
+See if both devices are bridge members
