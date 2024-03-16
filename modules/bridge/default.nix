@@ -14,6 +14,8 @@ let
   inherit (pkgs) liminix;
 in
 {
+  imports = [ ../ifwait ];
+
   options = {
     system.service.bridge = {
       primary = mkOption { type = liminix.lib.types.serviceDefn; };
@@ -27,7 +29,7 @@ in
         description = "bridge interface name to create";
       };
     };
-    members = liminix.callService ./members.nix {
+    members = config.system.callService ./members.nix {
       primary = mkOption {
         type = liminix.lib.types.interface;
         description = "primary bridge interface";
@@ -47,5 +49,5 @@ in
     # a better way to test for the existence of vlan config:
     # maybe the module should set an `enabled` attribute?
     BRIDGE_VLAN_FILTERING = "y";
-  };    
+  };
 }
