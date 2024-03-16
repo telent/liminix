@@ -31,6 +31,8 @@ let
     , producer-for ? null
     , consumer-for ? null
     , pipeline-name ? null
+    , timeout-up ? 30000        # milliseconds
+    , timeout-down ? 0
     , dependencies ? []
     , contents ? []
     , buildInputs ? []
@@ -39,7 +41,7 @@ let
       # we use stdenvNoCC to avoid generating derivations with names
       # like foo.service-mips-linux-musl
       inherit name serviceType up down run notification-fd
-        producer-for consumer-for pipeline-name;
+        producer-for consumer-for pipeline-name timeout-up timeout-down;
       buildInputs = buildInputs ++ dependencies ++ contents;
       dependencies = builtins.map (d: d.name) dependencies;
       contents = builtins.map (d: d.name) contents;
