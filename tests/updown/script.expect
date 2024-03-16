@@ -13,9 +13,14 @@ spawn socat unix-connect:vm/console -
 set console_id $spawn_id
 
 expect "BusyBox" 
-expect "#" { send "PS1=RE\\ADY_\\ \r" }
-expect "READY_" { send "sleep 3\r" }
-expect "READY_" { send "ip link\r" }
+expect "#" { send "PS1=RE\\ADY_\\ ; stty -echo \r" }
+expect "READY_" { send "s6-rc -b -a list\r"  } ; # -b waits for s6-rc lock
+expect "READY_" { send "ls /sys/class/net/lan/master\r" }
+expect {
+  "No such file or directory" { }
+  timeout { exit 1 }
+}
+
 expect "READY_" { send "cat /sys/class/net/lan/operstate\r" }
 expect {
   "down" { }
@@ -24,6 +29,36 @@ expect {
 expect "READY_" { send "s6-rc -a -u change\r"  }
 expect {
   "unable to take locks" { exit 1 }
-  "READY_" { send "hostname\r" }
+  "READY_" { send "\r" }
 }
-expect "updown"
+
+set spawn_id $monitor_id
+send "\r"
+expect "(qemu)"
+send "set_link virtio-net-pci.1 on\n"
+expect "(qemu)"
+send "set_link virtio-net-pci.0 on\n"
+expect "(qemu)"
+set spawn_id $console_id
+
+expect "entered forwarding state"
+send "\r"
+expect "READY_" { send "cat /sys/class/net/lan/operstate\r" }
+expect {
+  "down" {  exit 1 }
+  "up" { }
+}
+
+expect "READY_" { send "cat /sys/class/net/lan/master/uevent\r" }
+expect {
+  "INTERFACE=int" { }
+  timeout { exit 1 }
+}
+
+expect "READY_" { send "s6-rc listall int.link.a.10.8.0.1.member.lan.link ; hostname\r"  }
+
+expect {
+  "updown"  {}
+  timeout { exit 1 }
+}
+
