@@ -4322,6 +4322,16 @@ set_link virtio-net-pci.0 on
 
 See if both devices are bridge members
 
+disable again,check if back to starting position
+
+
+Wed Mar 13 00:00:16 GMT 2024
+
+aside: "trigger" is the least bad word I've thought of so far for
+these services that stop/start other services
+
+telent: yeah, in general 'ps afuxww' (or s6-ps -H :)) is the way to solve this, look for hung s6-rc processes and in particular their s6-svlisten1 children, where the command line will show what service is still waiting for readiness
+
 Wed Mar 20 19:34:36 GMT 2024
 
 Because I forgot hoe to rebuild rotuer, I tihnk it is time to improve
