@@ -52,6 +52,7 @@ let
     , outputs ? []
     , notification-fd ? null
     , dependencies ? []
+    , buildInputs ? []
     , ...
   } @ args:
     let logger = service {
@@ -63,7 +64,7 @@ let
           pipeline-name = "${name}-pipeline";
         };
     in service (args // {
-      buildInputs = [ logger ];
+      buildInputs = buildInputs ++ [ logger ];
       serviceType = "longrun";
       run = serviceScript "${run}\n${cleanupScript name}";
       producer-for = "${name}-log";
