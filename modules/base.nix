@@ -29,6 +29,10 @@ in {
     services = mkOption {
       type = types.attrsOf type_service;
     };
+    system.callService = mkOption {
+      type = types.functionTo (types.functionTo types.anything);
+    };
+
     filesystem = mkOption {
       type = types.anything;
       description = ''
@@ -110,6 +114,31 @@ in {
       "rootfstype=${config.rootfsType}"
       "fw_devlink=off"
     ] ++ lib.optional (config.rootOptions != null) "rootflags=${config.rootOptions}";
+
+    system.callService = path : parameters :
+      let
+        typeChecked = caller: type: value:
+          let
+            inherit (lib) types mergeDefinitions;
+            defs = [{ file = caller; inherit value; }];
+            type' = types.submodule { options = type; };
+          in (mergeDefinitions [] type' defs).mergedValue;
+        cp = lib.callPackageWith(pkgs // { svc = config.system.service; });
+        pkg = cp path {};
+        checkTypes = t : p : typeChecked (builtins.toString path) t p;
+      in {
+        inherit parameters;
+        build = { dependencies ? [], ... } @ args :
+          let
+            s = pkg (checkTypes parameters
+              (builtins.removeAttrs args ["dependencies"]));
+          in s.overrideAttrs (o: {
+            dependencies = (builtins.map (d: d.name) dependencies) ++ o.dependencies;
+            buildInputs = dependencies ++ o.buildInputs;
+          });
+      };
+
+
 
     users.root = {
       uid = 0; gid= 0; gecos = "Root of all evaluation";
