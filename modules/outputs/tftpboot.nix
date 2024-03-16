@@ -122,7 +122,7 @@ in {
             fdtput -p -t lx dtb /reserved-memory/$node reg $ac_prefix $(hex $rootfsStart) $sz_prefix $(hex $rootfsSize)
 
             cmd="liminix ${cmdline} mtdparts=phram0:''${rootfsSize}(rootfs) phram.phram=phram0,''${rootfsStart},''${rootfsSize},${toString config.hardware.flash.eraseBlockSize} root=/dev/mtdblock0";
-            fdtput -t s dtb /chosen bootargs "$cmd"
+            fdtput -t s dtb /chosen ${config.boot.commandLineDtbNode} "$cmd"
 
             dtbSize=$(binsize ./dtb )
 
