@@ -37,8 +37,8 @@
   (when (not (= up wanted?))
     (set up
          (if wanted?
-             (pcall system (.. "s6-rc -u change " service))
-             (not (pcall system (.. "s6-rc -d change " service)))))
+             (pcall system (.. "s6-rc -b -u change " service))
+             (not (pcall system (.. "s6-rc -b -d change " service)))))
     ))
 
 (fn run [args event-fn]
