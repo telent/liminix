@@ -8,6 +8,7 @@
   config,
   pkgs,
   lib,
+  modulesPath,
   ...
 }: let
   secrets = import ./extneder-secrets.nix;
@@ -20,8 +21,8 @@ in rec {
   };
 
   imports = [
-    ../modules/profiles/wap.nix
-    ../modules/vlan
+    "${modulesPath}/profiles/wap.nix"
+    "${modulesPath}/vlan"
   ];
 
   hostname = "extneder";

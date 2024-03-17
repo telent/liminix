@@ -20,6 +20,9 @@ let
   });
 
   eval = pkgs.lib.evalModules {
+    specialArgs = {
+      modulesPath = builtins.toString ./modules;
+    };
     modules = [
       { _module.args = { inherit pkgs; inherit (pkgs) lim; }; }
       ./modules/hardware.nix
