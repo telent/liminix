@@ -150,26 +150,6 @@ in rec {
       in lib.recursiveUpdate defaults secrets.firewallRules;
   };
 
-  services.packet_forwarding = svc.network.forward.build { };
-
-  services.dhcp6c =
-    let client = svc.dhcp6c.client.build {
-          interface = config.services.wan;
-        };
-    in bundle {
-      name = "dhcp6c";
-      contents = [
-        (svc.dhcp6c.prefix.build {
-          inherit client;
-          interface = config.services.int;
-        })
-        (svc.dhcp6c.address.build {
-          inherit client;
-          interface = config.services.wan;
-        })
-      ];
-    };
-
   defaultProfile.packages = with pkgs; [
     min-collect-garbage
     nftables

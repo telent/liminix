@@ -2,8 +2,9 @@
 let
   svc = config.system.service;
   cfg = config.profile.gateway;
-  inherit (lib) mkOption mkEnableOption mdDoc types optional optionals;
+  inherit (lib) mkOption mkEnableOption mkIf mdDoc types optional optionals;
   inherit (pkgs) liminix;
+  inherit (liminix.services) bundle oneshot;
   hostaps =
     let
       defaults = {
@@ -73,7 +74,7 @@ in {
     };
 
     services.wan = svc.pppoe.build {
-      interface = config.hardware.networkInterfaces.wan;
+      inherit (cfg.wan) interface;
       ppp-options = [
         "debug" "+ipv6" "noauth"
         "name" cfg.wan.username
@@ -81,6 +82,27 @@ in {
       ];
     };
 
+    services.packet_forwarding = svc.network.forward.build { };
+
+    services.dhcp6c =
+      let
+        client = svc.dhcp6c.client.build {
+          interface = config.services.wan;
+        };
+        bundl = bundle {
+          name = "dhcp6c";
+          contents = [
+            (svc.dhcp6c.prefix.build {
+              inherit client;
+              interface = config.services.int;
+            })
+            (svc.dhcp6c.address.build {
+              inherit client;
+              interface = config.services.wan;
+            })
+          ];
+        };
+      in mkIf cfg.wan.dhcp6.enable bundl;
   };
 
 #   services.dns =
