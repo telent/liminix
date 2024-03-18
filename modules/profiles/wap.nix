@@ -40,7 +40,6 @@ in {
     ../network
     ../hostapd
     ../bridge
-    ../ssh
     { config.services = hostaps; }
   ];
 
@@ -54,7 +53,6 @@ in {
     };
   };
   config = {
-    services.sshd = svc.ssh.build {};
 
     services.int = svc.bridge.primary.build {
       ifname = "int";
