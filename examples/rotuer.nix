@@ -52,6 +52,13 @@ in rec {
         family = "inet"; address ="${secrets.lan.prefix}.1"; prefixLength = 24;
       };
     };
+    wan = {
+      interface = config.hardware.networkInterfaces.wan;
+      username = secrets.l2tp.name;
+      password = secrets.l2tp.password;
+      dhcp6.enable = true;
+    };
+
     wireless.networks = {
       telent = {
         interface = config.hardware.networkInterfaces.wlan;
@@ -104,23 +111,14 @@ in rec {
       domain = secrets.domainName;
     };
 
-  services.wan = svc.pppoe.build {
-    interface = config.hardware.networkInterfaces.wan;
-    ppp-options = [
-      "debug" "+ipv6" "noauth"
-      "name" secrets.l2tp.name
-      "password" secrets.l2tp.password
-    ];
-  };
-
   services.resolvconf = oneshot rec {
-    dependencies = [ services.wan ];
+    dependencies = [ config.services.wan ];
     name = "resolvconf";
     up = ''
       . ${serviceFns}
       ( in_outputs ${name}
-       echo "nameserver $(output ${services.wan} ns1)" > resolv.conf
-       echo "nameserver $(output ${services.wan} ns2)" >> resolv.conf
+       echo "nameserver $(output ${config.services.wan} ns1)" > resolv.conf
+       echo "nameserver $(output ${config.services.wan} ns2)" >> resolv.conf
        chmod 0444 resolv.conf
       )
     '';
@@ -135,15 +133,15 @@ in rec {
     };
 
   services.defaultroute4 = svc.network.route.build {
-    via = "$(output ${services.wan} address)";
+    via = "$(output ${config.services.wan} address)";
     target = "default";
-    dependencies = [ services.wan ];
+    dependencies = [ config.services.wan ];
   };
 
   services.defaultroute6 = svc.network.route.build {
-    via = "$(output ${services.wan} ipv6-peer-address)";
+    via = "$(output ${config.services.wan} ipv6-peer-address)";
     target = "default";
-    interface = services.wan;
+    interface = config.services.wan;
   };
 
   services.firewall = svc.firewall.build {
@@ -156,7 +154,7 @@ in rec {
 
   services.dhcp6c =
     let client = svc.dhcp6c.client.build {
-          interface = services.wan;
+          interface = config.services.wan;
         };
     in bundle {
       name = "dhcp6c";

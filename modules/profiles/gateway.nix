@@ -36,6 +36,13 @@ in {
         type = types.attrs;
       };
     };
+    wan = {
+      interface = mkOption { type = liminix.lib.types.interface; };
+      username =  mkOption { type = types.str; };
+      password =  mkOption { type = types.str; };
+      dhcp6.enable = mkOption { type = types.bool; };
+    };
+
     wireless = mkOption {
       type = types.attrsOf types.anything;
     };
@@ -64,6 +71,16 @@ in {
       primary = config.services.int;
       members = cfg.lan.interfaces;
     };
+
+    services.wan = svc.pppoe.build {
+      interface = config.hardware.networkInterfaces.wan;
+      ppp-options = [
+        "debug" "+ipv6" "noauth"
+        "name" cfg.wan.username
+        "password" cfg.wan.password
+      ];
+    };
+
   };
 
 #   services.dns =
@@ -87,14 +104,6 @@ in {
 #       domain = secrets.domainName;
 #     };
 
-#   services.wan = svc.pppoe.build {
-#     interface = config.hardware.networkInterfaces.wan;
-#     ppp-options = [
-#       "debug" "+ipv6" "noauth"
-#       "name" secrets.l2tp.name
-#       "password" secrets.l2tp.password
-#     ];
-#   };
 
 #   services.resolvconf = oneshot rec {
 #     dependencies = [ services.wan ];
