@@ -55,32 +55,6 @@ in {
     { config.services = hostaps; }
   ];
 
-
-
-#   services.hostap = svc.hostapd.build {
-#     interface = config.hardware.networkInterfaces.wlan;
-#     params = {
-#       ssid = secrets.ssid;
-#       hw_mode="g";
-#       channel = "2";
-#       ieee80211n = 1;
-#     } // wirelessConfig;
-#   };
-
-#   services.hostap5 = svc.hostapd.build {
-#     interface = config.hardware.networkInterfaces.wlan5;
-#     params = rec {
-#       ssid = "${secrets.ssid}5";
-#       hw_mode="a";
-#       channel = 36;
-#       ht_capab = "[HT40+]";
-#       vht_oper_chwidth = 1;
-#       vht_oper_centr_freq_seg0_idx = channel + 6;
-#       ieee80211n = 1;
-#       ieee80211ac = 1;
-#     } // wirelessConfig;
-#   };
-
   config = {
     services.int = svc.network.address.build ({
       interface = svc.bridge.primary.build { ifname = "int"; };
@@ -91,14 +65,6 @@ in {
       members = cfg.lan.interfaces;
     };
   };
-#   services.ntp = svc.ntp.build {
-#     pools = { "pool.ntp.org" = ["iburst"]; };
-#     makestep = { threshold = 1.0; limit = 3; };
-#   };
-
-#   services.sshd = svc.ssh.build { };
-
-#   users.root = secrets.root;
 
 #   services.dns =
 #     let interface = services.int;
