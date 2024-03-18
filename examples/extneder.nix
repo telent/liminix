@@ -12,6 +12,7 @@
   ...
 }: let
   secrets = import ./extneder-secrets.nix;
+  svc = config.system.service;
 in rec {
   boot = {
     tftp = {
@@ -23,6 +24,7 @@ in rec {
   imports = [
     "${modulesPath}/profiles/wap.nix"
     "${modulesPath}/vlan"
+    "${modulesPath}/ssh"
   ];
 
   hostname = "extneder";
@@ -45,6 +47,7 @@ in rec {
     };
   };
 
+  services.sshd = svc.ssh.build {};
   users.root.passwd = lib.mkForce secrets.root.passwd;
   defaultProfile.packages = with pkgs; [nftables strace tcpdump swconfig];
 }
