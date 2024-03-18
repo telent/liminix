@@ -6,13 +6,13 @@
 # problems.
 
 
-{ config, pkgs, lib, ... } :
+{ config, pkgs, lib, modulesPath, ... } :
 let
   secrets = {
     domainName = "fake.liminix.org";
     firewallRules = {};
   } // (import ./rotuer-secrets.nix);
-  inherit (pkgs.liminix.services) oneshot longrun bundle;
+  inherit (pkgs.liminix.services) oneshot bundle;
   inherit (pkgs) serviceFns;
   svc = config.system.service;
   wirelessConfig =  {
@@ -36,25 +36,28 @@ in rec {
   };
 
   imports = [
-    ../modules/wlan.nix
-    ../modules/network
-    ../modules/ppp
-    ../modules/dnsmasq
-    ../modules/dhcp6c
-    ../modules/firewall
-    ../modules/hostapd
-    ../modules/bridge
-    ../modules/ntp
-    ../modules/schnapps
-    ../modules/ssh
-    ../modules/outputs/btrfs.nix
-    ../modules/outputs/extlinux.nix
+    "${modulesPath}/profiles/gateway.nix"
+    "${modulesPath}/schnapps"
+    "${modulesPath}/outputs/btrfs.nix"
+    "${modulesPath}/outputs/extlinux.nix"
   ];
   hostname = "rotuer";
   rootfsType = "btrfs";
   rootOptions = "subvol=@";
   boot.loader.extlinux.enable = true;
 
+  profile.gateway = {
+    lan = {
+      interfaces =  with config.hardware.networkInterfaces;
+        [
+          wlan wlan5
+          lan0 lan1 lan2 lan3 lan4
+        ];
+      address = {
+        family = "inet"; address ="${secrets.lan.prefix}.1"; prefixLength = 24;
+      };
+    };
+  };
   services.hostap = svc.hostapd.build {
     interface = config.hardware.networkInterfaces.wlan;
     params = {
@@ -79,24 +82,6 @@ in rec {
     } // wirelessConfig;
   };
 
-  services.int = svc.network.address.build {
-    interface = svc.bridge.primary.build { ifname = "int"; };
-    family = "inet"; address ="${secrets.lan.prefix}.1"; prefixLength = 24;
-  };
-
-  services.bridge =  svc.bridge.members.build {
-    primary = services.int;
-    members = with config.hardware.networkInterfaces;
-      [ wlan
-        wlan5
-        lan0
-        lan1
-        lan2
-        lan3
-        lan4
-      ];
-  };
-
   services.ntp = svc.ntp.build {
     pools = { "pool.ntp.org" = ["iburst"]; };
     makestep = { threshold = 1.0; limit = 3; };
@@ -107,7 +92,7 @@ in rec {
   users.root = secrets.root;
 
   services.dns =
-    let interface = services.int;
+    let interface = config.services.int;
     in svc.dnsmasq.build {
       resolvconf = services.resolvconf;
       inherit interface;
@@ -186,11 +171,11 @@ in rec {
       contents = [
         (svc.dhcp6c.prefix.build {
           inherit client;
-          interface = services.int;
+          interface = config.services.int;
         })
         (svc.dhcp6c.address.build {
           inherit client;
-          interface = services.wan;
+          interface = config.services.wan;
         })
       ];
     };
