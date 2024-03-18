@@ -3,7 +3,7 @@ let
   svc = config.system.service;
   cfg = config.profile.gateway;
   inherit (lib) mkOption mkEnableOption mkIf mdDoc types optional optionals;
-  inherit (pkgs) liminix;
+  inherit (pkgs) liminix serviceFns;
   inherit (liminix.services) bundle oneshot;
   hostaps =
     let
@@ -36,10 +36,17 @@ in {
       address = mkOption {
         type = types.attrs;
       };
+      prefix = mkOption { type = types.str; };
+      dhcp = {
+        start = mkOption { type = types.int; };
+        end = mkOption { type = types.int; };
+        hosts = mkOption { type = types.attrs; };
+        localDomain = mkOption { type = types.str; };
+      };
     };
     wan = {
       interface = mkOption { type = liminix.lib.types.interface; };
-      username =  mkOption { type = types.str; };
+      username = mkOption { type = types.str; };
       password =  mkOption { type = types.str; };
       dhcp6.enable = mkOption { type = types.bool; };
     };
@@ -103,51 +110,48 @@ in {
           ];
         };
       in mkIf cfg.wan.dhcp6.enable bundl;
+
+    services.dns =
+      let interface = config.services.int;
+          dcfg = cfg.lan.dhcp;
+      in svc.dnsmasq.build {
+        resolvconf = config.services.resolvconf;
+        inherit interface;
+        ranges = [
+          "${cfg.lan.prefix}.${toString dcfg.start},${cfg.lan.prefix}.${toString dcfg.end}"
+          # ra-stateless: sends router advertisements with the O and A
+          # bits set, and provides a stateless DHCP service. The client
+          # will use a SLAAC address, and use DHCP for other
+          # configuration information.
+          "::,constructor:$(output ${interface} ifname),ra-stateless"
+        ];
+
+        hosts = dcfg.hosts;
+        upstreams = [ "/${dcfg.localDomain}/" ];
+        domain = dcfg.localDomain;
+      };
+
+    services.resolvconf = oneshot rec {
+      dependencies = [ config.services.wan ];
+      name = "resolvconf";
+      up = ''
+        . ${serviceFns}
+        ( in_outputs ${name}
+         echo "nameserver $(output ${config.services.wan} ns1)" > resolv.conf
+         echo "nameserver $(output ${config.services.wan} ns2)" >> resolv.conf
+         chmod 0444 resolv.conf
+        )
+      '';
+    };
+
+    filesystem =
+      let inherit (pkgs.pseudofile) dir symlink;
+      in dir {
+        etc = dir {
+          "resolv.conf" = symlink "${config.services.resolvconf}/.outputs/resolv.conf";
+        };
+      };
   };
-
-#   services.dns =
-#     let interface = services.int;
-#     in svc.dnsmasq.build {
-#       resolvconf = services.resolvconf;
-#       inherit interface;
-#       ranges = [
-#         "${secrets.lan.prefix}.10,${secrets.lan.prefix}.240"
-#         # ra-stateless: sends router advertisements with the O and A
-#         # bits set, and provides a stateless DHCP service. The client
-#         # will use a SLAAC address, and use DHCP for other
-#         # configuration information.
-#         "::,constructor:$(output ${interface} ifname),ra-stateless"
-#       ];
-
-#       # You can add static addresses for the DHCP server here.  I'm
-#       # not putting my actual MAC addresses in a public git repo ...
-#       hosts = { } // lib.optionalAttrs (builtins.pathExists ./static-leases.nix) (import ./static-leases.nix);
-#       upstreams = [ "/${secrets.domainName}/" ];
-#       domain = secrets.domainName;
-#     };
-
-
-#   services.resolvconf = oneshot rec {
-#     dependencies = [ services.wan ];
-#     name = "resolvconf";
-#     up = ''
-#       . ${serviceFns}
-#       ( in_outputs ${name}
-#        echo "nameserver $(output ${services.wan} ns1)" > resolv.conf
-#        echo "nameserver $(output ${services.wan} ns2)" >> resolv.conf
-#        chmod 0444 resolv.conf
-#       )
-#     '';
-#   };
-
-#   filesystem =
-#     let inherit (pkgs.pseudofile) dir symlink;
-#     in dir {
-#       etc = dir {
-#         "resolv.conf" = symlink "${services.resolvconf}/.outputs/resolv.conf";
-#       };
-#     };
-
 #   services.defaultroute4 = svc.network.route.build {
 #     via = "$(output ${services.wan} address)";
 #     target = "default";

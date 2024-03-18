@@ -48,8 +48,15 @@ in rec {
           wlan wlan5
           lan0 lan1 lan2 lan3 lan4
         ];
+      inherit (secrets.lan) prefix;
       address = {
         family = "inet"; address ="${secrets.lan.prefix}.1"; prefixLength = 24;
+      };
+      dhcp = {
+        start = 10;
+        end = 240;
+        hosts = { } // lib.optionalAttrs (builtins.pathExists ./static-leases.nix) (import ./static-leases.nix);
+        localDomain = "lan";
       };
     };
     wan = {
@@ -89,48 +96,6 @@ in rec {
   services.sshd = svc.ssh.build { };
 
   users.root = secrets.root;
-
-  services.dns =
-    let interface = config.services.int;
-    in svc.dnsmasq.build {
-      resolvconf = services.resolvconf;
-      inherit interface;
-      ranges = [
-        "${secrets.lan.prefix}.10,${secrets.lan.prefix}.240"
-        # ra-stateless: sends router advertisements with the O and A
-        # bits set, and provides a stateless DHCP service. The client
-        # will use a SLAAC address, and use DHCP for other
-        # configuration information.
-        "::,constructor:$(output ${interface} ifname),ra-stateless"
-      ];
-
-      # You can add static addresses for the DHCP server here.  I'm
-      # not putting my actual MAC addresses in a public git repo ...
-      hosts = { } // lib.optionalAttrs (builtins.pathExists ./static-leases.nix) (import ./static-leases.nix);
-      upstreams = [ "/${secrets.domainName}/" ];
-      domain = secrets.domainName;
-    };
-
-  services.resolvconf = oneshot rec {
-    dependencies = [ config.services.wan ];
-    name = "resolvconf";
-    up = ''
-      . ${serviceFns}
-      ( in_outputs ${name}
-       echo "nameserver $(output ${config.services.wan} ns1)" > resolv.conf
-       echo "nameserver $(output ${config.services.wan} ns2)" >> resolv.conf
-       chmod 0444 resolv.conf
-      )
-    '';
-  };
-
-  filesystem =
-    let inherit (pkgs.pseudofile) dir symlink;
-    in dir {
-      etc = dir {
-        "resolv.conf" = symlink "${services.resolvconf}/.outputs/resolv.conf";
-      };
-    };
 
   services.defaultroute4 = svc.network.route.build {
     via = "$(output ${config.services.wan} address)";
