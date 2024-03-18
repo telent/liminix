@@ -52,7 +52,7 @@ in {
     ../bridge
     ../ntp
     ../ssh
-#    { config.services = hostaps; }
+    { config.services = hostaps; }
   ];
 
 
