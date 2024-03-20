@@ -72,16 +72,14 @@ in rec {
         in lib.recursiveUpdate defaults secrets.firewallRules;
     };
     wireless.networks = {
-      telent = {
+      "${secrets.ssid}" = {
         interface = config.hardware.networkInterfaces.wlan;
-        ssid = secrets.ssid;
         hw_mode="g";
         channel = "2";
         ieee80211n = 1;
       } // wirelessConfig;
-      telent5 = rec {
+      "${secrets.ssid}5" = rec {
         interface = config.hardware.networkInterfaces.wlan5;
-        ssid = "${secrets.ssid}5";
         hw_mode="a";
         channel = 36;
         ht_capab = "[HT40+]";
