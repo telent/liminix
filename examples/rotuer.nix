@@ -65,7 +65,12 @@ in rec {
       password = secrets.l2tp.password;
       dhcp6.enable = true;
     };
-
+    firewall = {
+      enable = true;
+      rules =
+        let defaults = import ./demo-firewall.nix;
+        in lib.recursiveUpdate defaults secrets.firewallRules;
+    };
     wireless.networks = {
       telent = {
         interface = config.hardware.networkInterfaces.wlan;
@@ -96,12 +101,6 @@ in rec {
   services.sshd = svc.ssh.build { };
 
   users.root = secrets.root;
-
-  services.firewall = svc.firewall.build {
-    ruleset =
-      let defaults = import ./demo-firewall.nix;
-      in lib.recursiveUpdate defaults secrets.firewallRules;
-  };
 
   defaultProfile.packages = with pkgs; [
     min-collect-garbage

@@ -44,6 +44,12 @@ in {
         localDomain = mkOption { type = types.str; };
       };
     };
+
+    firewall = {
+      enable = mkEnableOption "firewall";
+      rules = mkOption { type = types.attrsOf types.attrs; };
+    };
+
     wan = {
       interface = mkOption { type = liminix.lib.types.interface; };
       username = mkOption { type = types.str; };
@@ -142,6 +148,11 @@ in {
       target = "default";
       interface = config.services.wan;
     };
+
+    services.firewall = mkIf cfg.firewall.enable
+      (svc.firewall.build {
+        ruleset = cfg.firewall.rules;
+      });
 
 
     services.resolvconf = oneshot rec {
