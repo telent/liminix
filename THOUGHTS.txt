@@ -4331,3 +4331,14 @@ aside: "trigger" is the least bad word I've thought of so far for
 these services that stop/start other services
 
 telent: yeah, in general 'ps afuxww' (or s6-ps -H :)) is the way to solve this, look for hung s6-rc processes and in particular their s6-svlisten1 children, where the command line will show what service is still waiting for readiness
+
+Sat Mar 16 23:28:10 GMT 2024
+
+We have the gl-ar750 booting with the bridge members added by trigger, and
+it seems to work.
+
+One thing worth flagging is that we have to run s6-rc with the -b
+(block if locked) flag in the trigger otherwise the triggered service
+just doesn't come up if there's something else starting at the same
+time.  There are warnings in the s6-rc docs about doing this, though.
+We need to think hard about whether we can end up calling s6-rc recursively
