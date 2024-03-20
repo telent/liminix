@@ -97,18 +97,6 @@ in rec {
 
   users.root = secrets.root;
 
-  services.defaultroute4 = svc.network.route.build {
-    via = "$(output ${config.services.wan} address)";
-    target = "default";
-    dependencies = [ config.services.wan ];
-  };
-
-  services.defaultroute6 = svc.network.route.build {
-    via = "$(output ${config.services.wan} ipv6-peer-address)";
-    target = "default";
-    interface = config.services.wan;
-  };
-
   services.firewall = svc.firewall.build {
     ruleset =
       let defaults = import ./demo-firewall.nix;

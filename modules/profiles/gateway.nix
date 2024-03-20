@@ -131,6 +131,19 @@ in {
         domain = dcfg.localDomain;
       };
 
+    services.defaultroute4 = svc.network.route.build {
+      via = "$(output ${config.services.wan} address)";
+      target = "default";
+      dependencies = [ config.services.wan ];
+    };
+
+    services.defaultroute6 = svc.network.route.build {
+      via = "$(output ${config.services.wan} ipv6-peer-address)";
+      target = "default";
+      interface = config.services.wan;
+    };
+
+
     services.resolvconf = oneshot rec {
       dependencies = [ config.services.wan ];
       name = "resolvconf";
