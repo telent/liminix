@@ -4321,3 +4321,16 @@ set_link virtio-net-pci.1 on
 set_link virtio-net-pci.0 on
 
 See if both devices are bridge members
+
+Wed Mar 20 19:34:36 GMT 2024
+
+Because I forgot hoe to rebuild rotuer, I tihnk it is time to improve
+support for out-of-tree configurations. So I've made
+modules/profiles/gateway.nix and now I can copy rotuer.nix to
+telent-nixos-config.
+
+Probably I should make nix-build work on the top-level derivation
+and install liminix-rebuild as a binary?
+
+would be good if an out-of-tree config could specify the device
+it was targeting?

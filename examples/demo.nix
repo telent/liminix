@@ -158,7 +158,6 @@ in rec {
   };
 
   services.firewall = svc.firewall.build {
-    ruleset = import ./demo-firewall.nix;
   };
 
   services.packet_forwarding = svc.network.forward.build { };

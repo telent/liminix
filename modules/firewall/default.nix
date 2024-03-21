@@ -56,8 +56,13 @@ in
   config = {
     system.service.firewall =
       let svc = liminix.callService ./service.nix  {
-            ruleset = mkOption {
+            extraRules = mkOption {
+              type = types.attrsOf types.attrs;
+              description = "firewall ruleset";
+            };
+            rules = mkOption {
               type = types.attrsOf types.attrs;   # we could usefully tighten this a bit :-)
+              default = import ./default-rules.nix;
               description = "firewall ruleset";
             };
           };

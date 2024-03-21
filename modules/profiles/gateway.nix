@@ -151,7 +151,7 @@ in {
 
     services.firewall = mkIf cfg.firewall.enable
       (svc.firewall.build {
-        ruleset = cfg.firewall.rules;
+        extraRules = cfg.firewall.rules;
       });
 
     services.resolvconf = oneshot rec {

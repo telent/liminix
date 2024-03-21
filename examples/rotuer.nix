@@ -67,9 +67,7 @@ in rec {
     };
     firewall = {
       enable = true;
-      rules =
-        let defaults = import ./demo-firewall.nix;
-        in lib.recursiveUpdate defaults secrets.firewallRules;
+      rules = secrets.firewallRules;
     };
     wireless.networks = {
       "${secrets.ssid}" = {
