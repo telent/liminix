@@ -4334,3 +4334,13 @@ and install liminix-rebuild as a binary?
 
 would be good if an out-of-tree config could specify the device
 it was targeting?
+
+Fri Mar 22 20:49:54 GMT 2024
+
+Ideally liminix-rebuild could accept a configuration file that
+specifies a liminix-config file, a target hostname (maybe plus ssh
+port, credentials etc) and the device name. Not going to work on that
+just now but it does mean we can punt on specifying the device inside the
+liminix-config which is unreasonably circular.
+
+Maybe we'll just chuck a makefile in telent-nixos-config
