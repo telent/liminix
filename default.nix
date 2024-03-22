@@ -1,5 +1,6 @@
 {
-  device
+  deviceName ? null
+, device ? (import ./devices/${deviceName} )
 , liminix-config ? <liminix-config>
 , nixpkgs ? <nixpkgs>
 , borderVmConf ? ./bordervm.conf.nix
