@@ -136,6 +136,7 @@
         };
         extraPatchPhase = ''
           ${openwrt.applyPatches.ramips}
+          ${openwrt.applyPatches.rt2x00}
         '';
         config = {
 

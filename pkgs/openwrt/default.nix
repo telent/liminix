@@ -1,6 +1,7 @@
 {
   fetchFromGitHub
 , writeShellScript
+, pkgsBuildBuild
 }:
 let
   src = fetchFromGitHub {
@@ -36,4 +37,25 @@ in {
   applyPatches.ramips = doPatch "ramips";
   applyPatches.mediatek = doPatch "mediatek"; # aarch64
   applyPatches.mvebu = doPatch "mvebu"; # arm
+
+  applyPatches.rt2x00 = ''
+    PATH=${pkgsBuildBuild.patchutils}/bin:$PATH
+    for i in ${src}/package/kernel/mac80211/patches/rt2x00/6*.patch ; do
+      fixed=$(basename $i).fixed
+      sed '/depends on m/d'  < $i | sed 's/CPTCFG_/CONFIG_/g' | recountdiff | filterdiff -x '*/local-symbols' > $fixed
+      case $fixed in
+        606-*)
+          ;;
+        611-*)
+          filterdiff -x '*/rt2x00.h' < $fixed | patch --forward -p1
+          ;;
+        601-*|607-*)
+          filterdiff -x '*/rt2x00_platform.h' < $fixed | patch --forward -p1
+          ;;
+        *)
+          cat $fixed | patch --forward -p1
+          ;;
+      esac
+    done
+  '';
 }
