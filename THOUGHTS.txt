@@ -4354,3 +4354,61 @@ just now but it does mean we can punt on specifying the device inside the
 liminix-config which is unreasonably circular.
 
 Maybe we'll just chuck a makefile in telent-nixos-config
+
+Fri Mar 22 22:14:32 GMT 2024
+
+For the service failover milestone we said
+
+a. A configuration demonstrating a service which is restarted when it crashes
+b. A failover config where service B runs iff service A is unavailable
+c. A config showing different pppd behaviour when interface is flakey (retry) vs ppp password is wrong (report error, wait for resolution)
+
+Sun Mar 24 23:41:27 GMT 2024
+
+TODO
+
+1) make liminix-rebuild bounce only affected services instead of
+  full reboot (what does it do about triggered services?)
+2) sniproxy
+
+3) see if arhcive still works. usb disk hotplug would be a good candidate for
+switching to triggers
+
+Mon Mar 25 19:35:47 GMT 2024
+
+to make the liminix-rebuild thing restart only affected services, it needs to
+know when the new service is not like the old one. By default it does not
+restart a service with a changed up/down/run script unless the name has
+also changed, so we need to figure out how to generate a "conversion"
+file with the services that are different
+
+pkgs/s6-rc-database/default.nix creates $out/compiled, we could add
+$out/hashes to this
+
+the other thing making this fun is that we will need to run `activate`
+(which is usually done in preinit) otherwise the new configuration's
+fhs directories won't exist.
+
+so the plan woyuld be
+
+in liminix-rebuild, when reboot was not chosen,
+
+- run activate
+- compare  /run/s6-rc/compiled/hashes (old services) with
+  /etc/s6-rc/compiled/hashes (new services)
+
+- whenever both files have the same column 1 and different
+column 2, add that name to restart list
+
+(need to turn restarts.fnl into a lua script)
+
+s6-rc-update /etc/s6-rc/compiled/hashes restarts
+
+Tue Mar 26 23:18:53 GMT 2024
+
+activate overwrites /etc/s6-rc/compiled, which is a problem because
+s6-rc-update expects to find the old compiled database here so that
+it can know what to update
+
+Maybe config.filesystem should specify /etc/s6-rc/compiled.new
+and something in early boot could symlink /etc/s6-rc/compiled to it
