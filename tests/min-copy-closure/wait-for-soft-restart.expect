@@ -1,0 +1,13 @@
+proc chat {instr outstr} {
+    expect {
+        $instr  { send $outstr }
+        timeout { exit 1 }
+    }
+}
+spawn socat unix-connect:vm/console -
+
+send "exit\r" 
+chat "BusyBox" "\r"
+chat "#" "stty -echo; type -p figlet\r"
+chat "figlet-armv7l-unknown-linux" "s6-rc -a list |grep  w\\inkle\r"
+chat "winkle" "poweroff\r"

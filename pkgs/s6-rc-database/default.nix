@@ -21,11 +21,22 @@ in stdenvNoCC.mkDerivation  {
       if test -d $i; then
         for j in $i/* ; do
           if test -f $j/type ; then
+            case $(cat $j/type) in
+              longrun|oneshot)
+                # s6-rc-update only wants oneshots in its
+                # restarts file
+                echo $(basename $j) " " $i >>  $out/hashes
+                ;;
+              *)
+                ;;
+            esac
             srcs="$srcs $i"
           fi
         done
       fi
     done
     s6-rc-compile $out/compiled $srcs
-    '';
-  }
+    s6-rc-db -c $out/compiled contents default
+    mv $out/hashes $out/compiled
+  '';
+}

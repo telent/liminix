@@ -1,0 +1,12 @@
+loopback   /nix/store/3k7yp08465k8z8a1514slansj0hbrvbq-loopback
+default   /nix/store/5247rr0mcr17x9lkaqjiywxmn4q3ibgd-default
+lan.link.a.10.3.0.1   /nix/store/99ic5bryzbx12ip4v8sh9cdrv15c8qwl-lan.link.a.10.3.0.1
+lo.link.a.-1   /nix/store/a2yvj42ghcg8iyvi51zcmzmpwwkrx30l-lo.link.a.-1
+sshd   /nix/store/afgznmavi6s9dxkv4vnn9xwd7qz5kk35-sshd
+lo.link   /nix/store/dz0nvlf16lqv9yndas0sk0xqh7jvx8gm-lo.link
+lo.link.a.127.0.0.1   /nix/store/jl018kbgxcnyb70s0cfw19q1zqa0pval-lo.link.a.127.0.0.1
+lan.link   /nix/store/lxvmhb7ax46s2akj9lsivcq494kmx0hm-lan.link
+lan.link.a.10.3.0.1.dnsmasq-log   /nix/store/rk8265ikd9lj3fpibyrw0kal32h0ksqg-lan.link.a.10.3.0.1.dnsmasq-log
+hostname   /nix/store/xfy0ymvnd0zv6wcd26h405f85hfkd8wq-hostname
+sshd-log   /nix/store/xj58nxvkacsjg3rvwb4bxcqnhaav4d3s-sshd-log
+lan.link.a.10.3.0.1.dnsmasq   /nix/store/z4l7h9pr4an9aq921cs9wrlvf9b8xr48-lan.link.a.10.3.0.1.dnsmasq

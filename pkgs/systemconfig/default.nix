@@ -6,6 +6,7 @@
 
 {
   writeText
+, writeFennelScript
 , lib
 , s6-init-bin
 , closureInfo
@@ -52,7 +53,7 @@ let
             chown = if uid>0 || gid>0
                     then "\nCHOWN(${qpathname},${toString uid},${toString gid});\n"
                     else "";
-          in "${cmd} ${chown}";
+          in "unlink(${qpathname}); ${cmd} ${chown}";
     in mapAttrsToList (makeFile prefix) attrset;
   activateScript = attrset: writeText "makedevs.c" ''
     #include "defs.h"
@@ -80,6 +81,7 @@ in attrset:
       cp $closure/store-paths $out/etc/nix-store-paths
       $STRIP --remove-section=.note  --remove-section=.comment --strip-all makedevs -o $out/bin/activate
       ln -s ${s6-init-bin}/bin/init $out/bin/init
+      cp -p ${writeFennelScript "restart-services" [] ./restart-services.fnl} $out/bin/restart-services
       cat > $out/bin/install <<EOF
       #!/bin/sh -e
       prefix=\''${1-/}
