@@ -1,9 +1,10 @@
+#!/usr/bin/env nix-shell
+#! nix-shell -v -i bash -p expect socat
+
 # This is a test for liminix-rebuild. It's not a CI test because
 # liminix-rebuild calls nix-build so won't run inside a derivation,
 # meaning you have to remember to run it manually when changing
 # liminix-rebuild
-
-# nix-shell -p  expect socat --run "sh ./tests/min-copy-closure/test-liminix-rebuild.sh "
 
 . tests/test-helpers.sh
 

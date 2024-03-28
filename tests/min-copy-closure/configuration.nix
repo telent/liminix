@@ -32,9 +32,5 @@ in {
     };
 
     rootfsType = "jffs2";
-    services.default = lib.mkForce (target {
-      name = "default";
-      contents = with config.services; [ loopback ntp defaultroute4 sshd dhcpv4 ];
-    });
   };
 }

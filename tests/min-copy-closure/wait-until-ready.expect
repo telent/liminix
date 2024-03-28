@@ -5,4 +5,9 @@ send "\r\n"
 expect {
        "# " { send "hostname\r\n" };
 }
-expect  "(none)"
+
+expect {
+    "(none)" {}
+    "liminix" {}
+    timeout { exit(1) }
+}
