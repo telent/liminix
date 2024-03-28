@@ -16,7 +16,7 @@ in rec {
     in svc.network.dhcp.client.build { interface = iface; };
 
   services.defaultroute4 = svc.network.route.build {
-    via = "$(output ${services.dhcpv4} address)";
+    via = "$(output ${services.dhcpv4} ip)";
     target = "default";
     dependencies = [ services.dhcpv4 ];
   };
