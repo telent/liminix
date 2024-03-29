@@ -31,7 +31,6 @@
    ./ssh
    ./outputs/tftpboot.nix
    ./outputs/ubifs.nix
-   ./ubinize.nix
    ./users.nix
    ./vlan
    ./watchdog
