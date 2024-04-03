@@ -21,11 +21,16 @@ in stdenvNoCC.mkDerivation  {
       if test -d $i; then
         for j in $i/* ; do
           if test -f $j/type ; then
+            if test -e $j/restart-on-upgrade; then
+              flag=force-restart
+            else
+              unset flag
+            fi
             case $(cat $j/type) in
               longrun|oneshot)
-                # s6-rc-update only wants oneshots in its
+                # s6-rc-update only wants atomics in its
                 # restarts file
-                echo $(basename $j) " " $i >>  $out/hashes
+                echo $(basename $j) " " ''${flag-$i} >>  $out/hashes
                 ;;
               *)
                 ;;

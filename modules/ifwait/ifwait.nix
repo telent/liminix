@@ -9,6 +9,7 @@ let
 in longrun {
   name = "ifwait.${interface.name}";
   buildInputs = [ service ];
+  isTrigger = true;
   run = ''
     ${ifwait}/bin/ifwait -s ${service.name}  $(output ${interface} ifname) ${state}
   '';

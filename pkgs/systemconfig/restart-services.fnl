@@ -12,8 +12,11 @@
         new-hashes (hashes-from-file new)]
     (with-open [f (io.open "/tmp/restarts" :w)]
       (each [n h (pairs old-hashes)]
-        (when (not (= h (. new-hashes n)))
-          (f:write (.. n " restart\n")))))))
+        (let [new (. new-hashes n)]
+          (when (or (= h "force-restart")
+                    (= new "force-restart")
+                    (not (= h new)))
+            (f:write (.. n " restart\n"))))))))
 
 (fn exec [text command]
   (io.write (.. text ": "))

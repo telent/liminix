@@ -36,12 +36,14 @@ let
     , dependencies ? []
     , contents ? []
     , buildInputs ? []
+    , isTrigger ? false
   } @ args:
     stdenvNoCC.mkDerivation {
       # we use stdenvNoCC to avoid generating derivations with names
       # like foo.service-mips-linux-musl
       inherit name serviceType up down run notification-fd
         producer-for consumer-for pipeline-name timeout-up timeout-down;
+      restart-on-upgrade = isTrigger;
       buildInputs = buildInputs ++ dependencies ++ contents;
       dependencies = builtins.map (d: d.name) dependencies;
       contents = builtins.map (d: d.name) contents;
