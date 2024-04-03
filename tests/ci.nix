@@ -9,4 +9,5 @@
   fennel = import ./fennel/test.nix;
   tftpboot = import ./tftpboot/test.nix;
   updown = import ./updown/test.nix;
+  inout = import ./inout/test.nix;
 }
