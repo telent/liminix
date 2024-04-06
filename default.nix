@@ -76,6 +76,7 @@ in {
       min-copy-closure
       fennelrepl
       lzma
+      lua
     ];
   };
 }
