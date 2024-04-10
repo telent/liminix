@@ -18,6 +18,12 @@
     f (do (f:close) true)
     _ false))
 
+(fn basename [path]
+  (string.match path ".*/([^/]-)$"))
+
+(fn dirname [path]
+  (string.match path "(.*)/[^/]-$"))
+
 (fn system [s]
   (match (os.execute s)
     res (do (print (.. "Executed \"" s "\", exit code " (tostring res)))  res)
@@ -69,6 +75,8 @@
 {
  : assoc
  : base64url
+ : basename
+ : dirname
  : dup
  : file-exists?
  : hash
