@@ -66,4 +66,13 @@
     (s:sub 1 (- (# s) pad))))
 
 
-{ : assoc : merge : split : file-exists? : system : hash : base64url : dup }
+{
+ : assoc
+ : base64url
+ : dup
+ : file-exists?
+ : hash
+ : merge
+ : split
+ : system
+ }
