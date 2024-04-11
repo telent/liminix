@@ -44,10 +44,18 @@ static int l_open_socket(lua_State *L) {
     memset(&sa, 0, sizeof(sa));
     sa.nl_family = AF_NETLINK;
     sa.nl_pid = getpid();
-    sa.nl_groups = 4; 		/* rebroadcasts from mdevd */
+
+    if(lua_isnumber(L, 1)) {
+	sa.nl_groups = lua_tointeger(L, 1);
+	lua_pop(L, 1);
+    }
+    else {
+	sa.nl_groups = 4; 		/* group 4 is rebroadcasts from mdevd */
+    }
 
     if(bind(netlink_fd, (struct sockaddr *) &sa, sizeof(sa))==0) {
 	lua_newtable(L);
+
 	lua_pushliteral(L, "fileno");
 	lua_pushinteger(L, netlink_fd);
 	lua_settable(L, 1);
