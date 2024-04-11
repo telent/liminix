@@ -6,17 +6,16 @@
 #include <sys/socket.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
-/* static int l_close_socket(lua_State *L) { */
-/*     LStream *p = (LStream *) luaL_checkudata(L, 1, LUA_FILEHANDLE); */
-/*     int res = fclose(p->f); */
-/*     return luaL_fileresult(L, (res == 0), NULL); */
-/* } */
-
+static int l_close_socket(lua_State *L) {
+    lua_getfield(L, 1, "fileno");
+    int fd = (int) lua_tointeger(L, -1);
+    close(fd);
+    return 0;
+}
 
 static int l_read_from_socket(lua_State *L) {
-    /* struct sockaddr_nl sa; */
-    /* memset(&sa, 0, sizeof(sa)); */
     int length = 32;
 
     if(lua_isnumber(L, 2))
@@ -62,6 +61,10 @@ static int l_open_socket(lua_State *L) {
 
 	lua_pushliteral(L, "read");
 	lua_pushcfunction(L, l_read_from_socket);
+	lua_settable(L, 1);
+
+	lua_pushliteral(L, "close");
+	lua_pushcfunction(L, l_close_socket);
 	lua_settable(L, 1);
 
 	return 1;
