@@ -19,6 +19,7 @@
    ./kernel
    ./outputs/kexecboot.nix
    ./mount
+   ./mdevd.nix
    ./network
    ./ntp
    ./outputs.nix
