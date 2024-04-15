@@ -106,6 +106,7 @@ in {
   swconfig = callPackage ./swconfig {};
   systemconfig = callPackage ./systemconfig {};
   tufted = callPackage ./tufted {};
+  uevent-watch = callPackage ./uevent-watch {};
   writeAshScript = callPackage ./write-ash-script {};
   writeFennel = callPackage ./write-fennel {};
   writeFennelScript = callPackage ./write-fennel-script {};

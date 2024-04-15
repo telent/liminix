@@ -33,4 +33,5 @@
  : mktree
  : rmtree
  : directory?
+ :symlink (fn [from to] (lfs.link from to true))
  }
