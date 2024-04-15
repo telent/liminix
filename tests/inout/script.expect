@@ -9,13 +9,6 @@ proc chat {instr outstr} {
 spawn socat -,echo=0,icanon=1 unix-connect:vm/monitor
 set monitor_id $spawn_id
 
-# expect "(qemu)"
-# send "set_link virtio-net-pci.1 off\n"
-# expect "(qemu)"
-# send "set_link virtio-net-pci.0 off\n"
-# expect "(qemu)"
-# send "c\r\n"
-
 spawn socat unix-connect:vm/console -
 set console_id $spawn_id
 
