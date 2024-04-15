@@ -52,10 +52,5 @@ in rec {
     fstype = "ext4";
   };
 
-  services.sshd = svc.ssh.build { };
 
-  defaultProfile.packages = with pkgs; [
-    min-collect-garbage
-    tcpdump
-  ];
 }
