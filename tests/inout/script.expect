@@ -14,9 +14,9 @@ set console_id $spawn_id
 
 expect "BusyBox"
 chat "#" "PS1=RE\\ADY_\\ ; stty -echo \r"
-chat "READY_"  "s6-rc -b  -a list\r"
+chat "READY_"  "tail -f /run/uncaught-logs/current & \rs6-rc -b  -a list\r"
 
-chat "watch-mount" "\r"
+chat "mount" "\r"
 
 set spawn_id $monitor_id
 chat "QEMU" "device_add usb-storage,bus=xhci.0,drive=usbstick\n"
@@ -25,16 +25,15 @@ chat "(qemu)" "version\r"
 set spawn_id $console_id
 
 expect {
-  "mounted filesystem" { }
+  "sda: sda1" { }
   timeout { exit 1 }
 }
 
 
 send "\r"
-chat "READY_" "s6-rc -b -a list\r"
-chat "READY_" "cat /proc/mounts\r"
+chat "READY_" "sleep 3; grep /srv /proc/mounts && hostname\r"
 
 expect {
-  "/srv" { }
+  "inout" { }
   timeout { exit 1 }
 }

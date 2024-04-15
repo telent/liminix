@@ -15,6 +15,7 @@ in rec {
     "${modulesPath}/network"
     "${modulesPath}/ssh"
     "${modulesPath}/mount"
+    "${modulesPath}/mdevd.nix"
   ];
 
   filesystem = dir { srv = dir {}; };
@@ -46,11 +47,20 @@ in rec {
   rootfsType = "jffs2";
   hostname = "inout";
 
-  services.mount_external_disk = svc.mount.build {
-    device = "LABEL=backup-disk";
-    mountpoint = "/srv";
-    fstype = "ext4";
-  };
-
-
+  services.watch_mount_srv =
+    let
+      node = "/dev/disk/by-partlabel/backup-disk";
+      mount = oneshot {
+        name = "mount-srv";
+        up = "mount -t ext2 ${node} /srv";
+        down = "umount /srv";
+      };
+    in longrun {
+      name = "mount_srv";
+      run = ''
+        ${pkgs.uevent-watch}/bin/uevent-watch -s ${mount.name} -n ${node} partname=backup-disk devtype=partition
+      '';
+      dependencies = [ config.services.mdevd ];
+      buildInputs = [ mount ];
+    };
 }
