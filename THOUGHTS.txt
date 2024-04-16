@@ -4412,3 +4412,154 @@ it can know what to update
 
 Maybe config.filesystem should specify /etc/s6-rc/compiled.new
 and something in early boot could symlink /etc/s6-rc/compiled to it
+
+Sat Mar 30 18:41:14 GMT 2024
+
+soft restart doesn't restart services that are invoked by trigger,
+because it has to do -p -u default so that it prunes services that
+were in the old config but not the new one. Ideally we need somehow
+to notify the trigger that it should respawn its service. Maybe
+we could add triggers to the force restart list, if there's a way
+to detect which they are?  don't want to do it by adding files in
+the service state directory if there may be oneshot triggers. Can
+there be oneshot triggers?
+
+The hashes file is built when we build the service database, so we
+could easily(?) add something in there to mark services that
+need poking whenever there's a restart. It's not perfect because the
+triggered services will be bounced unnecessarily, but remember that
+the alternative is a reboot ...
+
+Mon Apr  1 00:18:50 BST 2024
+
+i) I don't know if digressing into remote log shipping is a tangent or
+an important part of making services work well.
+
+ii) Should there be a single "machine state" value for all of the
+trigger services to reference, or is it better that each trigger
+service has its own private state, or (third option) one state
+per "state source"? We previously handwaved that a state source
+is a service
+
+services.addmember = services.udev.watch {
+  match = {
+    SUBSYSTEM = "net";
+    ID_PATH = "pci-0000:04:00.0";
+    ATTR.operstate = "up";
+  };
+
+  service = oneshot {
+    up = "ip link set dev $dev master $(output ${primary} ifname)";
+    down = "ip link set dev $(output ${member} ifname) nomaster";
+  };
+}
+
+
+Tue Apr  2 19:55:25 BST 2024
+
+We could do a test script for udev usb disk mounting, which uses the
+qemu monitor to add/remove a disk.
+
+
+./result/run.sh --flag -device --flag usb-ehci,id=xhci --flag -drive  --flag if=none,id=usbstick,format=raw,file=./stick.img
+
+(qemu) device_add  usb-storage,bus=xhci.0,drive=usbstick
+
+Fri Apr  5 17:11:46 BST 2024
+
+1) write a fennel thing that reads from the udev rebroadcast socket
+2) and can check sysfs for state
+3) set up mdevd in liminix
+
+
+Sat Apr  6 13:23:02 BST 2024
+
+I wonder if we could replace preinit with an execline script? One for
+the TODO stack
+
+
+Sun Apr  7 14:03:29 BST 2024
+
+1) we want to know what messages are sent from mdevd under various circumstances
+ - actually, right now the only relevant circumstances are updown and inout
+
+2) we might get a wider variety of messages from real hardware?
+
+3) if we log the raw messages, pref. with timestamps, then we can
+write tests for the parsing
+
+
+therefore: write a program that opens the netlink socket and logs
+all data received
+
+----
+
+what's the minimum we need here?  we need the inout test to open a
+uevent socket and use uevents to update some state that says whether the
+backup drive is plugged in
+
+rather awkwardly, uevents don't have filesystem labels. so we also need
+to run blkid to find the label of each partition, and ideally we do this
+while the partition is present, not each time we get an event for it.
+
+We have DEVNAME, DEVTYPE, SUBSYSTEM to indicate that a filesystem of interest
+may be present, we should use that as a trigger to scan any known
+
+
+
+add@/devices/pci0000:00/0000:00:13.0/usb1/1-1/1-1:1.0/host0/target0:0:0/0:0:0:0/block/sda/sda1
+ACTION=add
+DEVPATH=/devices/pci0000:00/0000:00:13.0/usb1/1-1/1-1:1.0/host0/target0:0:0/0:0:0:0/block/sda/sda1
+SUBSYSTEM=block
+MAJOR=8
+MINOR=1
+DEVNAME=sda1
+DEVTYPE=partition
+DISKSEQ=2
+PARTN=1
+SEQNUM=1528
+
+Some disks on loaclhost and noetbook have PARTNAME field - I assume
+this is because they're GPT disks. Would it actually be better to use this
+field than grovelling for filesystem label?
+
+Tue Apr  9 21:07:50 BST 2024
+
+Having waited for the appropriately labelled disk to appear, we then
+also have to communicate its path to the service that mounts it
+
+- create a symlink
+- or use an instanced service
+
+Creating a symlink will be fine if we can pass the symlink name as
+a param to fswait
+
+Wed Apr 10 20:53:48 BST 2024
+
+We think that fswait will evolve into a more general
+waiting-for-uevents tool. Maybe we could provide the matchers on the
+command line:
+
+waituevent -l /dev/volumes/backup-disk -s mount-srv devtype=partition partname=backup-disk
+
+Thu Apr 11 23:09:43 BST 2024
+
+lcommit d3a2e3a4cb80b631df2ab79d463c2c4d1adef37b
+commit 4a58cf9335116ce673fcf08f70f3bca921a4c9ad
+commit afca6d4b63dd39062f02827b3c29e16904770216
+
+Sun Apr 14 19:50:27 BST 2024
+
+how to get this on to main:
+ - make uevent-watcher package (it's fswait renamed)
+ - make mount service use it
+ - module for mdevd
+ - add nellie (generalise for other netlink uses w/params pid/family/groups)
+
+Mon Apr 15 19:59:43 BST 2024
+
+plan:
+
+introduce uevent-watcher command, update test to use it
+
+make mount service use it
