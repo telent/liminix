@@ -88,6 +88,16 @@ in rec {
     fstype = "ext4";
   };
 
+  # until we support retained uevent state, we need to push coldplug
+  # events to mount_external_disk to account for the case that the
+  # disk is already plugged at boot time
+
+  services.fudge_coldplug = oneshot {
+    name = "fudge_coldplug";
+    up = "sleep 5; for i in /sys/class/block/*/uevent; do echo 'change' > $i ;done";
+    dependencies = [ services.mount_external_disk ];
+  };
+
   services.rsync =
     let
       secrets_file = oneshot rec {
