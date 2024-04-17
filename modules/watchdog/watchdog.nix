@@ -1,6 +1,7 @@
 {
   liminix
 , lib
+, s6
 }:
 { watched, headStart } :
 let
@@ -8,5 +9,5 @@ let
 in longrun {
   name = "watchdog";
   run =
-    "HEADSTART=${toString headStart} ${./gaspode.sh} ${lib.concatStringsSep " " (builtins.map (s: s.name) watched)}";
+    "PATH=${s6}/bin:$PATH HEADSTART=${toString headStart} ${./gaspode.sh} ${lib.concatStringsSep " " (builtins.map (s: s.name) watched)}";
 }
