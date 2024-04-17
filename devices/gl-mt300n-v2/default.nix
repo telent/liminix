@@ -122,6 +122,7 @@
         # 20MB seems to give enough room to uncompress the kernel
         # without anything getting trodden on. 10MB was too small
         loadAddress = lim.parseInt "0x1400000";
+        appendDTB = true;
       };
 
       kernel = {
