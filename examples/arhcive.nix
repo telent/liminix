@@ -83,7 +83,7 @@ in rec {
   };
 
   services.mount_external_disk = svc.mount.build {
-    device = "LABEL=backup-disk";
+    partlabel = "backup-disk";
     mountpoint = "/srv";
     fstype = "ext4";
   };

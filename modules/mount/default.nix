@@ -19,28 +19,36 @@ in {
       type = liminix.lib.types.serviceDefn;
     };
   };
-  config.system.service = {
-    mount = liminix.callService ./service.nix {
-      device = mkOption {
-        type = types.str;
-        example = "/dev/sda1";
-      };
-      mountpoint = mkOption {
-        type = types.str;
-        example = "/mnt/media";
-      };
-      options = mkOption {
-        type = types.listOf types.str;
-        default = [];
-        example = ["noatime" "ro" "sync"];
-      };
-      fstype = mkOption {
-        type = types.str;
-        default = "auto";
-        example = "vfat";
-      };
+  imports = [ ../mdevd.nix ];
+  config.system.service.mount =
+    let svc = liminix.callService ./service.nix {
+          partlabel = mkOption {
+            type = types.str;
+            example = "my-usb-stick";
+          };
+          mountpoint = mkOption {
+            type = types.str;
+            example = "/mnt/media";
+          };
+          options = mkOption {
+            type = types.listOf types.str;
+            default = [];
+            example = ["noatime" "ro" "sync"];
+          };
+          fstype = mkOption {
+            type = types.str;
+            default = "auto";
+            example = "vfat";
+          };
+        };
+    in svc // {
+      build = args:
+        let args' = args // {
+              dependencies = (args.dependencies or []) ++ [config.services.mdevd];
+            };
+        in svc.build args' ;
     };
-  };
+
   config.programs.busybox  = {
     applets = ["blkid" "findfs"];
     options = {

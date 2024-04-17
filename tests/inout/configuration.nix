@@ -47,20 +47,9 @@ in rec {
   rootfsType = "jffs2";
   hostname = "inout";
 
-  services.watch_mount_srv =
-    let
-      node = "/dev/disk/by-partlabel/backup-disk";
-      mount = oneshot {
-        name = "mount-srv";
-        up = "mount -t ext2 ${node} /srv";
-        down = "umount /srv";
-      };
-    in longrun {
-      name = "mount_srv";
-      run = ''
-        ${pkgs.uevent-watch}/bin/uevent-watch -s ${mount.name} -n ${node} partname=backup-disk devtype=partition
-      '';
-      dependencies = [ config.services.mdevd ];
-      buildInputs = [ mount ];
-    };
+  services.mount_backup_disk = svc.mount.build {
+    partlabel = "backup-disk";
+    mountpoint = "/srv";
+    fstype = "ext4";
+  };
 }

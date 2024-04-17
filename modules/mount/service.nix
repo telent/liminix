@@ -1,10 +1,12 @@
 {
   liminix
+, uevent-watch
 , lib
 }:
-{ device, mountpoint, options, fstype }:
+{ partlabel, mountpoint, options, fstype }:
 let
   inherit (liminix.services) longrun oneshot;
+  device = "/dev/disk/by-partlabel/${partlabel}";
   options_string =
     if options == [] then "" else "-o ${lib.concatStringsSep "," options}";
   mount_service = oneshot {
@@ -18,14 +20,7 @@ in longrun {
   isTrigger = true;
   buildInputs = [ mount_service ];
 
-  # This accommodates bringing the service up when the device appears.
-  # It doesn't bring it down on unplug because unmount will probably
-  # fail anyway (so don't do that)
   run = ''
-    while ! findfs ${device}; do
-      echo waiting for device ${device}
-      sleep 1
-    done
-    s6-rc -b -u change ${mount_service.name}
+    ${uevent-watch}/bin/uevent-watch -s ${mount_service.name} -n ${device} partname=${partlabel} devtype=partition
   '';
 }
