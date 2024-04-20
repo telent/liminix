@@ -1,7 +1,6 @@
 (local { : view} (require :fennel))
 (import-macros { : expect= } :anoia.assert)
 
-(set _G.arg (doto [] (tset 0 "test")))
 (local subject (require :watch))
 
 (let [params
@@ -35,7 +34,9 @@
 
 ;; this tests event parsing but not whether anything
 ;; happens as a result of processing them
-(subject.run
- ["-s" "foo" "-n" (os.getenv "TMPDIR") "partname=backup-disk" ]
+(subject.run-with-fh
  { :read (next-event) }
+ ["-s" "foo" "-n" (os.getenv "TMPDIR") "partname=backup-disk" ]
  )
+
+(print "OK")

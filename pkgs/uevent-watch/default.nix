@@ -1,7 +1,7 @@
 {
   lua
 , nellie
-, writeFennelScript
+, writeFennel
 , runCommand
 , anoia
 , fennel
@@ -14,7 +14,10 @@ stdenv.mkDerivation {
   nativeBuildInputs = [ fennelrepl ];
   installPhase = ''
     mkdir -p $out/bin
-    cp -p ${writeFennelScript "uevent-watch" [fennel anoia nellie lua.pkgs.luafilesystem] ./watch.fnl} $out/bin/uevent-watch
+    cp -p ${writeFennel "uevent-watch" {
+      packages = [fennel anoia nellie lua.pkgs.luafilesystem];
+      mainFunction = "run";
+    } ./watch.fnl} $out/bin/uevent-watch
   '';
   checkPhase = ''
     fennelrepl ./test.fnl

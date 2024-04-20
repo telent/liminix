@@ -47,7 +47,7 @@
                      "(%g-)=(%g+)")]
         (k:lower) v))))
 
-(fn run [args fh]
+(fn run-with-fh [fh args]
   (set up :unknown)
   (let [parameters
         (assert (parse-args args) (.. "can't parse args: " (table.concat args " ")))]
@@ -62,9 +62,9 @@
         (set finished? (= e nil))
         ))))
 
-(when (not (= (. arg 0) "test"))
+(fn run [args]
   (let [nellie (require :nellie)
         netlink (nellie.open 4)]
-    (run arg netlink)))
+    (run-with-fh netlink arg)))
 
-{ : run  : event-matches? }
+{ : run : run-with-fh : event-matches? }
