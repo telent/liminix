@@ -82,6 +82,7 @@ in {
   zyxel-bootconfig = callPackage ./zyxel-bootconfig {};
   min-collect-garbage = callPackage ./min-collect-garbage {};
   min-copy-closure = callPackage ./min-copy-closure {};
+  minisock = callPackage ./minisock {};
   nellie = callPackage ./nellie {};
   netlink-lua = callPackage ./netlink-lua {};
   odhcp-script = callPackage ./odhcp-script {};
