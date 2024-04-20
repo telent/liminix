@@ -56,6 +56,7 @@ in {
   # please keep the rest of this list alphabetised :-)
 
   anoia = callPackage ./anoia {};
+  devout = callPackage ./devout {};
   fennel = callPackage ./fennel {};
   fennelrepl = callPackage ./fennelrepl {};
   firewallgen = callPackage ./firewallgen {};
