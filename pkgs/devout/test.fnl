@@ -2,13 +2,14 @@
 (import-macros { : expect= } :anoia.assert)
 
 (fn parse-uevent [s]
-  (let [(nl nxt) (string.find s "\0" 1 true)]
+  (let [at (string.find s "@" 1 true)
+        (nl nxt) (string.find s "\0" 1 true)]
     (doto
         (collect [k v (string.gmatch
                        (string.sub s (+ 1 nxt))
                        "(%g-)=(%g+)")]
           (k:lower) v)
-      (tset :path (string.sub s 1 (- nl 1))))))
+      (tset :path (string.sub s (+ at 1) (- nl 1))))))
 
 (fn event-matches? [e terms]
   (accumulate [match? true
@@ -29,6 +30,7 @@
      :add (fn [_ event-string]
             (let [e (parse-uevent event-string)]
               (tset db e.path e)))
+     :at-path (fn [_ path] (. db path))
      }))
 
 (var failed false)
@@ -70,6 +72,15 @@ SEQNUM=1527")
  (let [db (database)]
    (db:add sda-uevent)
    (expect= (db:find {:devname "sdb"}) [])))
+
+(example
+ "when I add a device, I can retrieve it by path"
+ (let [db (database)]
+   (db:add sda-uevent)
+   (let [m (db:at-path "/devices/pci0000:00/0000:00:13.0/usb1/1-1/1-1:1.0/host0/target0:0:0/0:0:0:0/block/sda")]
+     (expect= m.devname "sda")
+     (expect= m.major "8"))))
+
 
 (example
  "when I search on multiple terms it uses all of them"
