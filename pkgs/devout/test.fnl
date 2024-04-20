@@ -31,8 +31,14 @@
               (tset db e.path e)))
      }))
 
+(var failed false)
+(fn fail [d msg] (set failed true) (print :FAIL d (.. "\n" msg)))
+
 (macro example [description & body]
-  `(do ,body))
+  `(let [(ok?# err#) (xpcall (fn [] ,body) debug.traceback)]
+     (if ok?#
+         (print :PASS ,description)
+         (fail ,description err#))))
 
 (example
  "given an empty database, searching it finds no entries"
@@ -74,5 +80,4 @@ SEQNUM=1527")
 
 
 
-
-(print "OK")
+(if failed (os.exit 1) (print "OK"))
