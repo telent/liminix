@@ -10,10 +10,15 @@ in stdenv.mkDerivation {
   src = ./.;
   nativeBuildInputs = [ fennel ];
   buildInputs = with lua.pkgs; [ luafilesystem ];
+  outputs = [ "out" "dev" ];
+
   doCheck = true;
-  checkPhase = "make test";
+
   installPhase = ''
     mkdir -p "$out/share/lua/${lua.luaversion}/${pname}"
     cp *.lua "$out/share/lua/${lua.luaversion}/${pname}"
+
+    mkdir -p "$dev/share/lua/${lua.luaversion}/${pname}"
+    cp assert.fnl "$dev/share/lua/${lua.luaversion}/${pname}"
   '';
 }

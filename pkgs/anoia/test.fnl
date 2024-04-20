@@ -1,5 +1,5 @@
-(local { : hash : base64url } (require :anoia))
-(import-macros { : expect= } :anoia.assert)
+(local { : hash : base64url } (require :init))
+(import-macros { : expect= } :assert)
 
 (expect= (hash "") 5381)
 

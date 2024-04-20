@@ -31,6 +31,7 @@ in writeScriptBin "fennelrepl" ''
     package.cpath = ${lib.strings.escapeShellArg luacpath} .. ";" .. (package.cpath or "")
     local fennel = require "fennel"
     table.insert(package.loaders or package.searchers,1, fennel.searcher)
+    fennel['macro-path'] = "${anoia.dev}/share/lua/${lua.luaversion}/?.fnl;" .. fennel['macro-path']
 
     local more_fennel = os.getenv("FENNEL_PATH")
     if more_fennel then
