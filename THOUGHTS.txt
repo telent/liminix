@@ -4627,8 +4627,7 @@ tests. assuming the sysfs setup from all-events.txt, we can write tests lik
 - when I add a device with $attributes major minor foo bar baz
   it is added to indices for foo bar baz but not major minor
 
-- when I remove it, it is gone (or marked as unfindable) from all
-  indices
+- when I remove it, it can no longer be found by looking in any index
 
 - when I query with multiple attributes, the search is performed
   using the most specific attribute (= the attribute whose
@@ -4642,4 +4641,38 @@ use so maybe it's an emerging pattern.
 
 
 https://github.com/philanc/minisock useful? we could almost replace
-nellie with it only not quite
+nellie with it only not quite (it hardcodes 0 as the "protocol" param
+to socket())
+
+Fri Apr 19 20:55:22 BST 2024
+
+We could have a service that's present only when a devdb entry is
+present. For example mount_disk only runs when partlabel=foo
+
+Or we could have a service that continues to run as the $somedatabase
+service state changes and does different things depending on the
+nature of those changes. For example, [I can't think of an example
+now, but it was definitely an issue the other day, maybe I dreamt it]
+I don't think this will be such an issue for devdb becuase there isn't
+much in it that has continuously varying values. Maybe battery health
+is the exception there
+
+The step ahead we're thinking here is: how do clients do a request?  A
+single one-of request for state is fine but chances are that a client
+will do that to get initial state and then need to open a netlink
+socket to get updates: well, if we can feed them the initial state
+filtered for their needs why can't we send them the relevant updates
+as well? This makes the database server design a bit more complicated
+as it needs to remember each client and their subscriptions, and then
+send only relevant updates to each subscribed client
+
+* should a client be allowed multiple subscriptions on the same
+connection?
+
+* do we guarantee that every message sent is matching the subscription
+or can we send other stuff as well if it makes implementation easier?
+it might defeat the purpose a bit because it means the client also
+needs to filter, but the client will anyway have to do some message
+parsing so they can distinguish add from remove
+
+* where do we start?
