@@ -4563,3 +4563,83 @@ plan:
 introduce uevent-watcher command, update test to use it
 
 make mount service use it
+
+Tue Apr 16 18:59:25 BST 2024
+
+Another idea for maybe-not-now: tftp local/peer addresses could be
+provided as top-level params (e.g. to nix-build).
+
+Wed Apr 17 18:57:49 BST 2024
+
+I hatched a plan (and forgot to save this file) to build a service
+that subscribes to uevents and retains state so that other services
+can know about things that happened before they started. I'm wondering
+if it's really needed though, because there could be one process to
+read the socket and start/stop *all* the udev triggered services.  Not
+sure how we'd describe this in nix though: how do all the other
+services
+
+How we would do a uevent database service (sysfsq):
+
+for each event e from socket
+
+if e.action in (add, change)
+  path[e.path] = e.attribues
+
+if e.action == 'remove'
+  path.remove e.path
+
+(update-indices e)
+
+
+(fn update-indices [event]
+  for each k in (keys event)
+    index.k.v += e)
+
+we also want to not maintain indexes when there are so many values in
+the index entry to make searching it worthless.
+
+to retrieve, look at each criterion that has an index and choose the
+index with fewest elements in the value. scan that index for the other
+criteria
+
+there are 813 uevent files in sysfs on arhcive, is this all overkill?
+maybe we could simplify using a hardcoded stopword list - e.g. don't
+have indices for MAJOR, MINOR
+
+what are we going to use for querying? can't be netlink because that's
+a shared medium (broadcast/multicast). unix dgram socket? alternative
+would be to somehow use the filesystem as a database
+
+Wed Apr 17 22:00:29 BST 2024
+
+tests. assuming the sysfs setup from all-events.txt, we can write tests lik
+
+- there is a path for $foo
+- the attributes are x, y, z
+
+- when I add a device with $attributes, I can recall it
+  - by path
+  - by attribute value
+
+- when I remove it again, I cannot access it by path or attributes
+
+- when I add a device with $attributes major minor foo bar baz
+  it is added to indices for foo bar baz but not major minor
+
+- when I remove it, it is gone (or marked as unfindable) from all
+  indices
+
+- when I query with multiple attributes, the search is performed
+  using the most specific attribute (= the attribute whose
+  value at this key has fewest elements)
+
+
+
+I am still looking for ways to avoid doing this, but it is potentially
+the first of several "database" services that triggers could want to
+use so maybe it's an emerging pattern.
+
+
+https://github.com/philanc/minisock useful? we could almost replace
+nellie with it only not quite
