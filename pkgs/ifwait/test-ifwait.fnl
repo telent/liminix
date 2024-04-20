@@ -1,16 +1,12 @@
 (local { : view &as fennel } (require :fennel))
 (local anoia (require :anoia))
+(import-macros { : expect= } :anoia.assert)
+
+;; nix-shell --run "cd pkgs/ifwait && fennelrepl test-ifwait.fnl"
 
 (var fake-system (fn [s] (print "executing " s)))
 (tset anoia :system #(fake-system $1))
 
-(macro expect= [actual expected]
-  `(let [ve# (view ,expected)
-         va# (view ,actual)]
-     (when (not (= ve# va#))
-       (assert false
-               (.. "\nexpected " ve# "\ngot " va#)
-               ))))
 
 (fn event-generator [events]
   (coroutine.wrap
@@ -117,3 +113,5 @@
   (set upsies [])
   (ifwait.run ["-s" "addmember" "dummy0" "up"] #gen)
   (expect= upsies [:u :u :u :u]))
+
+(print "OK")

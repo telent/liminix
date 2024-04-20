@@ -1,7 +1,8 @@
 (local subject (require :acquire-wan-address))
-(local { : view } (require :fennel))
+(import-macros { : expect= } :anoia.assert)
 (local { : merge : dup } (require :anoia))
 
+;; nix-shell --run "cd modules/dhcp6c && fennelrepl acquire-wan-address-test.fnl"
 
 (local a1
        {
@@ -46,19 +47,6 @@
                         }
         }
        )
-
-(macro expect [assertion]
-  (let [msg (.. "expectation failed: " (view assertion))]
-    `(when (not ,assertion)
-       (assert false ,msg))))
-
-(macro expect= [actual expected]
-  `(let [ve# (view ,expected)
-         va# (view ,actual)]
-     (when (not (= ve# va#))
-       (assert false
-               (.. "\nexpected " ve# "\ngot " va#)
-               ))))
 
 (fn first-address []
   (let [deleted

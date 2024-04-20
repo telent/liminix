@@ -1,15 +1,8 @@
 (local { : view} (require :fennel))
+(import-macros { : expect= } :anoia.assert)
 
 (set _G.arg (doto [] (tset 0 "test")))
 (local subject (require :watch))
-
-(macro expect= [actual expected]
-  `(let [ve# (view ,expected)
-         va# (view ,actual)]
-     (when (not (= ve# va#))
-       (assert false
-               (.. "\nexpected " ve# "\ngot " va#)
-               ))))
 
 (let [params
       {:matches {:devname "foo" :partname "my-usbstick"}}]
