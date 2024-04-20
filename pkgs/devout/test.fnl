@@ -10,10 +10,22 @@
           (k:lower) v)
       (tset :path (string.sub s 1 (- nl 1))))))
 
+(fn event-matches? [e terms]
+  (accumulate [match? true
+               name value (pairs terms)]
+    (and match? (= value (. e name)))))
+
+(fn find-in-database [db terms]
+  (accumulate [found []
+               _ e (pairs db)]
+    (if (event-matches? e terms)
+        (doto found (table.insert e))
+        found)))
+
 (fn database []
   (let [db {}]
     {
-     :find (fn [_ terms] [(.  db (next db))])
+     :find (fn [_ terms] (find-in-database db terms))
      :add (fn [_ event-string]
             (let [e (parse-uevent event-string)]
               (tset db e.path e)))
@@ -23,14 +35,12 @@
   `(do ,body))
 
 (example
- "given an empty database, search for some criteria matches no entries"
+ "given an empty database, searching it finds no entries"
  (let [db (database)]
    (expect= (db:find {:partname "boot"}) [])))
 
-(example
- "when I add a device, I can find it"
- (let [db (database)]
-   (db:add "add@/devices/pci0000:00/0000:00:13.0/usb1/1-1/1-1:1.0/host0/target0:0:0/0:0:0:0/block/sda\0ACTION=add
+(local sda-uevent
+       "add@/devices/pci0000:00/0000:00:13.0/usb1/1-1/1-1:1.0/host0/target0:0:0/0:0:0:0/block/sda\0ACTION=add
 DEVPATH=/devices/pci0000:00/0000:00:13.0/usb1/1-1/1-1:1.0/host0/target0:0:0/0:0:0:0/block/sda
 SUBSYSTEM=block
 MAJOR=8
@@ -39,10 +49,29 @@ DEVNAME=sda
 DEVTYPE=disk
 DISKSEQ=2
 SEQNUM=1527")
-   (let [[m & more] (db:find {:devname "boot"})]
+
+(example
+ "when I add a device, I can find it"
+ (let [db (database)]
+   (db:add sda-uevent)
+   (let [[m & more] (db:find {:devname "sda"})]
      (expect= m.devname "sda")
      (expect= m.major "8")
      (expect= more []))))
+
+(example
+ "when I add a device, I cannot find it with wrong terms"
+ (let [db (database)]
+   (db:add sda-uevent)
+   (expect= (db:find {:devname "sdb"}) [])))
+
+(example
+ "when I search on multiple terms it uses all of them"
+ (let [db (database)]
+   (db:add sda-uevent)
+   (expect= (# (db:find {:devname "sda" :devtype "disk"})) 1)
+   (expect= (# (db:find {:devname "sda" :devtype "dosk"})) 0)))
+
 
 
 
