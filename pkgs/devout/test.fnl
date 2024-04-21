@@ -27,6 +27,31 @@ DEVTYPE=disk
 DISKSEQ=2
 SEQNUM=1527")
 
+(local sdb1-insert
+       "add@/devices/pci0000:00/0000:00:14.0/usb1/1-3/1-3:1.0/host1/target1:0:0/1:0:0:0/block/sdb/sdb1\0ACTION=add
+DEVPATH=/devices/pci0000:00/0000:00:14.0/usb1/1-3/1-3:1.0/host1/target1:0:0/1:0:0:0/block/sdb/sdb1
+SUBSYSTEM=block
+DEVNAME=/dev/sdb1
+DEVTYPE=partition
+DISKSEQ=33
+PARTN=1
+SEQNUM=82381
+MAJOR=8
+MINOR=17")
+
+(local sdb1-remove
+       "remove@/devices/pci0000:00/0000:00:14.0/usb1/1-3/1-3:1.0/host1/target1:0:0/1:0:0:0/block/sdb/sdb1\0ACTION=remove
+DEVPATH=/devices/pci0000:00/0000:00:14.0/usb1/1-3/1-3:1.0/host1/target1:0:0/1:0:0:0/block/sdb/sdb1
+SUBSYSTEM=block
+DEVNAME=/dev/sdb1
+DEVTYPE=partition
+DISKSEQ=33
+PARTN=1
+SEQNUM=82386
+MAJOR=8
+MINOR=17")
+
+
 (example
  "when I add a device, I can find it"
  (let [db (database)]
@@ -49,6 +74,21 @@ SEQNUM=1527")
    (let [m (db:at-path "/devices/pci0000:00/0000:00:13.0/usb1/1-1/1-1:1.0/host0/target0:0:0/0:0:0:0/block/sda")]
      (expect= m.devname "sda")
      (expect= m.major "8"))))
+
+(example
+ "when I add and then remove a device, I cannot retrieve it by path"
+ (let [db (database)]
+   (db:add sdb1-insert)
+   (db:add sdb1-remove)
+   (expect= (db:at-path "/devices/pci0000:00/0000:00:14.0/usb1/1-3/1-3:1.0/host1/target1:0:0/1:0:0:0/block/sdb/sdb1") nil)))
+
+(example
+ "when I add and then remove a device, I cannot find it"
+ (let [db (database)]
+   (db:add sdb1-insert)
+   (db:add sda-uevent)
+   (db:add sdb1-remove)
+   (expect= (db:find {:devname "/dev/sdb1"}) [])))
 
 (example
  "when I search on multiple terms it uses all of them"

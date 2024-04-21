@@ -26,7 +26,12 @@
      :find (fn [_ terms] (find-in-database db terms))
      :add (fn [_ event-string]
             (let [e (parse-uevent event-string)]
-              (tset db e.path e)))
+              (match e.action
+                :add (tset db e.path e)
+                :change (tset db e.path e)
+                ; ;bind ?
+                :remove (tset db e.path nil)
+                )))
      :at-path (fn [_ path] (. db path))
      }))
 
