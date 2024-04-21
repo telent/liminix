@@ -91,7 +91,6 @@
     - Mount the logs partition, mount / as overlayfs of firmware ? rootfs and rootfs_data for extended data.
     - Jitter-based entropy injection? Device can be slow to initialize its CRNG and hostapd will reject few clients at the start because of that.
     - Defaults for hostapd based on MT7915 capabilities? See the example for one possible list.
-    - Remove primary/secondary hack and put it in preinit.
     - Offer ways to reflash the *bootloader* itself to support direct boot via UBI and kernel upgrades via filesystem rewrite.
 
     Vendor web page: https://www.zyxel.com/fr/fr/products/wireless/ax1800-wifi-6-dual-radio-nebulaflex-access-point-nwa50ax
@@ -171,6 +170,8 @@
           maxLEBcount = "256";
         };
 
+        flash.eraseBlockSize = 65536;
+
         # This is a FIT containing a kernel padded and
         # a UBI volume rootfs.
         defaultOutput = "zyxel-nwa-fit";
@@ -181,22 +182,18 @@
         alignment = 2048;
 
         rootDevice = "ubi:rootfs";
+        alternativeRootDevice = "ubi:rootfs";
+
+        # Auto-attach MTD devices: ubi_a then ubi_b.
+        ubi.mtds = [ "ubi_a" "ubi_b" ];
 
         dts = {
-          # Actually, this is not what we want.
-          # This DTS is insufficient.
-          src = ./mt7621_zyxel_nwa50ax.dtsi;
+          # Strong DTB assumptions:
+          # ubi_a and ubi_b are two MTD devices.
+          # If those changes, disaster will occur.
+          src = ./dtb/mt7621_zyxel_nwa50ax.dtsi;
           includes = [
-            # Here's one weird trick to make `ubi` detection
-            # out of the box.
-            # We will write ubi on /dev/firmware_a:rootfs location
-            # and same for /dev/firmware_b:rootfs.
-            # How do we distinguish both?
-            # We can just use the DTS to point ubi at A or B.
-            # This, unfortunately, means that we have "two images".
-            # But they are really just 1 image with 2 different DTS.
-            # TODO: improve this hack in preinit?
-            (if config.boot.imageType == "primary" then "${./a_image}" else "${./b_image}")
+            "${./dtb}"
             "${openwrt.src}/target/linux/ramips/dts"
           ];
         };

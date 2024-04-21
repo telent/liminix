@@ -62,7 +62,7 @@ on a system with pre-existing firmware and OS.
         };
       '';
       in
-      pkgs.runCommand "zyxel-nwa-fit-${config.boot.imageType}" {
+      pkgs.runCommand "zyxel-nwa-fit" {
         nativeBuildInputs = [ pkgs.pkgsBuildBuild.ubootTools pkgs.pkgsBuildBuild.dtc ];
       } ''
         mkimage -f ${dts} $out

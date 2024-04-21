@@ -56,7 +56,7 @@
 			};
 
 			partition@400000 {
-				label = "ubi";
+				label = "ubi_a";
 				reg = <0x800000 0x2000000>;
 			};
 		};
