@@ -100,5 +100,24 @@ MINOR=17")
    (expect= (# (db:find {:devname "sda" :devtype "dosk"})) 0)))
 
 
+;;; tests for indices
+
+(example "when I add a device with $attributes major minor foo bar baz,
+ it is added to indices for foo bar baz but not major minor")
+
+(example "a removed device can no longer be found by looking in any index")
+
+(example "when I query with multiple attributes, the search is performed using the most specific attribute"
+         ;; (= the attribute whose
+         ;;   value at this key has fewest elements)
+         )
+
+;;; tests for subscriptions
+
+(example "I can subscribe to some search terms")
+
+(example "my callback is invoked when devices matching those terms are
+ added/changed/removed")
+
 
 (if failed (os.exit 1) (print "OK"))
