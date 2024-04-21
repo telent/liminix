@@ -6,10 +6,12 @@
 (fn fail [d msg] (set failed true) (print :FAIL d (.. "\n" msg)))
 
 (macro example [description & body]
-  `(let [(ok?# err#) (xpcall (fn [] ,body) debug.traceback)]
-     (if ok?#
-         (print :PASS ,description)
-         (fail ,description err#))))
+  (if (. body 1)
+      `(let [(ok?# err#) (xpcall (fn [] ,body) debug.traceback)]
+         (if ok?#
+             (print :PASS ,description)
+             (fail ,description err#)))
+      `(print :PENDING ,description)))
 
 (example
  "given an empty database, searching it finds no entries"
