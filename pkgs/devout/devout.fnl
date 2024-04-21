@@ -20,19 +20,28 @@
         (doto found (table.insert e))
         found)))
 
+(fn record-event [db subscribers str]
+  (let [e (parse-uevent str)]
+    (match e.action
+      :add (tset db e.path e)
+      :change (tset db e.path e)
+      ;; should we do something for bind?
+      :remove (tset db e.path nil)
+      )
+    (each [_ { : terms : callback } (ipairs subscribers)]
+      (if (event-matches? e terms) (callback e)))
+    e))
+
 (fn database []
-  (let [db {}]
+  (let [db {}
+        subscribers []]
     {
      :find (fn [_ terms] (find-in-database db terms))
-     :add (fn [_ event-string]
-            (let [e (parse-uevent event-string)]
-              (match e.action
-                :add (tset db e.path e)
-                :change (tset db e.path e)
-                ; ;bind ?
-                :remove (tset db e.path nil)
-                )))
+     :add (fn [_ event-string] (record-event db subscribers event-string))
      :at-path (fn [_ path] (. db path))
+     :subscribe (fn [_ callback terms]
+                  (table.insert subscribers {: callback : terms }))
+
      }))
 
 

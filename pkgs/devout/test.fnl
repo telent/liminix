@@ -114,10 +114,16 @@ MINOR=17")
 
 ;;; tests for subscriptions
 
-(example "I can subscribe to some search terms")
-
-(example "my callback is invoked when devices matching those terms are
- added/changed/removed")
+(example
+ "I can subscribe to some search terms and be notified of matching events"
+ (var received [])
+ (let [db (database)
+       subscriber (fn [e] (table.insert received e))]
+   (db:subscribe subscriber {:devname "/dev/sdb1"})
+   (db:add sdb1-insert)
+   (db:add sda-uevent)
+   (db:add sdb1-remove)
+   (expect= (# received) 2)))
 
 
 (if failed (os.exit 1) (print "OK"))
