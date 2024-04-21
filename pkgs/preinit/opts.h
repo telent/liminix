@@ -1,5 +1,6 @@
 struct root_opts {
     char *device;
+    char *altdevice; /* For A/B schemas */
     char *fstype;
     char *mount_opts;
 };

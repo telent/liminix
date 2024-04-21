@@ -13,7 +13,7 @@
 #include "opts.h"
 
 #define ERR(x) write(2, x, strlen(x))
-#define AVER(c) do { if(c < 0) { ERR("failed: "  #c ": error=0x" ); pr_u32(errno); ERR("\n"); } } while(0)
+#define AVER(c) do { if(c < 0) { ERR("failed: "  #c ": error=0x" ); pr_u32(errno); ERR ( " - "); ERR(strerror(errno)); ERR("\n"); } } while(0)
 
 char * pr_u32(int32_t input);
 
@@ -88,8 +88,21 @@ int main(int argc, char *argv[], char *envp[])
 	    write(1, ", opts=", 7);
 	    write(1, opts.mount_opts, strlen(opts.mount_opts));
 	}
+	if(opts.altdevice) {
+	    write(1, ", altdevice=", 12);
+	    write(1, opts.altdevice, strlen(opts.altdevice));
+	}
 	write(1, ")\n", 2);
-	AVER(mount(opts.device, "/target/persist", opts.fstype, 0, opts.mount_opts));
+
+	if(!opts.altdevice) {
+	    AVER(mount(opts.device, "/target/persist", opts.fstype, 0, opts.mount_opts));
+	} else {
+	    if(mount(opts.device, "/target/persist", opts.fstype, 0, opts.mount_opts) < 0) {
+		AVER(mount(opts.altdevice, "/target/persist", opts.fstype, 0, opts.mount_opts));
+	    }
+	}
+
+	// FUTUREWORK: any failure using `opts.device` should force us to consider rerunning this with the alternative rootfs.
 	AVER(mount("/target/persist/nix", "/target/nix",
 		   "bind", MS_BIND, NULL));
 
@@ -102,6 +115,7 @@ int main(int argc, char *argv[], char *envp[])
 
 	argv[0] = "init";
 	argv[1] = NULL;
+
 	AVER(execve("/persist/init", argv, envp));
     }
     die();
