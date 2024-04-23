@@ -103,6 +103,13 @@
         true)
     (nil err) (do (print err) false)))
 
+(fn open-netlink [groups]
+  (match (ll.socket AF_NETLINK SOCK_RAW NETLINK_KOBJECT_UEVENT)
+    fd (doto fd (ll.bind (string.pack "I2I2I4I4" ; family pad pid groups
+                                      AF_NETLINK 0 0 groups)))
+    (nil errno) (values nil errno)))
+
+
 (fn event-loop []
   (let [fds {}]
     {
@@ -117,9 +124,10 @@
      }))
 
 (fn run []
-  (let [[sockname] arg
+  (let [[sockname nl-groups] arg
         s (unix-socket sockname)
         db (database)
+        nl (open-netlink nl-groups)
         loop (event-loop)]
     (loop:register
      s
@@ -128,6 +136,9 @@
         (do
           (loop:register client (partial handle-client db))
           true)))
+    (loop:register
+     nl
+     #(do (print :netlink (ll.read nl)) true))
     (while true
       (let [pollfds (pollfds-for (loop:fds))]
         (ll.poll pollfds 5000)
