@@ -4676,3 +4676,57 @@ needs to filter, but the client will anyway have to do some message
 parsing so they can distinguish add from remove
 
 * where do we start?
+
+Sun Apr 21 13:31:48 BST 2024
+
+We have the mechanics of it working (albeit implemented in the
+simplest possible terms), we need to glue it to some I/O
+
+1) open a netlink socket and read the events from it
+
+2) "create a PF_UNIX socket of type SOCK_STREAM, and accept connections on it, then each time you accept a connection, you get a new fd"
+
+- accept connection
+- read terms from it
+- register callback that writes event to connected socket
+
+minisock has no support for "test if fd is ready" or "wait for [fds]
+to become ready", either we need poll() or we could add a call for "is
+this fd ready to read" and use coroutines. Fork minisock or add as
+another library?
+
+[ if we fork minisock we could expose the protocol param to Lua
+so we could use it for netlink ]
+
+Tue Apr 23 19:13:45 BST 2024
+
+we could convert from minisock to lualinux. if we can also use that to
+get rid of nellie and/or lfs, the size tradeoff is minimal
+
+---
+
+Is there some way we could test the devout event loop?
+
+I can register a fd with a callback
+when the fd is ready, my callback is called
+when the callback return true it remains registered
+when the callback return true it is unregistered and the fd is closed
+
+loop.register
+loop.registered?
+loop.feed
+
+Tue Apr 23 20:34:03 BST 2024
+
+I think we could make the event loop abstraction leak less?
+It's not actually a _loop_, all the actual GOTO 10 happens
+outside of it
+
+1) see if we can do netlink in lualinux
+2) if so, convert it to lualinux
+3) add netlink socket to event loop
+4) make it send messages to subscribers
+5) package it
+6) make inout test use it instead of uevent-watcher
+7) write an inout test variant that has the stick inserted
+  at boot time already
