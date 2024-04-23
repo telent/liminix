@@ -119,11 +119,22 @@ MINOR=17")
  (var received [])
  (let [db (database)
        subscriber (fn [e] (table.insert received e))]
-   (db:subscribe subscriber {:devname "/dev/sdb1"})
+   (db:subscribe :me subscriber {:devname "/dev/sdb1"})
    (db:add sdb1-insert)
    (db:add sda-uevent)
    (db:add sdb1-remove)
    (expect= (# received) 2)))
 
+(example
+ "I can unsubscribe after subscribing"
+ (var received [])
+ (let [db (database)
+       subscriber (fn [e] (table.insert received e))]
+   (db:subscribe :me subscriber {:devname "/dev/sdb1"})
+   (db:unsubscribe :me)
+   (db:add sdb1-insert)
+   (db:add sda-uevent)
+   (db:add sdb1-remove)
+   (expect= (# received) 0)))
 
 (if failed (os.exit 1) (print "OK"))

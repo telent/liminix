@@ -28,7 +28,7 @@
       ;; should we do something for bind?
       :remove (tset db e.path nil)
       )
-    (each [_ { : terms : callback } (ipairs subscribers)]
+    (each [_ { : terms : callback } (pairs subscribers)]
       (if (event-matches? e terms) (callback e)))
     e))
 
@@ -39,8 +39,9 @@
      :find (fn [_ terms] (find-in-database db terms))
      :add (fn [_ event-string] (record-event db subscribers event-string))
      :at-path (fn [_ path] (. db path))
-     :subscribe (fn [_ callback terms]
-                  (table.insert subscribers {: callback : terms }))
+     :subscribe (fn [_ id callback terms]
+                  (tset subscribers id {: callback : terms }))
+     :unsubscribe (fn [_ id] (tset subscribers id nil))
 
      }))
 
