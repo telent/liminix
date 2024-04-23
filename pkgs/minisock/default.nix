@@ -1,16 +1,17 @@
 { lua, lib, fetchFromGitHub }:
-let pname = "minisock";
+let
+  pname = "minisock";
+  src = fetchFromGitHub {
+    repo = "minisock";
+    owner = "telent";
+    rev = "f31926e8aac6922923d4e83ed3e85b727172e9c5";
+    hash = "sha256-/RlhnRrIrXa/86mX20RMLtzmGdoeA7zVc8uBoFyexnY=";
+  };
 in lua.pkgs.buildLuaPackage {
   inherit pname;
   version = "0.1";              # :shrug:
 
-  src = fetchFromGitHub {
-    repo = "minisock";
-    owner = "philanc";
-    rev = "a20db2aaa871653c61045019633279167cf1b458";
-    hash = "sha256-zB9KSt0WEGCSYTLA6W9QrsVRFEZYaoBBeXx9VEXmsGY=";
-  };
-
+  inherit src;
   makeFlags = [ "LUADIR=."  "minisock.so" ];
 
   installPhase = ''
