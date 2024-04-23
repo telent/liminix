@@ -4,8 +4,8 @@ let
   src = fetchFromGitHub {
     repo = "minisock";
     owner = "telent";
-    rev = "f31926e8aac6922923d4e83ed3e85b727172e9c5";
-    hash = "sha256-/RlhnRrIrXa/86mX20RMLtzmGdoeA7zVc8uBoFyexnY=";
+    rev = "46e0470ff88c68f3a873dedbcf1dc351f4916b1a";
+    hash = "sha256-uTV5gpfEMvHMBgdu41Gy2uizc3K9bXtO5BiCY70cYUs=";
   };
 in lua.pkgs.buildLuaPackage {
   inherit pname;
