@@ -71,6 +71,7 @@ in {
   levitate = callPackage ./levitate {};
   libubootenv = callPackage ./libubootenv {};
   linotify = callPackage ./linotify {};
+  lualinux = callPackage ./lualinux {};
 
   # we need to build real lzma instead of using xz, because the lzma
   # decoder in u-boot doesn't understand streaming lzma archives
