@@ -1,6 +1,7 @@
-(local { : database } (require :devout))
+(local { : database : event-loop } (require :devout))
 (local { : view } (require :fennel))
-(import-macros { : expect= } :anoia.assert)
+(local sock (require :minisock))
+(import-macros { : expect : expect= } :anoia.assert)
 
 (var failed false)
 (fn fail [d msg] (set failed true) (print :FAIL d (.. "\n" msg)))
@@ -136,5 +137,49 @@ MINOR=17")
    (db:add sda-uevent)
    (db:add sdb1-remove)
    (expect= (# received) 0)))
+
+
+;;; test for event loop
+
+(example
+ "I can register a fd with a callback"
+ (let [loop (event-loop)
+       cb #(print $1)]
+   (loop:register 3 cb)
+   (expect= (. (loop:_tbl) 3) cb)))
+
+(example
+ "when the fd is ready, my callback is called"
+ (let [loop (event-loop)]
+   (var ran? false)
+   (loop:register 3 #(set ran? true))
+   (loop:feed {3 1})
+   (expect= ran? true)
+   ))
+
+(example
+ "when the callback returns true it remains registered"
+ (let [loop (event-loop)]
+   (loop:register 3 #true)
+   (loop:feed {3 1})
+   (expect (. (loop:_tbl) 3))
+   ))
+
+(fn new-fd []
+  (let [fd (sock.bind (.. "\1\0"  "/tmp/test-socket"  "\0\0\0\0\0"))]
+    (os.remove "/tmp/test-socket")
+    fd))
+
+(example
+ "when the callback returns false it is unregistered and the fd is closed"
+ (let [loop (event-loop)
+       fd (new-fd)]
+   (expect (> fd 2))
+   (loop:register 3 #false)
+   (loop:feed {3 1})
+   (expect (not (. (loop:_tbl) 3)))
+   (assert (not (os.execute (string.format "test -e /dev/fd/%d" fd))))
+   ))
+
 
 (if failed (os.exit 1) (print "OK"))
