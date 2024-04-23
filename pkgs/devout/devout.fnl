@@ -1,8 +1,8 @@
-(local sock (require :minisock))
+(local ll (require :lualinux))
 (local { : view } (require :fennel))
 
 (fn trace [expr]
-  (doto expr (print :TRACE (view expr))))
+  (do (print :TRACE (view expr)) expr))
 
 (fn parse-uevent [s]
   (let [at (string.find s "@" 1 true)
@@ -50,29 +50,39 @@
      :unsubscribe (fn [_ id] (tset subscribers id nil))
      }))
 
-;; #define POLLIN          0x0001
-;; #define POLLPRI         0x0002
-;; #define POLLOUT         0x0004
-;; #define POLLERR         0x0008
-;; #define POLLHUP         0x0010
-;; #define POLLNVAL        0x0020
+;; grepped from kernel headers
+
+(local POLLIN          0x0001)
+(local POLLPRI         0x0002)
+(local POLLOUT         0x0004)
+(local POLLERR         0x0008)
+(local POLLHUP         0x0010)
+(local POLLNVAL        0x0020)
+
+(local AF_LOCAL 1)
+(local AF_NETLINK 16)
+(local SOCK_STREAM 1)
+(local SOCK_DGRAM 2)
+(local SOCK_RAW 3)
+(local NETLINK_KOBJECT_UEVENT 15)
 
 (fn unix-socket [name]
-  (let [addr (.. "\1\0"  name  "\0\0\0\0\0")
-        (sock err) (sock.bind addr)]
-    (assert sock err)))
+  (let [addr (.. "\1\0"  name  "\0\0\0\0\0")]
+    (match (ll.socket AF_LOCAL SOCK_STREAM 0)
+      fd (match (ll.bind fd addr)
+           0 (doto fd (ll.listen  32))
+           (nil err) (values nil err))
+      (nil err) (values nil err))))
 
 (fn pollfds-for [fds]
-  (table.concat (icollect [_ v (ipairs fds)] (string.pack "iHH" v 1 0))))
+  (icollect [_ v (ipairs fds)]
+    (bor (lshift v 32) (lshift 1 16))))
 
 (fn unpack-pollfds [pollfds]
-  (var i 1)
-  (let [fds {}]
-    (while (< i (# pollfds))
-      (let [(fd _ revents i_) (string.unpack "iHH" pollfds i)]
-        (if (> revents 0) (tset fds fd revents))
-        (set i i_)))
-    fds))
+  (collect [_ v (ipairs pollfds)]
+    (let [fd (band (rshift v 32) 0xffffffff)
+          revent (band v 0xffff)]
+      (values fd revent))))
 
 (fn parse-terms [str]
   (print :terms str)
@@ -80,7 +90,7 @@
     (string.match n "(.-)=(.+)")))
 
 (fn handle-client [db client]
-  (match (trace (sock.read client))
+  (match (ll.read client)
     "" (do
          (db:unsubscribe client)
          false)
@@ -88,7 +98,7 @@
         (db:subscribe
          client
          (fn [e]
-           (sock.write client (view e)))
+           (ll.write client (view e)))
          (parse-terms s))
         true)
     (nil err) (do (print err) false)))
@@ -101,7 +111,7 @@
              (each [fd revent (pairs revents)]
                (when (not ((. fds fd) fd))
                  (tset fds fd nil)
-                 (sock.close fd))))
+                 (ll.close fd))))
      :fds #(icollect [fd _ (pairs fds)] fd)
     :_tbl #(do fds)                    ;exposed for tests
      }))
@@ -113,15 +123,14 @@
         loop (event-loop)]
     (loop:register
      s
-     #(match (sock.accept s)
+     #(match (ll.accept s)
         (client addr)
         (do
           (loop:register client (partial handle-client db))
           true)))
     (while true
-      (let [pollfds (pollfds-for (loop:fds))
-            (rpollfds numfds) (sock.poll pollfds 1000)]
-        (when (> numfds 0)
-          (loop:feed (unpack-pollfds rpollfds)))))))
+      (let [pollfds (pollfds-for (loop:fds))]
+        (ll.poll pollfds 5000)
+        (loop:feed (unpack-pollfds pollfds))))))
 
 { : database : run : event-loop  }
