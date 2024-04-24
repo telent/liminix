@@ -16,6 +16,7 @@ let packages = [
       anoia
       fennel
       netlink-lua
+      lua.pkgs.readline
       lua.pkgs.luafilesystem
     ];
     join = ps: builtins.concatStringsSep ";" ps;
