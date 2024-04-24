@@ -138,7 +138,7 @@
           true)))
     (loop:register
      nl
-     #(do (print :netlink (ll.read nl)) true))
+     #(do (db:add (ll.read nl)) true))
     (while true
       (let [pollfds (pollfds-for (loop:fds))]
         (ll.poll pollfds 5000)
