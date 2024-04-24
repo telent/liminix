@@ -86,7 +86,7 @@
 
 (fn parse-terms [str]
   (print :terms str)
-  (collect [n (string.gmatch str "([^ ]+)")]
+  (collect [n (string.gmatch (str:gsub "\n+$" "") "([^ ]+)")]
     (string.match n "(.-)=(.+)")))
 
 (fn handle-client [db client]
