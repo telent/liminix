@@ -12,7 +12,10 @@ in lua.pkgs.buildLuaPackage {
   version = "0.1";              # :shrug:
 
   inherit src;
-  makeFlags = [ "LUADIR=."  "lualinux.so" ];
+  postPatch = ''
+    sed -i -e '/strip/d' Makefile
+  '';
+  makeFlags = [ "LUADIR=." "CC:=$(CC)" "STRIP=true"  "lualinux.so"  ];
 
   installPhase = ''
     mkdir -p "$out/lib/lua/${lua.luaversion}"
