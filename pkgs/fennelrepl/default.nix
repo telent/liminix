@@ -5,6 +5,7 @@
 , lib
 , luaPackages
 , lua
+, lualinux
 , writeScriptBin
 , linotify
 , anoia
@@ -15,6 +16,7 @@ let packages = [
       linotify
       anoia
       fennel
+      lualinux
       netlink-lua
       lua.pkgs.readline
       lua.pkgs.luafilesystem
