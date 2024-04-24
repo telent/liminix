@@ -82,7 +82,7 @@
   (collect [_ v (ipairs pollfds)]
     (let [fd (band (rshift v 32) 0xffffffff)
           revent (band v 0xffff)]
-      (values fd revent))))
+      (values fd (if (> revent 0) revent nil)))))
 
 (fn parse-terms [str]
   (print :terms str)
