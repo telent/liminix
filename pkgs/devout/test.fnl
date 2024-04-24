@@ -1,6 +1,6 @@
 (local { : database : event-loop } (require :devout))
 (local { : view } (require :fennel))
-(local sock (require :minisock))
+(local ll (require :lualinux))
 (import-macros { : expect : expect= } :anoia.assert)
 
 (var failed false)
@@ -166,9 +166,7 @@ MINOR=17")
    ))
 
 (fn new-fd []
-  (let [fd (sock.bind (.. "\1\0"  "/tmp/test-socket"  "\0\0\0\0\0"))]
-    (os.remove "/tmp/test-socket")
-    fd))
+  (ll.open "/dev/zero" 0 0x1ff))
 
 (example
  "when the callback returns false it is unregistered and the fd is closed"
