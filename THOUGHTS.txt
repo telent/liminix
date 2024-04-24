@@ -4722,11 +4722,15 @@ I think we could make the event loop abstraction leak less?
 It's not actually a _loop_, all the actual GOTO 10 happens
 outside of it
 
-1) see if we can do netlink in lualinux
-2) if so, convert it to lualinux
-3) add netlink socket to event loop
-4) make it send messages to subscribers
+[X] 1) see if we can do netlink in lualinux
+[X] 2) if so, convert it to lualinux
+[X] 3) add netlink socket to event loop
+[X] 4) make it send messages to subscribers
 5) package it
-6) make inout test use it instead of uevent-watcher
+6) make uevent-watcher use it instead of netlink directly
 7) write an inout test variant that has the stick inserted
   at boot time already
+
+I'm also thinking we could wrap the raw fds from lualinux into small
+objects with read and close methods? It would make testing easier if
+nothing else - also use of with-open.  Maybe do that in anoia.
