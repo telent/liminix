@@ -2,6 +2,7 @@
   fennel
 , stdenv
 , lua
+, lualinux
 }:
 let pname =  "anoia";
 in stdenv.mkDerivation {
@@ -9,7 +10,7 @@ in stdenv.mkDerivation {
   version = "0.1";
   src = ./.;
   nativeBuildInputs = [ fennel ];
-  buildInputs = with lua.pkgs; [ luafilesystem ];
+  buildInputs = with lua.pkgs; [ luafilesystem lualinux ];
   outputs = [ "out" "dev" ];
 
   doCheck = true;

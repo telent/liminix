@@ -2,5 +2,6 @@
   writeFennelScript
 , anoia
 , lua
+, lualinux
 }:
-writeFennelScript  "odhcpc-script" [anoia lua.pkgs.luafilesystem] ./odhcp6-script.fnl
+writeFennelScript  "odhcpc-script" [anoia lualinux] ./odhcp6-script.fnl

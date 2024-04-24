@@ -1,6 +1,7 @@
 {
   lua
 , nellie
+, lualinux
 , writeFennel
 , runCommand
 , anoia
@@ -15,7 +16,7 @@ stdenv.mkDerivation {
   installPhase = ''
     mkdir -p $out/bin
     cp -p ${writeFennel "uevent-watch" {
-      packages = [fennel anoia nellie lua.pkgs.luafilesystem];
+      packages = [fennel anoia nellie lualinux];
       mainFunction = "run";
     } ./watch.fnl} $out/bin/uevent-watch
   '';
