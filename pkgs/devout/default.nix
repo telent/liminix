@@ -15,7 +15,7 @@ stdenv.mkDerivation {
   installPhase = ''
     mkdir -p $out/bin
     cp -p ${writeFennel "devout" {
-      packages = [fennel anoia nellie lua.pkgs.luafilesystem lualinux];
+      packages = [fennel anoia nellie lualinux];
       mainFunction = "run";
     } ./devout.fnl} $out/bin/devout
   '';

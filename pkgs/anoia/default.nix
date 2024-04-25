@@ -1,6 +1,7 @@
 {
   fennel
 , stdenv
+, linotify
 , lua
 , lualinux
 }:
@@ -10,7 +11,7 @@ in stdenv.mkDerivation {
   version = "0.1";
   src = ./.;
   nativeBuildInputs = [ fennel ];
-  buildInputs = with lua.pkgs; [ luafilesystem lualinux ];
+  buildInputs = with lua.pkgs; [ linotify lualinux ];
   outputs = [ "out" "dev" ];
 
   doCheck = true;

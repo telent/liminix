@@ -19,7 +19,6 @@ let packages = [
       lualinux
       netlink-lua
       lua.pkgs.readline
-      lua.pkgs.luafilesystem
     ];
     join = ps: builtins.concatStringsSep ";" ps;
     luapath = join (builtins.map (f:

@@ -1,7 +1,6 @@
 (local inotify (require :inotify))
 (local { : file-exists? } (require :anoia))
-(local { : directory? } (require :anoia.fs))
-(local lfs (require :lfs))
+(local { : file-type : dir &as fs } (require :anoia.fs))
 
 (fn read-line [name]
   (with-open [f (assert (io.open name :r) (.. "can't open file " name))]
@@ -20,15 +19,15 @@
     handle))
 
 (fn read-value [pathname]
-  (case (lfs.symlinkattributes pathname)
+  (case (file-type pathname)
     nil nil
-    {:mode "directory"}
-    (collect [f (lfs.dir pathname)]
+    :directory
+    (collect [f (fs.dir pathname)]
       (when (not (or (= f ".") (= f "..")))
         (values f (read-value ( .. pathname "/" f)))))
-    {:mode "file"}
+    :file
     (read-line pathname)
-    {:mode "link"}
+    :link
     (read-line pathname)
     unknown
     (error (.. "can't read " pathname " of kind \"" unknown.mode "\""))))

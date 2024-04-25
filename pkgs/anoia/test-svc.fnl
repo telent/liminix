@@ -1,4 +1,4 @@
-(local svc (require :anoia.svc))
+(local svc (require :svc))
 (local { : view } (require :fennel))
 
 (local ex (svc.open "./example-output"))

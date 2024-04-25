@@ -2,9 +2,10 @@
   writeFennel
 , linotify
 , anoia
+, lualinux
 , lua
 }:
 writeFennel "acquire-wan-address" {
-  packages = [ linotify anoia lua.pkgs.luafilesystem ];
+  packages = [ linotify anoia lualinux ];
   mainFunction = "run";
 } ./acquire-wan-address.fnl
