@@ -4734,3 +4734,10 @@ outside of it
 I'm also thinking we could wrap the raw fds from lualinux into small
 objects with read and close methods? It would make testing easier if
 nothing else - also use of with-open.  Maybe do that in anoia.
+
+when a subscriber connects we need to send them their matching current
+state before subscribing them [ needs a test ]
+
+figure out what event format the subscribers want? lua-ish or send the
+same messages as udev would? If we're going to send the originals,
+should we store them alongside the parsed, or reconstruct from parsed?
