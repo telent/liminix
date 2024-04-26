@@ -104,7 +104,6 @@
       (values fd (if (> revent 0) revent nil)))))
 
 (fn parse-terms [str]
-  (print :terms str)
   (collect [n (string.gmatch (str:gsub "\n+$" "") "([^ ]+)")]
     (string.match n "(.-)=(.+)")))
 
