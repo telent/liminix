@@ -17,34 +17,38 @@
        val# val#
        (nil err#) (error (string.format "%s failed: errno=%d" ,(v expr) err#)))))
 
-(fn parse-event [s]
-  (let [at (string.find s "@" 1 true)
-        (nl nxt) (string.find s "\0" 1 true)]
-    (doto
-        (collect [k v (string.gmatch
-                       (string.sub s (+ 1 nxt))
-                       "(%g-)=(%g+)")]
-          (k:lower) v)
-      (tset :path (string.sub s (+ at 1) (- nl 1))))))
-
 (fn format-event [e]
   (..
    (string.format "%s@%s\0" e.action e.path)
    (table.concat
-    (icollect [k v (pairs e)]
+    (icollect [k v (pairs e.attributes)]
       (string.format "%s=%s" (string.upper k) v ))
     "\n")))
-
 
 (fn event-matches? [e terms]
   (accumulate [match? true
                name value (pairs terms)]
-    (and match? (= value (. e name)))))
+    (and match? (= value (. e.attributes name)))))
+
+(fn parse-event [s]
+  (let [at (string.find s "@" 1 true)
+        (nl nxt) (string.find s "\0" 1 true)
+        attributes
+        (collect [k v (string.gmatch
+                       (string.sub s (+ 1 nxt))
+                       "(%g-)=(%g+)")]
+          (k:lower) v)]
+    { : attributes
+      :path (string.sub s (+ at 1) (- nl 1))
+      :action (string.sub s 1 (- at 1))
+      :format format-event
+      :matches? event-matches?
+      }))
 
 (fn find-in-database [db terms]
   (accumulate [found []
                _ e (pairs db)]
-    (if (event-matches? e terms)
+    (if (e:matches? terms)
         (doto found (table.insert e))
         found)))
 
@@ -57,7 +61,7 @@
       :remove (tset db e.path nil)
       )
     (each [_ { : terms : callback } (pairs subscribers)]
-      (if (event-matches? e terms) (callback e)))
+      (if (e:matches? terms) (callback e)))
     e))
 
 (fn database []
@@ -166,4 +170,4 @@
         (ll.poll pollfds 5000)
         (loop:feed (unpack-pollfds pollfds))))))
 
-{ : database : run : event-loop  }
+{ : database : run : event-loop : parse-event }

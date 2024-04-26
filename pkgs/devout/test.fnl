@@ -1,4 +1,4 @@
-(local { : database : event-loop } (require :devout))
+(local { : database : event-loop : parse-event } (require :devout))
 (local { : view } (require :fennel))
 (local ll (require :lualinux))
 (import-macros { : expect : expect= } :anoia.assert)
@@ -13,11 +13,6 @@
              (print :PASS ,description)
              (fail ,description err#)))
       `(print :PENDING ,description)))
-
-(example
- "given an empty database, searching it finds no entries"
- (let [db (database)]
-   (expect= (db:find {:partname "boot"}) [])))
 
 (local sda-uevent
        "add@/devices/pci0000:00/0000:00:13.0/usb1/1-1/1-1:1.0/host0/target0:0:0/0:0:0:0/block/sda\0ACTION=add
@@ -54,14 +49,36 @@ SEQNUM=82386
 MAJOR=8
 MINOR=17")
 
+(example
+ "I can parse an event"
+ (let [e (parse-event sdb1-insert)]
+   (expect= e.attributes.seqnum "82381")
+   (expect= e.attributes.devname "/dev/sdb1")
+   (expect= e.path "/devices/pci0000:00/0000:00:14.0/usb1/1-3/1-3:1.0/host1/target1:0:0/1:0:0:0/block/sdb/sdb1")
+   (expect= e.action :add)
+   (expect= e (parse-event (e:format)))))
+
+(example
+ "An event can match against terms"
+ (let [terms {:devname "foo" :partname "my-usbstick"}]
+   (expect= (: (parse-event "add@/\0SEQNUM=1") :matches? terms) false)
+   (expect= (: (parse-event "add@/\0DEVNAME=bill") :matches? terms) false)
+   (expect= (: (parse-event "add@/\0DEVNAME=foo\nPARTNAME=my-usbstick") :matches? terms) true)
+   (expect= (: (parse-event "add@/\0DEVNAME=foo\nPARTNAME=my-usbstick\nOTHERTHING=bar") :matches? terms) true)
+   ))
+
+(example
+ "given an empty database, searching it finds no entries"
+ (let [db (database)]
+   (expect= (db:find {:partname "boot"}) [])))
 
 (example
  "when I add a device, I can find it"
  (let [db (database)]
    (db:add sda-uevent)
    (let [[m & more] (db:find {:devname "sda"})]
-     (expect= m.devname "sda")
-     (expect= m.major "8")
+     (expect= m.attributes.devname "sda")
+     (expect= m.attributes.major "8")
      (expect= more []))))
 
 (example
@@ -75,8 +92,8 @@ MINOR=17")
  (let [db (database)]
    (db:add sda-uevent)
    (let [m (db:at-path "/devices/pci0000:00/0000:00:13.0/usb1/1-1/1-1:1.0/host0/target0:0:0/0:0:0:0/block/sda")]
-     (expect= m.devname "sda")
-     (expect= m.major "8"))))
+     (expect= m.attributes.devname "sda")
+     (expect= m.attributes.major "8"))))
 
 (example
  "when I add and then remove a device, I cannot retrieve it by path"

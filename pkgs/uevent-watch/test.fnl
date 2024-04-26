@@ -3,13 +3,6 @@
 
 (local subject (require :watch))
 
-(let [params
-      {:matches {:devname "foo" :partname "my-usbstick"}}]
-  (expect= (subject.event-matches? params {}) false)
-  (expect= (subject.event-matches? params {:devname "bill"}) false)
-  (expect= (subject.event-matches? params {:devname "foo" :partname "my-usbstick"}) true)
-  (expect= (subject.event-matches? params {:devname "foo" :otherthing "bar" :partname "my-usbstick"}) true)
-  )
 
 
 ;; Events come from the netlink socket as an initial summary line
