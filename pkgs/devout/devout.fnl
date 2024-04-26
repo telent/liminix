@@ -21,6 +21,15 @@
           (k:lower) v)
       (tset :path (string.sub s (+ at 1) (- nl 1))))))
 
+(fn format-event [e]
+  (..
+   (string.format "%s@%s\0" e.action e.path)
+   (table.concat
+    (icollect [k v (pairs e)]
+      (string.format "%s=%s" (string.upper k) v ))
+    "\n")))
+
+
 (fn event-matches? [e terms]
   (accumulate [match? true
                name value (pairs terms)]
@@ -102,7 +111,7 @@
         (db:subscribe
          client
          (fn [e]
-           (ll.write client (view e)))
+           (ll.write client (format-event e)))
          (parse-terms s))
         true)
     (nil err) (do (print err) false)))
