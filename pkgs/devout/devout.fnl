@@ -53,6 +53,9 @@
      :add (fn [_ event-string] (record-event db subscribers event-string))
      :at-path (fn [_ path] (. db path))
      :subscribe (fn [_ id callback terms]
+                  (let [past-events (find-in-database db terms)]
+                    (each [_ e (pairs past-events)]
+                      (callback e)))
                   (tset subscribers id {: callback : terms }))
      :unsubscribe (fn [_ id] (tset subscribers id nil))
      }))

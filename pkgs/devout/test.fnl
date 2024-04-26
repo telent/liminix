@@ -127,6 +127,16 @@ MINOR=17")
    (expect= (# received) 2)))
 
 (example
+ "Subscribers get notifications of prior events for present devices"
+ (var received [])
+ (let [db (database)
+       subscriber (fn [e] (table.insert received e))]
+   (db:add sdb1-insert)
+   (db:add sda-uevent)
+   (db:subscribe :me subscriber {:devname "/dev/sdb1"})
+   (expect= (# received) 1)))
+
+(example
  "I can unsubscribe after subscribing"
  (var received [])
  (let [db (database)
