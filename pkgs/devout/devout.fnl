@@ -1,4 +1,11 @@
 (local ll (require :lualinux))
+(local {
+        : AF_LOCAL
+        : AF_NETLINK
+        : SOCK_STREAM
+        : SOCK_RAW
+        : NETLINK_KOBJECT_UEVENT
+        } (require :anoia.net.constants))
 (local { : view } (require :fennel))
 
 (fn trace [expr]
@@ -59,15 +66,9 @@
 (local POLLHUP         0x0010)
 (local POLLNVAL        0x0020)
 
-(local AF_LOCAL 1)
-(local AF_NETLINK 16)
-(local SOCK_STREAM 1)
-(local SOCK_DGRAM 2)
-(local SOCK_RAW 3)
-(local NETLINK_KOBJECT_UEVENT 15)
 
 (fn unix-socket [name]
-  (let [addr (.. "\1\0"  name  "\0\0\0\0\0")]
+  (let [addr (string.pack "=Hz" AF_LOCAL name)]
     (match (ll.socket AF_LOCAL SOCK_STREAM 0)
       fd (match (ll.bind fd addr)
            0 (doto fd (ll.listen  32))
