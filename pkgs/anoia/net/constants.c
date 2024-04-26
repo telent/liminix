@@ -1,0 +1,11 @@
+
+#define MACRO(c) [#c] = c,
+
+return {
+    MACRO(SOCK_STREAM)
+    MACRO(SOCK_DGRAM)
+    MACRO(SOCK_RAW)
+    MACRO(AF_LOCAL)
+    MACRO(AF_NETLINK)
+    MACRO(NETLINK_KOBJECT_UEVENT)
+}
