@@ -11,7 +11,7 @@
 (fn trace [expr]
   (do (print :TRACE (view expr)) expr))
 
-(fn parse-uevent [s]
+(fn parse-event [s]
   (let [at (string.find s "@" 1 true)
         (nl nxt) (string.find s "\0" 1 true)]
     (doto
@@ -34,7 +34,7 @@
         found)))
 
 (fn record-event [db subscribers str]
-  (let [e (parse-uevent str)]
+  (let [e (parse-event str)]
     (match e.action
       :add (tset db e.path e)
       :change (tset db e.path e)
@@ -50,7 +50,7 @@
         subscribers []]
     {
      :find (fn [_ terms] (find-in-database db terms))
-     :add (fn [_ event-string] (record-event db subscribers event-string))
+     :add (fn [_ event-string] (when event-string (record-event db subscribers event-string)))
      :at-path (fn [_ path] (. db path))
      :subscribe (fn [_ id callback terms]
                   (let [past-events (find-in-database db terms)]
