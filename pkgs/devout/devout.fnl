@@ -11,6 +11,12 @@
 (fn trace [expr]
   (do (print :TRACE (view expr)) expr))
 
+(macro check-errno [expr]
+  (let [{ :view v } (require :fennel)]
+    `(case ,expr
+       val# val#
+       (nil err#) (error (string.format "%s failed: errno=%d" ,(v expr) err#)))))
+
 (fn parse-event [s]
   (let [at (string.find s "@" 1 true)
         (nl nxt) (string.find s "\0" 1 true)]
@@ -81,9 +87,9 @@
 
 (fn unix-socket [name]
   (let [addr (string.pack "=Hz" AF_LOCAL name)]
-    (match (ll.socket AF_LOCAL SOCK_STREAM 0)
-      fd (match (ll.bind fd addr)
-           0 (doto fd (ll.listen  32))
+    (case (ll.socket AF_LOCAL SOCK_STREAM 0)
+      fd (case (ll.bind fd addr)
+           0 (doto fd (ll.listen 32))
            (nil err) (values nil err))
       (nil err) (values nil err))))
 
@@ -138,17 +144,20 @@
 
 (fn run []
   (let [[sockname nl-groups] arg
-        s (unix-socket sockname)
+        s (check-errno (unix-socket sockname))
         db (database)
-        nl (open-netlink nl-groups)
+        nl (check-errno (open-netlink nl-groups))
         loop (event-loop)]
     (loop:register
      s
-     #(match (ll.accept s)
-        (client addr)
-        (do
-          (loop:register client (partial handle-client db))
-          true)))
+     #(case
+       (ll.accept s)
+       (client addr)
+       (do
+         (loop:register client (partial handle-client db))
+         true)
+       (nil err)
+       (print (string.format "error accepting connection, errno=%d" err))))
     (loop:register
      nl
      #(do (db:add (ll.read nl)) true))
