@@ -143,6 +143,7 @@
     (loop:register
      nl
      #(do (db:add (ll.read nl)) true))
+    (ll.write 10 "ready\n")
     (while true
       (let [pollfds (pollfds-for (loop:fds))]
         (ll.poll pollfds 5000)
