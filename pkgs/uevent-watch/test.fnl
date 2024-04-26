@@ -1,11 +1,6 @@
-(local { : view} (require :fennel))
-(import-macros { : expect= } :anoia.assert)
+(local watch (require :watch))
 
-(local subject (require :watch))
-
-
-
-;; Events come from the netlink socket as an initial summary line
+;; Events come from the devout socket as an initial summary line
 ;; followed by a NUL character followed by newline-separated key=value
 ;; pairs. For ease of editing we don't have NULs in events.txt,
 ;; so we need to massage it into shape here
@@ -27,8 +22,11 @@
 
 ;; this tests event parsing but not whether anything
 ;; happens as a result of processing them
-(subject.run-with-fh
- { :read (next-event) }
+(watch.run-with-fh
+ {
+  :read (next-event)
+  :write (fn [payload] )
+  }
  ["-s" "foo" "-n" (os.getenv "TMPDIR") "partname=backup-disk" ]
  )
 

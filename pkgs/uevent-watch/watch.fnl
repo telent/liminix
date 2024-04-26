@@ -1,24 +1,18 @@
 (local { : assoc : system : dirname } (require :anoia))
 (local { : mktree : rmtree : symlink } (require :anoia.fs))
+(local { : AF_LOCAL : SOCK_STREAM } (require :anoia.net.constants))
+(local ll (require :lualinux))
 
-(fn parse-match [s]  (string.match s "(.-)=(.+)"))
+(local { : view } (require :fennel))
 
 (fn parse-args [args]
   (match args
     ["-s" service & rest] (assoc (parse-args rest) :service service)
     ["-n" path & rest] (assoc (parse-args rest) :linkname path)
-    matches { :matches (collect [_ m (ipairs matches)] (parse-match m)) }
+    matches { :matches (table.concat matches " ") }
     _  nil))
 
 (fn %% [fmt ...] (string.format fmt ...))
-
-(fn event-matches? [params e]
-  (and
-   e
-   (accumulate [match? true
-                name value (pairs params.matches)]
-     (and match? (= value (. e name))))))
-
 
 (var up :unknown)
 
@@ -54,17 +48,30 @@
     (mktree (dirname parameters.linkname))
     (var finished? false)
 
+    (print "registering for events" (fh:write parameters.matches))
+
     (while (not finished?)
-      (let [e (parse-uevent (fh:read 5000))]
-        (when (event-matches? parameters e)
+      (let [e (parse-uevent (fh:read))]
+        (when e
           (let [wanted? (. {:add true :change true} e.action)]
             (toggle-service e.devname parameters.linkname parameters.service wanted?)))
         (set finished? (= e nil))
         ))))
 
-(fn run [args]
-  (let [nellie (require :nellie)
-        netlink (nellie.open 4)]
-    (run-with-fh netlink arg)))
+(fn unix-connect [pathname]
+  (let [addr (string.pack "=Hz" AF_LOCAL pathname)]
+    (match (ll.socket AF_LOCAL SOCK_STREAM 0)
+      sock (doto sock (ll.connect addr))
+      (nil err) (error err))))
 
-{ : run : run-with-fh : event-matches? }
+
+(fn run [args]
+  (let [fd (assert (unix-connect "/run/devout.sock"))
+        devout {
+                :read #(ll.read fd)
+                :write #(ll.write fd $2)
+                :close #(ll.close fd)
+                }]
+    (run-with-fh devout arg)))
+
+{ : run : run-with-fh  }

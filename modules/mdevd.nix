@@ -13,10 +13,14 @@ in {
         notification-fd = 10;
         run = "${pkgs.devout}/bin/devout /run/devout.sock 4";
       };
-      mdevd-coldplug = oneshot {
-        name ="mdev-coldplug";
-        up = "${pkgs.mdevd}/bin/mdevd-coldplug -O 4";
-        dependencies = [devout];
+      coldplug = oneshot {
+        name ="coldplug";
+        # would love to know what mdevd-coldplug/udevadm trigger does
+        # that this doesn't
+        up = ''
+          for i in $(find /sys -name uevent); do ( echo change > $i ) ; done
+        '';
+        dependencies = [devout mdevd];
       };
     };
   };

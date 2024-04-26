@@ -44,7 +44,10 @@ in {
     in svc // {
       build = args:
         let args' = args // {
-              dependencies = (args.dependencies or []) ++ [config.services.mdevd];
+              dependencies = (args.dependencies or []) ++ [
+                config.services.mdevd
+                config.services.devout
+              ];
             };
         in svc.build args' ;
     };
