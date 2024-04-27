@@ -1,16 +1,38 @@
 set timeout 10
 
+set when [lindex $argv 0];
+
+spawn socat -,echo=0,icanon=1 unix-connect:vm/monitor
+set monitor_id $spawn_id
+
+spawn socat unix-connect:vm/console -
+set console_id $spawn_id
+
 proc chat {instr outstr} {
     expect {
         $instr  { send $outstr }
         timeout { exit 1 }
     }
 }
-spawn socat -,echo=0,icanon=1 unix-connect:vm/monitor
-set monitor_id $spawn_id
 
-spawn socat unix-connect:vm/console -
-set console_id $spawn_id
+proc adddevice { } {
+    global monitor_id console_id spawn_id
+    set spawn_id $monitor_id
+
+    chat "QEMU" "device_add usb-storage,bus=xhci.0,drive=usbstick\n"
+    chat "(qemu)" "version\r"
+
+    set spawn_id $console_id
+    expect {
+      "sda: sda1" { }
+      timeout { exit 1 }
+    }
+}
+
+if { $when eq "early" } {
+  adddevice
+}
+
 
 expect "BusyBox"
 chat "#" "PS1=RE\\ADY_\\ ; stty -echo \r"
@@ -18,19 +40,13 @@ chat "READY_"  "tail -f /run/uncaught-logs/current & \rs6-rc -b  -a list\r"
 
 chat "mount" "\r"
 
-set spawn_id $monitor_id
-chat "QEMU" "device_add usb-storage,bus=xhci.0,drive=usbstick\n"
-chat "(qemu)" "version\r"
-
-set spawn_id $console_id
-
-expect {
-  "sda: sda1" { }
-  timeout { exit 1 }
+if { $when eq "late" } {
+  adddevice
 }
 
-
 send "\r"
+set timeout 20
+
 chat "READY_" "sleep 3; grep /srv /proc/mounts && hostname\r"
 
 expect {
