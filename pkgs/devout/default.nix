@@ -11,7 +11,11 @@
 stdenv.mkDerivation {
   name = "devout";
   src = ./.;
-  checkInputs = [ fennelrepl ];
+  nativeBuildInputs = [ fennelrepl ];
+  postBuild = ''
+    LUA_CPATH=${lualinux}/lib/lua/5.3/?.so\;$LUA_CPATH \
+    fennelrepl ./test.fnl
+  '';
   installPhase = ''
     mkdir -p $out/bin
     cp -p ${writeFennel "devout" {
@@ -19,9 +23,4 @@ stdenv.mkDerivation {
       mainFunction = "run";
     } ./devout.fnl} $out/bin/devout
   '';
-  checkPhase = ''
-    LUA_CPATH=${lualinux}/lib/lua/5.3/?.so\;$LUA_CPATH \
-    fennelrepl ./test.fnl
-  '';
-  doCheck = true;
 }
