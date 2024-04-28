@@ -97,7 +97,7 @@
                 swconfig dev switch0 vlan 2 set ports '0 6t'
                 swconfig dev switch0 set apply
               '';
-              down = "swconfig dev switch0 set reset";
+              down = "${pkgs.swconfig}/bin/swconfig dev switch0 set reset";
             };
           in rec {
             eth = link.build { ifname = "eth0"; dependencies =  [swconfig]; };
