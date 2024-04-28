@@ -36,5 +36,6 @@
    ./vlan
    ./watchdog
    ./wlan.nix
+   ./nixpkgs.nix
  ];
 }

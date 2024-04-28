@@ -16,8 +16,7 @@ in
     "${modulesPath}/s6"
     "${modulesPath}/users.nix"
     "${modulesPath}/outputs.nix"
+    "${modulesPath}/nixpkgs.nix"
     # FIXME: we should let the caller inject `pkgs` and `lim` ideally...
-  ] ++ lib.optional (pkgs ? lim) {
-    _module.args = { inherit (pkgs) lim; };
-  };
+  ];
 })
