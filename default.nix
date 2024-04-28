@@ -30,6 +30,7 @@ let
       ./modules/base.nix
       ./modules/busybox.nix
       ./modules/hostname.nix
+      ./modules/kernel
       device.module
       liminix-config
       ./modules/s6

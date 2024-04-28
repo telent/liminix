@@ -12,9 +12,6 @@ let
   type_service = pkgs.liminix.lib.types.service;
 
 in {
-  imports = [
-    ./kernel            # kernel is a separate module for doc purposes
-  ];
   options = {
     defaultProfile = {
       packages = mkOption {
