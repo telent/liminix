@@ -137,5 +137,13 @@ in rec {
     gid=500; usernames = ["backup"];
   };
 
-  defaultProfile.packages = with pkgs; [e2fsprogs strace tcpdump ];
+  defaultProfile.packages = with pkgs; [
+    e2fsprogs
+    mtdutils
+    (levitate.override {
+      services = {
+        inherit (config.services) dhcpc sshd;
+      }; }
+    )
+  ];
 }
