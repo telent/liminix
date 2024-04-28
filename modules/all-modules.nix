@@ -9,29 +9,29 @@
    ./busybox.nix
    ./dhcp6c
    ./dnsmasq
-   ./outputs/ext4fs.nix
    ./firewall
    ./hardware.nix
    ./hostapd
    ./hostname.nix
-   ./outputs/initramfs.nix
-   ./outputs/jffs2.nix
    ./kernel
-   ./outputs/kexecboot.nix
-   ./mount
    ./mdevd.nix
+   ./mount
    ./network
    ./ntp
    ./outputs.nix
-   ./outputs/vmroot.nix
-   ./outputs/ubimage.nix
+   ./outputs/ext4fs.nix
+   ./outputs/initramfs.nix
+   ./outputs/jffs2.nix
+   ./outputs/kexecboot.nix
    ./outputs/mtdimage.nix
+   ./outputs/tftpboot.nix
+   ./outputs/ubifs.nix
+   ./outputs/ubimage.nix
+   ./outputs/vmroot.nix
    ./ppp
    ./ramdisk.nix
    ./squashfs.nix
    ./ssh
-   ./outputs/tftpboot.nix
-   ./outputs/ubifs.nix
    ./users.nix
    ./vlan
    ./watchdog
