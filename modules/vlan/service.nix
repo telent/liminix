@@ -15,4 +15,5 @@ in oneshot rec {
     )
   '';
   down = "ip link set down dev ${ifname}";
+  dependencies = [ primary ];
 }
