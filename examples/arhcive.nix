@@ -141,9 +141,13 @@ in rec {
     e2fsprogs
     mtdutils
     (levitate.override {
-      services = {
-        inherit (config.services) dhcpc sshd;
-      }; }
-    )
+      config  = {
+        services = {
+          inherit (config.services) dhcpc sshd watchdog;
+        };
+        defaultProfile.packages = [ mtdutils ];
+        users.root.openssh.authorizedKeys.keys = secrets.root.keys;
+      };
+    })
   ];
 }

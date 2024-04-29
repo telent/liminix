@@ -83,4 +83,23 @@ sponsoring this development (and funding the hardware)
 2024-02-21
 
 New port! Thanks to Raito Bezarius, Liminix now runs on the Zyxel NWA50AX,
-an MT7621 (MIPS EL) dual radio WiFi AP. 
+an MT7621 (MIPS EL) dual radio WiFi AP.
+
+2024-04-29
+
+The setup for using `levitate` has changed: now it accepts an entire
+config fragment, not just a list of services.  Hopefully this makes it
+a bit more useful :-)
+
+  defaultProfile.packages = with pkgs; [
+    ... 
+    (levitate.override {
+      config  = {
+        services = {
+          inherit (config.services) dhcpc sshd watchdog;
+        };
+        defaultProfile.packages = [ mtdutils ];
+        users.root.openssh.authorizedKeys.keys = secrets.root.keys;
+      };
+    })
+  ];

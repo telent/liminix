@@ -4,7 +4,7 @@
 , systemconfig
 , execline
 , lib
-, services ? null
+, config ? {}
 , liminix
 , pseudofile
 , pkgs
@@ -12,6 +12,7 @@
 let
   inherit (pseudofile) dir symlink;
   inherit (liminix.services) oneshot;
+  paramConfig = config;
   newRoot = "/run/maintenance";
   sysconfig =
     let
@@ -25,8 +26,8 @@ let
         emptyenv chroot . /bin/init
       '';
       base = {...} : {
-        config = {
-          services = services // {
+        config =  {
+          services = {
             banner = oneshot {
               name = "banner";
               up = "cat /etc/banner > /dev/console";
@@ -60,6 +61,7 @@ let
           ../../modules/users.nix
           ../../modules/busybox.nix
           base
+          ({ ... } : paramConfig)
           ../../modules/s6
         ];
       };
