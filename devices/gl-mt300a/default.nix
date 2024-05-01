@@ -124,7 +124,8 @@
       };
       boot.tftp = {
         loadAddress = lim.parseInt "0x00A00000";
-      };
+        appendDTB = true;
+     };
 
       kernel = {
         src = pkgs.fetchurl {
