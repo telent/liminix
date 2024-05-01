@@ -112,6 +112,7 @@ in {
             tufted
             iptables
             usbutils
+            busybox
           ];
     security.sudo.wheelNeedsPassword = false;
     networking = {
