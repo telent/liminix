@@ -110,13 +110,11 @@
               ifname = "eth0.1";
               primary = eth;
               vid = "1";
-              dependencies =  [swconfig eth]; # 660ed5d obsoletes this?
             };
             wan = vlan.build {
               ifname = "eth0.2";
               primary = eth;
               vid = "2";
-              dependencies =  [swconfig eth]; # 660ed5d obsoletes this?
             };
             wlan = link.build {
               ifname = "wlan0";
