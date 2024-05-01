@@ -73,12 +73,16 @@ in
               };
           in svc.build args' ;
       };
-
+    programs.busybox.applets = [
+      "insmod" "rmmod"
+    ];
     kernel.config = {
       NETFILTER = "y";
       NETFILTER_ADVANCED = "y";
       NETFILTER_NETLINK = "m";
       NF_CONNTRACK = "m";
+
+      NETLINK_DIAG = "y";
 
       IP6_NF_IPTABLES=  "m";
       IP_NF_IPTABLES = "m";
