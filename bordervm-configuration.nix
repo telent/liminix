@@ -4,6 +4,10 @@ let
   inherit (lib) mkOption mkEnableOption mdDoc types optional optionals;
 in {
   options.bordervm = {
+    keys = mkOption {
+      type = types.listOf types.str;
+      default = [];
+    };
     l2tp = {
       host = mkOption {
         description = mdDoc ''
@@ -122,6 +126,7 @@ in {
       isNormalUser = true;
       uid = 1000;
       extraGroups = [ "wheel"];
+      openssh.authorizedKeys.keys = cfg.keys;
     };
     services.getty.autologinUser = "liminix";
   };
