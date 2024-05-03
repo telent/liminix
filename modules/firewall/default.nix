@@ -59,6 +59,7 @@ in
             extraRules = mkOption {
               type = types.attrsOf types.attrs;
               description = "firewall ruleset";
+              default = {};
             };
             rules = mkOption {
               type = types.attrsOf types.attrs;   # we could usefully tighten this a bit :-)
