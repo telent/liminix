@@ -4726,9 +4726,9 @@ outside of it
 [X] 2) if so, convert it to lualinux
 [X] 3) add netlink socket to event loop
 [X] 4) make it send messages to subscribers
-5) package it
-6) make uevent-watcher use it instead of netlink directly
-7) write an inout test variant that has the stick inserted
+[X] 5) package it
+[X] 6) make uevent-watcher use it instead of netlink directly
+[X] 7) write an inout test variant that has the stick inserted
   at boot time already
 
 I'm also thinking we could wrap the raw fds from lualinux into small
@@ -4741,3 +4741,20 @@ state before subscribing them [ needs a test ]
 figure out what event format the subscribers want? lua-ish or send the
 same messages as udev would? If we're going to send the originals,
 should we store them alongside the parsed, or reconstruct from parsed?
+
+Sat Apr 27 21:52:11 BST 2024
+
+We have a passing inout test. Next thing to do is try it on
+the actual arhcive hardware
+
+Next big thing is some kind of failovery service.  Almost-obvious
+candidate is LTE failover with aaisp l2tp tunnel
+
+Tue Apr 30 23:27:30 BST 2024
+
+I want to connect my new ip camera to arthur without letting it reach the
+internet, or the internet reach it.
+
+we could plug it into a gl.inet box running dhcp server on lan
+and client on wan, then use NAT to expose the camera's http and rtsp
+ports on whatever address it has on the wan interface
