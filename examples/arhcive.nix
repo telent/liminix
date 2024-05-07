@@ -18,8 +18,8 @@
 in rec {
   boot = {
     tftp = {
-      serverip = "192.168.8.148";
-      ipaddr = "192.168.8.251";
+      serverip = "10.0.0.1";
+      ipaddr = "10.0.0.8";
     };
   };
 
@@ -124,9 +124,7 @@ in rec {
 
   users.root = {
     passwd = lib.mkForce secrets.root.passwd;
-    # openssh.authorizedKeys.keys = [
-    #   (builtins.readFile "/home/dan/.ssh/id_rsa.pub")
-    # ];
+    openssh.authorizedKeys.keys = secrets.root.keys;
   };
 
   users.backup = {
