@@ -1,6 +1,6 @@
 {
   liminix
-, dnsmasq
+, dnsmasqSmall
 , serviceFns
 , lib
 }:
@@ -27,7 +27,7 @@ longrun {
   dependencies = [ interface ];
   run = ''
     . ${serviceFns}
-    ${dnsmasq}/bin/dnsmasq \
+    ${dnsmasqSmall}/bin/dnsmasq \
     --user=${user} \
     --domain=${domain} \
     --group=${group} \

@@ -94,7 +94,7 @@ extraPkgs // {
     else {}
   );
 
-  dnsmasq =
+  dnsmasqSmall =
     let d =  prev.dnsmasq.overrideAttrs(o: {
           preBuild =  ''
               makeFlagsArray=("COPTS=")
