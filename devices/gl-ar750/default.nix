@@ -125,8 +125,14 @@
         networkInterfaces =
           let inherit (config.system.service.network) link;
           in {
-            lan = link.build { ifname = "eth0"; };
-            wan = link.build { ifname = "eth1"; };
+            lan = link.build {
+              ifname = "lan";
+              devpath = "/devices/platform/ahb/19000000.eth";
+            };
+            wan = link.build {
+              ifname = "wan";
+              devpath = "/devices/platform/ahb/1a000000.eth";
+            };
             wlan = link.build {
               ifname = "wlan0";
               dependencies = [ mac80211 ];
