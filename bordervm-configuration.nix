@@ -133,6 +133,11 @@ in {
         useDHCP = false;
         ipv4.addresses = [ { address = "10.0.0.1"; prefixLength = 24;}];
       };
+      nat = {
+        enable = true;
+        internalInterfaces = [ "eth1" ];
+        externalInterface ="eth0";
+      };
     };
     users.users.liminix = {
       isNormalUser = true;
