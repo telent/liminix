@@ -80,7 +80,18 @@ in {
       };
     };
     services.openssh.enable = true;
+    services.dnsmasq = {
+      enable = true;
+      resolveLocalQueries = false;
+      settings =  {
+        # domain-needed = true;
+        dhcp-range = [ "10.0.0.10,10.0.0.240" ];
+        interface = "eth1";
+      };
+    };
+
     systemd.services.sshd.wantedBy = pkgs.lib.mkForce [ "multi-user.target" ];
+
 
     virtualisation = {
       qemu = {
