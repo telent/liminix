@@ -17,12 +17,25 @@ in {
     system.service.pppoe = mkOption {
       type = liminix.lib.types.serviceDefn;
     };
+    system.service.l2tp = mkOption {
+      type = liminix.lib.types.serviceDefn;
+    };
   };
   config = {
     system.service.pppoe = pkgs.liminix.callService ./pppoe.nix {
       interface = mkOption {
         type = liminix.lib.types.service;
         description = "ethernet interface to run PPPoE over";
+      };
+      ppp-options = mkOption {
+        type = types.listOf types.str;
+        description = "options supplied on ppp command line";
+      };
+    };
+    system.service.l2tp = pkgs.liminix.callService ./l2tp.nix {
+      lns = mkOption {
+        type = types.str;
+        description = "hostname or address of the L2TP network server";
       };
       ppp-options = mkOption {
         type = types.listOf types.str;
@@ -36,6 +49,8 @@ in {
         PPP_DEFLATE = "y";
         PPP_ASYNC = "y";
         PPP_SYNC_TTY = "y";
+        PPPOL2TP = "y";
+        L2TP = "y";
       };
     };
   };
