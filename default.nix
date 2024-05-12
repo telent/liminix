@@ -61,6 +61,13 @@ in {
   # cross-compiling nix-shell for any package we're customizing
   inherit pkgs;
 
+  deployEnv = pkgs.mkShell {
+    packages = with pkgs.pkgsBuildBuild; [
+      tufted
+      min-copy-closure
+    ];
+  };
+
   buildEnv = pkgs.mkShell {
     packages = with pkgs.pkgsBuildBuild; [
       tufted
