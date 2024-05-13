@@ -18,6 +18,7 @@ let
     ${commands}
   '';
   cleanupScript = name : ''
+    #!/bin/sh
     if test -d ${prefix}/${name} ; then rm -rf ${prefix}/${name} ; fi
   '';
   service = {
@@ -26,6 +27,7 @@ let
     , run ? null
     , up ? null
     , down ? null
+    , finish ? null
     , outputs ? []
     , notification-fd ? null
     , producer-for ? null
@@ -41,7 +43,7 @@ let
     stdenvNoCC.mkDerivation {
       # we use stdenvNoCC to avoid generating derivations with names
       # like foo.service-mips-linux-musl
-      inherit name serviceType up down run notification-fd
+      inherit name serviceType up down run finish notification-fd
         producer-for consumer-for pipeline-name timeout-up timeout-down;
       restart-on-upgrade = isTrigger;
       buildInputs = buildInputs ++ dependencies ++ contents;
@@ -70,7 +72,8 @@ let
     in service (args // {
       buildInputs = buildInputs ++ [ logger ];
       serviceType = "longrun";
-      run = serviceScript "${run}\n${cleanupScript name}";
+      run = serviceScript run;
+      finish = cleanupScript name;
       producer-for = "${name}-log";
     });
 

@@ -11,7 +11,7 @@ test -n "$contents" && for d in $contents; do
     touch $out/${name}/contents.d/$d
 done
 
-for i in timeout-up timeout-down run notification-fd up down consumer-for producer-for pipeline-name restart-on-upgrade; do
+for i in timeout-up timeout-down run notification-fd up down finish consumer-for producer-for pipeline-name restart-on-upgrade; do
     test -n "$(printenv $i)" && (echo "$(printenv $i)" > $out/${name}/$i)
 done
 
