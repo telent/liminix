@@ -54,10 +54,9 @@ in
 longrun {
   inherit name;
   run = ''
-    . ${serviceFns} 
     mkdir -p /run/xl2tpd
     touch ${control}
-    ${xl2tpd}/bin/xl2tpd -D -p /run/xl2tpd/${name}.pid -c ${conf} -C ${control} 
+    exec ${xl2tpd}/bin/xl2tpd -D -p /run/xl2tpd/${name}.pid -c ${conf} -C ${control} 
   '';
   notification-fd = 10;
 }
