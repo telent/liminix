@@ -4758,3 +4758,96 @@ internet, or the internet reach it.
 we could plug it into a gl.inet box running dhcp server on lan
 and client on wan, then use NAT to expose the camera's http and rtsp
 ports on whatever address it has on the wan interface
+
+Tue May  7 22:23:49 BST 2024
+
+If we want to build a config with an l2tp upstream, it needs an
+underlying dhcp interface not pppoe as we can't use the bordervm l2tp
+account simultaneously. Having bordervm do dhcp might be quite useful
+anyway for other applications, although it will have to double-nat to
+the internet. We could give it an aaisp /64 and have routable ipv6 but
+maybe that's a level of faff too high.
+
+Given that we can build xl2tpd  and a service for it.
+
+
+'re using the same l2tp account for thingy that we use to simulate ppp,
+we need an upstream which is not ppp
+
+We need a less shit coldplug that copes with filenames containing spaces (!)
+
+Fri May 10 00:33:14 BST 2024
+
+Getting xl2tp hackily running turned out to be not a lot of work. However,
+we need to figure out routing
+
+- we need a route on lan device to the dns to lookup l2tp.aaisp.net.uk
+- we need a route on lan device to l2tp.aaisp.net.uk
+
+also it doesn't die when the tunnel closes, which is a bit shit
+
+maybe this is where we lean into health check services
+
+a health check service is just a service that watches another service
+and kills it if it's not healthy.
+
+for xl2tpd, "not healthy" is "there is no ppp process" or "there is no
+tunnel" or "the tunnel has no sessions". I don't know how we
+(robustly) test for no ppp process associated with the l2tp peer
+
+when ppp quits, does the tunnel come down?
+in xl2tld.c child_handler we respond to sigchld by closing c->fd
+and setting it to -1
+
+Sat May 11 17:55:04 BST 2024
+
+A better way to monitor the connection health would be to ping a
+computer on the internet (preferably one that doesn't mind being
+pinged).  If we combine autodial with "is $isp still there" then we
+should have something fairly robust.
+
+xl2tpd spawns pppd, we should equip it with config that writes the
+ppp outputs (ip address etc) to the xl2tp service directory so
+that it can be used like a regular ppp. This will also make
+it possible to have the health check work by pinging the peer address
+
+Sun May 12 22:33:09 BST 2024
+
+sleep until the interface is probably up
+failure counter  = 0
+loop indefinitely
+  get outputs/peer-address of watched ppp service
+  ping it
+  if ok
+    reset failure counter
+  else
+    increment failure counter
+  fi
+  if failure counter > threshold
+    bounce the ppp service
+    exit, if previous action didn't do that already
+  end
+  sleep(check interval)
+end loop
+
+
+# ps ax | grep l2tp
+   72 root      1316 S    s6-supervise l2tp.aaisp.net.uk.l2tp
+   73 root      1316 S    s6-supervise l2tp.aaisp.net.uk.l2tp-log
+  122 root      1428 S    {run.user} /bin/sh ./run.user l2tp.aaisp.net.uk.l2tp
+ 1099 root      1428 S    {run.user} /bin/sh ./run.user l2tp.aaisp.net.uk.l2tp
+ 1102 root      1104 S    {xl2tpd} /nix/store/i1bbqh7vybam03l6jzf4sm4np3k4ack5
+ 1115 root      1420 S    grep l2tp
+# s6-rc -d change l2tp.aaisp.net.uk.l2tp
+# ps ax | grep l2tp
+   72 root      1316 S    s6-supervise l2tp.aaisp.net.uk.l2tp
+   73 root      1316 S    s6-supervise l2tp.aaisp.net.uk.l2tp-log
+  122 root      1428 S    {run.user} /bin/sh ./run.user l2tp.aaisp.net.uk.l2tp
+ 1102 root      1104 S    {xl2tpd} /nix/store/i1bbqh7vybam03l6jzf4sm4np3k4ack5
+ 1122 root      1420 S    grep l2tp
+
+
+
+
+
+we are the LAC, aaisp are the LNS
