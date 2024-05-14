@@ -20,7 +20,7 @@ in rec {
   };
 
   imports = [
-    ../modules/cdc-ncm.nix
+    ../modules/cdc-ncm
     ../modules/network
     ../modules/vlan
     ../modules/ssh
