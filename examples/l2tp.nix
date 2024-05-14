@@ -6,6 +6,7 @@
 }: let
   secrets = import ./extneder-secrets.nix;
   rsecrets = import ./rotuer-secrets.nix;
+  lns = "l2tp.aaisp.net.uk";
   inherit (pkgs.liminix.services) oneshot longrun bundle target;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs) writeText dropbear ifwait serviceFns;
@@ -58,20 +59,26 @@ in rec {
     srv = dir {};
   };
 
+  services.lnsroute = svc.network.route.build {
+    via = "$(output ${services.dhcpc} router)";
+    target = lns;
+    dependencies = [services.dhcpc];
+  };
+
   services.l2tp = svc.l2tp.build {
-    lns = "l2tp.aaisp.net.uk";
+    inherit lns;
     ppp-options = [
       "debug" "+ipv6" "noauth"
       "name" rsecrets.l2tp.name
       "password" rsecrets.l2tp.password
     ];
-    dependencies = [ services.defaultroute4 ];
+    dependencies = [ services.lnsroute ];
   };
 
   services.defaultroute4 = svc.network.route.build {
-    via = "$(output ${services.dhcpc} router)";
+    via = "$(output ${services.l2tp} router)";
     target = "default";
-    dependencies = [services.dhcpc];
+    dependencies = [services.l2tp];
   };
 
   users.root = {
