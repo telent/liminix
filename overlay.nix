@@ -271,6 +271,8 @@ extraPkgs // {
    '';
   };
 
+  libusb1 = prev.libusb1.override { enableUdev = false; };
+
   util-linux-small = prev.util-linux.override {
     ncursesSupport = false;
     pamSupport = false;
