@@ -15,16 +15,29 @@ in {
 
     services.wwan = let
       chat = lib.escapeShellArgs [
+        # Your usb modem thing might present as a tty that you run PPP
+        # over, or as a network device ("ndis" or "ncm"). The latter
+        # kind is to be preferred, at least in principle, because it's
+        # faster.  This initialization sequence works for the Huawei
+        # E3372, and took much swearing: the error messages are *awful*
         "" "AT"
         "OK" "ATZ"
+        # create PDP context
         "OK" "AT+CGDCONT=1,\"IP\",\"data.uk\""
+        # activate PDP context
         "OK"  "AT+CGACT=1,1"
-        # caret is special to chat, so needs escaping in AT commands
+        # setup username and password per requirements of sim provider.
+        # (caret is special to chat, so needs escaping in AT commands)
         "OK"  "AT\\^AUTHDATA=1,2,\"1p\",\"one2one\",\"user\""
-        "OK" "AT\\^NDISDUP=1,1" # ,\"data.uk\",\"user\",\"one2one\",2"
+        # start the thing (I am choosing to read this as "NDIS DialUP")
+        "OK" "AT\\^NDISDUP=1,1"
       ];
       modemConfig = oneshot {
         name = "modem-configure";
+        # this is currently only going to work if there is one
+        # modem only plugged in, it is plugged in already at boot,
+        # and nothing else is providing a USB tty.
+        # https://stackoverflow.com/questions/5477882/how-to-i-detect-whether-a-tty-belonging-to-a-gsm-3g-modem-is-a-data-or-control-p
         up = ''
           sleep 2
           ${pkgs.usb-modeswitch}/bin/usb_modeswitch -v 12d1 -p 14fe --huawei-new-mode
@@ -38,14 +51,6 @@ in {
       dependencies = [ modemConfig ];
     };
 
-    # an ncm ethernet adaptor does
-    # * usb modeswitch
-    # * AT commands
-    # and then behaves like a link.
 
-    # we could identify by vid:pid but that's a bit awkward
-    # if there's more than one present.  IMEI?
-
-    # https://stackoverflow.com/questions/5477882/how-to-i-detect-whether-a-tty-belonging-to-a-gsm-3g-modem-is-a-data-or-control-p
   };
 }
