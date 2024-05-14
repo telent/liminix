@@ -110,6 +110,7 @@ in {
   systemconfig = callPackage ./systemconfig {};
   tufted = callPackage ./tufted {};
   uevent-watch = callPackage ./uevent-watch {};
+  usb-modeswitch = callPackage ./usb-modeswitch {};
   writeAshScript = callPackage ./write-ash-script {};
   writeFennel = callPackage ./write-fennel {};
   writeFennelScript = callPackage ./write-fennel-script {};
