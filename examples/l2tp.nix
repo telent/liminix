@@ -86,25 +86,5 @@ in rec {
     openssh.authorizedKeys.keys = secrets.root.keys;
   };
 
-  users.backup = {
-    uid=500; gid=500; gecos="Storage owner"; dir="/srv";
-    shell="/dev/null";
-  };
-  groups.backup = {
-    gid=500; usernames = ["backup"];
-  };
 
-  defaultProfile.packages = with pkgs; [
-    # e2fsprogs
-    # mtdutils
-    # (levitate.override {
-    #   config  = {
-    #     services = {
-    #       inherit (config.services) dhcpc sshd watchdog;
-    #     };
-    #     defaultProfile.packages = [ mtdutils ];
-    #     users.root.openssh.authorizedKeys.keys = secrets.root.keys;
-    #   };
-    # })
-  ];
 }
