@@ -31,12 +31,10 @@ in rec {
   ];
   hostname = "thing";
 
-  services.dhcpc =
-    let iface = config.hardware.networkInterfaces.lan;
-    in svc.network.dhcp.client.build {
-      interface = iface;
-      dependencies = [ config.services.hostname ];
-    };
+  services.dhcpc = svc.network.dhcp.client.build {
+    interface = config.services.wwan;
+    dependencies = [ config.services.hostname ];
+  };
 
   services.sshd = svc.ssh.build { };
 
@@ -85,6 +83,4 @@ in rec {
     passwd = lib.mkForce secrets.root.passwd;
     openssh.authorizedKeys.keys = secrets.root.keys;
   };
-
-
 }
