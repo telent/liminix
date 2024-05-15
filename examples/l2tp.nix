@@ -31,6 +31,13 @@ in rec {
   ];
   hostname = "thing";
 
+  services.wwan = svc.wwan.build {
+    apn = "data.uk";
+    username = "user";
+    password = "one2one";
+    authType = "chap";
+  };
+
   services.dhcpc = svc.network.dhcp.client.build {
     interface = config.services.wwan;
     dependencies = [ config.services.hostname ];
