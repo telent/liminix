@@ -17,13 +17,13 @@
 (var up :unknown)
 
 (fn start-service [devname linkname service]
-  (match (symlink (.. "/dev/" devname ) linkname)
+  (match (if linkname (symlink (.. "/dev/" devname) linkname) true)
     ok (pcall system (%% "s6-rc -b -u change %q" service))
     (nil err) false))
 
 (fn stop-service [linkname service]
-  (match (pcall system (%% "s6-rc -b -d change %q" linkname service))
-    ok (os.remove linkname)
+  (match (pcall system (%% "s6-rc -b -d change %q" service))
+    ok (if linkname (os.remove linkname) true)
     (nil err) false))
 
 (fn toggle-service [devname linkname service wanted?]
@@ -45,7 +45,7 @@
   (set up :unknown)
   (let [parameters
         (assert (parse-args args) (.. "can't parse args: " (table.concat args " ")))]
-    (mktree (dirname parameters.linkname))
+    (when parameters.linkname (mktree (dirname parameters.linkname)))
     (var finished? false)
 
     (print "registering for events" (fh:write parameters.matches))
