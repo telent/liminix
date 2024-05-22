@@ -1,7 +1,7 @@
 {
   buildGoModule
 , fetchFromGitHub
-, pppBuild
+, ppp
 }:
 
 buildGoModule rec {
@@ -16,7 +16,7 @@ buildGoModule rec {
   };
 
   patchPhase = ''
-    sed -i.bak -e 's:/usr/sbin/pppd:${pppBuild}/bin/pppd:' cmd/kl2tpd/pppd.go
+    sed -i.bak -e 's:/usr/sbin/pppd:${ppp}/bin/pppd:' cmd/kl2tpd/pppd.go
     sed -i.bak -e 's:/usr/sbin/kl2tpd:${placeholder "out"}/bin/kl2tpd:' cmd/kpppoed/l2tpd_kl2tpd.go
     grep bin/kl2tp cmd/kpppoed/l2tpd_kl2tpd.go
   '';

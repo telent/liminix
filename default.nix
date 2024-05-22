@@ -46,7 +46,14 @@ let
   borderVm = ((import <nixpkgs/nixos/lib/eval-config.nix>) {
     system = builtins.currentSystem;
     modules = [
-      ({  ... } : { nixpkgs.overlays = [ overlay ]; })
+      {
+        nixpkgs.overlays = [
+          (final: prev: {
+            go-l2tp = final.callPackage ./pkgs/go-l2tp {};
+            tufted = final.callPackage ./pkgs/tufted {};
+          })
+        ];
+      }
       (import ./bordervm-configuration.nix)
       borderVmConf
     ];
