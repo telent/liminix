@@ -4905,3 +4905,67 @@ everyting depending on it
 
 I don't think we have common code for triggers, so either we need to
 add some or put this marking in all of the current examples
+
+Wed May 22 22:29:46 BST 2024
+
+# cat /sys/bus/usb/devices/1-1.2:1.2/uevent
+DEVTYPE=usb_interface
+DRIVER=huawei_cdc_ncm
+PRODUCT=12d1/1506/102
+TYPE=0/0/0
+INTERFACE=255/2/22
+MODALIAS=usb:v12D1p1506d0102dc00dsc00dp00icFFisc02ip16in02
+
+# cat /sys/bus/usb/devices/1-1.2:1.0/uevent
+DEVTYPE=usb_interface
+DRIVER=option
+PRODUCT=12d1/1506/102
+TYPE=0/0/0
+INTERFACE=255/2/18
+MODALIAS=usb:v12D1p1506d0102dc00dsc00dp00icFFisc02ip12in00
+
+neither of these is a tty. however, there's a ttyUSB0
+diretory in there -
+
+# cat /sys/bus/usb/devices/1-1.2:1.0/ttyUSB0/uevent
+DRIVER=option1
+
+# cat /sys/bus/usb/devices/1-1.2:1.0/ttyUSB0/tty/ttyUSB0/uevent
+MAJOR=188
+MINOR=0
+DEVNAME=ttyUSB0
+
+
+We can query devout using s6-ipcclient:
+
+$ s6-ipcclient -v /run/devout.sock  sh -c "echo devtype=wwan >&7; cat <&6 >&2"
+
+
+we're going to need to expose sysfs parent attributes in devout,
+so that we can tie together vendor/product and tty name
+
+- they don't come from netlink socket so we'll have to read the
+  filesystem
+- we don't know if we can cache them indefinitely or if they change
+- we also will want to match on parent attributes
+- per https://www.kernel.org/doc/html/v4.16/admin-guide/sysfs-rules.html
+  we should do that by getting the parent directory, not by
+  following symlinks
+
+I think we are going to document "a rule depending on attrs won't
+trigger if those attrs change silently without a uevent". attrs for a
+path are rescanned only when a event for that path (or a child?)
+is received.
+
+we need to avoid using stdio to read sysfs attributes because of the
+need for atomicity
+
+Sun May 26 12:24:45 BST 2024
+
+cd /
+mkdir -p /tmp/sys/devices
+find /sys/devices -type f | while read F ; do
+   D=/tmp/$(dirname $F)
+   test -d $D || mkdir -p $D
+   test -r $F &&  cat $F > /tmp/$F
+done
