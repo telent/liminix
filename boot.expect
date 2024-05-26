@@ -1,0 +1,20 @@
+# This is for use with minicom, but needs you to configure it to
+# use expect as its "Script program" instead of runscript.  Try
+# Ctrl+A O -> Filenames and paths -> D
+
+log_user 0
+log_file -a -open stderr
+set f [open "result/boot.scr"]
+send "version\r"
+set timeout 60
+while {[gets $f line] >= 0} {
+    puts stderr "next line $line\r"
+    puts stderr "waiting for prompt\r"	
+    expect {
+      "ath>" {}
+      "BusyBox" { puts stderr  "DONE"; exit 0 }
+    }
+    send "$line\r\n"
+}
+puts stderr "done\r\n"
+close $f
