@@ -1,3 +1,4 @@
+(local { : dirname } (require :anoia))
 (local ll (require :lualinux))
 (local {
         : AF_LOCAL
@@ -145,6 +146,25 @@
     :_tbl #(do fds)                    ;exposed for tests
      }))
 
+(fn read-if-exists [pathname]
+  (match (ll.open pathname 0 0)
+    fd (let [s (ll.read fd 4096)
+             s1 (string.gsub s "[ \n]*(.-)[ \n]*" "%1")]
+         (ll.close fd)
+         s1)
+    nil nil))
+
+(fn sysfs [fspath]
+  {
+   :attr (fn [_ path name]
+           (read-if-exists (.. fspath "/" path "/" name)))
+   :attrs (fn [self path name]
+            (when path
+              (or (self:attr path name)
+                  (self:attrs (dirname path) name))))
+   })
+
+
 (fn run []
   (let [[sockname nl-groups] arg
         s (check-errno (unix-socket sockname))
@@ -170,4 +190,4 @@
         (ll.poll pollfds 5000)
         (loop:feed (unpack-pollfds pollfds))))))
 
-{ : database : run : event-loop : parse-event }
+{ : database : run : event-loop : parse-event : sysfs }
