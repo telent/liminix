@@ -4,10 +4,11 @@
 , ppp
 , lib
 , svc
+, uevent-watch
 }:
 { apn, username, password, authType }:
 let
-  inherit (liminix.services) oneshot;
+  inherit (liminix.services) bundle longrun oneshot;
   authTypeNum = if authType == "pap" then "1" else "2";
   chat = lib.escapeShellArgs [
     # Your usb modem thing might present as a tty that you run PPP
@@ -27,21 +28,44 @@ let
     # start the thing (I am choosing to read this as "NDIS DialUP")
     "OK" "AT\\^NDISDUP=1,1"
   ];
-  modemConfig = oneshot {
-    name = "modem-configure";
-    # this is currently only going to work if there is one
-    # modem only plugged in, it is plugged in already at boot,
-    # and nothing else is providing a USB tty.
-    # https://stackoverflow.com/questions/5477882/how-to-i-detect-whether-a-tty-belonging-to-a-gsm-3g-modem-is-a-data-or-control-p
+  modeswitch = oneshot {
+    name = "modem-modeswitch";
     up = ''
-      sleep 2
       ${usb-modeswitch}/bin/usb_modeswitch -v 12d1 -p 14fe --huawei-new-mode
-      sleep 5
-      ${ppp}/bin/chat -s -v ${chat}  0<>/dev/ttyUSB0 1>&0
+      ln -s /dev/ttyUSB0 /dev/modem
     '';
-    down = "chat -v '' ATZ OK  </dev/ttyUSB0 >&0";
+  };
+  atz = oneshot {
+    name = "modem-atz";
+#    timeout-up = 180;
+    dependencies = [ modeswitch ];
+    up = ''
+      sleep 3
+      ls -l /dev/modem
+      ${ppp}/bin/chat -s -v ${chat}  0<>/dev/modem 1>&0
+    '';
+    down = "${ppp}/bin/chat -v '' ATZ OK  0<>/dev/modem 1>&0";
+  };
+  setup = bundle {
+    name = "modemm-mm-mm-mm";
+    contents = [
+      (longrun {
+        name = "watch-for-usb-modeswitch";
+        isTrigger = true;
+        buildInputs = [ modeswitch ];
+        run = "${uevent-watch}/bin/uevent-watch -s ${modeswitch.name}   devtype=usb_device product=12d1/14fe/102";
+      })
+      atz
+      # (longrun {
+      #   name = "watch-for-modem";
+      #   isTrigger = true;
+      #   timeout-up = 180;
+      #   buildInputs = [ atz ];
+      #   run = "sleep 120; ${uevent-watch}/bin/uevent-watch -n /dev/ttyUSB0 -s ${atz.name} devtype=usb_device product=12d1/1506/102";
+      # })
+    ];
   };
 in svc.network.link.build {
   ifname = "wwan0";
-  dependencies = [ modemConfig ];
+  dependencies = [ setup ];
 }
