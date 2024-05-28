@@ -4969,3 +4969,19 @@ find /sys/devices -type f | while read F ; do
    test -d $D || mkdir -p $D
    test -r $F &&  cat $F > /tmp/$F
 done
+
+Tue May 28 20:58:58 BST 2024
+
+To make testing easier, we pass the /sys mount point as a param
+to (sysfs) via (database)
+
+This means that for event:match to work with attributes, the event
+also has to point back to the database, or at least to sysfs. However
+we'd like to do the attr tests after the regular uevent key tests
+and the attrs tests after even that, because they're that mich slower.
+
+-----
+
+Let's change it up.  The database contains kobjects not events. A
+kobject knows its mountpoint as well as its path, and implements the
+attr and attrs methods
