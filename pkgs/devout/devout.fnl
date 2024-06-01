@@ -1,4 +1,4 @@
-(local { : dirname } (require :anoia))
+(local { : dirname : merge } (require :anoia))
 (local ll (require :lualinux))
 (local {
         : AF_LOCAL
@@ -101,7 +101,7 @@
 (fn database [options]
   (let [db {}
         subscribers []
-        { : sys-path } (or options {:sysfs-path "/sys" })]
+        { : sys-path } (or options {:sys-path "/sys" })]
     {
      :find (fn [_ terms] (find-in-database db terms))
      :add (fn [_ event-string]
@@ -147,8 +147,16 @@
       (values fd (if (> revent 0) revent nil)))))
 
 (fn parse-terms [str]
-  (collect [n (string.gmatch (str:gsub "\n+$" "") "([^ ]+)")]
-    (string.match n "(.-)=(.+)")))
+  (let [keys {}
+        attr {}
+        attrs {}]
+    (each [term (string.gmatch (str:gsub "\n+$" "") "([^ ]+)")]
+      (let [(k v) (string.match term "(.-)=(.+)")]
+        (match (string.match k "(.+)%.(.+)")
+          ("attrs" a) (tset attrs a v)
+          ("attr" a) (tset attr a v)
+          nil (tset keys k v))))
+    (merge keys {: attr : attrs})))
 
 (fn handle-client [db client]
   (match (ll.read client)
@@ -208,4 +216,7 @@
         (ll.poll pollfds 5000)
         (loop:feed (unpack-pollfds pollfds))))))
 
-{ : database : run : event-loop : parse-event }
+{ : database : run : event-loop : parse-event
+
+  : parse-terms
+  }

@@ -1,4 +1,4 @@
-(local { : database : event-loop : parse-event : sysfs } (require :devout))
+(local { : database : event-loop : parse-event : parse-terms } (require :devout))
 (local { : view } (require :fennel))
 (local ll (require :lualinux))
 (import-macros { : expect : expect= } :anoia.assert)
@@ -245,5 +245,12 @@ MINOR=17")
    (assert (not (os.execute (string.format "test -e /dev/fd/%d" fd))))
    ))
 
+
+(example
+ "parse terms from string"
+ (expect= (parse-terms "foo=bar baz=quuz")
+          {:foo "bar" :baz "quuz" :attr {} :attrs {}})
+ (expect= (parse-terms "foo=bar attr.womble=0x1234")
+           {:foo "bar" :attr {:womble "0x1234"} :attrs {}}))
 
 (if failed (os.exit 1) (print "OK"))
