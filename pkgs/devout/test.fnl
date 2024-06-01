@@ -52,8 +52,8 @@ MINOR=17")
 (example
  "I can parse an event"
  (let [e (parse-event sdb1-insert)]
-   (expect= e.attributes.seqnum "82381")
-   (expect= e.attributes.devname "/dev/sdb1")
+   (expect= e.properties.seqnum "82381")
+   (expect= e.properties.devname "/dev/sdb1")
    (expect= e.path "/devices/pci0000:00/0000:00:14.0/usb1/1-3/1-3:1.0/host1/target1:0:0/1:0:0:0/block/sdb/sdb1")
    (expect= e.action :add)
    (expect= e (parse-event (e:format)))))
@@ -77,8 +77,8 @@ MINOR=17")
  (let [db (database)]
    (db:add sda-uevent)
    (let [[m & more] (db:find {:devname "sda"})]
-     (expect= m.attributes.devname "sda")
-     (expect= m.attributes.major "8")
+     (expect= m.properties.devname "sda")
+     (expect= m.properties.major "8")
      (expect= more []))))
 
 (example
@@ -92,8 +92,8 @@ MINOR=17")
  (let [db (database)]
    (db:add sda-uevent)
    (let [m (db:at-path "/devices/pci0000:00/0000:00:13.0/usb1/1-1/1-1:1.0/host0/target0:0:0/0:0:0:0/block/sda")]
-     (expect= m.attributes.devname "sda")
-     (expect= m.attributes.major "8"))))
+     (expect= m.properties.devname "sda")
+     (expect= m.properties.major "8"))))
 
 (example
  "when I add and then remove a device, I cannot retrieve it by path"

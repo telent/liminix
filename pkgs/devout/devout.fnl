@@ -22,24 +22,24 @@
   (..
    (string.format "%s@%s\0" e.action e.path)
    (table.concat
-    (icollect [k v (pairs e.attributes)]
+    (icollect [k v (pairs e.properties)]
       (string.format "%s=%s" (string.upper k) v ))
     "\n")))
 
 (fn event-matches? [e terms]
   (accumulate [match? true
                name value (pairs terms)]
-    (and match? (= value (. e.attributes name)))))
+    (and match? (= value (. e.properties name)))))
 
 (fn parse-event [s]
   (let [at (string.find s "@" 1 true)
         (nl nxt) (string.find s "\0" 1 true)
-        attributes
+        properties
         (collect [k v (string.gmatch
                        (string.sub s (+ 1 nxt))
                        "(%g-)=(%g+)")]
           (k:lower) v)]
-    { : attributes
+    { : properties
       :path (string.sub s (+ at 1) (- nl 1))
       :action (string.sub s 1 (- at 1))
       :format format-event
