@@ -27,20 +27,18 @@ let
     "OK"  "AT\\^AUTHDATA=1,${authTypeNum},\"\",\"${password}\",\"${username}\""
     # start the thing (I am choosing to read this as "NDIS DialUP")
     "OK" "AT\\^NDISDUP=1,1"
+    "OK"
   ];
   modeswitch = oneshot {
     name = "modem-modeswitch";
     up = ''
       ${usb-modeswitch}/bin/usb_modeswitch -v 12d1 -p 14fe --huawei-new-mode
-      ln -s /dev/ttyUSB0 /dev/modem
     '';
   };
   atz = oneshot {
     name = "modem-atz";
-#    timeout-up = 180;
     dependencies = [ modeswitch ];
     up = ''
-      sleep 3
       ls -l /dev/modem
       ${ppp}/bin/chat -s -v ${chat}  0<>/dev/modem 1>&0
     '';
@@ -53,16 +51,14 @@ let
         name = "watch-for-usb-modeswitch";
         isTrigger = true;
         buildInputs = [ modeswitch ];
-        run = "${uevent-watch}/bin/uevent-watch -s ${modeswitch.name}   devtype=usb_device product=12d1/14fe/102";
+        run = "${uevent-watch}/bin/uevent-watch -s ${modeswitch.name} devtype=usb_device product=12d1/14fe/102";
       })
-      atz
-      # (longrun {
-      #   name = "watch-for-modem";
-      #   isTrigger = true;
-      #   timeout-up = 180;
-      #   buildInputs = [ atz ];
-      #   run = "sleep 120; ${uevent-watch}/bin/uevent-watch -n /dev/ttyUSB0 -s ${atz.name} devtype=usb_device product=12d1/1506/102";
-      # })
+      (longrun {
+        name = "watch-for-modem";
+        isTrigger = true;
+        buildInputs = [ atz ];
+        run = "${uevent-watch}/bin/uevent-watch -n /dev/modem -s ${atz.name} subsystem=tty attrs.idVendor=12d1 attrs.idProduct=1506";
+      })
     ];
   };
 in svc.network.link.build {
