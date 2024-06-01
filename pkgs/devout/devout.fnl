@@ -170,7 +170,6 @@
                                       AF_NETLINK 0 0 groups)))
     (nil errno) (values nil errno)))
 
-
 (fn event-loop []
   (let [fds {}]
     {
@@ -183,19 +182,6 @@
      :fds #(icollect [fd _ (pairs fds)] fd)
     :_tbl #(do fds)                    ;exposed for tests
      }))
-
-
-
-(fn sysfs [fspath]
-  {
-   :attr (fn [_ path name]
-           (read-if-exists (.. fspath "/" path "/" name)))
-   :attrs (fn [self path name]
-            (when path
-              (or (self:attr path name)
-                  (self:attrs (dirname path) name))))
-   })
-
 
 (fn run []
   (let [[sockname nl-groups] arg
@@ -222,4 +208,4 @@
         (ll.poll pollfds 5000)
         (loop:feed (unpack-pollfds pollfds))))))
 
-{ : database : run : event-loop : parse-event : sysfs }
+{ : database : run : event-loop : parse-event }

@@ -246,35 +246,4 @@ MINOR=17")
    ))
 
 
-;; tests for sysfs attrs
-
-(example
- "read attributes from sysfs"
- (let [sysfs (sysfs "./fixtures/sys")]
-   ;; finds attr at path
-   (expect=
-    (sysfs:attr "devices/pci0000:00/0000:00:14.0/usb1/1-2" "idVendor")
-    "1199")
-   ;; finds attr in ancestor directory
-   (expect=
-    (sysfs:attrs
-     "devices/pci0000:00/0000:00:14.0/usb1/1-7/1-7:1.0/bluetooth/hci0"
-     "idVendor")
-    "8087")
-   ;; nil if no attr
-   (expect=
-    (sysfs:attrs
-     "devices/pci0000:00/0000:00:14.0/usb1/1-7/1-7:1.0/bluetooth/hci0"
-     "idOfWizard")
-    nil)
-   ;; closer ancestor wins against more distant one
-   (expect=
-    (sysfs:attrs
-     "devices/pci0000:00/0000:00:14.0/usb1/1-7/1-7:1.0/bluetooth/hci0"
-     "modalias")
-    "usb:v8087p0A2Bd0001dcE0dsc01dp01icE0isc01ip01in00")))
-
-
-
-
 (if failed (os.exit 1) (print "OK"))
