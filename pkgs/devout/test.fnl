@@ -133,6 +133,29 @@ MINOR=17")
      (expect (not m)))
    ))
 
+(example
+ "I can find a device matching ancestor sysfs attributes"
+ (let [db (database {:sys-path "./fixtures/sys"})
+       path "/devices/pci0000:00/0000:00:14.0/usb1/1-8/1-8:1.1"
+       e (.. "add@" path "\0ACTION=add\n"
+             (with-open [f (io.open (.. "fixtures/sys" path "/uevent"))]
+               (f:read "*a")))]
+   (db:add e)
+   (let [[m & more] (db:find {:devtype "usb_interface"
+                              :driver "uvcvideo"
+                              :attrs {:idVendor "13d3"
+                                      :manufacturer "Azurewave"
+                                      }})]
+     (expect= m.properties.driver "uvcvideo")
+     (expect= m.properties.interface "14/2/0")
+     (expect= more []))
+
+   (let [[m & more] (db:find {:devtype "usb_interface"
+                              :driver "uvcvideo"
+                              :attrs {:idVendor "23d3"
+                                      :manufacturer "Azurewave"
+                                      }})]
+     (expect (not m)))))
 
 ;;; tests for indices
 

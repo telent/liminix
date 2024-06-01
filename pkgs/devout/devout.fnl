@@ -31,13 +31,18 @@
                name value (pairs expected)]
     (and match? (= value (event:attr name)))))
 
+(fn ancestor-attrs-match? [event expected]
+  (accumulate [match? true
+               name value (pairs expected)]
+    (and match? (= value (event:ancestor-attr name)))))
+
 (fn event-matches? [e terms]
   (accumulate [match? true
                name value (pairs terms)]
     (and match?
          (case name
            :attr (attrs-match? e value)
-           :attrs true
+           :attrs (ancestor-attrs-match? e value)
            other (= value (. e.properties name))))))
 
 (fn read-if-exists [pathname]
@@ -47,6 +52,16 @@
          (ll.close fd)
          s1)
     nil nil))
+
+(fn event-ancestor-attr [event name]
+  (fn walk-up [sys-path path name]
+    (when path
+      (or (read-if-exists (.. sys-path "/" path "/" name))
+          (walk-up sys-path (dirname path) name))))
+  (walk-up event.sys-path event.path name))
+
+(fn event-attr [event name]
+  (read-if-exists (..  event.sys-path "/" event.path "/" name)))
 
 (fn parse-event [s]
   (let [at (string.find s "@" 1 true)
@@ -61,8 +76,8 @@
       :action (string.sub s 1 (- at 1))
       :format format-event
       :matches? event-matches?
-      :attr (fn [self name]
-              (read-if-exists (..  self.sys-path "/" self.path "/" name)))
+      :attr event-attr
+      :ancestor-attr event-ancestor-attr
       }))
 
 (fn find-in-database [db terms]
