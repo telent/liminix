@@ -1,0 +1,2 @@
+DEVTYPE=usb_role_switch
+USB_ROLE_SWITCH=intel_xhci_usb_sw-role-switch

@@ -26,10 +26,27 @@
       (string.format "%s=%s" (string.upper k) v ))
     "\n")))
 
+(fn attrs-match? [event expected]
+  (accumulate [match? true
+               name value (pairs expected)]
+    (and match? (= value (event:attr name)))))
+
 (fn event-matches? [e terms]
   (accumulate [match? true
                name value (pairs terms)]
-    (and match? (= value (. e.properties name)))))
+    (and match?
+         (case name
+           :attr (attrs-match? e value)
+           :attrs true
+           other (= value (. e.properties name))))))
+
+(fn read-if-exists [pathname]
+  (match (ll.open pathname 0 0)
+    fd (let [s (ll.read fd 4096)
+             s1 (string.gsub s "[ \n]*(.-)[ \n]*" "%1")]
+         (ll.close fd)
+         s1)
+    nil nil))
 
 (fn parse-event [s]
   (let [at (string.find s "@" 1 true)
@@ -44,6 +61,8 @@
       :action (string.sub s 1 (- at 1))
       :format format-event
       :matches? event-matches?
+      :attr (fn [self name]
+              (read-if-exists (..  self.sys-path "/" self.path "/" name)))
       }))
 
 (fn find-in-database [db terms]
@@ -53,24 +72,28 @@
         (doto found (table.insert e))
         found)))
 
-(fn record-event [db subscribers str]
-  (let [e (parse-event str)]
-    (match e.action
-      :add (tset db e.path e)
-      :change (tset db e.path e)
-      ;; should we do something for bind?
-      :remove (tset db e.path nil)
-      )
-    (each [_ { : terms : callback } (pairs subscribers)]
-      (if (e:matches? terms) (callback e)))
-    e))
+(fn record-event [db subscribers e]
+  (match e.action
+    :add (tset db e.path e)
+    :change (tset db e.path e)
+    ;; should we do something for bind?
+    :remove (tset db e.path nil)
+    )
+  (each [_ { : terms : callback } (pairs subscribers)]
+    (if (e:matches? terms) (callback e)))
+  e)
 
-(fn database []
+(fn database [options]
   (let [db {}
-        subscribers []]
+        subscribers []
+        { : sys-path } (or options {:sysfs-path "/sys" })]
     {
      :find (fn [_ terms] (find-in-database db terms))
-     :add (fn [_ event-string] (when event-string (record-event db subscribers event-string)))
+     :add (fn [_ event-string]
+            (when event-string
+              (let [e (doto (parse-event event-string)
+                        (tset :sys-path sys-path))]
+                (record-event db subscribers e))))
      :at-path (fn [_ path] (. db path))
      :subscribe (fn [_ id callback terms]
                   (let [past-events (find-in-database db terms)]
@@ -146,13 +169,7 @@
     :_tbl #(do fds)                    ;exposed for tests
      }))
 
-(fn read-if-exists [pathname]
-  (match (ll.open pathname 0 0)
-    fd (let [s (ll.read fd 4096)
-             s1 (string.gsub s "[ \n]*(.-)[ \n]*" "%1")]
-         (ll.close fd)
-         s1)
-    nil nil))
+
 
 (fn sysfs [fspath]
   {

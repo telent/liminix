@@ -117,6 +117,22 @@ MINOR=17")
    (expect= (# (db:find {:devname "sda" :devtype "disk"})) 1)
    (expect= (# (db:find {:devname "sda" :devtype "dosk"})) 0)))
 
+(example
+ "I can find a device with sysfs attributes"
+ (let [db (database {:sys-path "./fixtures/sys"})
+       path "/devices/pci0000:00/0000:00:14.0/usb1"
+       e (.. "add@" path "\0ACTION=add\n"
+             (with-open [f (io.open (.. "fixtures/sys" path "/uevent"))]
+               (f:read "*a")))]
+   (db:add e)
+   (let [[m & more] (db:find {:devtype "usb_device" :attr {:idVendor "1d6b" }})]
+     (expect= m.properties.driver "usb")
+     (expect= m.properties.major "189")
+     (expect= more []))
+   (let [[m & more] (db:find {:devtype "usb_device" :attr {:idVendor "0000" }})]
+     (expect (not m)))
+   ))
+
 
 ;;; tests for indices
 

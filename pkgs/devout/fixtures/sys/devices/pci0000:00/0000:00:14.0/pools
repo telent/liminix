@@ -1,0 +1,13 @@
+poolinfo - 0.1
+buffer-2048         0    0 2048  0
+buffer-512          0    0  512  0
+buffer-128          0   32  128  1
+buffer-32           0    0   32  0
+xHCI 1KB stream ctx arrays    0    0 1024  0
+xHCI 256 byte stream ctx arrays    0    0  256  0
+xHCI input/output contexts    6   11 2112 11
+xHCI ring segments   26   42 4096 42
+buffer-2048         0    0 2048  0
+buffer-512          0    0  512  0
+buffer-128          0   32  128  1
+buffer-32           0    0   32  0

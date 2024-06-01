@@ -1,0 +1,2 @@
+DRIVER=intel_xhci_usb_sw
+MODALIAS=platform:intel_xhci_usb_sw

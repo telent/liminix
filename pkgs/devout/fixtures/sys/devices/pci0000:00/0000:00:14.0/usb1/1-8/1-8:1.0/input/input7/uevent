@@ -1,0 +1,7 @@
+PRODUCT=3/13d3/5248/20
+NAME="Integrated Camera: Integrated C"
+PHYS="usb-0000:00:14.0-8/button"
+PROP=0
+EV=3
+KEY=100000 0 0 0
+MODALIAS=input:b0003v13D3p5248e0020-e0,1,kD4,ramlsfw
