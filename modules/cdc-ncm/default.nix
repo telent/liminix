@@ -4,6 +4,10 @@ let
   inherit (lib) mkOption types;
   svc = config.system.service;
 in {
+  imports = [
+    ../service-trigger
+  ];
+
   options = {
     system.service.wwan = mkOption {
       type = liminix.lib.types.serviceDefn;

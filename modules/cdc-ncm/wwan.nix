@@ -53,11 +53,16 @@ let
         buildInputs = [ modeswitch ];
         run = "${uevent-watch}/bin/uevent-watch -s ${modeswitch.name} devtype=usb_device product=12d1/14fe/102";
       })
-      (longrun {
-        name = "watch-for-modem";
-        isTrigger = true;
-        buildInputs = [ atz ];
-        run = "${uevent-watch}/bin/uevent-watch -n /dev/modem -s ${atz.name} subsystem=tty attrs.idVendor=12d1 attrs.idProduct=1506";
+      (svc.uevent-rule.build {
+        service = atz;
+        terms = {
+          subsystem = "tty";
+          attrs = {
+            idVendor = "12d1";
+            idProduct = "1506";
+          };
+        };
+        symlink = "/dev/modem";
       })
     ];
   };
