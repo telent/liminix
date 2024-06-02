@@ -47,11 +47,9 @@ let
   setup = bundle {
     name = "modemm-mm-mm-mm";
     contents = [
-      (longrun {
-        name = "watch-for-usb-modeswitch";
-        isTrigger = true;
-        buildInputs = [ modeswitch ];
-        run = "${uevent-watch}/bin/uevent-watch -s ${modeswitch.name} devtype=usb_device product=12d1/14fe/102";
+      (svc.uevent-rule.build {
+        service = modeswitch;
+        terms = { devtype = "usb_device"; product = "12d1/14fe/102"; };
       })
       (svc.uevent-rule.build {
         service = atz;

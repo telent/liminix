@@ -1,7 +1,7 @@
 {
   liminix
-, uevent-watch
 , lib
+, svc
 }:
 { partlabel, mountpoint, options, fstype }:
 let
@@ -15,12 +15,11 @@ let
     up = "mount -t ${fstype} ${options_string} ${device} ${mountpoint}";
     down = "umount ${mountpoint}";
   };
-in longrun {
-  name = "watch-mount.${lib.strings.sanitizeDerivationName mountpoint}";
-  isTrigger = true;
-  buildInputs = [ mount_service ];
-
-  run = ''
-    ${uevent-watch}/bin/uevent-watch -s ${mount_service.name} -n ${device} partname=${partlabel} devtype=partition
-  '';
+in svc.uevent-rule.build {
+  service = mount_service;
+  symlink = device;
+  terms = {
+    partname = partlabel;
+    devtype = "partition";
+  };
 }

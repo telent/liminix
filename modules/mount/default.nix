@@ -19,9 +19,9 @@ in {
       type = liminix.lib.types.serviceDefn;
     };
   };
-  imports = [ ../mdevd.nix ];
+  imports = [ ../mdevd.nix ../service-trigger ];
   config.system.service.mount =
-    let svc = liminix.callService ./service.nix {
+    let svc = config.system.callService ./service.nix {
           partlabel = mkOption {
             type = types.str;
             example = "my-usb-stick";
