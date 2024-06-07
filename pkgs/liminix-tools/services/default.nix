@@ -8,7 +8,7 @@
 , serviceFns
 }:
 let
-  inherit (builtins) concatStringsSep;
+  inherit (builtins) concatStringsSep any map;
   prefix = "/run/services/outputs";
   output = service: name: "${prefix}/${service.name}/${name}";
   serviceScript = commands : ''
@@ -47,8 +47,8 @@ let
         producer-for consumer-for pipeline-name timeout-up timeout-down;
       restart-on-upgrade = isTrigger;
       buildInputs = buildInputs ++ dependencies ++ contents;
-      dependencies = builtins.map (d: d.name) dependencies;
-      contents = builtins.map (d: d.name) contents;
+      dependencies = map (d: d.name) dependencies;
+      contents = map (d: d.name) contents;
       builder = ./builder.sh;
     };
 
