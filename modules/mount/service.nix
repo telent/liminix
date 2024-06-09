@@ -7,19 +7,21 @@
 let
   inherit (liminix.services) longrun oneshot;
   device = "/dev/disk/by-partlabel/${partlabel}";
+  name = "mount.${lib.strings.sanitizeDerivationName (lib.escapeURL mountpoint)}";
   options_string =
     if options == [] then "" else "-o ${lib.concatStringsSep "," options}";
-  mount_service = oneshot {
-    name = "mount.${lib.escapeURL mountpoint}";
-    timeout-up = 3600;
-    up = "mount -t ${fstype} ${options_string} ${device} ${mountpoint}";
-    down = "umount ${mountpoint}";
+  controller = svc.uevent-rule.build {
+    serviceName = name;
+    symlink = device;
+    terms = {
+      partname = partlabel;
+      devtype = "partition";
+    };
   };
-in svc.uevent-rule.build {
-  service = mount_service;
-  symlink = device;
-  terms = {
-    partname = partlabel;
-    devtype = "partition";
-  };
+in oneshot {
+  inherit name;
+  timeout-up = 3600;
+  up = "mount -t ${fstype} ${options_string} ${device} ${mountpoint}";
+  down = "umount ${mountpoint}";
+  inherit controller;
 }

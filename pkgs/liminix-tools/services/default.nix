@@ -39,6 +39,7 @@ let
     , contents ? []
     , buildInputs ? []
     , isTrigger ? false
+    , controller ? null
   } @ args:
     stdenvNoCC.mkDerivation {
       # we use stdenvNoCC to avoid generating derivations with names
@@ -46,9 +47,11 @@ let
       inherit name serviceType up down run finish notification-fd
         producer-for consumer-for pipeline-name timeout-up timeout-down;
       restart-on-upgrade = isTrigger;
-      buildInputs = buildInputs ++ dependencies ++ contents;
+      buildInputs = buildInputs ++ dependencies ++ contents ++ lib.optional (controller != null) controller;
       dependencies = map (d: d.name) dependencies;
       contents = map (d: d.name) contents;
+      inherit controller;
+      controllerName = if controller ? name then controller.name else null;
       builder = ./builder.sh;
     };
 

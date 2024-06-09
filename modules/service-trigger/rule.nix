@@ -4,7 +4,7 @@
 , serviceFns
 , lib }:
 {
-  service, terms, symlink
+  serviceName, terms, symlink
 }:
 let
   inherit (liminix.services) longrun;
@@ -18,8 +18,7 @@ let
           attrs));
   termsString = stringify terms;
 in longrun {
-  name = "watch-for-${service.name}";
+  name = "watch-for-${serviceName}";
   isTrigger = true;
-  buildInputs = [ service ];
-  run = "${uevent-watch}/bin/uevent-watch ${if symlink != null then "-n ${symlink}" else ""} -s ${service.name} ${termsString}";
+  run = "${uevent-watch}/bin/uevent-watch ${if symlink != null then "-n ${symlink}" else ""} -s ${serviceName} ${termsString}";
 }

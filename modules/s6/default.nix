@@ -13,7 +13,10 @@ let
     let
       defaultDefaultTarget = bundle {
         name = "default";
-        contents = builtins.attrValues config.services;
+        contents =
+          builtins.map
+            (s: if (s ? controller && s.controller != null) then s.controller else s)
+            (builtins.attrValues config.services));
       };
       servicesAttrs = {
         default = defaultDefaultTarget;
