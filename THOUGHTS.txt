@@ -4985,3 +4985,86 @@ and the attrs tests after even that, because they're that mich slower.
 Let's change it up.  The database contains kobjects not events. A
 kobject knows its mountpoint as well as its path, and implements the
 attr and attrs methods
+
+
+Sun Jun  2 20:58:47 BST 2024
+
+we have a new uevent-rule service that can start/stop its controlled
+service based on uevent fields and sysfs attrs for the corresponding
+device/any ancestor of its sysfs path
+
+we need
+- a way of starting _dependent_ services of the controlled service:
+  we want to activate that whole sub-branch of the dependency tree
+
+- a way to not attempt to start dependents of the controlled service
+at boot time: we don't want to put them in the default bundle if
+they depend on stuff that's part of the default service set.
+
+what happens when a service depends on _two_ controlled services?
+we want to start it only when _both_ of them are up. That discourages
+any idea of creating a bundle for each controlled service and its
+dependants
+
+Tue Jun  4 19:07:44 BST 2024
+
+we have to do it at runtime. I think we can add a file in the service
+directory to identify that it's triggered (i.e. only run in response
+to an event, we could use better terminology here(
+
+
+for s in the reverse deps of $triggered
+  unless any? (s1:  {  s1.triggered && s1.down  }  )
+              s.dependencies
+    start s
+
+we can do this in ci, maybe adapt the inout test
+
+two triggered services, A with a uevent that does happen
+and B which doesn't
+
+two dependent services; C depends on A only and D on A+B.
+
+each should write an output
+we check that the output from C is present but not the one from D
+
+
+
+Tue Jun  4 22:22:20 BST 2024
+
+We can't have dependencies of triggered services unless we expose the
+triggered service instead of the watcher from the module that sets up
+uevent-watch. otherwise the user will be declaring their dependencies
+on the watcher and they will start when the watcher does. We need to
+invert it.
+
+Bother.
+
+services.mount-foo = oneshot {
+  name = "blah";
+  up = "mount /dev/disk/by-partlabel/mydisk";
+  runCondition = conditions.sysfs {
+    terms = { partlabel = "blah"; };
+    symlink = "/dev/disk/by-partlabel/mydisk";
+  }
+}
+
+To process this, we need to
+
+- remove it from the default bundle
+- create a service that _is_ in the default bundle which
+   starts this one when runCondition is true
+
+
+How would it look for service conditions other than uevents
+
+Thu Jun  6 21:49:10 BST 2024
+
+runCondition can be a function that accepts the service to be
+watched and returns a service that does the watching. The
+derivation calls this function and makes the watched service
+depend on the watcher.
+
+When adding services to the default bundle (wherever that happens, I
+no longer remember) we need to check if the service has a controller
+and add that instead of the service itself.
