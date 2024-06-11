@@ -3,15 +3,22 @@ mkdir -p $out/${name}
 echo $serviceType > $out/${name}/type
 mkdir -p $out/${name}/dependencies.d
 echo $buildInputs > $out/buildInputs
-test -n "$dependencies" && for d in $dependencies; do
+test -n "$dependencies" && for path in $dependencies; do
+    d=$(dirname $(cd ${path} && ls -d */type))
     touch $out/${name}/dependencies.d/$d
 done
-test -n "$contents" && for d in $contents; do
+test -n "$contents" && for path in $contents; do
+    d=$(dirname $(cd ${path} && ls -d */type))
     mkdir -p $out/${name}/contents.d
     touch $out/${name}/contents.d/$d
 done
 
-for i in controllerName timeout-up timeout-down run notification-fd up down finish consumer-for producer-for pipeline-name restart-on-upgrade; do
+if test -n "$controller" ; then
+    d=$(dirname $(cd ${controller} && ls -d */type))
+    echo "$d)" > $out/${name}/controller
+fi
+
+for i in timeout-up timeout-down run notification-fd up down finish consumer-for producer-for pipeline-name restart-on-upgrade; do
     test -n "$(printenv $i)" && (echo "$(printenv $i)" > $out/${name}/$i)
 done
 

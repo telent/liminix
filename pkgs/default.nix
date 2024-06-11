@@ -27,7 +27,7 @@ in {
             s = pkg (checkTypes parameters
               (builtins.removeAttrs args ["dependencies"]));
           in s.overrideAttrs (o: {
-            dependencies = (builtins.map (d: d.name) dependencies) ++ o.dependencies;
+            dependencies = dependencies ++ o.dependencies;
             buildInputs = dependencies ++ o.buildInputs;
           });
       };

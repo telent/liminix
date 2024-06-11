@@ -48,10 +48,7 @@ let
         producer-for consumer-for pipeline-name timeout-up timeout-down;
       restart-on-upgrade = isTrigger;
       buildInputs = buildInputs ++ dependencies ++ contents ++ lib.optional (controller != null) controller;
-      dependencies = map (d: d.name) dependencies;
-      contents = map (d: d.name) contents;
-      inherit controller;
-      controllerName = if controller ? name then controller.name else null;
+      inherit controller dependencies contents;
       builder = ./builder.sh;
     };
 
