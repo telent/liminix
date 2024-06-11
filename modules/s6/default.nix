@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 let
   inherit (pkgs)
     execline
@@ -6,17 +6,38 @@ let
     s6-init-bin
     s6-linux-init
     stdenvNoCC;
+  inherit (lib.lists) unique concatMap;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs.liminix.services) bundle;
 
   s6-rc-db =
     let
+      # In the default bundle we need to have all the services
+      # in config.services except for controlled services and
+      # anything that depends on one. But we do need the controllers
+      # themselves.
+
+      # So, find all required services and their transitive
+      # dependencies and their controllers. remove all controlled
+      # services and all services that have a controlled service as
+      # dependency
+
+      isControlled = s : s ? controller && s.controller != null;
+      deps = s : s.dependencies ++
+                 lib.optional (isControlled s) s.controller;
+      flatDeps = s : [s] ++ concatMap flatDeps (deps s);
+      allServices = unique (concatMap flatDeps (builtins.attrValues config.services));
+      isDependentOnControlled = s :
+        isControlled s ||
+        (lib.lists.any isDependentOnControlled s.dependencies);
+
+      defaultStart =
+        builtins.filter
+          (s: !(isDependentOnControlled s))
+          (lib.debug.traceValSeqN 2 allServices);
       defaultDefaultTarget = bundle {
         name = "default";
-        contents =
-          builtins.map
-            (s: if (s ? controller && s.controller != null) then s.controller else s)
-            (builtins.attrValues config.services));
+        contents = defaultStart;
       };
       servicesAttrs = {
         default = defaultDefaultTarget;
