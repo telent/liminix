@@ -29,42 +29,39 @@ let
     "OK" "AT\\^NDISDUP=1,1"
     "OK"
   ];
-  modeswitch = oneshot {
+  modeswitch = oneshot rec {
     name = "modem-modeswitch";
+    controller = (svc.uevent-rule.build {
+      serviceName = name;
+      terms = { devtype = "usb_device"; product = "12d1/14fe/102"; };
+    });
     up = ''
       ${usb-modeswitch}/bin/usb_modeswitch -v 12d1 -p 14fe --huawei-new-mode
     '';
   };
-  atz = oneshot {
+  atz = oneshot rec {
     name = "modem-atz";
     dependencies = [ modeswitch ];
+    controller = (svc.uevent-rule.build {
+      serviceName = name;
+      terms = {
+        subsystem = "tty";
+        attrs = {
+          idVendor = "12d1";
+          idProduct = "1506";
+        };
+      };
+      symlink = "/dev/modem";
+    });
     up = ''
       ls -l /dev/modem
+      test -L /dev/modem || exit 1
       ${ppp}/bin/chat -s -v ${chat}  0<>/dev/modem 1>&0
     '';
     down = "${ppp}/bin/chat -v '' ATZ OK  0<>/dev/modem 1>&0";
   };
-  setup = bundle {
-    name = "modemm-mm-mm-mm";
-    contents = [
-      (svc.uevent-rule.build {
-        service = modeswitch;
-        terms = { devtype = "usb_device"; product = "12d1/14fe/102"; };
-      })
-      (svc.uevent-rule.build {
-        service = atz;
-        terms = {
-          subsystem = "tty";
-          attrs = {
-            idVendor = "12d1";
-            idProduct = "1506";
-          };
-        };
-        symlink = "/dev/modem";
-      })
-    ];
-  };
+
 in svc.network.link.build {
   ifname = "wwan0";
-  dependencies = [ setup ];
+  dependencies = [ atz ];
 }
