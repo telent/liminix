@@ -122,7 +122,7 @@ in {
             socat
             tufted
             iptables
-            usbutils
+            # usbutils
             busybox
           ];
     security.sudo.wheelNeedsPassword = false;
