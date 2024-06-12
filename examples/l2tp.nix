@@ -36,22 +36,18 @@ in rec {
     username = "user";
     password = "one2one";
     authType = "chap";
-  };
-
-  services.dhcpc = svc.network.dhcp.client.build {
-    interface = config.services.wwan;
     dependencies = [ config.services.hostname ];
   };
 
   services.sshd = svc.ssh.build { };
 
   services.resolvconf = oneshot rec {
-    dependencies = [ services.dhcpc ];
+    dependencies = [ services.wwan ];
     name = "resolvconf";
     up = ''
       . ${serviceFns}
       ( in_outputs ${name}
-      for i in $(output ${services.dhcpc} dns); do
+      for i in $(output ${services.wwan} dns); do
         echo "nameserver $i" > resolv.conf
       done
       )

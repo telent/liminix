@@ -53,6 +53,7 @@ let
       };
       symlink = "/dev/modem";
     });
+    # XXX need an ip-up script here to collect the IP address
     up = ''
       ls -l /dev/modem
       test -L /dev/modem || exit 1
