@@ -23,12 +23,17 @@
         VIRTIO_BLK = "y";
         VIRTIO_NET = "y";
       };
+      conditionalConfig = {
+        WLAN= {
+          MAC80211_HWSIM = "m";
+        };
+      };
     };
     hardware =
       let
-        mac80211 =  pkgs.mac80211.override {
-          drivers = ["mac80211_hwsim"];
-          klibBuild = config.system.outputs.kernel.modulesupport;
+        mac80211 =  pkgs.kmodloader.override {
+          inherit (config.system.outputs) kernel;
+          targets = ["mac80211_hwsim"];
         };
       in {
         defaultOutput = "vmroot";
