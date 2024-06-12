@@ -33,8 +33,7 @@ let
 
       defaultStart =
         builtins.filter
-          (s: !(isDependentOnControlled s))
-          (lib.debug.traceValSeqN 2 allServices);
+          (s: !(isDependentOnControlled s)) allServices;
       defaultDefaultTarget = bundle {
         name = "default";
         contents = defaultStart;
