@@ -271,7 +271,9 @@ extraPkgs // {
    '';
   };
 
-  libusb1 = prev.libusb1.override { enableUdev = false; };
+  libusb1 = prev.libusb1.override {
+    enableUdev = final.stdenv.buildPlatform == final.stdenv.hostPlatform;
+  };
 
   util-linux-small = prev.util-linux.override {
     ncursesSupport = false;
