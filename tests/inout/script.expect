@@ -33,7 +33,6 @@ if { $when eq "early" } {
   adddevice
 }
 
-
 expect "BusyBox"
 chat "#" "PS1=RE\\ADY_\\ ; stty -echo \r"
 chat "READY_"  "tail -f /run/uncaught-logs/current & \rs6-rc -b  -a list\r"
@@ -47,7 +46,7 @@ if { $when eq "late" } {
 send "\r"
 set timeout 20
 
-chat "READY_" "sleep 3; grep /srv /proc/mounts && hostname\r"
+chat "READY_" "sleep 5; grep /srv /proc/mounts && hostname\r"
 
 expect {
   "inout" { }
