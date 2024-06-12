@@ -5076,3 +5076,44 @@ Sun Jun  9 22:55:05 BST 2024
 services which depend on services that have controllers should not be
 added to default bundle, otherwise they will try to start the controlled
 service before its ready
+
+Tue Jun 11 20:00:04 BST 2024
+
+we can't look in /run/service/name  to see if it's controlled, because
+if it's a oneshot that directory won't exist. likewise /run/s6-rc/servicedirs/
+
+we could add the controller to the dependencies, then
+controlled? = (any dependency is a controller)
+
+what about generating a script at build time that has the knowledge
+baked in?
+
+
+to_start = reverse deps of service
+print "to_start=$to_start"
+for each service s1 in to_start
+  if isControlled s1
+     rd = reverse deps of s1
+     print "test_stopped s1 && not_to_start="$not_to_start $rd"
+print ''
+for s in $to_start; do
+  case " $not_to_start " in
+    *" $s "*) true;;
+    *) s6-rc -u change $s ;;
+  esac
+done
+''
+
+---
+
+would it help to make an empty bundle called "controlled" and have all
+controlled services depend on it? no, because the condition for
+skipping a service is that it depends on a _different_ controlled
+service that's down
+
+s6-rc -u change $service
+for s in $(s6-rc-db -d all-dependencies $service); do
+  if (s6-rc-db all-dependencies $s | grep controlled); do
+    start s: nothing
+  else
+    start s
