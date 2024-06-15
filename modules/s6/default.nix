@@ -8,7 +8,7 @@ let
     stdenvNoCC;
   inherit (lib.lists) unique concatMap;
   inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs.liminix.services) bundle;
+  inherit (pkgs.liminix.services) oneshot bundle;
 
   s6-rc-db =
     let
@@ -31,12 +31,25 @@ let
         isControlled s ||
         (lib.lists.any isDependentOnControlled s.dependencies);
 
+      # all controlled services depend on this oneshot, which
+      # makes a list of them so we can identify them at runtime
+      controlled = oneshot {
+        name = "controlled";
+        up = ''
+          mkdir -p /run/services/controlled
+          for s in $(s6-rc-db -d dependencies controlled); do
+            touch /run/services/controlled/$s
+          done
+        '';
+        down = "rm -r /run/services/controlled";
+      };
+
       defaultStart =
         builtins.filter
           (s: !(isDependentOnControlled s)) allServices;
       defaultDefaultTarget = bundle {
         name = "default";
-        contents = defaultStart;
+        contents = defaultStart ++ [controlled];
       };
       servicesAttrs = {
         default = defaultDefaultTarget;

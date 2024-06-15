@@ -98,6 +98,7 @@ in {
   run-liminix-vm = callPackage ./run-liminix-vm {};
   s6-init-bin =  callPackage ./s6-init-bin {};
   s6-rc-database = callPackage ./s6-rc-database {};
+  s6-rc-up-tree = callPackage ./s6-rc-up-tree {};
 
   # schnapps is written by Turris and provides a high-level interface
   # to btrfs snapshots. It may be useful on the Turris Omnia to
@@ -112,6 +113,7 @@ in {
   uevent-watch = callPackage ./uevent-watch {};
   usb-modeswitch = callPackage ./usb-modeswitch {};
   writeAshScript = callPackage ./write-ash-script {};
+  writeAshScriptBin = callPackage ./write-ash-script/bin.nix {};
   writeFennel = callPackage ./write-fennel {};
   writeFennelScript = callPackage ./write-fennel-script {};
 }

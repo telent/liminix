@@ -1,0 +1,7 @@
+
+the service starts
+uncontrolled descendants start
+controlled descendants don't start
+descendants which depend on a _different_ controlled service, which is down, don't start
+descendants which depend on a _different_ controlled service, which is up, do start
+

@@ -18,7 +18,7 @@
 
 (fn start-service [devname linkname service]
   (match (if linkname (symlink (.. "/dev/" devname) linkname) true)
-    ok (pcall system (%% "s6-rc -b -u change %q" service))
+    ok (pcall system (%% "s6-rc-up-tree %q" service))
     (nil err) false))
 
 (fn stop-service [linkname service]

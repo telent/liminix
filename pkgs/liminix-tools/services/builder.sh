@@ -16,6 +16,8 @@ done
 if test -n "$controller" ; then
     d=$(dirname $(cd ${controller} && ls -d */type))
     echo "$d)" > $out/${name}/controller
+    #       ^ why is there a closing paren here?
+    touch $out/${name}/dependencies.d/controlled
 fi
 
 for i in timeout-up timeout-down run notification-fd up down finish consumer-for producer-for pipeline-name restart-on-upgrade; do
