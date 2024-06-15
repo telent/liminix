@@ -5114,6 +5114,50 @@ service that's down
 s6-rc -u change $service
 for s in $(s6-rc-db -d all-dependencies $service); do
   if (s6-rc-db all-dependencies $s | grep controlled); do
-    start s: nothing
+    # do nothing: if it's stopped, we don't want to start it,
+    # and if it's already running there's no need to.
+    # XXX what if it's running but its children are not?
+    # XXX 2 this fails as written because _every_ service $s depends
+    # on the controlled service $service
   else
     start s
+
+"[service] Names cannot be duplicated and cannot contain a slash or a
+newline; they can contain spaces and tabs, but using anything else
+than alphanumerical characters, underscores and dashes is discouraged"
+
+ would this be simpler in fennel?
+
+(each [l (lines (io.popen (%. "s6-rc-db -d all-dependencies %s" service)))]
+  (if (not (controlled-ancestor l))
+    (tset to-start l true)))
+
+Sat Jun 15 08:51:21 BST 2024
+
+# do this at boot
+for s in  $(s6-rc-db -d dependencies controlled); do
+  mkdir -p /run/services/controlled
+  touch  /run/services/controlled/$s
+done
+
+
+# now we can do this to start a service tree
+
+for controlled in $(cd /run/services/controlled/ && echo *); do
+  if down $controlled; then
+    blocks="$blocks $controlled "
+  fi
+done
+
+for s in $(s6-rc-db -d all-dependencies $service); do
+  for dep in $(s6-rc-db all-dependencies $s)
+    case "$blocks" in
+      "* $dep *")
+      	: don't start
+        ;;
+      *)
+	s6-rc -u change $s
+      ;;
+    esac
+  done
+done
