@@ -17,7 +17,7 @@ let
         ip address replace $ip/$mask dev $interface
         (in_outputs ${name}
          for i in lease mask ip router siaddr dns serverid subnet opt53 interface ; do
-            printenv $i > $i
+            (printenv $i || true) > $i
          done)
     }
     case $action in
@@ -40,7 +40,7 @@ let
   '';
 in longrun {
   inherit name;
-  run = "/bin/udhcpc -f -i $(output ${interface} ifname) -x hostname:$(cat /proc/sys/kernel/hostname) -s ${script}";
+  run = "exec /bin/udhcpc -f -i $(output ${interface} ifname) -x hostname:$(cat /proc/sys/kernel/hostname) -s ${script}";
   notification-fd = 10;
   dependencies = [ interface ];
 }
