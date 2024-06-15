@@ -11,7 +11,7 @@ in {
       devout = longrun {
         name = "devout";
         notification-fd = 10;
-        run = "${pkgs.devout}/bin/devout /run/devout.sock 4";
+        run = "exec ${pkgs.devout}/bin/devout /run/devout.sock 4";
       };
       coldplug = oneshot {
         name ="coldplug";
