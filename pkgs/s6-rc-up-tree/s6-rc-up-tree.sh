@@ -2,7 +2,7 @@ service=$1
 
 blocks=""
 for controlled in $(cd /run/services/controlled/ && echo *); do
-    down=$(s6-rc -un0 change $controlled)
+    down=$(s6-rc -b -un0 change $controlled)
     echo $controlled $down
     if test -n "$down"; then
 	blocks="$blocks $controlled "
@@ -17,7 +17,7 @@ for s in $(s6-rc-db -d all-dependencies $service); do
 		;;
 	    *)
 		echo "starting $s because $service"
-		s6-rc -u change $s
+		s6-rc -b -u change $s
 		;;
 	esac
     done
