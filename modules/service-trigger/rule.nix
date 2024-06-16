@@ -19,6 +19,6 @@ let
   termsString = stringify terms;
 in longrun {
   name = "watch-for-${serviceName}";
-  isTrigger = true;
+  restart-on-upgrade = true;
   run = "${uevent-watch}/bin/uevent-watch ${if symlink != null then "-n ${symlink}" else ""} -s ${serviceName} ${termsString}";
 }
