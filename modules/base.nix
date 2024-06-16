@@ -64,10 +64,6 @@ in {
         default = "bootargs";
         description = "Kernel command line's devicetree node";
       };
-      imageType = mkOption {
-        type = types.enum [ "primary" "secondary" ];
-        default = "primary";
-      };
       imageFormat = mkOption {
         type = types.enum ["fit" "uimage"];
         default = "uimage";
@@ -110,7 +106,10 @@ in {
       "root=${config.hardware.rootDevice}"
       "rootfstype=${config.rootfsType}"
       "fw_devlink=off"
-    ] ++ lib.optional (config.rootOptions != null) "rootflags=${config.rootOptions}";
+    ]
+    ++ (map (mtd: "ubi.mtd=${mtd}") config.hardware.ubi.mtds)
+    ++ lib.optional (config.rootOptions != null) "rootflags=${config.rootOptions}"
+    ++ lib.optional (config.hardware.alternativeRootDevice != null) "altroot=${config.hardware.alternativeRootDevice}";
 
     system.callService = path : parameters :
       let

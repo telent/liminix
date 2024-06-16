@@ -70,6 +70,7 @@ void parseopts(char * cmdline, struct root_opts *opts) {
 	p = eat_param(p, "root=", &(opts->device));
 	p = eat_param(p, "rootfstype=", &(opts->fstype));
 	p = eat_param(p, "rootflags=", &(opts->mount_opts));
+	p = eat_param(p, "altroot=", &(opts->altdevice));
     };
 }
 
@@ -99,6 +100,14 @@ int main()
     buf = strdup("liminix console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 root=/dev/ubi0_4 rootfstype=ubifs rootflags=subvol=1 fw_devlink=off mtdparts=phram0:18M(rootfs) phram.phram=phram0,0x40400000,18874368,65536 root=/dev/mtdblock0 foo");
     memset(&opts, '\0', sizeof opts); parseopts(buf, &opts);
     expect_equal(opts.device, "/dev/mtdblock0");
+    expect_equal(opts.fstype, "ubifs");
+    expect_equal(opts.mount_opts, "subvol=1");
+
+    // finds altroot= options
+    buf = strdup("liminix console=ttyS0,115200 panic=10 oops=panic init=/bin/init loglevel=8 root=/dev/ubi0_4 rootfstype=ubifs rootflags=subvol=1 fw_devlink=off mtdparts=phram0:18M(rootfs) phram.phram=phram0,0x40400000,18874368,65536 root=/dev/mtdblock0 altroot=/dev/mtdblock6 foo");
+    memset(&opts, '\0', sizeof opts); parseopts(buf, &opts);
+    expect_equal(opts.device, "/dev/mtdblock0");
+    expect_equal(opts.altdevice, "/dev/mtdblock6");
     expect_equal(opts.fstype, "ubifs");
     expect_equal(opts.mount_opts, "subvol=1");
 
@@ -134,13 +143,15 @@ int main()
     if(opts.fstype) die("expected null rootfstype, got \"%s\"", opts.fstype);
     if(opts.device) die("expected null root, got \"%s\"", opts.device);
     if(opts.mount_opts) die("expected null mount_opts, got \"%s\"", opts.mount_opts);
+    if(opts.altdevice) die("expected null altdevice, got \"%s\"", opts.altdevice);
 
     // provides empty strings for empty options
-    buf = strdup("liminix rootfstype= fw_devlink=off root= /dev/hda1");
+    buf = strdup("liminix rootfstype= fw_devlink=off root= altroot= /dev/hda1");
     memset(&opts, '\0', sizeof opts);  parseopts(buf, &opts);
 
     if(strlen(opts.fstype)) die("expected empty rootfstype, got \"%s\"", opts.fstype);
-    if(strlen(opts.device)) die("expected null root, got \"%s\"", opts.device);
+    if(strlen(opts.device)) die("expected empty root, got \"%s\"", opts.device);
+    if(strlen(opts.altdevice)) die("expected empty altroot, got \"%s\"", opts.altdevice);
 
     expect_equal("01", pr_u32(1));
     expect_equal("ab", pr_u32(0xab));

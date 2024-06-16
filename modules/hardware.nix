@@ -82,6 +82,18 @@ in {
         type = types.str;
         example = "/dev/mtdblock3";
       };
+      alternativeRootDevice = mkOption {
+        description = "Full path to alternative preferred root device (the B partition of your rootfs)";
+        type = types.nullOr types.str;
+        example = "ubi_b:rootfs";
+        default = null;
+      };
+      ubi.mtds = mkOption {
+        description = "List of MTD device to attach";
+        type = types.listOf types.str;
+        example = [ "ubi_a" "ubi_b" "data" ];
+        default = null;
+      };
       networkInterfaces = mkOption {
         type = types.attrsOf types.anything;
       };

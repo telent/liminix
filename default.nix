@@ -4,7 +4,6 @@
 , liminix-config ? <liminix-config>
 , nixpkgs ? <nixpkgs>
 , borderVmConf ? ./bordervm.conf.nix
-, imageType ? "primary"
 }:
 
 let
@@ -14,8 +13,7 @@ let
     config = {
       allowUnsupportedSystem = true; # mipsel
       permittedInsecurePackages = [
-        "python-2.7.18.6"       # kernel backports needs python <3
-        "python-2.7.18.7"
+        "python-2.7.18.8" # kernel backports needs python <3
       ];
     };
   });
@@ -36,9 +34,6 @@ let
       ./modules/s6
       ./modules/users.nix
       ./modules/outputs.nix
-      {
-        boot.imageType = imageType;
-      }
     ];
   };
   config = eval.config;
@@ -72,6 +67,13 @@ in {
   # this is just here as a convenience, so that we can get a
   # cross-compiling nix-shell for any package we're customizing
   inherit pkgs;
+
+  deployEnv = pkgs.mkShell {
+    packages = with pkgs.pkgsBuildBuild; [
+      tufted
+      min-copy-closure
+    ];
+  };
 
   buildEnv = pkgs.mkShell {
     packages = with pkgs.pkgsBuildBuild; [
