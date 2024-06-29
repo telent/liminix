@@ -4,7 +4,6 @@
 , liminix
 , ... }:
 let
-  inherit (builtins) map;
   pkgs = (import nixpkgs {});
   borderVmConf =  ./bordervm.conf-example.nix;
   inherit (pkgs.lib.attrsets) genAttrs;
@@ -44,12 +43,6 @@ let
                   imports = [ ./modules/all-modules.nix ];
                 };
               }).outputs.optionsJson;
-            installers = map (f: "system.outputs.${f}") [
-              "vmroot"
-              "mtdimage"
-              "ubimage"
-            ];
-            inherit (pkgs.lib) concatStringsSep;
         in pkgs.stdenv.mkDerivation {
           name = "liminix-doc";
           nativeBuildInputs = with pkgs; [

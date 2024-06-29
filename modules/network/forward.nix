@@ -1,7 +1,5 @@
 {
   liminix
-, ifwait
-, serviceFns
 , lib
 }:
 { enableIPv4, enableIPv6 }:

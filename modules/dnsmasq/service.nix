@@ -18,7 +18,7 @@ let
   name = "${interface.name}.dnsmasq";
   inherit (liminix.services) longrun;
   inherit (lib) concatStrings concatStringsSep mapAttrsToList;
-  hostOpt = name : { mac, v4, v6, leasetime } @ attrs:
+  hostOpt = name : { mac, v4, v6, leasetime }:
     let v6s = concatStrings (map (a : ",[${a}]") v6);
     in "--dhcp-host=${mac},${v4}${v6s},${name},${builtins.toString leasetime}";
 in

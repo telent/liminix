@@ -3,9 +3,7 @@
 , python2
 , which
 , fetchgit
-, fetchpatch
 , fetchFromGitHub
-, autoreconfHook
 , coccinelle
 }:
 let

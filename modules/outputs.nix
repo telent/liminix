@@ -6,7 +6,7 @@
 }:
 let
   inherit (lib) mkOption types concatStringsSep;
-  inherit (pkgs) liminix callPackage writeText;
+  inherit (pkgs) liminix writeText;
   o = config.system.outputs;
 in
 {

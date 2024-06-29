@@ -103,8 +103,6 @@
 
   module = { pkgs, config, lib, lim, ...}:
     let
-      inherit (pkgs.liminix.networking) interface;
-      inherit (pkgs.liminix.services) oneshot;
       inherit (pkgs.pseudofile) dir symlink;
       inherit (pkgs) openwrt;
 

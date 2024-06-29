@@ -24,7 +24,7 @@
   '';
   installer = "vmroot";
 
-  module = {pkgs, config, lim, ... }: {
+  module = { config, lim, ... }: {
     imports = [
       ../../modules/arch/arm.nix
       ../families/qemu.nix

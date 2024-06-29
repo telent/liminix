@@ -1,6 +1,4 @@
-{
-  lua
-, nellie
+{ nellie
 , writeFennel
 , anoia
 , fennel

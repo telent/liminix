@@ -9,7 +9,7 @@ name :
   packages ? [],
   correlate ? false,
   mainFunction ? null
-} @ options : source :
+} : source :
   let
     luapath = builtins.map
       (f:

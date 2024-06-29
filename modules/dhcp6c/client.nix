@@ -1,13 +1,11 @@
 {
   liminix
-, lib
 , odhcp6c
 , odhcp-script
 }:
 { interface } :
 let
   inherit (liminix.services) longrun;
-  inherit (lib) mkOption types;
   name = "dhcp6c.${interface.name}";
 in longrun {
   inherit name;

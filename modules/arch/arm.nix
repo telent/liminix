@@ -1,4 +1,4 @@
-{ lib, lim, pkgs, config, ...}:
+{ lim, pkgs, config, ...}:
 {
   config = {
     kernel.config = {

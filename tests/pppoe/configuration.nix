@@ -1,6 +1,6 @@
-{ config, pkgs, lib, ... } :
+{ config, pkgs, ... } :
 let
-  inherit (pkgs.liminix.services) oneshot longrun bundle target output;
+  inherit (pkgs.liminix.services) target;
   svc = config.system.service;
 in rec {
   services.lan4 = svc.network.address.build {

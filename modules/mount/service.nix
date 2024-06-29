@@ -5,7 +5,7 @@
 }:
 { partlabel, mountpoint, options, fstype }:
 let
-  inherit (liminix.services) longrun oneshot;
+  inherit (liminix.services) oneshot;
   device = "/dev/disk/by-partlabel/${partlabel}";
   name = "mount.${lib.strings.sanitizeDerivationName (lib.escapeURL mountpoint)}";
   options_string =

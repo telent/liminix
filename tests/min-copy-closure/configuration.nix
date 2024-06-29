@@ -1,15 +1,7 @@
 { config, pkgs, lib, ... } :
 let
   inherit (pkgs) dropbear;
-  inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs.liminix.services) oneshot longrun bundle target;
-  inherit
-    (pkgs.liminix.networking)
-    address
-    udhcpc
-    interface
-    route
-  ;
+  inherit (pkgs.liminix.services) longrun;
 in {
   imports = [
     ../../vanilla-configuration.nix

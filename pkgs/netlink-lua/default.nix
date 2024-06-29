@@ -1,4 +1,4 @@
-{ lua, lib, fetchpatch, fetchFromGitHub, libmnl }:
+{ lua, fetchFromGitHub, libmnl }:
 let pname = "netlink";
 in lua.pkgs.buildLuaPackage {
   inherit pname;

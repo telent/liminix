@@ -6,9 +6,9 @@
 ## :file:`devices/manuf-model/default.nix`
 
 
-{ lib, pkgs, config, ...}:
+{ lib, ...}:
 let
-  inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;
+  inherit (lib) mkOption types ;
 in {
   options = {
     boot = {

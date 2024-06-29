@@ -1,12 +1,10 @@
 {
   liminix
-, ifwait
 , lib
 }:
 { ifname } :
 let
-  inherit (liminix.services) bundle oneshot;
-  inherit (lib) mkOption types;
+  inherit (liminix.services) oneshot;
 in oneshot rec {
   name = "${ifname}.link";
   up = ''

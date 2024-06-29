@@ -58,7 +58,6 @@ in {
     system.outputs = rec {
       tftpboot =
         let
-          inherit (pkgs.lib.trivial) toHexString;
           o = config.system.outputs;
           image = let choices = {
             uimage = o.uimage;

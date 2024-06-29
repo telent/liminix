@@ -1,14 +1,7 @@
 {
   stdenv
-, fetchzip
 , gdb
  }:
-let kernel = fetchzip {
-      name = "linux";
-      url = "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.71.tar.gz";
-      hash = "sha256-pq6QNa0PJVeheaZkuvAPD0rLuEeKrViKk65dz+y4kqo=";
-    };
-in
 stdenv.mkDerivation {
   name = "preinit";
   src = ./.;

@@ -1,8 +1,5 @@
 {
   liminix
-, lib
-, ppp
-, pppoe
 , writeAshScript
 , writeText
 , serviceFns

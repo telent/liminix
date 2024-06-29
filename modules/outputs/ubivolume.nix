@@ -5,7 +5,6 @@
 , ...
 }:
 let
-  inherit (pkgs) liminix;
   inherit (lib) mkIf mkOption types concatStringsSep optionalString;
 in
   {

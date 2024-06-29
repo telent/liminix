@@ -5,7 +5,7 @@
 , ...
 }:
 let
-  inherit (lib) mkOption mkForce types concatStringsSep;
+  inherit (lib) mkOption types concatStringsSep;
 in {
   imports = [ ../ramdisk.nix ];
   options.system.outputs = {
@@ -42,8 +42,7 @@ in {
 
       boot-sh =
         let
-          inherit (pkgs.lib.trivial) toHexString;
-          inherit (config.system.outputs) rootfs kernel;
+          inherit (config.system.outputs) rootfs;
           cmdline = concatStringsSep " " config.boot.commandLine;
         in
           pkgs.buildPackages.runCommand "boot.sh.sh" {

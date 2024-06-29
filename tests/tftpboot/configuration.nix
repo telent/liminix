@@ -1,6 +1,6 @@
 { config, pkgs, lib, lim, ... } :
 let
-  inherit (pkgs.pseudofile) dir symlink;
+  inherit (pkgs.pseudofile) dir;
   dts = pkgs.runCommand "qemu.dts" {
     nativeBuildInputs = with pkgs.pkgsBuildBuild; [ dtc qemu ];
   } ''

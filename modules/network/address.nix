@@ -1,6 +1,5 @@
 {
   liminix
-, ifwait
 , serviceFns
 , lib
 }:

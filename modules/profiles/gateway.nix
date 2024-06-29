@@ -2,7 +2,7 @@
 let
   svc = config.system.service;
   cfg = config.profile.gateway;
-  inherit (lib) mkOption mkEnableOption mkIf mdDoc types optional optionals;
+  inherit (lib) mkOption mkEnableOption mkIf types;
   inherit (pkgs) liminix serviceFns;
   inherit (liminix.services) bundle oneshot;
   hostaps =

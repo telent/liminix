@@ -1,7 +1,7 @@
 # support for USB block devices and the common filesystems
 # they're likely to provide
 
-{lib, config, ... }:
+{ config, ... }:
 {
   kernel = {
     config = {

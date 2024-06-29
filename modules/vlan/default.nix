@@ -13,7 +13,6 @@
 { lib, pkgs, config, ...}:
 let
   inherit (lib) mkOption types;
-  inherit (pkgs.liminix.services) oneshot;
   inherit (pkgs) liminix;
 in
 {

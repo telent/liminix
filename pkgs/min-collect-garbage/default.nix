@@ -1,12 +1,8 @@
 {
   stdenv
-, nix
-, cpio
-, openssh
 }: stdenv.mkDerivation {
   name = "min-collect-garbage";
   buildInputs = [ ];
-#  propagatedBuildInputs = [ openssh ];
   src = ./.;
   makeFlags = [ "min-list-garbage" ];
   installPhase = ''

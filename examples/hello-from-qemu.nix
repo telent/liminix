@@ -1,6 +1,5 @@
-{ config, pkgs, lib, ... } :
+{ config, pkgs, ... } :
 let
-  inherit (pkgs) serviceFns;
   svc = config.system.service;
 
 in rec {

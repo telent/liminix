@@ -1,14 +1,11 @@
 {
   stdenvNoCC
-, s6-rc
 , s6
 , lib
-, callPackage
 , writeScript
 , serviceFns
 }:
 let
-  inherit (builtins) concatStringsSep any map;
   prefix = "/run/services/outputs";
   output = service: name: "${prefix}/${service.name}/${name}";
   serviceScript = commands : ''
@@ -28,7 +25,6 @@ let
     , up ? null
     , down ? null
     , finish ? null
-    , outputs ? []
     , notification-fd ? null
     , producer-for ? null
     , consumer-for ? null
@@ -40,7 +36,7 @@ let
     , buildInputs ? []
     , restart-on-upgrade ? false
     , controller ? null
-  } @ args:
+  }:
     stdenvNoCC.mkDerivation {
       # we use stdenvNoCC to avoid generating derivations with names
       # like foo.service-mips-linux-musl
@@ -55,9 +51,7 @@ let
   longrun = {
     name
     , run
-    , outputs ? []
     , notification-fd ? null
-    , dependencies ? []
     , buildInputs ? []
     , ...
   } @ args:
@@ -81,8 +75,6 @@ let
     name
     , up
     , down ? ""
-    , outputs ? []
-    , dependencies ? []
     , ...
   } @ args : service (args  // {
     serviceType = "oneshot";
@@ -91,9 +83,7 @@ let
       "${name}-down"
       "${serviceScript down}\n${cleanupScript name}";
   });
-  bundle = {
-    name
-    , contents ? []
+  bundle = { contents ? []
     , dependencies ? []
     , ...
   } @ args: service (args // {

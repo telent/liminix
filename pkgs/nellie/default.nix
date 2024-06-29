@@ -1,4 +1,4 @@
-{ lua, lib, fetchpatch, fetchFromGitHub, stdenv }:
+{ lua, stdenv }:
 
 let pname = "nellie";
 in lua.pkgs.buildLuaPackage {

@@ -4,10 +4,8 @@
 
 { lib, pkgs, config, ...}:
 let
-  inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;
+  inherit (lib) mkOption types ;
   inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs.liminix.networking) address interface;
-  inherit (pkgs.liminix.services) bundle;
 
   type_service = pkgs.liminix.lib.types.service;
 

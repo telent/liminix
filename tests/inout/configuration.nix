@@ -1,8 +1,6 @@
-{ config, pkgs, lib, modulesPath, ... } :
+{ config, pkgs, modulesPath, ... } :
 let
-  inherit (pkgs.liminix.services) bundle oneshot longrun;
-  inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs) serviceFns;
+  inherit (pkgs.pseudofile) dir;
 
   svc = config.system.service;
 

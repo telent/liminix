@@ -8,7 +8,7 @@
 }:
 { apn, username, password, authType }:
 let
-  inherit (liminix.services) bundle longrun oneshot;
+  inherit (liminix.services) oneshot;
   authTypeNum = if authType == "pap" then "1" else "2";
   chat = lib.escapeShellArgs [
     # Your usb modem thing might present as a tty that you run PPP

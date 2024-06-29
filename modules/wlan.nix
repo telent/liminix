@@ -1,6 +1,5 @@
 { lib, pkgs, config, ...}:
 let
-  inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs) stdenv wireless-regdb;
   regulatory = stdenv.mkDerivation {

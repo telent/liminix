@@ -1,7 +1,4 @@
-{
-  stdenv
-, busybox
-, buildPackages
+{ buildPackages
 , callPackage
 , pseudofile
 , runCommand

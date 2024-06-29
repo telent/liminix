@@ -5,7 +5,7 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption mkOption types concatStringsSep;
+  inherit (lib) mkIf mkOption types;
   cfg = config.boot.tftp;
   instructions = pkgs.writeText "env.scr" ''
     setenv serverip ${cfg.serverip}

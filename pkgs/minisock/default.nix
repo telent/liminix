@@ -1,4 +1,4 @@
-{ lua, lib, fetchFromGitHub }:
+{ lua, fetchFromGitHub }:
 let
   pname = "minisock";
   src = fetchFromGitHub {

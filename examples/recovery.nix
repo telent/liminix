@@ -3,7 +3,7 @@ let
   inherit (pkgs) serviceFns;
   svc = config.system.service;
   inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs.liminix.services) oneshot longrun bundle target;
+  inherit (pkgs.liminix.services) oneshot target;
   some-util-linux = pkgs.runCommand "some-util-linux" {} ''
     mkdir -p $out/bin
     cd ${pkgs.util-linux-small}/bin

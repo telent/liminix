@@ -7,11 +7,6 @@
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
-  mkBoolOption = description : mkOption {
-    type = types.bool;
-    inherit description;
-    default = true;
-  };
 
 in {
   options = {

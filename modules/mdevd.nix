@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ...} :
+{ config, pkgs, ...} :
 let inherit (pkgs.liminix.services) oneshot longrun;
 in {
   config = {

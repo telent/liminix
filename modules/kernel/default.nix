@@ -5,13 +5,8 @@
 
 { lib, pkgs, config, ...}:
 let
-  inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;
-  inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs.liminix.networking) address interface;
-  inherit (pkgs.liminix.services) bundle;
+  inherit (lib) mkOption types ;
   inherit (pkgs) liminix;
-
-  type_service = pkgs.liminix.lib.types.service;
 
   mergeConditionals = conf : conditions :
     # for each key in conditions, if it is present in conf

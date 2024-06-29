@@ -1,9 +1,6 @@
-{
-  lua
-, nellie
+{ nellie
 , lualinux
 , writeFennel
-, runCommand
 , anoia
 , fennel
 , stdenv

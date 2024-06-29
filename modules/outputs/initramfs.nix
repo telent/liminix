@@ -6,7 +6,7 @@
 }:
 let
   inherit (lib) mkEnableOption mkOption mkIf types;
-  inherit (pkgs) runCommand callPackage writeText;
+  inherit (pkgs) runCommand;
 in
 {
   options = {

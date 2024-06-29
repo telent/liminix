@@ -8,8 +8,6 @@
 let
   inherit (liminix.services) longrun;
   inherit (lib) concatStringsSep mapAttrsToList;
-  inherit (liminix.lib) typeChecked;
-  inherit (lib) mkOption types;
 
   # This is not a friendly interface to configuring a wireless AP: it
   # just passes everything straight through to the hostapd config.

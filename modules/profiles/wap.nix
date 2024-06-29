@@ -5,9 +5,9 @@
   ...
 }: let
   inherit (pkgs) liminix;
-  inherit (lib) mkEnableOption mkOption types isDerivation hasAttr ;
+  inherit (lib) mkOption types ;
 
-  inherit (pkgs.liminix.services) oneshot longrun bundle target;
+  inherit (pkgs.liminix.services) oneshot target;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs) serviceFns;
   svc = config.system.service;

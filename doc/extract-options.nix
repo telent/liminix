@@ -1,6 +1,5 @@
 { eval, lib, pkgs }:
 let
-  inherit (lib) types;
   conf = eval.config;
   rootDir = builtins.toPath ./..;
   stripAnyPrefixes = lib.flip (lib.fold lib.removePrefix)

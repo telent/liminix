@@ -1,7 +1,6 @@
 {
   lua5_3
 , stdenv
-, fetchFromGitHub
 , makeWrapper
 } :
 let

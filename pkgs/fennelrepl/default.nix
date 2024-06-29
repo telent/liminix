@@ -1,9 +1,4 @@
-{
-  runCommand
-, runtimeShell
-, fetchurl
-, lib
-, luaPackages
+{ lib
 , lua
 , lualinux
 , writeScriptBin

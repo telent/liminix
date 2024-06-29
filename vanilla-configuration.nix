@@ -1,7 +1,6 @@
 { config, pkgs, ... } :
 let
-  inherit (pkgs.liminix.services) oneshot longrun bundle target;
-  inherit (pkgs) writeText;
+  inherit (pkgs.liminix.services) target;
   svc = config.system.service;
 in rec {
   imports = [

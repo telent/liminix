@@ -22,7 +22,7 @@ let
     rev = "a5265497a4f6da158e95d6a450cb2cb6dc085cab";
     hash = "sha256-YYi4gkpLjbOK7bM2MGQjAyEBuXJ9JNXoz/JEmYf8xE8=";
   };
-  inherit (liminix.services) oneshot longrun;
+  inherit (liminix.services) oneshot;
   inherit (lib.lists) foldl;
   configs = {
     ath9k.kconfig = {

@@ -1,6 +1,4 @@
-{
-  lua
-, netlink-lua
+{ netlink-lua
 , writeFennelScript
 , runCommand
 , anoia

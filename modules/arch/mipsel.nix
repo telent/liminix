@@ -1,4 +1,4 @@
-{ lib, pkgs, config, ...}:
+{ config, ...}:
 {
   imports = [ ./mips.nix ];
   config = {

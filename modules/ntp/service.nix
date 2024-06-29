@@ -1,7 +1,6 @@
 {
   liminix
 , chrony
-, serviceFns
 , lib
 , writeText
 }:
@@ -9,10 +8,6 @@ params:
 let
   inherit (liminix.services) longrun;
   inherit (lib) concatStringsSep mapAttrsToList;
-  inherit (liminix.lib) typeChecked;
-  inherit (lib) mkOption types;
-
-  serverOpts = types.listOf types.str;
   configFile = p:
     (mapAttrsToList (name: opts: "server ${name} ${concatStringsSep "" opts}")
       p.servers)

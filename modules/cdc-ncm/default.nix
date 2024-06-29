@@ -2,7 +2,6 @@
 let
   inherit (pkgs) liminix;
   inherit (lib) mkOption types;
-  svc = config.system.service;
 in {
   imports = [
     ../service-trigger

@@ -26,9 +26,9 @@
 
   lns = { hostname = "l2tp.aaisp.net.uk"; address = "194.4.172.12"; };
 
-  inherit (pkgs.liminix.services) oneshot longrun bundle target;
+  inherit (pkgs.liminix.services) oneshot target;
   inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs) writeText dropbear ifwait serviceFns;
+  inherit (pkgs) serviceFns;
   svc = config.system.service;
 in rec {
   boot = {

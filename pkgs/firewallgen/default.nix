@@ -7,8 +7,8 @@ name : ruleset :
 let
   inherit (lib.strings) concatStringsSep splitString hasInfix substring;
   inherit (lib.lists) groupBy;
-  inherit (lib.attrsets) mapAttrsToList nameValuePair;
-  inherit (builtins) map listToAttrs replaceStrings head tail;
+  inherit (lib.attrsets) mapAttrsToList;
+  inherit (builtins) map head tail;
 
   indentLines = offset : lines :
     if lines == []
@@ -31,7 +31,7 @@ let
 
   indent = text : indentLines 0 (splitString "\n" text);
 
-  dochain = { name, type, family, rules,
+  dochain = { name, type, rules,
               policy ? null,
               priority ? "filter",
               hook ? null } : ''

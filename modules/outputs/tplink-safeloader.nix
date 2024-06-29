@@ -5,7 +5,7 @@
 , ...
 }:
 let
-  inherit (lib) mkOption types concatStringsSep;
+  inherit (lib) mkOption types;
   o = config.system.outputs;
   cfg = config.tplink-safeloader;
 in {

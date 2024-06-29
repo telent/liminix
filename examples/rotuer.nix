@@ -12,8 +12,6 @@ let
     domainName = "fake.liminix.org";
     firewallRules = {};
   } // (import ./rotuer-secrets.nix);
-  inherit (pkgs.liminix.services) oneshot bundle;
-  inherit (pkgs) serviceFns;
   svc = config.system.service;
   wirelessConfig =  {
     country_code = "GB";

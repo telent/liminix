@@ -1,7 +1,6 @@
 {
   liminix
 , dropbear
-, serviceFns
 , lib
 }:
 p :

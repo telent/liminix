@@ -8,7 +8,6 @@
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
-  inherit (pkgs.liminix.services) oneshot;
 
   kmodules = pkgs.kmodloader.override {
     inherit (config.system.outputs) kernel;

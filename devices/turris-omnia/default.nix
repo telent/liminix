@@ -155,8 +155,6 @@
 
   module = {pkgs, config, lib, lim, ... }:
     let
-      openwrt = pkgs.openwrt;
-      inherit (lib) mkOption types;
       inherit (pkgs.liminix.services) oneshot;
       inherit (pkgs) liminix;
       mtd_by_name_links = pkgs.liminix.services.oneshot rec  {
@@ -358,7 +356,6 @@
           networkInterfaces =
             let
               inherit (config.system.service.network) link;
-              inherit (config.system.service) bridge;
             in rec {
               en70000 = link.build {
                 # in armada-38x.dtsi this is eth0.

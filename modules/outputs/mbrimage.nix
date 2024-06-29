@@ -5,7 +5,7 @@
 , ...
 }:
 let
-  inherit (lib) mkOption types concatStringsSep;
+  inherit (lib) mkOption types;
   o = config.system.outputs;
   phram_address = lib.toHexString (config.hardware.ram.startAddress + 256 * 1024 * 1024);
 in {

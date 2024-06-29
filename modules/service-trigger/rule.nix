@@ -1,7 +1,6 @@
 {
   liminix
 , uevent-watch
-, serviceFns
 , lib }:
 {
   serviceName, terms, symlink

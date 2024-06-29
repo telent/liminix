@@ -419,7 +419,6 @@
           networkInterfaces =
             let
               inherit (config.system.service.network) link;
-              inherit (config.system.service) bridge;
             in rec {
               lan1 = link.build { ifname = "lan1"; };
               lan2 = link.build { ifname = "lan2"; };

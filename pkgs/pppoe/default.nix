@@ -2,8 +2,6 @@
 , stdenv
 , fetchFromGitHub
 , ppp } :
-let
-in
 stdenv.mkDerivation rec {
   pname = "rp-pppoe";
   version = "3.15";

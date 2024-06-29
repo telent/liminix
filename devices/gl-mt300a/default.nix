@@ -45,7 +45,6 @@
 
   module = { pkgs, config, lib, lim, ...}:
     let
-      inherit (pkgs.liminix.networking) interface;
       inherit (pkgs) openwrt;
       mac80211 = pkgs.kmodloader.override {
         targets = ["rt2800soc"];
@@ -90,19 +89,6 @@
           let
             inherit (config.system.service.network) link;
             inherit (config.system.service) vlan;
-            inherit (pkgs.liminix.services) oneshot;
-            swconfig = oneshot {
-              name = "swconfig";
-              up = ''
-                PATH=${pkgs.swconfig}/bin:$PATH
-                swconfig dev switch0 set reset
-                swconfig dev switch0 set enable_vlan 1
-                swconfig dev switch0 vlan 1 set ports '1 2 3 4 6t'
-                swconfig dev switch0 vlan 2 set ports '0 6t'
-                swconfig dev switch0 set apply
-              '';
-              down = "${pkgs.swconfig}/bin/swconfig dev switch0 set reset";
-            };
           in rec {
             eth = link.build { ifname = "eth0"; };
             # lan and wan ports are both behind a switch on eth0

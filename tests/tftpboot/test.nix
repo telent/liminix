@@ -4,7 +4,7 @@
 let check = deviceName  : config :
 let derivation = (import liminix {
       device = import "${liminix}/devices/${deviceName}/";
-      liminix-config = { pkgs, ... } : {
+      liminix-config = { ... } : {
         imports = [./configuration.nix];
         inherit config;
       };

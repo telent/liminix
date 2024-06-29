@@ -5,9 +5,9 @@
 # wherever the text "EDIT" appears - please consult the tutorial
 # documentation for details.
 
-{ config, pkgs, lib, ... } :
+{ config, pkgs, ... } :
 let
-  inherit (pkgs.liminix.services) bundle oneshot longrun;
+  inherit (pkgs.liminix.services) bundle oneshot;
   inherit (pkgs) serviceFns;
   # EDIT: you can pick your preferred RFC1918 address space
   # for NATted connections, if you don't like this one.

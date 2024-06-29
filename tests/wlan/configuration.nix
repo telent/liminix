@@ -1,7 +1,6 @@
-{ config, pkgs, lib, ... } :
+{ config, pkgs, ... } :
 let
-  inherit (pkgs.liminix.networking) interface address hostapd route dnsmasq;
-  inherit (pkgs.liminix.services) oneshot longrun bundle target;
+  inherit (pkgs.liminix.networking) interface hostapd;
 in rec {
   imports = [
     ../../modules/wlan.nix

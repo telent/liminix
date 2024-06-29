@@ -1,7 +1,5 @@
 {
   liminix
-, ifwait
-, serviceFns
 , lib
 }:
 { target, via, interface ? null, metric }:

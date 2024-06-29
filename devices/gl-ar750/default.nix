@@ -92,7 +92,6 @@
         '';
       };
       inherit (pkgs.pseudofile) dir symlink;
-      inherit (pkgs.liminix.networking) interface;
     in {
       imports = [
         ../../modules/network

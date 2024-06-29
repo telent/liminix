@@ -1,6 +1,6 @@
-{ config, pkgs, lib, ... } :
+{ config, pkgs, ... } :
 let
-  inherit (pkgs.pseudofile) dir symlink;
+  inherit (pkgs.pseudofile) dir;
 in {
   imports = [
     ../../vanilla-configuration.nix

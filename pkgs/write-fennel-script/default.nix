@@ -1,8 +1,4 @@
-{
-  lua
-, lib
-, fennel
-, writeFennel
+{ writeFennel
 , stdenv
 }:
 name : packages : source :

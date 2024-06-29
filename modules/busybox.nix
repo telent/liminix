@@ -8,7 +8,7 @@
 
 { lib, pkgs, config, ...}:
 let
-  inherit (lib) mkOption mkEnableOption types mapAttrsToList;
+  inherit (lib) mkOption types mapAttrsToList;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (lib.strings) toUpper;
 

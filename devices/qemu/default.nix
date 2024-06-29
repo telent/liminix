@@ -36,7 +36,7 @@
     in the Development manual.
 
   '';
-  module = {pkgs, config, lib, lim, ... }: {
+  module = { config, lib, lim, ... }: {
     imports = [
       ../../modules/arch/mipseb.nix
       ../families/qemu.nix

@@ -1,11 +1,10 @@
 {
   config
-, pkgs
 , lib
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption mkOption; # types concatStringsSep;
+  inherit (lib) mkIf mkEnableOption; # types concatStringsSep;
 in {
   options = {
     boot = {

@@ -2,7 +2,6 @@
   writeFennel
 , linotify
 , anoia
-, lua
 , lualinux
 }:
 writeFennel "acquire-delegated-prefix" {

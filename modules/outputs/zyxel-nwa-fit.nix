@@ -5,7 +5,7 @@
 , ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption mkOption types concatStringsSep;
+  inherit (lib) mkIf mkOption types;
   models = "6b e1 6f e1 ff ff ff ff ff ff";
 in {
   options.system.outputs = {
