@@ -1,4 +1,4 @@
-{ config, pkgs, ... } :
+{ config, pkgs, ... }:
 let
   inherit (pkgs.liminix.services) target;
   svc = config.system.service;
@@ -31,5 +31,5 @@ in rec {
     ipaddr = "192.168.8.251";
   };
 
-  defaultProfile.packages = [ pkgs.hello ] ;
+  defaultProfile.packages = [ pkgs.hello ];
 }

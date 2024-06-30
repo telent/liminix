@@ -5,14 +5,13 @@
 ## you want to run on it, and would usually be set in the "device" file:
 ## :file:`devices/manuf-model/default.nix`
 
-
-{ lib, ...}:
+{ lib, ... }:
 let
-  inherit (lib) mkOption types ;
-in {
+  inherit (lib) mkOption types;
+in
+{
   options = {
-    boot = {
-    };
+    boot = { };
     hardware = {
       dts = {
         src = mkOption {
@@ -26,7 +25,7 @@ in {
           '';
         };
         includes = mkOption {
-          default = [];
+          default = [ ];
           description = "List of directories to search for DTS includes (.dtsi files)";
           type = types.listOf types.path;
         };

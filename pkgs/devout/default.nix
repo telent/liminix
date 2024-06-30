@@ -1,10 +1,11 @@
-{ nellie
-, writeFennel
-, anoia
-, fennel
-, stdenv
-, fennelrepl
-, lualinux
+{
+  nellie,
+  writeFennel,
+  anoia,
+  fennel,
+  stdenv,
+  fennelrepl,
+  lualinux,
 }:
 stdenv.mkDerivation {
   name = "devout";

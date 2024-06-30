@@ -119,7 +119,7 @@ in rec {
         secrets_file
         services.mount_external_disk
         config.hardware.networkInterfaces.lan
-      ] ;
+      ];
     };
 
   users.root = {
@@ -128,18 +128,22 @@ in rec {
   };
 
   users.backup = {
-    uid=500; gid=500; gecos="Storage owner"; dir="/srv";
-    shell="/dev/null";
+    uid = 500;
+    gid = 500;
+    gecos = "Storage owner";
+    dir = "/srv";
+    shell = "/dev/null";
   };
   groups.backup = {
-    gid=500; usernames = ["backup"];
+    gid = 500;
+    usernames = [ "backup" ];
   };
 
   defaultProfile.packages = with pkgs; [
     e2fsprogs
     mtdutils
     (levitate.override {
-      config  = {
+      config = {
         services = {
           inherit (config.services) dhcpc sshd watchdog;
         };

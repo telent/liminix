@@ -1,10 +1,10 @@
 {
-  s6-linux-init
-, execline
-, writeScript
-, stdenvNoCC
-, lib
-, s6-rc
+  s6-linux-init,
+  execline,
+  writeScript,
+  stdenvNoCC,
+  lib,
+  s6-rc,
 }:
 let
   hpr = name: arg: writeScript name ''

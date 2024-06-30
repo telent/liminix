@@ -1,14 +1,14 @@
 {
-  writeScriptBin
-, writeScript
-, systemconfig
-, execline
-, lib
-, config ? {}
-, liminix
-, pseudofile
-, pkgs
-} :
+  writeScriptBin,
+  writeScript,
+  systemconfig,
+  execline,
+  lib,
+  config ? { },
+  liminix,
+  pseudofile,
+  pkgs,
+}:
 let
   inherit (pseudofile) dir symlink;
   inherit (liminix.services) oneshot;
@@ -16,7 +16,7 @@ let
   newRoot = "/run/maintenance";
   sysconfig =
     let
-      doChroot =  writeScript "exec" ''
+      doChroot = writeScript "exec" ''
         #!${execline}/bin/execlineb -P
         cd ${newRoot}
         foreground { mount --move ${newRoot} / }

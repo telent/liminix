@@ -46,7 +46,7 @@ in
 extraPkgs // {
   # liminix library functions
   lim = {
-    parseInt = s : (builtins.fromTOML "r=${s}").r;
+    parseInt = s: (builtins.fromTOML "r=${s}").r;
   };
 
   # keep these alphabetical
@@ -74,7 +74,6 @@ extraPkgs // {
       # should texinfo be in nativeBuildInputs instead of
       # buildInputs?
       texinfo = null;
-
     };
 
   # luarocks wants a cross-compiled cmake (which seems like a bug,
@@ -186,9 +185,12 @@ extraPkgs // {
     # done. Do it the ugly way..
     postPatch =
       o.postPatch
-      + (with final;
-        lib.optionalString (stdenv.buildPlatform != stdenv.hostPlatform)
-          "\nsed -i.bak 's/linux.*-mips/linux-mops/' Configure\n");
+      + (
+        with final;
+        lib.optionalString (
+          stdenv.buildPlatform != stdenv.hostPlatform
+        ) "\nsed -i.bak 's/linux.*-mips/linux-mops/' Configure\n"
+      );
   });
 
   pppBuild = prev.ppp;
@@ -200,13 +202,12 @@ extraPkgs // {
   }); in q.override { nixosTestRunner = true; sdlSupport = false; };
 
   rsyncSmall =
-    let r = prev.rsync.overrideAttrs(o: {
-          configureFlags = o.configureFlags ++ [
-            "--disable-openssl"
-          ];
-        });
-    in r.override { openssl = null; };
-
+    let
+      r = prev.rsync.overrideAttrs (o: {
+        configureFlags = o.configureFlags ++ [ "--disable-openssl" ];
+      });
+    in
+    r.override { openssl = null; };
 
   inherit s6;
   s6-linux-init = prev.s6-linux-init.override {
@@ -224,14 +225,14 @@ extraPkgs // {
 
   ubootQemuAarch64 = final.buildUBoot {
     defconfig = "qemu_arm64_defconfig";
-    extraMeta.platforms = ["aarch64-linux"];
-    filesToInstall = ["u-boot.bin"];
+    extraMeta.platforms = [ "aarch64-linux" ];
+    filesToInstall = [ "u-boot.bin" ];
   };
 
   ubootQemuArm = final.buildUBoot {
     defconfig = "qemu_arm_defconfig";
-    extraMeta.platforms = ["armv7l-linux"];
-    filesToInstall = ["u-boot.bin"];
+    extraMeta.platforms = [ "armv7l-linux" ];
+    filesToInstall = [ "u-boot.bin" ];
     extraConfig = ''
       CONFIG_CMD_UBI=y
       CONFIG_CMD_UBIFS=y
@@ -245,8 +246,8 @@ extraPkgs // {
 
   ubootQemuMips = final.buildUBoot {
     defconfig = "malta_defconfig";
-    extraMeta.platforms = ["mips-linux"];
-    filesToInstall = ["u-boot.bin"];
+    extraMeta.platforms = [ "mips-linux" ];
+    filesToInstall = [ "u-boot.bin" ];
     # define the prompt to be the same as arm{32,64} so
     # we can use the same expect script for both
     extraPatches = [ ./pkgs/u-boot/0002-virtio-init-for-malta.patch ];
@@ -268,7 +269,7 @@ extraPkgs // {
       CONFIG_MIPS_BOOT_FDT=y
       CONFIG_OF_LIBFDT=y
       CONFIG_OF_STDOUT_VIA_ALIAS=y
-   '';
+    '';
   };
 
   libusb1 = prev.libusb1.override {
@@ -283,5 +284,4 @@ extraPkgs // {
     translateManpages = false;
     capabilitiesSupport = false;
   };
-
 }

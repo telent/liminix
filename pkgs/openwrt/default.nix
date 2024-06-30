@@ -1,7 +1,4 @@
-{
-  fetchFromGitHub
-, pkgsBuildBuild
-}:
+{ fetchFromGitHub, pkgsBuildBuild }:
 let
   src = fetchFromGitHub {
     name = "openwrt-source";
@@ -10,7 +7,7 @@ let
     rev = "refs/tags/v23.05.2";
     hash = "sha256-kP+cSOB6LiOMWs7g+ji7P7ehiDYDwRdmT4R5jSzw6K4=";
   };
-  doPatch = family : ''
+  doPatch = family: ''
     cp -av ${src}/target/linux/generic/files/* .
     chmod -R u+w .
     cp -av ${src}/target/linux/${family}/files/* .

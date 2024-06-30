@@ -1,8 +1,8 @@
 {
-  fetchFromGitHub
-, stdenv
-, autoreconfHook
-, substituteAll
+  fetchFromGitHub,
+  stdenv,
+  autoreconfHook,
+  substituteAll,
 # , openssl
 }: stdenv.mkDerivation {
   pname  = "ppp";
@@ -35,6 +35,4 @@
     "man"
     "dev"
   ];
-
-
 }

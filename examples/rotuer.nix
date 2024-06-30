@@ -10,10 +10,10 @@
 let
   secrets = {
     domainName = "fake.liminix.org";
-    firewallRules = {};
+    firewallRules = { };
   } // (import ./rotuer-secrets.nix);
   svc = config.system.service;
-  wirelessConfig =  {
+  wirelessConfig = {
     country_code = "GB";
     inherit (secrets) wpa_passphrase;
     wmm_enabled = 1;
@@ -70,13 +70,13 @@ in rec {
     wireless.networks = {
       "${secrets.ssid}" = {
         interface = config.hardware.networkInterfaces.wlan;
-        hw_mode="g";
+        hw_mode = "g";
         channel = "2";
         ieee80211n = 1;
       } // wirelessConfig;
       "${secrets.ssid}5" = rec {
         interface = config.hardware.networkInterfaces.wlan5;
-        hw_mode="a";
+        hw_mode = "a";
         channel = 36;
         ht_capab = "[HT40+]";
         vht_oper_chwidth = 1;

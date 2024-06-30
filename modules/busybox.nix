@@ -85,10 +85,13 @@ in {
       };
     };
     filesystem = dir {
-      bin = dir ({
-        busybox = symlink "${busybox}/bin/busybox";
-        sh = symlink "${busybox}/bin/busybox";
-      } // makeLinks);
+      bin = dir (
+        {
+          busybox = symlink "${busybox}/bin/busybox";
+          sh = symlink "${busybox}/bin/busybox";
+        }
+        // makeLinks
+      );
     };
   };
 }

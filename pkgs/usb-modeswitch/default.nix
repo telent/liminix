@@ -1,9 +1,10 @@
 # usb modeswitch without udev, tcl, coreutils, bash dependencies
-{ stdenv
-, lib
-, fetchurl
-, pkg-config
-, libusb1
+{
+  stdenv,
+  lib,
+  fetchurl,
+  pkg-config,
+  libusb1,
 }:
 let
   pname = "usb-modeswitch";
@@ -12,7 +13,7 @@ in stdenv.mkDerivation {
   inherit pname version;
 
   src = fetchurl {
-    url    = "http://www.draisberghof.de/usb_modeswitch/${pname}-${version}.tar.bz2";
+    url = "http://www.draisberghof.de/usb_modeswitch/${pname}-${version}.tar.bz2";
     sha256 = "18wbbxc5cfsmikba0msdvd5qlaga27b32nhrzicyd9mdddp265f2";
   };
 
@@ -34,6 +35,6 @@ in stdenv.mkDerivation {
 
   meta = {
     license = lib.licenses.gpl2;
-    maintainers = [];
+    maintainers = [ ];
   };
 }

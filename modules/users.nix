@@ -17,10 +17,16 @@ let
     concatStrings concatStringsSep mapAttrsToList mkOption types;
   inherit (builtins) toString;
   inherit (pkgs.pseudofile) dir;
-  passwd-file  =
-    let lines =  mapAttrsToList (name: u: "${name}:${if u ? passwd  then u.passwd else "!!"}:${toString u.uid}:${toString u.gid}:${u.gecos}:${u.dir}:${u.shell}\n" )
-      config.users;
-    in concatStrings lines;
+  passwd-file =
+    let
+      lines = mapAttrsToList (
+        name: u:
+        "${name}:${
+          if u ? passwd then u.passwd else "!!"
+        }:${toString u.uid}:${toString u.gid}:${u.gecos}:${u.dir}:${u.shell}\n"
+      ) config.users;
+    in
+    concatStrings lines;
   group-file =
     let lines = mapAttrsToList
       (name: {gid, usernames ? []}:

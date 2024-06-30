@@ -21,5 +21,4 @@ in lua.pkgs.buildLuaPackage {
     mkdir -p "$out/lib/lua/${lua.luaversion}"
     cp ${pname}.so "$out/lib/lua/${lua.luaversion}/"
   '';
-
 }

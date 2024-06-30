@@ -1,9 +1,10 @@
 {
-  stdenv
-, nix
-, cpio
-, openssh
-}: stdenv.mkDerivation {
+  stdenv,
+  nix,
+  cpio,
+  openssh,
+}:
+stdenv.mkDerivation {
   name = "min-copy-closure";
   buildInputs = [ ];
   propagatedBuildInputs = [ cpio openssh nix ];

@@ -14,13 +14,16 @@ in {
         run = "exec ${pkgs.devout}/bin/devout /run/devout.sock 4";
       };
       coldplug = oneshot {
-        name ="coldplug";
+        name = "coldplug";
         # would love to know what mdevd-coldplug/udevadm trigger does
         # that this doesn't
         up = ''
           for i in $(find /sys -name uevent); do ( echo change > $i ) ; done
         '';
-        dependencies = [devout mdevd];
+        dependencies = [
+          devout
+          mdevd
+        ];
       };
     };
   };

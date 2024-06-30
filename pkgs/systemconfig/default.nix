@@ -5,12 +5,12 @@
 # they should contain
 
 {
-  writeText
-, writeFennelScript
-, lib
-, s6-init-bin
-, closureInfo
-, stdenv
+  writeText,
+  writeFennelScript,
+  lib,
+  s6-init-bin,
+  closureInfo,
+  stdenv,
 }:
 let
   inherit (lib.attrsets) mapAttrsToList;

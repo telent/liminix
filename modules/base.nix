@@ -4,7 +4,7 @@
 
 { lib, pkgs, config, ...}:
 let
-  inherit (lib) mkOption types ;
+  inherit (lib) mkOption types;
   inherit (pkgs.pseudofile) dir symlink;
 
   type_service = pkgs.liminix.lib.types.service;
@@ -36,7 +36,7 @@ in {
       '';
       # internal = true;  # probably a good case to make this internal
     };
-    rootfsType =  mkOption {
+    rootfsType = mkOption {
       default = "squashfs";
       type = types.enum [
         "btrfs"
@@ -46,7 +46,7 @@ in {
         "ubifs"
       ];
     };
-    rootOptions =  mkOption {
+    rootOptions = mkOption {
       type = types.nullOr types.str;
       default = null;
     };
@@ -54,20 +54,29 @@ in {
     boot = {
       commandLine = mkOption {
         type = types.listOf types.nonEmptyStr;
-        default = [];
+        default = [ ];
         description = "Kernel command line";
       };
       commandLineDtbNode = mkOption {
-        type = types.enum [ "bootargs" "bootargs-override" ];
+        type = types.enum [
+          "bootargs"
+          "bootargs-override"
+        ];
         default = "bootargs";
         description = "Kernel command line's devicetree node";
       };
       imageType = mkOption {
-        type = types.enum [ "primary" "secondary" ];
+        type = types.enum [
+          "primary"
+          "secondary"
+        ];
         default = "primary";
       };
       imageFormat = mkOption {
-        type = types.enum ["fit" "uimage"];
+        type = types.enum [
+          "fit"
+          "uimage"
+        ];
         default = "uimage";
       };
       tftp = {
@@ -83,7 +92,7 @@ in {
         };
         # These names match the uboot environment variables. I reserve
         # the right to change them if I think of better ones.
-        ipaddr =  mkOption {
+        ipaddr = mkOption {
           type = types.str;
           description = ''
             Our IP address to use when creating scripts to

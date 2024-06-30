@@ -1,7 +1,4 @@
-{
-  writeText
-, lib
-}:
+{ writeText, lib }:
 let
   inherit (lib.attrsets) mapAttrsToList;
   visit = prefix: attrset:

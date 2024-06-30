@@ -1,12 +1,12 @@
 {
-  liminix
-, lib
-, targets ? []
-, kernel ? null
-, runCommand
-, pkgsBuildBuild
-, dependencies ? []
-} :
+  liminix,
+  lib,
+  targets ? [ ],
+  kernel ? null,
+  runCommand,
+  pkgsBuildBuild,
+  dependencies ? [ ],
+}:
 let
   inherit (liminix.services) oneshot;
   inherit (lib) concatStringsSep;

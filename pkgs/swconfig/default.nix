@@ -14,8 +14,8 @@ in stdenv.mkDerivation {
   name = "swconfig";
   buildInputs = [ buildPackages.pkg-config ];
   nativeBuildInputs = [ libnl ];
-  CFLAGS="-O2 -Ifrom_kernel -I${libnl.dev}/include/libnl3";
-  LDFLAGS="-L${libnl.out}/lib";
+  CFLAGS = "-O2 -Ifrom_kernel -I${libnl.dev}/include/libnl3";
+  LDFLAGS = "-L${libnl.out}/lib";
 
   patchPhase = ''
     mkdir -p from_kernel/linux

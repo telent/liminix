@@ -1,17 +1,17 @@
 # make out-of-tree modules given a backported kernel source tree
 
 {
-  extraConfig ? {}
-, drivers ? [ ]
-, kernel-backport
-, stdenv
-, writeText
-, klibBuild ? null
-, buildPackages
-, fetchFromGitHub
+  extraConfig ? { },
+  drivers ? [ ],
+  kernel-backport,
+  stdenv,
+  writeText,
+  klibBuild ? null,
+  buildPackages,
+  fetchFromGitHub,
 
-, liminix
-, lib
+  liminix,
+  lib,
 }:
 let
   arch = stdenv.hostPlatform.linuxArch;

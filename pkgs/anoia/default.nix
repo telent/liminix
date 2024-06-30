@@ -1,10 +1,10 @@
 {
-  fennel
-, stdenv
-, linotify
-, lua
-, lualinux
-, cpio
+  fennel,
+  stdenv,
+  linotify,
+  lua,
+  lualinux,
+  cpio,
 }:
 let pname =  "anoia";
 in stdenv.mkDerivation {

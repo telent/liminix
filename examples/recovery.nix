@@ -4,7 +4,7 @@ let
   svc = config.system.service;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs.liminix.services) oneshot target;
-  some-util-linux = pkgs.runCommand "some-util-linux" {} ''
+  some-util-linux = pkgs.runCommand "some-util-linux" { } ''
     mkdir -p $out/bin
     cd ${pkgs.util-linux-small}/bin
     cp fdisk sfdisk mkswap $out/bin
@@ -53,7 +53,7 @@ in rec {
   services.defaultroute4 = svc.network.route.build {
     via = "$(output ${services.dhcpc} router)";
     target = "default";
-    dependencies = [services.dhcpc];
+    dependencies = [ services.dhcpc ];
   };
 
   services.resolvconf = oneshot rec {

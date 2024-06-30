@@ -1,9 +1,10 @@
-{ stdenv
-, cmake
-, zlib
-, libyaml
-, fetchFromGitHub
-} :
+{
+  stdenv,
+  cmake,
+  zlib,
+  libyaml,
+  fetchFromGitHub,
+}:
 stdenv.mkDerivation {
   name = "libubootenv";
   src = fetchFromGitHub {

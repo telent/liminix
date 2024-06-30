@@ -1,29 +1,38 @@
-{  stdenv
- , buildPackages
- , writeText
- , lib
+{
+  stdenv,
+  buildPackages,
+  writeText,
+  lib,
 
- , config
- , src
- , version ? "0"
- , extraPatchPhase ? "echo"
- , targets ? ["vmlinux"]
-} :
+  config,
+  src,
+  version ? "0",
+  extraPatchPhase ? "echo",
+  targets ? [ "vmlinux" ],
+}:
 let
   writeConfig = import ./write-kconfig.nix { inherit lib writeText; };
   kconfigFile = writeConfig "kconfig" config;
   arch = stdenv.hostPlatform.linuxArch;
-  targetNames =  map baseNameOf targets;
-  inherit lib; in
+  targetNames = map baseNameOf targets;
+  inherit lib;
+in
 stdenv.mkDerivation rec {
   name = "kernel";
   inherit src extraPatchPhase;
-  hardeningDisable = ["all"];
-  nativeBuildInputs = [buildPackages.stdenv.cc] ++
-                      (with buildPackages.pkgs; [
-                        rsync bc bison flex pkg-config
-                        openssl ncurses.all perl
-                      ]);
+  hardeningDisable = [ "all" ];
+  nativeBuildInputs =
+    [ buildPackages.stdenv.cc ]
+    ++ (with buildPackages.pkgs; [
+      rsync
+      bc
+      bison
+      flex
+      pkg-config
+      openssl
+      ncurses.all
+      perl
+    ]);
   CC = "${stdenv.cc.bintools.targetPrefix}gcc";
   HOSTCC = with buildPackages.pkgs;
     "gcc -I${openssl}/include -I${ncurses}/include";

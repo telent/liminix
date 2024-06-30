@@ -1,7 +1,7 @@
 {
-  stdenv
-, lua
-, fetchFromSourcehut
+  stdenv,
+  lua,
+  fetchFromSourcehut,
 }:
 let pname =  "fennel";
 in stdenv.mkDerivation {

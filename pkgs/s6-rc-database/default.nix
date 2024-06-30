@@ -2,11 +2,11 @@
 # config.services and calling s6-rc-compile on them
 
 {
-  stdenvNoCC
-, buildPackages
-, closureInfo
-, writeText
-, services ? []
+  stdenvNoCC,
+  buildPackages,
+  closureInfo,
+  writeText,
+  services ? [ ],
 }:
 let closure-info = closureInfo { rootPaths = services; };
 in stdenvNoCC.mkDerivation  {

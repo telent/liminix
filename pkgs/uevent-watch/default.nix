@@ -1,11 +1,12 @@
-{ nellie
-, lualinux
-, writeFennel
-, anoia
-, fennel
-, stdenv
-, fennelrepl
-, s6-rc-up-tree
+{
+  nellie,
+  lualinux,
+  writeFennel,
+  anoia,
+  fennel,
+  stdenv,
+  fennelrepl,
+  s6-rc-up-tree,
 }:
 stdenv.mkDerivation {
   name = "uevent-watch";

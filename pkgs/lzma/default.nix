@@ -1,7 +1,4 @@
-{
-  stdenv
-, fetchurl
-}:
+{ stdenv, fetchurl }:
 stdenv.mkDerivation {
   pname = "lzma";
   version = "4.32.7";

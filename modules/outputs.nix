@@ -1,8 +1,8 @@
 {
-  config
-, pkgs
-, lib
-, ...
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 let
   inherit (lib) mkOption types concatStringsSep;
@@ -22,7 +22,7 @@ in
       # but only part of one.
       kernel = mkOption {
         type = types.package;
-        internal  = true;
+        internal = true;
         description = ''
           kernel
           ******
@@ -42,7 +42,7 @@ in
       };
       dtb = mkOption {
         type = types.package;
-        internal  = true;
+        internal = true;
         description = ''
           dtb
           ***
@@ -52,7 +52,7 @@ in
       };
       uimage = mkOption {
         type = types.package;
-        internal  = true;
+        internal = true;
         description = ''
           uimage
           ******
@@ -68,7 +68,7 @@ in
       };
       manifest = mkOption {
         type = types.package;
-        internal  = true;
+        internal = true;
         description = ''
           Debugging aid. JSON rendition of config.filesystem, on
           which can run "nix-store -q --tree" on it and find

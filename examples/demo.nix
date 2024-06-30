@@ -5,7 +5,7 @@
 # wherever the text "EDIT" appears - please consult the tutorial
 # documentation for details.
 
-{ config, pkgs, ... } :
+{ config, pkgs, ... }:
 let
   inherit (pkgs.liminix.services) bundle oneshot;
   inherit (pkgs) serviceFns;
@@ -49,31 +49,40 @@ in rec {
       country_code = "GB";
       wpa_passphrase = "not a real wifi password";
 
-      hw_mode="g";
+      hw_mode = "g";
       ieee80211n = 1;
       auth_algs = 1; # 1=wpa2, 2=wep, 3=both
-      wpa = 2;       # 1=wpa, 2=wpa2, 3=both
+      wpa = 2; # 1=wpa, 2=wpa2, 3=both
       wpa_key_mgmt = "WPA-PSK";
-      wpa_pairwise = "TKIP CCMP";   # auth for wpa (may not need this?)
-      rsn_pairwise = "CCMP";        # auth for wpa2
+      wpa_pairwise = "TKIP CCMP"; # auth for wpa (may not need this?)
+      rsn_pairwise = "CCMP"; # auth for wpa2
       wmm_enabled = 1;
     };
   };
 
   services.int = svc.network.address.build {
     interface = svc.bridge.primary.build { ifname = "int"; };
-    family = "inet"; address = "${ipv4LocalNet}.1"; prefixLength = 16;
+    family = "inet";
+    address = "${ipv4LocalNet}.1";
+    prefixLength = 16;
   };
 
-  services.bridge =  svc.bridge.members.build {
+  services.bridge = svc.bridge.members.build {
     primary = services.int;
-    members = with config.hardware.networkInterfaces;
-      [ wlan lan ];
+    members = with config.hardware.networkInterfaces; [
+      wlan
+      lan
+    ];
   };
 
   services.ntp = svc.ntp.build {
-    pools = { "pool.ntp.org" = ["iburst"]; };
-    makestep = { threshold = 1.0; limit = 3; };
+    pools = {
+      "pool.ntp.org" = [ "iburst" ];
+    };
+    makestep = {
+      threshold = 1.0;
+      limit = 3;
+    };
   };
 
   services.sshd = svc.ssh.build { };
@@ -157,8 +166,7 @@ in rec {
     interface = services.wan;
   };
 
-  services.firewall = svc.firewall.build {
-  };
+  services.firewall = svc.firewall.build { };
 
   services.packet_forwarding = svc.network.forward.build { };
 
@@ -195,7 +203,5 @@ in rec {
       ];
     };
 
-  defaultProfile.packages = with pkgs; [
-    min-collect-garbage
-  ];
+  defaultProfile.packages = with pkgs; [ min-collect-garbage ];
 }

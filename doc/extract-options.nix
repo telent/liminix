@@ -2,9 +2,8 @@
 let
   conf = eval.config;
   rootDir = builtins.toPath ./..;
-  stripAnyPrefixes = lib.flip (lib.fold lib.removePrefix)
-    ["${rootDir}/"];
-  optToDoc = name: opt : {
+  stripAnyPrefixes = lib.flip (lib.fold lib.removePrefix) [ "${rootDir}/" ];
+  optToDoc = name: opt: {
     inherit name;
     description = opt.description or null;
     default = opt.default or null;
@@ -25,7 +24,6 @@ let
           let x = lib.mapAttrsToList optToDoc sd.parameters; in x;
       }
     else
-      item // { declarations =  map stripAnyPrefixes item.declarations; };
+      item // { declarations = map stripAnyPrefixes item.declarations; };
 in
-builtins.map spliceServiceDefn
-  (pkgs.lib.optionAttrSetToDocList eval.options)
+builtins.map spliceServiceDefn (pkgs.lib.optionAttrSetToDocList eval.options)

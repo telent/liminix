@@ -1,24 +1,27 @@
 {
-  deviceName ? null
-, device ? (import ./devices/${deviceName} )
-, liminix-config ? <liminix-config>
-, nixpkgs ? <nixpkgs>
-, borderVmConf ? ./bordervm.conf.nix
-, imageType ? "primary"
+  deviceName ? null,
+  device ? (import ./devices/${deviceName}),
+  liminix-config ? <liminix-config>,
+  nixpkgs ? <nixpkgs>,
+  borderVmConf ? ./bordervm.conf.nix,
+  imageType ? "primary",
 }:
 
 let
   overlay = import ./overlay.nix;
-  pkgs = import nixpkgs (device.system // {
-    overlays = [overlay];
-    config = {
-      allowUnsupportedSystem = true; # mipsel
-      permittedInsecurePackages = [
-        "python-2.7.18.6"       # kernel backports needs python <3
-        "python-2.7.18.7"
-      ];
-    };
-  });
+  pkgs = import nixpkgs (
+    device.system
+    // {
+      overlays = [ overlay ];
+      config = {
+        allowUnsupportedSystem = true; # mipsel
+        permittedInsecurePackages = [
+          "python-2.7.18.6" # kernel backports needs python <3
+          "python-2.7.18.7"
+        ];
+      };
+    }
+  );
 
   eval = pkgs.lib.evalModules {
     specialArgs = {

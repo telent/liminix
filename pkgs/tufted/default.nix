@@ -1,8 +1,8 @@
 {
-  lua5_3
-, stdenv
-, makeWrapper
-} :
+  lua5_3,
+  stdenv,
+  makeWrapper,
+}:
 let
   lua = lua5_3.withPackages (ps: with ps; [
     luasocket luaposix fennel

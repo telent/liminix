@@ -1,11 +1,12 @@
 {
-  nixpkgs
-, unstable
-, liminix
-, ... }:
+  nixpkgs,
+  unstable,
+  liminix,
+  ...
+}:
 let
-  pkgs = (import nixpkgs {});
-  borderVmConf =  ./bordervm.conf-example.nix;
+  pkgs = (import nixpkgs { });
+  borderVmConf = ./bordervm.conf-example.nix;
   inherit (pkgs.lib.attrsets) genAttrs;
   devices = [
     "gl-ar750"
@@ -26,27 +27,35 @@ let
     }).outputs.default;
   tests = import ./tests/ci.nix;
   jobs =
-    (genAttrs devices for-device) //
-    tests //
-    {
-      buildEnv = (import liminix {
-        inherit nixpkgs borderVmConf;
-        device = import (liminix + "/devices/qemu");
-        liminix-config = vanilla;
-      }).buildEnv;
+    (genAttrs devices for-device)
+    // tests
+    // {
+      buildEnv =
+        (import liminix {
+          inherit nixpkgs borderVmConf;
+          device = import (liminix + "/devices/qemu");
+          liminix-config = vanilla;
+        }).buildEnv;
       doc =
-        let json =
-              (import liminix {
-                inherit nixpkgs borderVmConf;
-                device = import (liminix + "/devices/qemu");
-                liminix-config = {...} : {
+        let
+          json =
+            (import liminix {
+              inherit nixpkgs borderVmConf;
+              device = import (liminix + "/devices/qemu");
+              liminix-config =
+                { ... }:
+                {
                   imports = [ ./modules/all-modules.nix ];
                 };
-              }).outputs.optionsJson;
-        in pkgs.stdenv.mkDerivation {
+            }).outputs.optionsJson;
+        in
+        pkgs.stdenv.mkDerivation {
           name = "liminix-doc";
           nativeBuildInputs = with pkgs; [
-            gnumake sphinx fennel luaPackages.lyaml
+            gnumake
+            sphinx
+            fennel
+            luaPackages.lyaml
           ];
           src = ./.;
           buildPhase = ''

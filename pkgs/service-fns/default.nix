@@ -1,4 +1,4 @@
-{writeText}:
+{ writeText }:
 writeText "service-fns.sh" ''
   output() { cat $1/.outputs/$2; }
   output_word() {

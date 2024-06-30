@@ -4,7 +4,7 @@ let
   inherit (pkgs) stdenv wireless-regdb;
   regulatory = stdenv.mkDerivation {
     name = "regulatory.db";
-    phases = ["installPhase"];
+    phases = [ "installPhase" ];
     installPhase = ''
       mkdir -p $out
       cp ${wireless-regdb}/lib/firmware/regulatory.db $out/

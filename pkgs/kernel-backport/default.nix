@@ -1,17 +1,18 @@
-{ stdenv
-, git
-, python2
-, which
-, fetchgit
-, fetchFromGitHub
-, coccinelle
+{
+  stdenv,
+  git,
+  python2,
+  which,
+  fetchgit,
+  fetchFromGitHub,
+  coccinelle,
 }:
 let
   donorTree = fetchFromGitHub {
     owner = "torvalds";
     repo = "linux";
-    rev = 	"e2c1a934fd8e4288e7a32f4088ceaccf469eb74c"; # 5.15.94
-    hash= "sha256-Jg3EgL86CseuzYMAlUG3CDWPCo8glMSIZs10l7EuhWI=";
+    rev = "e2c1a934fd8e4288e7a32f4088ceaccf469eb74c"; # 5.15.94
+    hash = "sha256-Jg3EgL86CseuzYMAlUG3CDWPCo8glMSIZs10l7EuhWI=";
   };
   backports = stdenv.mkDerivation {
     name = "linux-backports";

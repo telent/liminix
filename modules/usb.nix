@@ -24,8 +24,6 @@
       EXT4_FS = "y";
       EXT4_USE_FOR_EXT2 = "y";
       FS_ENCRYPTION = "y";
-
-
     };
   };
 }

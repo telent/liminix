@@ -1,14 +1,14 @@
 {
-  busybox
-, pkgsBuildBuild
-, runCommand
-, cpio
-, writeReferencesToFile
-, writeScript
-} :
+  busybox,
+  pkgsBuildBuild,
+  runCommand,
+  cpio,
+  writeReferencesToFile,
+  writeScript,
+}:
 let
   inherit (pkgsBuildBuild) gen_init_cpio;
-  script =  writeScript "init" ''
+  script = writeScript "init" ''
     #!/bin/sh
     exec >/dev/console
     echo Running in initramfs

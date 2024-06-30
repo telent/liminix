@@ -1,7 +1,7 @@
 {
-  buildGoModule
-, fetchFromGitHub
-, ppp
+  buildGoModule,
+  fetchFromGitHub,
+  ppp,
 }:
 
 buildGoModule rec {
@@ -12,7 +12,7 @@ buildGoModule rec {
     repo = "go-l2tp";
     owner = "katalix";
     rev = "570d763";
-    hash= "sha256-R8ImKPkPBC+FvzKOBEZ3VxQ12dEjtfRa7AH94xMsAGA=";
+    hash = "sha256-R8ImKPkPBC+FvzKOBEZ3VxQ12dEjtfRa7AH94xMsAGA=";
   };
 
   patchPhase = ''
@@ -23,5 +23,4 @@ buildGoModule rec {
 
   doCheck = false;
   vendorHash = "sha256-hOkhJhToN/VJwjQmnQJSPGz26/YDR2Ch+1yeW51OF+U=";
-
 }

@@ -6,7 +6,7 @@ in {
   options.bordervm = {
     keys = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
     };
     l2tp = {
       host = mkOption {
@@ -55,18 +55,17 @@ in {
     <nixpkgs/nixos/modules/virtualisation/qemu-vm.nix>
   ];
   config = {
-    boot.kernelParams = [
-      "loglevel=9"
-    ];
+    boot.kernelParams = [ "loglevel=9" ];
     systemd.services.pppoe =
-      let conf = pkgs.writeText "kpppoed.toml"
-        ''
-      interface_name = "eth1"
-      services = [ "myservice" ]
-      lns_ipaddr = "${cfg.l2tp.host}:${builtins.toString cfg.l2tp.port}"
-      ac_name = "kpppoed-1.0"
-    '';
-      in  {
+      let
+        conf = pkgs.writeText "kpppoed.toml" ''
+          interface_name = "eth1"
+          services = [ "myservice" ]
+          lns_ipaddr = "${cfg.l2tp.host}:${builtins.toString cfg.l2tp.port}"
+          ac_name = "kpppoed-1.0"
+        '';
+      in
+      {
         wantedBy = [ "multi-user.target" ];
         after = [ "network-online.target" ];
         serviceConfig = {
@@ -83,7 +82,7 @@ in {
     services.dnsmasq = {
       enable = true;
       resolveLocalQueries = false;
-      settings =  {
+      settings = {
         # domain-needed = true;
         dhcp-range = [ "10.0.0.10,10.0.0.240" ];
         interface = "eth1";
@@ -92,17 +91,17 @@ in {
 
     systemd.services.sshd.wantedBy = pkgs.lib.mkForce [ "multi-user.target" ];
 
-
     virtualisation = {
       qemu = {
-        networkingOptions = [];
-        options = [] ++
-          optional cfg.ethernet.pci.enable
-            "-device vfio-pci,host=${cfg.ethernet.pci.id}" ++
-          optionals cfg.ethernet.usb.enable [
+        networkingOptions = [ ];
+        options =
+          [ ]
+          ++ optional cfg.ethernet.pci.enable "-device vfio-pci,host=${cfg.ethernet.pci.id}"
+          ++ optionals cfg.ethernet.usb.enable [
             "-device usb-ehci,id=ehci"
             "-device usb-host,bus=ehci.0,vendorid=${cfg.ethernet.usb.vendor},productid=${cfg.ethernet.usb.product}"
-          ] ++ [
+          ]
+          ++ [
             "-nographic"
             "-serial mon:stdio"
           ];
@@ -136,13 +135,13 @@ in {
       nat = {
         enable = true;
         internalInterfaces = [ "eth1" ];
-        externalInterface ="eth0";
+        externalInterface = "eth0";
       };
     };
     users.users.liminix = {
       isNormalUser = true;
       uid = 1000;
-      extraGroups = [ "wheel"];
+      extraGroups = [ "wheel" ];
       openssh.authorizedKeys.keys = cfg.keys;
     };
     services.getty.autologinUser = "liminix";

@@ -1,9 +1,9 @@
 {
-  stdenv
-, python3
-, qemu
-, fetchzip
-, writeShellApplication
+  stdenv,
+  python3,
+  qemu,
+  fetchzip,
+  writeShellApplication,
 }:
 let
   chr-image = fetchzip {
@@ -14,7 +14,7 @@ let
   ros-exec-script = stdenv.mkDerivation {
     name = "ros-exec-script";
     src = ./.;
-    buildInputs = [python3];
+    buildInputs = [ python3 ];
     buildPhase = ":";
     installPhase = ''
       mkdir -p $out/bin

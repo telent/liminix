@@ -1,7 +1,4 @@
-{
-  stdenv
-, openwrt
-}:
+{ stdenv, openwrt }:
 stdenv.mkDerivation {
   name = "zyxel-bootconfig";
   inherit (openwrt) src;
