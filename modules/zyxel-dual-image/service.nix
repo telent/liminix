@@ -3,7 +3,7 @@
 , lib
 , zyxel-bootconfig
 }:
-{ ensureActiveImage, bootConfigurationMtdPartition, kernelCommandLineSource }:
+{ ensureActiveImage, primaryMtdPartition, secondaryMtdPartition, bootConfigurationMtdPartition, kernelCommandLineSource }:
 let
   inherit (liminix.services) oneshot;
   activeImageIndex = if ensureActiveImage == "primary" then 0 else 1;
