@@ -10,7 +10,7 @@
 stdenv.mkDerivation {
   name = "uevent-watch";
   src = ./.;
-  nativeBuildInputs = [ fennelrepl makeWrapper ];
+  nativeBuildInputs = [ fennelrepl ];
   propagatedBuildInputs = [ s6-rc-up-tree ];
   installPhase = ''
     mkdir -p $out/bin
