@@ -272,9 +272,16 @@ extraPkgs // {
     '';
   };
 
-  libusb1 = prev.libusb1.override {
-    enableUdev = final.stdenv.buildPlatform == final.stdenv.hostPlatform;
-  };
+  libusb1 =
+    let u = prev.libusb1.overrideAttrs(o: {
+          # don't use gcc libatomic because it vastly increases the
+          # closure size
+          preConfigure = "sed -i.bak /__atomic_fetch_add_4/c\: configure.ac";
+        });
+    in u.override {
+      enableUdev = final.stdenv.buildPlatform == final.stdenv.hostPlatform;
+      withDocs = false;
+    };
 
   util-linux-small = prev.util-linux.override {
     ncursesSupport = false;
