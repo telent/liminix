@@ -95,6 +95,7 @@ in {
   run-liminix-vm = callPackage ./run-liminix-vm { };
   s6-init-bin = callPackage ./s6-init-bin { };
   s6-rc-database = callPackage ./s6-rc-database { };
+  s6-rc-round-robin = callPackage ./s6-rc-round-robin { };
   s6-rc-up-tree = callPackage ./s6-rc-up-tree { };
 
   # schnapps is written by Turris and provides a high-level interface

@@ -9,6 +9,8 @@
 { interface, ppp-options }:
 let
   inherit (liminix.services) longrun;
+  lcp-echo-interval = 4;
+  lcp-echo-failure = 3;
   name = "${interface.name}.pppoe";
   ip-up = writeAshScript "ip-up" {} ''
     . ${serviceFns} 
@@ -37,15 +39,19 @@ let
     "ipparam" name
     "nodetach"
     "usepeerdns"
+    "lcp-echo-interval" (builtins.toString lcp-echo-interval)
+    "lcp-echo-failure" (builtins.toString lcp-echo-failure)
     "logfd" "2"
   ];
 in
 longrun {
   inherit name;
   run = ''
-    . ${serviceFns} 
-    ${ppp}/bin/pppd pty "${pppoe}/bin/pppoe -I $(output ${interface} ifname)" ${lib.concatStringsSep " " ppp-options'}
+    . ${serviceFns}
+    echo Starting pppoe, pppd pid is $$
+    exec ${ppp}/bin/pppd pty "${pppoe}/bin/pppoe -T ${builtins.toString (4 * lcp-echo-interval)}  -I $(output ${interface} ifname)" ${lib.concatStringsSep " " ppp-options'}
   '';
   notification-fd = 10;
+  timeout-up = (10 + lcp-echo-failure * lcp-echo-interval) * 1000;
   dependencies = [ interface ];
 }

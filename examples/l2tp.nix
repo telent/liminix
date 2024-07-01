@@ -26,7 +26,7 @@
 
   lns = { hostname = "l2tp.aaisp.net.uk"; address = "194.4.172.12"; };
 
-  inherit (pkgs.liminix.services) oneshot target;
+  inherit (pkgs.liminix.services) oneshot longrun target;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs) serviceFns;
   svc = config.system.service;
@@ -57,21 +57,77 @@ in rec {
     authType = "chap";
   };
 
-  services.dhcpc = svc.network.dhcp.client.build {
-    interface = config.services.wwan;
-    dependencies = [ config.services.hostname ];
-  };
+  services.wan =
+    let
+      z = final : prev: {
+        controller = longrun rec {
+          name = "wan-switcher";
+          run = ''
+            (in_outputs ${name}
+             ${pkgs.s6-rc-round-robin}/bin/s6-rc-round-robin \
+               -p ${final.proxy.name} \
+               ${lib.concatStringsSep " "
+                 (builtins.map (f: f.name) [final.pppoe final.l2tp])}
+            )
+          '';
+        };
+        pppoe = (svc.pppoe.build {
+          interface = config.hardware.networkInterfaces.wan;
+
+          ppp-options = [
+            "debug" "+ipv6" "noauth"
+            "name" rsecrets.l2tp.name
+            "password" rsecrets.l2tp.password
+          ];
+        }).overrideAttrs(o: { inherit (final) controller; });
+
+        l2tp =
+          let
+            check-address = oneshot rec {
+              name = "check-lns-address";
+              up = "grep -Fx ${ lns.address} $(output_path ${services.lns-address} addresses)";
+              dependencies = [ services.lns-address ];
+            };
+            route = svc.network.route.build {
+              via = "$(output ${services.dhcpc} router)";
+              target = lns.address;
+              dependencies = [services.dhcpc check-address];
+            };
+          in (svc.l2tp.build {
+            lns = lns.address;
+            ppp-options = [
+              "debug" "+ipv6" "noauth"
+              "name" rsecrets.l2tp.name
+              "connect-delay" "5000"
+              "password" rsecrets.l2tp.password
+            ];
+            dependencies = [config.services.lns-address route check-address];
+          }).overrideAttrs(o: { inherit (final) controller; });
+        proxy = oneshot rec {
+          name = "wan-proxy";
+          inherit (final) controller;
+          buildInputs = with final; [ pppoe l2tp];
+          up = ''
+            echo start proxy ${name}
+            set -x
+            (in_outputs ${name}
+             cp -rv $(output_path ${final.controller} active)/* .
+            )
+          '';
+        };
+      };
+    in (lib.fix (lib.extends z (prev : { }))).proxy;
 
   services.sshd = svc.ssh.build { };
 
   services.resolvconf = oneshot rec {
-    dependencies = [ services.l2tp ];
+    dependencies = [ services.wan ];
     name = "resolvconf";
     up = ''
       . ${serviceFns}
        ( in_outputs ${name}
         for i in ns1 ns2 ; do
-          ns=$(output ${services.l2tp} $i)
+          ns=$(output ${services.wan} $i)
           echo "nameserver $ns" >> resolv.conf
         done
        )
@@ -81,6 +137,11 @@ in rec {
     etc = dir {
       "resolv.conf" = symlink "${services.resolvconf}/.outputs/resolv.conf";
     };
+  };
+
+  services.dhcpc = svc.network.dhcp.client.build {
+    interface = config.services.wwan;
+    dependencies = [ config.services.hostname ];
   };
 
   services.lns-address = let
@@ -101,35 +162,10 @@ in rec {
     '';
   };
 
-  services.l2tp =
-    let
-      check-address = oneshot rec {
-        name = "check-lns-address";
-        up = ''
-          grep -Fx ${lns.address} $(output_path ${services.lns-address} addresses)
-        '';
-        dependencies = [ services.lns-address ];
-      };
-      route = svc.network.route.build {
-        via = "$(output ${services.dhcpc} router)";
-        target = lns.address;
-        dependencies = [services.dhcpc check-address];
-      };
-    in svc.l2tp.build {
-      lns = lns.address;
-      ppp-options = [
-        "debug" "+ipv6" "noauth"
-        "name" rsecrets.l2tp.name
-        "connect-delay" "5000"
-        "password" rsecrets.l2tp.password
-      ];
-      dependencies = [config.services.lns-address route check-address];
-  };
-
   services.defaultroute4 = svc.network.route.build {
-    via = "$(output ${services.l2tp} peer-address)";
+    via = "$(output ${services.wan} peer-address)";
     target = "default";
-    dependencies = [services.l2tp];
+    dependencies = [services.wan];
   };
 
 #  defaultProfile.packages = [ pkgs.go-l2tp ];

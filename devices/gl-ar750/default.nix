@@ -126,11 +126,13 @@
           in {
             lan = link.build {
               ifname = "lan";
-              devpath = "/devices/platform/ahb/19000000.eth";
+              #              devpath = "/devices/platform/ahb/19000000.eth";
+              devpath = "/devices/platform/ahb/1a000000.eth";
             };
             wan = link.build {
               ifname = "wan";
-              devpath = "/devices/platform/ahb/1a000000.eth";
+              devpath = "/devices/platform/ahb/19000000.eth";
+              # devpath = "/devices/platform/ahb/1a000000.eth";
             };
             wlan = link.build {
               ifname = "wlan0";

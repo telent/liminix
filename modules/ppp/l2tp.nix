@@ -44,7 +44,8 @@ let
     require authentication = no
     pppoptfile = ${writeText "ppp-options" ppp-options'}
     autodial = yes
-    redial = yes
+    redial = no
+    max redials = 1
   '';
   control = "/run/xl2tpd/control-${name}";
 in
@@ -56,4 +57,5 @@ longrun {
     exec ${xl2tpd}/bin/xl2tpd -D -p /run/xl2tpd/${name}.pid -c ${conf} -C ${control} 
   '';
   notification-fd = 10;
+  timeout-up = 40 * 1000;
 }
