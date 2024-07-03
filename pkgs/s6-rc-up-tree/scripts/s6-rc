@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+
+echo s6-rc $@
+if [ "$1" = "-da" ]; then
+    if [ "$2" = "list" ]; then
+	echo wattle # controlled
+	echo wombat # controlled
+	echo turmeric # uncontrolled
+    fi
+fi
+if [ "$1" = "-u" ]; then
+    if [ "$2" = "change" ]; then
+	echo  "$3" >> $TEST_LOG
+    fi
+fi

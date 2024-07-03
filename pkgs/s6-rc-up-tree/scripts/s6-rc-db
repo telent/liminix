@@ -1,0 +1,31 @@
+#!/usr/bin/env sh
+
+reverse_deps(){
+    echo $1
+    case "$1" in
+	thyme)
+	    echo rosemary
+	    ;;
+	enables-wan)
+	    echo wattle # controlled
+	    ;;
+    esac
+}
+
+deps(){
+    echo $1
+    case "$1" in
+	rosemary)
+	    echo thyme;;
+	*)
+	    ;;
+    esac
+}
+
+if test "$1" = "-d" && test "$2" = "all-dependencies"; then
+    shift; shift;
+    reverse_deps $@
+elif test "$1" = "all-dependencies"; then
+    shift;
+    deps $@
+fi

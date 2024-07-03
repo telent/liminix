@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+cat << DEPS
+one
+two
+three
+four
+DEPS
