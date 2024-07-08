@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 
 echo s6-rc $@
+[ "$1" = "-b" ] && shift
+
 if [ "$1" = "-da" ]; then
     if [ "$2" = "list" ]; then
 	echo wattle # controlled

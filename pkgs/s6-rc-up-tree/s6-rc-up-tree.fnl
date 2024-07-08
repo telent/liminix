@@ -28,7 +28,7 @@
 
 (fn stopped-controlled-services [dir]
   (let [controlled (controlled-services dir)]
-    (with-popen [h (.. "s6-rc -da list")]
+    (with-popen [h (.. "s6-rc -b -da list")]
       (collect [s (h:lines)]
         (if (. controlled s) (values s s))))))
 
@@ -39,9 +39,8 @@
   (popen (.. "s6-rc-db -d all-dependencies " service)))
 
 (fn start-service [name]
-  (case (os.execute (.. "s6-rc -u change " name))
-    (ok) nil
-    (nil err) (fail err)))
+  (with-popen [h (.. "s6-rc -b -u change " name)]
+    (print (h:read "*a"))))
 
 (fn run [dir]
   (let [service (. arg 1)
