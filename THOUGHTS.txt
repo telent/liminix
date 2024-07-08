@@ -5161,3 +5161,215 @@ for s in $(s6-rc-db -d all-dependencies $service); do
     esac
   done
 done
+
+Sun Jun 16 23:13:53 BST 2024
+
+what we are trying to do is set up an l2tp by hostname
+
+1) this means looking up the hostname in the dns
+2) this means having a route to the dns server
+3) this means parsing the space-separated list of dns servers
+  provided by dhcp
+
+we could write the servers each into their own file, but that
+helps less than you'd think unless we give those files predictable
+names
+
+Thu Jun 20 10:16:52 BST 2024
+
+now we have l2tp-over-wwan, we need to do the failover mechanism
+
+- can't have both l2tp and pppoe running at once (at least for aaisp)
+  because same creds used for both and starting l2tp will cause them
+  to route all traffic to the l2tp instead of the FTTx
+
+- we could have the wwan stick permanently configured and ready to go,
+  as long as we're not actvely using it unless the main connection is
+  b0rked
+
+- can we have the same odhcp stuff running and point it to either?
+  maybe renaming the wan interface would be an easy-ish way to do this
+
+we need some kind of health check on the main connection that will
+bring up the backup if e.g. packet loss over x%. Or is lcp echo good
+enough here? for multipath to the same backhaul, if some weird routing
+cockup makes google unavailable from the main connection it will most
+likely also be unavailable from the backup, so lcp echo is arguably better
+
+
+on a side note, use of shell functions to get the output from another
+service is a bit icky
+
+Fri Jun 21 21:05:21 BST 2024
+
+We can have a controller with two controlled services, which runs the
+second one when the first one isn't working.
+
+how do we connect the dependent services (dhcp pd, defaultroute, anything
+else dependent on wan) to the correct upstream?
+
+we can't use bundles because bundles just flatten to atomic services, there's
+no either/or there
+
+controller
+  - main service
+  - backup service
+  - proxy service
+
+The proxy service is running when one of the main or backup services is
+up.  It provides all the outputs of whichever backend service is active
+
+https://skarnet.org/software/s6/s6-svwait.html
+
+proxy could use "s6-svwait -U -o main backup" to wait for one of the two
+backend services, provded that both are longruns
+
+so in the controller we start main-service, and if/when that fails start
+backup-service. we run proxy-service if any of the backend services is
+running, and use its outputs to indicate which.
+
+the proxy could just symlink to the backing service outputs directory,
+or it could copy and translate if the main and backup services have
+different outputs, so that it presents a common interface. I'm not
+sure proxy is the best name but I haven't thought of a better.
+
+we can do a manual switch back to main-service by restarting the
+controller.  we could do an automatic switch by adding logic to the
+controller to make it restart itself.
+
+perhaps the controller has an output that indicates which backend is
+active, then the proxy just needs to look at that to figure which one to
+use.
+
+while true; do
+  if s6-rc -u change $primary; then # will wait until succeeded, or exit 1 if timeout
+    ln -sf $primary outputs/active
+    s6-rc -u change $proxy
+  elif s6-rc -u change $secondary;  then
+    ln -sf $secondary outputs/active
+    s6-rc -u change $proxy
+  else
+    rm outputs/active
+    s6-rc -d change $proxy
+  fi
+  # wait for the backend to die (down cleanup will
+  # remove outputs directory)
+  while test -d outputs/active/.outputs
+    inotifywait outputs/active/.outputs
+  fi
+  rm outputs/active
+  s6-rc -d change $proxy
+end
+
+this script will when when primary dies, attempt to start primary: if
+it doesn't come up, start secondary
+
+if the primary comes up and then goes down later, we'll start it
+again - which isn't what we want. When the primary dies, we
+want to try the secondary next
+
+backends="primary secondary tertiary etc"
+rest=$backends
+while true ; do
+  first="${rest%% *}"
+  rest="${backends#* }"
+  if test -n "$first"; then
+    if s6-rc -u change $first; then
+      ln -sf $first outputs/active
+      s6-rc -u change $proxy
+
+      while test -d outputs/active/.outputs
+	inotifywait outputs/active/.outputs
+      fi
+    fi
+    rm outputs/active
+    s6-rc -d change $proxy
+  else
+    rest=$backends
+  fi
+done
+
+in this version when the secondary dies then we try the third backend
+(round-robin). are there circumstances where we'd rather retry the primary?
+Presumably there are circumstances where we would _not_ rather
+retry the primary, otherwise why are we even providing a tertiary?
+If we could answer that question then we'd know.
+
+
+Mon Jun 24 21:22:34 BST 2024
+
+the controller needs to know the names of its backends, which is ugly
+if they're computed names because we can't define the services themselves
+first without their references to the controller
+
+mutual recursion ... maybe it's time to understand how this fixpoint
+thing works
+
+Wed Jun 26 22:16:25 BST 2024
+
+s6 will restart the pppoe service when it dies, and keep doing this
+indefinitely - unless the ./finish script returns 125. Note that this
+is only true for longruns, but it's not as though oneshots can die
+anyway as there's no process to fail.
+
+Sat Jun 29 21:43:10 BST 2024
+
+> s6-supervise says it restarts the supervised process when it exits
+  "unless told not to"; however s6-rc talks about "failed
+  transitions": if a s6-rc service doesn't signal readiness before
+  timeout-up expires, it is stopped and won't be restarted.  I *think*
+  the behaviour I am observing is that ./run may be invoked several
+  times if it dies without ever signalling readiness, and then it's
+  killed when the timeout is exceeded
+
+
+... so ... that's OK, probably. pppoe will stop running after n
+lcp-echoes time out
+
+----
+
+inotifywait apparently requires c++ and libgcc and transitively the
+kitchen sink, which is a bit silly as we have linotify in lua. So
+we should replace the failover scripty thing with a lua program
+
+(table.concat rdepends ", ")
+
+
+Fri Jul  5 21:21:18 BST 2024
+
+
+1970-01-01 00:01:00.797696621 wan-switcher      blocks (        modem-modeswitch, modem-atz, wan.link.pppoe, 194.4.172.12.l2tp, wan-proxy     )       rdepends (      194.4.172.12.l2tp       )       start ( 194.4.172.12.l2tp       )
+
+
+why is it starting l2tp when it should depend on having a route to the
+l2tp server
+
+Sat Jul  6 14:24:26 BST 2024
+
+The logic for up-tree is not correct, as it assumes that the
+requested service is itself ready to start (so excludes it from
+the blocked list). If the requested service is dependent on
+some other block, it should not be started.
+
+[ I am confused. Isn't this what happens already? ]
+
+
+@40000000000000441b51b24c wan-switcher  blocks (        modem-atz, modem-modeswitch, 194.4.172.12.l2tp, wan.link.pppoe, wan-proxy     )       rdepends (      194.4.172.12.l2tp       )       start ( 194.4.172.12.l2tp       )
+
+
+# s6-rc-db all-dependencies  194.4.172.12.l2tp
+route-05029a9e8e2c-ee8d76f34e9c
+hostname
+modem-atz
+modem-modeswitch
+wwan0.link
+check-lns-address
+resolve-l2tp-server
+controlled
+route-07d8f171cb5a-ee8d76f34e9c
+wwan0.link.dhcpc
+wwan0.link.dhcpc-log
+194.4.172.12.l2tp-log
+194.4.172.12.l2tp
+s6rc-fdholder
+s6rc-oneshot-runner
