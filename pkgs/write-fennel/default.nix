@@ -28,6 +28,7 @@ stdenv.mkDerivation {
      echo "package.path = ${lib.strings.escapeShellArg (builtins.concatStringsSep "" luapath)} .. package.path"
      echo "package.cpath = ${lib.strings.escapeShellArg (builtins.concatStringsSep "" luacpath)} .. package.cpath"
      echo "local ok, stdlib = pcall(require,'posix.stdlib'); if ok then stdlib.setenv('PATH',${lib.escapeShellArg (lib.makeBinPath packages)} .. \":\" .. os.getenv('PATH')) end"
+     echo "local ok, ll = pcall(require,'lualinux'); if ok then ll.setenv('PATH',${lib.escapeShellArg (lib.makeBinPath packages)} .. \":\" .. os.getenv('PATH')) end"
      fennel ${if correlate then "--correlate" else ""} --compile ${source}
     ) >  ${name}.lua
   '';
