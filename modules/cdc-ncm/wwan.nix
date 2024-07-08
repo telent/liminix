@@ -41,7 +41,10 @@ let
   };
   atz = oneshot rec {
     name = "modem-atz";
-    dependencies = [ modeswitch ];
+    # atz does not depend on modeswitch because modeswitch service
+    # is only running when the stick is in the wrong mode
+    dependencies = [ modeswitch.controller ];
+    buildInputs = [ modeswitch ];
     controller = (svc.uevent-rule.build {
       serviceName = name;
       terms = {
