@@ -44,8 +44,9 @@ let
     require authentication = no
     pppoptfile = ${writeText "ppp-options" ppp-options'}
     autodial = yes
-    redial = no
-    max redials = 1
+    redial = yes
+    redial timeout = 1
+    max redials = 2 # this gives 1 actual retry, as xl2tpd can't count
   '';
   control = "/run/xl2tpd/control-${name}";
 in

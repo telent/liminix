@@ -1,0 +1,55 @@
+diff --git a/xl2tpd.c b/xl2tpd.c
+index 791d5a4..1382b68 100644
+--- a/xl2tpd.c
++++ b/xl2tpd.c
+@@ -814,6 +814,33 @@ static struct call *lac_call (int tid, struct lac *lac, struct lns *lns)
+     return NULL;
+ }
+ 
++void terminate_if_no_active(void * _unused)
++{
++    l2tp_log (LOG_WARNING, "%s : is anything still happening?\n", __FUNCTION__);
++
++    struct lac *lac = (struct lac *) laclist;
++    while(lac) {
++	l2tp_log (LOG_INFO, "%s : lac %s active %s\n", __FUNCTION__,
++		  lac->entname, (lac->active  ? "yes" : "no"));
++	if(lac->active)
++	    return;
++	lac = lac->next;
++    }
++
++    struct lns *lns = (struct lns *) lnslist;
++    while(lns) {
++	l2tp_log (LOG_INFO, "%s : lns %s active %s\n", __FUNCTION__,
++		  lns->entname, (lns->active  ? "yes" : "no"));
++	if(lns->active)
++	    return;
++	lns = lns->next;
++    }
++
++    l2tp_log (LOG_WARNING, "%s : apparently nothing\n", __FUNCTION__);
++
++    death_handler(SIGTERM);
++}
++
+ void magic_lac_dial (void *data)
+ {
+     struct lac *lac;
+@@ -832,7 +859,15 @@ void magic_lac_dial (void *data)
+     lac->rtries++;
+     if (lac->rmax && (lac->rtries > lac->rmax))
+     {
+-        l2tp_log (LOG_INFO, "%s: maximum retries exceeded.\n", __FUNCTION__);
++        struct timeval tv;
++
++        l2tp_log (LOG_INFO, "%s: maximum retries exceeded %d/%d.\n",
++		  __FUNCTION__, lac->rtries , lac->rmax);
++	lac->active = 0;
++        tv.tv_sec = 0;
++        tv.tv_usec = 100;
++	schedule (tv, &terminate_if_no_active, NULL);
++
+         return;
+     }
+     if (!lac->t)

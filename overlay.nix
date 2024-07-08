@@ -291,4 +291,8 @@ extraPkgs // {
     translateManpages = false;
     capabilitiesSupport = false;
   };
+
+  xl2tpd = prev.xl2tpd.overrideAttrs(o: {
+    patches = [ ./pkgs/xl2tpd-exit-on-close.patch ];
+  });
 }
