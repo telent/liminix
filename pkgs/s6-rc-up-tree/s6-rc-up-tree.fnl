@@ -1,5 +1,4 @@
 (local { : opendir : readdir } (require :lualinux))
-(local { : view } (require :fennel))
 
 (fn fail [err]
   (print "ERROR" err)
@@ -22,9 +21,6 @@
         (if (not (string.match filename "^%."))
             (values filename filename)))
     (nil err) (fail (.. "can't open " dir " :" err))))
-
-(fn stopped-services []
-  (popen (.. "s6-rc -da list")))
 
 (fn stopped-controlled-services [dir]
   (let [controlled (controlled-services dir)]
