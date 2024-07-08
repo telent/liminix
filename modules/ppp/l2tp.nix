@@ -59,6 +59,7 @@ longrun {
   run = ''
     mkdir -p /run/xl2tpd
     touch ${control}
+    in_outputs $name
     exec ${xl2tpd}/bin/xl2tpd -D -p /run/xl2tpd/${name}.pid -c ${conf} -C ${control} 
   '';
   notification-fd = 10;
