@@ -44,7 +44,8 @@ let
     require authentication = no
     pppoptfile = ${writeText "ppp-options" ppp-options'}
     autodial = yes
-    redial = yes
+    redial = no
+    max redials = 1
   '';
   control = "/run/xl2tpd/control-${name}";
 in
