@@ -8,6 +8,8 @@
 { lns, ppp-options }:
 let
   inherit (liminix.services) longrun;
+  lcp-echo-interval = 4;
+  lcp-echo-failure = 3;
   name = "${lns}.l2tp";
   ip-up = writeAshScript "ip-up" {} ''
     . ${serviceFns} 
@@ -36,6 +38,8 @@ let
     "ipparam" name
     "nodetach"
     "usepeerdns"
+    "lcp-echo-interval" (builtins.toString lcp-echo-interval)
+    "lcp-echo-failure" (builtins.toString lcp-echo-failure)
     "logfd" "2"
   ];
   conf = writeText "xl2tpd.conf" ''
