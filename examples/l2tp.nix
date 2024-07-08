@@ -138,4 +138,9 @@ in rec {
     passwd = lib.mkForce secrets.root.passwd;
     openssh.authorizedKeys.keys = secrets.root.keys;
   };
+
+  programs.busybox.options = {
+    FEATURE_FANCY_TAIL = "y";
+  };
+
 }
