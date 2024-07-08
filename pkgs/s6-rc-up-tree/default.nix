@@ -46,9 +46,19 @@ stdenv.mkDerivation {
 
     # started controlled rdepends are running, so starting them is harmless
 
-    # descendants which depend on a _different_ controlled service, which is down, don't start
+    # descendants which depend on a _different_ controlled service,
+    # which is down, don't start:
+    # Given:
+    #  - modeswitch is controlled
+    #  - atz is controlled
+    #  - atz => modeswitch
+    #  - ifconfig => atz
+    # Then: if atz is down, ifconfig should not start when modeswitch is started
+    fennelrepl ./test.fnl ${./test-services} modeswitch
+    expect "modeswitch"
 
     # descendants which depend on a _different_ controlled service, which is up, do start
-
+    ATZ=up fennelrepl ./test.fnl ${./test-services} modeswitch
+    expect "modeswitch atz ifconfig"
   '';
 }

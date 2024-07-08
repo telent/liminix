@@ -9,6 +9,12 @@ reverse_deps(){
 	enables-wan)
 	    echo wattle # controlled
 	    ;;
+	modeswitch)
+	    reverse_deps atz
+	    ;;
+	atz)
+	    echo ifconfig
+	    ;;
     esac
 }
 
@@ -17,8 +23,12 @@ deps(){
     case "$1" in
 	rosemary)
 	    echo thyme;;
-	*)
-	    ;;
+	wattle)
+	    echo enables-wan;;
+	atz)
+	    echo modeswitch;;
+	ifconfig)
+	    deps atz;;
     esac
 }
 

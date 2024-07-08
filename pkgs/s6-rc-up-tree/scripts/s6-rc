@@ -8,6 +8,7 @@ if [ "$1" = "-da" ]; then
 	echo wattle # controlled
 	echo wombat # controlled
 	echo turmeric # uncontrolled
+	test -n "$ATZ" || echo atz # uncontrolled
     fi
 fi
 if [ "$1" = "-u" ]; then

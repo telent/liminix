@@ -38,16 +38,31 @@
   (with-popen [h (.. "s6-rc -b -u change " name)]
     (print (h:read "*a"))))
 
+(fn keys [t]
+  (icollect [_ v (pairs t)] v))
+
 (fn run [dir]
   (let [service (. arg 1)
-        blocks (stopped-controlled-services (or dir "/run/services/controlled"))]
-    (print :service service :blocks (view blocks))
-    (each [_ s (ipairs (reverse-dependencies service))]
-      (print :dep s)
-      (when
-          (accumulate [start true
-                       _ dep (ipairs (dependencies s))]
-            (and start (or (= s service) (not (. blocks dep)))))
-        (start-service s)))))
+        blocks (doto
+                   (stopped-controlled-services (or dir "/run/services/controlled"))
+                 (tset service nil))
+        rdepends (reverse-dependencies service)
+        starts
+        (icollect [_ s (ipairs rdepends)]
+          (when
+              (accumulate [start true
+                           _ dep (ipairs (dependencies s))]
+                (and start (not (. blocks dep))))
+            s))]
+    (print "s6-rc-up-tree"
+           service
+           "blocks (" (table.concat (keys blocks) ", ") ")"
+           ;; "rdepends (" (table.concat rdepends ", ") ")"
+           "start (" (table.concat  starts ", ") ")")
+    (if (> (# starts) 0)
+        (each [_ s (ipairs starts)]
+          (start-service s))
+        (os.exit 1))))
+
 
 { : run }
