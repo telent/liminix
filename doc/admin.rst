@@ -42,7 +42,7 @@ in a particular piece of hardware) so you probably don't want to be
 starting them by hand if the conditions aren't there.
 
 A service may be **up** or **down** (there are no intermediate states
-like "started" or "stopping" or "dying" or "cogitating"). . Some (but
+like "started" or "stopping" or "dying" or "cogitating"). Some (but
 not all) services have "readiness" notifications: the dependents of a
 service with a readiness notification won't be started until the
 service signals (by writing to a nominated file descriptor) that it's
@@ -56,13 +56,14 @@ automatically. Liminix does not automatically set it to **down**.
 
 (If the process providing a service dies without ever notifying
 readiness, Liminix will restart it as many times as it has to until the
-timeout period elapses, and then stop it and mark it down.
+timeout period elapses, and then stop it and mark it down.)
 
 Controlled services
 ===================
 
 **Controlled** services are those which are started/stopped on demand
-by a controller instead of being started at boot time.  For example
+by a **controller** (another service) instead of being started at boot
+time.  For example:
 
 * ``svc.uevent-rule.build`` creates a controlled service which is
   active when a particular hardware device (identified by uevent/sysfs
