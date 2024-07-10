@@ -12,6 +12,9 @@ in {
     kexecboot = mkOption {
       type = types.package;
       description = ''
+        kexecboot
+        *********
+
         Directory containing files needed for kexec booting.
         Can be copied onto the target device using ssh or similar
       '';

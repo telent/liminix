@@ -19,7 +19,7 @@
     ARM targets differ from MIPS in that the kernel format expected
     by QEMU is an "Image" (raw binary file) rather than an ELF
     file, but this is taken care of by :command:`run.sh`. Check the
-    documentation for the :ref:`QEMU` (MIPS) target for more information.
+    documentation for the :ref:`qemu` target for more information.
 
   '';
 

@@ -7,19 +7,19 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Liminix'
-copyright = '2023, Daniel Barlow'
+copyright = '2023-2024 Daniel Barlow'
 author = 'Daniel Barlow'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autosectionlabel'
+#    'sphinx.ext.autosectionlabel'
 ]
 autosectionlabel_prefix_document = True
 
 templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['*.inc.rst', '_build', 'Thumbs.db', '.DS_Store']
 
 
 

@@ -1,4 +1,4 @@
 Module options
 ##############
 
-.. include:: modules-generated.rst
+.. include:: modules-generated.inc.rst

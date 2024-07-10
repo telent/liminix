@@ -274,6 +274,8 @@ Note that this only copies the package to the device: it doesn't update
 any profile to add it to ``$PATH``
 
 
+.. _rebuilding the system:
+
 Rebuilding the system
 =====================
 

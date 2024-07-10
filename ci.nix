@@ -59,15 +59,15 @@ let
           ];
           src = ./.;
           buildPhase = ''
-            cat ${json} | fennel --correlate doc/parse-options.fnl > doc/modules-generated.rst
-            cat ${json} | fennel --correlate doc/parse-options-outputs.fnl     > doc/outputs-generated.rst
+            cat ${json} | fennel --correlate doc/parse-options.fnl > doc/modules-generated.inc.rst
+            cat ${json} | fennel --correlate doc/parse-options-outputs.fnl     > doc/outputs-generated.inc.rst
             cp ${(import ./doc/hardware.nix)} doc/hardware.rst
             make -C doc html
           '';
           installPhase = ''
             mkdir -p $out/nix-support $out/share/doc/
             cd doc
-            cp *-generated.rst  $out
+            cp *-generated.inc.rst hardware.rst $out
             ln -s ${json} $out/options.json
             cp -a _build/html $out/share/doc/liminix
             echo "file source-dist \"$out/share/doc/liminix\"" \

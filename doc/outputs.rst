@@ -10,4 +10,4 @@ different artefacts, or have different ways to get that artefact
 installed. The options available for a particular device are described in
 the section for that device.
 
-.. include:: outputs-generated.rst
+.. include:: outputs-generated.inc.rst

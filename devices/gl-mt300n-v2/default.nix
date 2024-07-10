@@ -13,7 +13,7 @@
     GL.iNet GL-MT300N-v2
     ********************
 
-    The GL-MT300N-v2 "Mango" is is very similar to the :ref:`MT300A <GL.iNet GL-MT300A>, but is
+    The GL-MT300N-v2 "Mango" is is very similar to the :ref:`gl-mt300a`, but is
     based on the MT7628 chipset instead of MT7620.  It's also marginally cheaper
     and comes in a yellow case not a blue one.  Be sure your device is
     v2 not v1, which is a different animal and has only half as much RAM.

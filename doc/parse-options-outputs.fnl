@@ -16,4 +16,4 @@
 (each [_ option (ipairs (sorted-options (yaml.load (io.read "*a"))))]
   (when (and (output? option) (not option.internal))
     (print (.. ".. _" (string.gsub option.name "%." "-") ":") "\n")
-    (print option.description)))
+    (print option.description "\n")))

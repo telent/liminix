@@ -7,11 +7,15 @@ let
     n:
     let
       d = import ../devices/${n}/default.nix;
+      tag = ".. _${lib.strings.replaceStrings [" "] ["-"] n}:";
       d' = {
-        description = "${n}\n${substring 0 (stringLength n) "********************************"}\n";
+        description = ''
+          ${n}
+          ${substring 0 (stringLength n) "********************************"}
+        '';
       } // d;
     in
-    d'.description
+      "${tag}\n\n${d'.description}"
   ) devices;
 in
 writeText "hwdoc" ''

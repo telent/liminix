@@ -300,7 +300,7 @@ machine, which for a test/demo system might involve a second network
 device in your build system - USB ethernet adapters are cheap - or
 a bit of messing around unplugging cables.)
 
-For more information about :code:`liminix-rebuild`, see the manual section :ref:`admin:Rebuilding the system`.
+For more information about :code:`liminix-rebuild`, see the manual section :ref:`Rebuilding the system`.
 
 
 Final thoughts
