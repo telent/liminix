@@ -4,7 +4,115 @@ System Administration
 Services on a running system
 ****************************
 
-* add an s6-rc cheatsheet here
+Liminix services are built on s6-rc, which is itself layered on s6.
+See configuration / services node for how to specify them.
+
+
+
+.. list-table:: Service management quick reference
+   :widths: 55 45
+   :header-rows: 1
+   
+   * - What
+     - How
+   * - List all running services
+     - ``s6-rc -a list``
+   * - List all services that are **not** running
+     - ``s6-rc -da list``
+   * - List services that ``wombat`` depends on
+     - ``s6-rc-db dependencies wombat``
+   * - ... transitively
+     - ``s6-rc-db all-dependencies wombat``
+   * - List services that depend on service ``wombat``
+     - ``s6-rc-db -d dependencies wombat``
+   * - ... transitively
+     - ``s6-rc-db -d all-dependencies wombat``
+   * - Stop service ``wombat`` and everything depending on it
+     - ``s6-rc -d change wombat``
+   * - Start service ``wombat`` (but not any services depending on it)
+     - ``s6-rc -u change wombat``
+   * - Start service ``wombat`` and all* services depending on it
+     - ``s6-rc-up-tree wombat``
+
+:command:`s6-rc-up-tree` brings up a service and all services that
+depend on it, except for any services that depend on a "controlled"
+service that is not currently running. Controlled services are not
+started at boot time but in response to external events (e.g. plugging
+in a particular piece of hardware) so you probably don't want to be
+starting them by hand if the conditions aren't there.
+
+A service may be **up** or **down** (there are no intermediate states
+like "started" or "stopping" or "dying" or "cogitating"). . Some (but
+not all) services have "readiness" notifications: the dependents of a
+service with a readiness notification won't be started until the
+service signals (by writing to a nominated file descriptor) that it's
+prepared to start work. Most services defined by Liminix also have a
+``timeout-up`` parameter, which means that if a service has readiness
+notifications and doesn't become ready in the allotted time (defaults
+20 seconds) it will be terminated and its state set to **down**.
+
+If the process providing a service dies, it will be restarted
+automatically. Liminix does not automatically set it to **down**.
+
+(If the process providing a service dies without ever notifying
+readiness, Liminix will restart it as many times as it has to until the
+timeout period elapses, and then stop it and mark it down.
+
+Controlled services
+===================
+
+**Controlled** services are those which are started/stopped on demand
+by a controller instead of being started at boot time.  For example
+
+* ``svc.uevent-rule.build`` creates a controlled service which is
+  active when a particular hardware device (identified by uevent/sysfs
+  directory) is present.
+
+* :command:`s6-rc-round-robin` can be used in a service controller to
+  invoke two or more services in turn, running the next one when the
+  process providing the previous one exits. We use this for failover
+  from one network connection to a backup connection, for example.
+
+The Configuration section of the manual describes this in more detail.
+
+Logs
+====
+
+Logs for all services are collated into :file:`/run/uncaught-logs/current`.
+The log file is rotated when it reaches a threshold size, into another
+file in the same directory whose name contains a TAI64 timestamp.
+
+Each log line is prefixed with a TAI64 timestamp and the name of the
+service, if it is a longrun. If it is a oneshot, a timestamp and the
+name of some other service. To convert the timestamp into a
+human-readable format, use :command:`s6-tai64nlocal`.
+
+.. code-block:: console
+
+  # ls -l /run/uncaught-logs/
+  -rw-r--r--    1         0 lock
+  -rw-r--r--    1         0 state
+  -rwxr--r--    1     98059 @4000000000025cb629c311ac.s
+  -rwxr--r--    1     98061 @40000000000260f7309c7fb4.s
+  -rwxr--r--    1     98041 @40000000000265233a6cc0b6.s
+  -rwxr--r--    1     98019 @400000000002695d10c06929.s
+  -rwxr--r--    1     98064 @4000000000026d84189559e0.s
+  -rwxr--r--    1     98055 @40000000000271ce1e031d91.s
+  -rwxr--r--    1     98054 @400000000002760229733626.s
+  -rwxr--r--    1     98104 @4000000000027a2e3b6f4e12.s
+  -rwxr--r--    1     98023 @4000000000027e6f0ed24a6c.s
+  -rw-r--r--    1     42374 current
+  
+  # tail -2 /run/uncaught-logs/current 
+  @40000000000284f130747343 wan.link.pppoe Connect: ppp0 <--> /dev/pts/0
+  @40000000000284f230acc669 wan.link.pppoe sent [LCP ConfReq id=0x1 <asyncmap 0x0> <magic 0x667a9594> <pcomp> <accomp>]
+  # tail -2 /run/uncaught-logs/current  | s6-tai64nlocal 
+  1970-01-02 21:51:45.828598156 wan.link.pppoe sent [LCP ConfReq id=0x1 <asyncmap 0x0> <magic 0x667a9594> <pcomp> <accom
+  p>]
+  1970-01-02 21:51:48.832588765 wan.link.pppoe sent [LCP ConfReq id=0x1 <asyncmap 0x0> <magic 0x667a9594> <pcomp> <accom
+  p>]
+
+
 
 
 Flashing and updating
