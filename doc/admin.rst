@@ -115,8 +115,6 @@ human-readable format, use :command:`s6-tai64nlocal`.
 
 
 
-
-
 Updating an installed system (JFFS2)
 ************************************
 
@@ -173,3 +171,117 @@ Caveats
   nixpkgs).
 
 * it cannot upgrade the kernel, only userland
+
+.. _levitate:  
+
+Levitate - Reinstalling a running system (any filesystem)
+*********************************************************
+
+Liminix is initially installed from a monolithic
+:file:`firmware.bin` - and unless you're running a system on which
+:command:`liminix-rebuild` is available, the only way to update it is
+to build and install a whole new :file:`firmware.bin`.  This makes it desirable to
+be able to install a new firmware over the top of a running system -
+and preferably without having to remove it from its installation site,
+unplug it from the network and stick serial cables in it all over
+again.
+
+For this we have :command:`levitate`. The problem is that you cannot
+safely flash a new firmware over the top of a running system if the system
+is running from the same partition as you're flashing onto. Levitate provides
+a way for a running Liminix system to "soft restart" into a ramdisk
+running only a limited set of services, so that the main
+partitions can then be safely flashed.
+
+Configuration
+=============
+
+*It needs to be configured when you create the initial system* to
+specify which services/packages/etc to run in maintenance mode - you
+will probably want a network interface and an sshd for example so that
+you can login to reflash it.
+
+.. code-block:: nix
+
+  defaultProfile.packages = with pkgs; [
+    ...
+    (levitate.override {
+      config  = {
+        services = {
+          inherit (config.services) dhcpc sshd watchdog;
+        };
+        defaultProfile.packages = [ mtdutils ];
+        users.root = config.users.root;
+      };
+    })
+  ];
+  		
+
+
+Use
+===
+
+Connect (with ssh, probably) to the running Liminix system that you
+wish to upgrade.
+
+.. code-block:: console
+
+  bash$ ssh root@the-device
+  
+Run :command:`levitate`. This takes a little while (perhaps a few
+tens of seconds) to execute, and copies all config required for
+maintenance mode to :file:`/run/maintenance`.
+  
+.. code-block:: console
+  
+  # levitate 
+  
+Reboot into maintenance mode. You will be logged out
+  
+.. code-block:: console
+
+  # reboot
+  
+Connect to the device again - note that the ssh host key will have changed.
+  
+.. code-block:: console
+
+  # ssh -o UserKnownHostsFile=/dev/null root@the-device
+  
+Check we're in maintenance mode
+  
+.. code-block:: console
+
+  # cat /etc/banner 
+  
+  LADIES AND GENTLEMEN WE ARE FLOATING IN SPACE
+  
+  Most services are disabled. The system is operating
+  with a ram-based root filesystem, making it safe to
+  overwrite the flash devices in order to perform
+  upgrades and maintenance.
+  
+  Don't forget to reboot when you have finished.
+  
+Perform the upgrade, using flashcp. This is an example,
+your device will differ
+   
+.. code-block:: console
+
+  # cat /proc/mtd 
+  dev:    size   erasesize  name
+  mtd0: 00030000 00010000 "u-boot"
+  mtd1: 00010000 00010000 "u-boot-env"
+  mtd2: 00010000 00010000 "factory"
+  mtd3: 00f80000 00010000 "firmware"
+  mtd4: 00220000 00010000 "kernel"
+  mtd5: 00d60000 00010000 "rootfs"
+  mtd6: 00010000 00010000 "art"
+  # flashcp -v firmware.bin mtd:firmware
+
+All done
+  
+.. code-block:: console
+
+  # reboot
+
