@@ -5373,3 +5373,22 @@ wwan0.link.dhcpc-log
 194.4.172.12.l2tp
 s6rc-fdholder
 s6rc-oneshot-runner
+
+Wed Jul 10 23:37:00 BST 2024
+
+I propose rewriting the admin section. Topics we need to cover
+
+* building liminix given a configuration
+* installing for the first time
+  - refer to hardware section to find which of the following apply
+  - installation from openwrt
+  - installation from boot monitor
+* upgrading
+  - when you have a writable filesystem
+  - using levitate
+* using the running system (services, logs)
+
+we also need to expunge all mention of kexec
+
+and mention the upgrade choices in the Configuration section so
+people don't build an unupgradable image and only find out later
