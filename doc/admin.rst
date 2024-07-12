@@ -174,32 +174,31 @@ Caveats
 
 .. _levitate:  
 
-Levitate - Reinstalling a running system (any filesystem)
-*********************************************************
+Reinstalling on a running system
+********************************
 
 Liminix is initially installed from a monolithic
-:file:`firmware.bin` - and unless you're running a system on which
-:command:`liminix-rebuild` is available, the only way to update it is
-to build and install a whole new :file:`firmware.bin`.  This makes it desirable to
-be able to install a new firmware over the top of a running system -
-and preferably without having to remove it from its installation site,
-unplug it from the network and stick serial cables in it all over
-again.
+:file:`firmware.bin` - and unless you're running a writable
+filesystem, the only way to update it is to build and install a whole
+new :file:`firmware.bin`.  However, you probably would prefer not to
+have to remove it from its installation site, unplug it from the
+network and stick serial cables in it all over again.
 
-For this we have :command:`levitate`. The problem is that you cannot
-safely flash a new firmware over the top of a running system if the system
-is running from the same partition as you're flashing onto. Levitate provides
-a way for a running Liminix system to "soft restart" into a ramdisk
-running only a limited set of services, so that the main
-partitions can then be safely flashed.
+It is not (generally) safe to install a new firmware onto the flash
+partitions that the active system is running on. To address this we
+have :command:`levitate`, which a way for a running Liminix system to
+"soft restart" into a ramdisk running only a limited set of services,
+so that the main partitions can then be safely flashed.
+
+
 
 Configuration
 =============
 
-*It needs to be configured when you create the initial system* to
-specify which services/packages/etc to run in maintenance mode - you
-will probably want a network interface and an sshd for example so that
-you can login to reflash it.
+Levitate *needs to be configured when you create the initial system*
+to specify which services/packages/etc to run in maintenance
+mode. Most likely you want to configure a network interface and an ssh
+for example so that you can login to reflash it.
 
 .. code-block:: nix
 
