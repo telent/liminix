@@ -5,9 +5,12 @@ Services on a running system
 ****************************
 
 Liminix services are built on s6-rc, which is itself layered on s6.
-See configuration / services node for how to specify them.
-
-
+Services are defined at build time in your configuration (see
+:ref:`configuration-services` for information) and can't be added
+to/changed at runtime, but to monitor
+events or diagnose problems you may need to inspect them on the
+running system. Here are some of the most commonly used s6,-rc
+commands:
 
 .. list-table:: Service management quick reference
    :widths: 55 45

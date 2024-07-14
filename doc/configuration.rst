@@ -86,6 +86,7 @@ domains, or you want to run two SSH daemons on different ports.
 	 don't use the NixOS modules themselves, because the
 	 underlying system is not similar enough for them to work.
 
+.. _configuration-services:
 
 Services
 ********
