@@ -5392,3 +5392,11 @@ we also need to expunge all mention of kexec
 
 and mention the upgrade choices in the Configuration section so
 people don't build an unupgradable image and only find out later
+
+Fri Jul 12 21:20:00 BST 2024
+
+generalising the failover example:
+
+- usb stick may or may not need a modeswitch
+- may need a different chat script
+- usb ids
