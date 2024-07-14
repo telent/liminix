@@ -8,6 +8,44 @@ generic instructions, but please refer to the documentation for your
 device to find whether and how well they apply.
 
 
+Building a firmware image
+*************************
+
+Liminix uses the Nix language to provide congruent configuration
+management.  This means that to change anything about the way in
+which a Liminix system works, you make that change in
+your :file:`configuration.nix` (or one of the other files it references),
+and rerun :command:`nix-build` or :command:`liminix-rebuild` to action
+the change. It is not possible (at least, without shenanigans) to make
+changes by logging into the device and running imperative commands
+whose effects may later be overridden: :file:`configuration.nix`
+always describes the entire system and can be used to recreate that
+system at any time.  You can usefully keep it under version control.
+
+If you are familiar with NixOS, you will notice some similarities
+between NixOS and Liminix configuration, and also some
+differences. Sometimes the differences are due to the
+resource-constrained devices we deploy onto, sometimes due to
+differences in the uses these devices are put to.
+
+For a more full description of how to configure Liminix, see
+:ref:`configuration`. Assuming for the moment that you want a typical
+home wireless gateway/router, the best way to get started is to copy
+:file:`examples/rotuer.nix` and edit it for your requirements.
+
+
+.. code-block:: console
+
+    $ cp examples/rotuer.nix configuration.nix
+    $ vi configuration.nix # other editors are available 
+    $ # adjust this next command for your hardware device
+    $ nix-build -I liminix-config=./configuration.nix \
+     --arg device "import ./devices/gl-mt300a" -A outputs.default
+
+Usually  (not always, *please check the documentation for your device*)
+this will leave you with a file :file:`result/firmware.bin`
+which you now need to flash to the device.
+
 
 Flashing from the boot monitor (TFTP install)
 *********************************************

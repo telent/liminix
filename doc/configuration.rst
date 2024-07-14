@@ -1,26 +1,7 @@
+.. _configuration:
+
 Configuration
 #############
-
-Liminix uses the Nix language to provide congruent configuration
-management.  This means that to change anything about the way in
-which a Liminix system works, you make that change in
-your :file:`configuration.nix` (or one of the other files it references),
-and rerun :command:`nix-build` or :command:`liminix-rebuild` to action
-the change. It is not possible (at least, without shenanigans) to make
-changes by logging into the device and running imperative commands
-whose effects may later be overridden: :file:`configuration.nix`
-always describes the entire system and can be used to recreate that
-system at any time.  You can usefully keep it under version control.
-
-If you are familiar with NixOS, you will notice some similarities
-between NixOS and Liminix configuration, and also some
-differences. Sometimes the differences are due to the
-resource-constrained devices we deploy onto, sometimes due to
-differences in the uses these devices are put to.
-
-
-Configuration taxonomy
-**********************
 
 There are many things you can specify in a configuration, but these
 are the ones you most commonly need to change:

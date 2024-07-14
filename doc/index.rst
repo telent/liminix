@@ -7,8 +7,8 @@ Liminix
 
    intro
    tutorial
-   configuration
    installation
+   configuration
    admin
    development
    modules
