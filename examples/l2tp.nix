@@ -39,7 +39,7 @@ in rec {
   };
 
   imports = [
-    ../modules/cdc-ncm
+    ../modules/wwan
     ../modules/network
     ../modules/vlan
     ../modules/ssh
@@ -50,7 +50,7 @@ in rec {
   ];
   hostname = "thing";
 
-  services.wwan = svc.wwan.build {
+  services.wwan = svc.wwan.huawei-e3372.build {
     apn = "data.uk";
     username = "user";
     password = "one2one";
