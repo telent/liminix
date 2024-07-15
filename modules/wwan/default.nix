@@ -23,6 +23,9 @@ in {
       USB_SERIAL = "y";
       USB_SERIAL_OPTION = "y";
     };
+    programs.busybox.applets = [
+      "insmod" "rmmod"
+    ];
 
     # https://www.0xf8.org/2017/01/flashing-a-huawei-e3372h-4g-lte-stick-from-hilink-to-stick-mode/
     system.service.wwan.huawei-e3372 =
