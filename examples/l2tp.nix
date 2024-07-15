@@ -59,63 +59,60 @@ in rec {
 
   services.wan =
     let
-      z = final : prev: {
-        controller = longrun rec {
-          name = "wan-switcher";
-          run = ''
+      controller = longrun rec {
+        name = "wan-switcher";
+        run = ''
             in_outputs ${name}
             exec ${pkgs.s6-rc-round-robin}/bin/s6-rc-round-robin \
-               -p ${final.proxy.name} \
+               -p ${proxy.name} \
                ${lib.concatStringsSep " "
-                 (builtins.map (f: f.name) [final.pppoe final.l2tp])}
+                 (builtins.map (f: f.name) [pppoe l2tp])}
           '';
-        };
-        pppoe = (svc.pppoe.build {
-          interface = config.hardware.networkInterfaces.wan;
+      };
+      pppoe = (svc.pppoe.build {
+        interface = config.hardware.networkInterfaces.wan;
 
+        ppp-options = [
+          "debug" "+ipv6" "noauth"
+          "name" rsecrets.l2tp.name
+          "password" rsecrets.l2tp.password
+        ];
+      }).overrideAttrs(o: { inherit controller; });
+
+      l2tp =
+        let
+          check-address = oneshot rec {
+            name = "check-lns-address";
+            up = "grep -Fx ${ lns.address} $(output_path ${services.lns-address} addresses)";
+            dependencies = [ services.lns-address ];
+          };
+          route = svc.network.route.build {
+            via = "$(output ${services.dhcpc} router)";
+            target = lns.address;
+            dependencies = [services.dhcpc check-address];
+          };
+        in (svc.l2tp.build {
+          lns = lns.address;
           ppp-options = [
             "debug" "+ipv6" "noauth"
             "name" rsecrets.l2tp.name
             "password" rsecrets.l2tp.password
           ];
-        }).overrideAttrs(o: { inherit (final) controller; });
-
-        l2tp =
-          let
-            check-address = oneshot rec {
-              name = "check-lns-address";
-              up = "grep -Fx ${ lns.address} $(output_path ${services.lns-address} addresses)";
-              dependencies = [ services.lns-address ];
-            };
-            route = svc.network.route.build {
-              via = "$(output ${services.dhcpc} router)";
-              target = lns.address;
-              dependencies = [services.dhcpc check-address];
-            };
-          in (svc.l2tp.build {
-            lns = lns.address;
-            ppp-options = [
-              "debug" "+ipv6" "noauth"
-              "name" rsecrets.l2tp.name
-              "connect-delay" "5000"
-              "password" rsecrets.l2tp.password
-            ];
-            dependencies = [config.services.lns-address route check-address];
-          }).overrideAttrs(o: { inherit (final) controller; });
-        proxy = oneshot rec {
-          name = "wan-proxy";
-          inherit (final) controller;
-          buildInputs = with final; [ pppoe l2tp];
-          up = ''
+          dependencies = [config.services.lns-address route check-address];
+        }).overrideAttrs(o: { inherit controller; });
+      proxy = oneshot rec {
+        name = "wan-proxy";
+        inherit controller;
+        buildInputs = [ pppoe l2tp];
+        up = ''
             echo start proxy ${name}
             set -x
             (in_outputs ${name}
-             cp -rv $(output_path ${final.controller} active)/* .
+             cp -rv $(output_path ${controller} active)/* .
             )
           '';
-        };
       };
-    in (lib.fix (lib.extends z (prev : { }))).proxy;
+    in proxy;
 
   services.sshd = svc.ssh.build { };
 
