@@ -20,7 +20,7 @@ in
     type = liminix.lib.types.serviceDefn;
   };
 
-  config.boot.zyxel-dual-image = liminix.callService ./service.nix {
+  config.boot.zyxel-dual-image = config.system.callService ./service.nix {
     ensureActiveImage = mkOption {
       type = types.enum [ "primary" "secondary" ];
       default = "primary";

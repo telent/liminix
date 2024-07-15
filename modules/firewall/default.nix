@@ -54,7 +54,7 @@ in
   };
   config = {
     system.service.firewall =
-      let svc = liminix.callService ./service.nix  {
+      let svc = config.system.callService ./service.nix  {
             extraRules = mkOption {
               type = types.attrsOf types.attrs;
               description = "firewall ruleset";

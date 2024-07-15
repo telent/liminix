@@ -22,7 +22,7 @@ in
     };
   };
   config.system.service.bridge = {
-    primary = liminix.callService ./primary.nix {
+    primary = config.system.callService ./primary.nix {
       ifname = mkOption {
         type = types.str;
         description = "bridge interface name to create";

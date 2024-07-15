@@ -23,13 +23,13 @@ in
     };
   };
   config.system.service.dhcp6c = {
-    client = liminix.callService ./client.nix {
+    client = config.system.callService ./client.nix {
       interface = mkOption {
         type = liminix.lib.types.interface;
         description = "interface (usually WAN) to query for DHCP6";
       };
     };
-    address = liminix.callService ./address.nix {
+    address = config.system.callService ./address.nix {
       client = mkOption {
         type = types.anything; # liminix.lib.types.service;
       };
@@ -38,7 +38,7 @@ in
         description = "interface to assign the address to";
       };
     };
-    prefix = liminix.callService ./prefix.nix {
+    prefix = config.system.callService ./prefix.nix {
       client = mkOption {
         type = types.anything; # liminix.lib.types.service;
       };

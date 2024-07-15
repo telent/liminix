@@ -174,7 +174,7 @@ To expose a service template in a module, it needs the following:
 
 .. code-block:: nix
 
-    config.system.service.cowsay = liminix.callService ./service.nix {
+    config.system.service.cowsay = config.system.callService ./service.nix {
       address = mkOption {
 	type = types.str;
 	default = "0.0.0.0";

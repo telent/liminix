@@ -22,7 +22,7 @@ in {
     };
   };
   config = {
-    system.service.pppoe = pkgs.liminix.callService ./pppoe.nix {
+    system.service.pppoe = config.system.callService ./pppoe.nix {
       interface = mkOption {
         type = liminix.lib.types.service;
         description = "ethernet interface to run PPPoE over";
@@ -32,7 +32,7 @@ in {
         description = "options supplied on ppp command line";
       };
     };
-    system.service.l2tp = pkgs.liminix.callService ./l2tp.nix {
+    system.service.l2tp = config.system.callService ./l2tp.nix {
       lns = mkOption {
         type = types.str;
         description = "hostname or address of the L2TP network server";

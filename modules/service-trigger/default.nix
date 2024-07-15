@@ -14,7 +14,7 @@ in {
     };
   };
   config = {
-    system.service.uevent-rule = liminix.callService ./rule.nix {
+    system.service.uevent-rule = config.system.callService ./rule.nix {
       serviceName = mkOption {
         description = "name of the service to run when the rule matches";
         type = types.str;

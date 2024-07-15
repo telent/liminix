@@ -20,7 +20,7 @@ in {
     };
   };
   config.system.service = {
-    ssh = liminix.callService ./ssh.nix {
+    ssh = config.system.callService ./ssh.nix {
       address = mkOption {
         type = types.nullOr types.str;
         default = null;

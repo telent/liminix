@@ -22,7 +22,7 @@ in {
     };
   };
   config = {
-    system.service.hostapd = liminix.callService ./service.nix {
+    system.service.hostapd = config.system.callService ./service.nix {
       interface = mkOption {
         type = liminix.lib.types.service;
       };

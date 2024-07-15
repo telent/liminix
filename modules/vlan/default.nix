@@ -19,7 +19,7 @@ in
   options = {
     system.service.vlan = mkOption { type = liminix.lib.types.serviceDefn; };
   };
-  config.system.service.vlan = liminix.callService ./service.nix {
+  config.system.service.vlan = config.system.callService ./service.nix {
     ifname = mkOption {
       type = types.str;
       description = "interface name to create";

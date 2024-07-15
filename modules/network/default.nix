@@ -64,7 +64,7 @@ in {
     services.loopback = config.hardware.networkInterfaces.lo;
 
     system.service.network = {
-      link = liminix.callService ./link.nix {
+      link = config.system.callService ./link.nix {
         ifname = mkOption {
           type = types.str;
           example = "eth0";
@@ -89,7 +89,7 @@ in {
           example = 1480;
         };
       };
-      address = liminix.callService ./address.nix {
+      address = config.system.callService ./address.nix {
         interface = mkOption {
           type = liminix.lib.types.service;
         };
@@ -104,7 +104,7 @@ in {
         };
       };
 
-      route = liminix.callService ./route.nix {
+      route = config.system.callService ./route.nix {
         interface = mkOption {
           type = types.nullOr liminix.lib.types.interface;
           default = null;
@@ -125,7 +125,7 @@ in {
         };
       };
 
-      forward = liminix.callService ./forward.nix {
+      forward = config.system.callService ./forward.nix {
         enableIPv4 = mkOption {
           type = types.bool;
           default = true;
@@ -136,7 +136,7 @@ in {
         };
       };
 
-      dhcp.client = liminix.callService ./dhcpc.nix {
+      dhcp.client = config.system.callService ./dhcpc.nix {
         interface = mkOption {
           type = liminix.lib.types.service;
         };

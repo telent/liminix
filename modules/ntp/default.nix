@@ -18,7 +18,7 @@ in {
     };
   };
   config = {
-    system.service.ntp = liminix.callService ./service.nix {
+    system.service.ntp = config.system.callService ./service.nix {
       user = mkOption {
         type = types.str;
         default = "ntp";

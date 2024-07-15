@@ -16,7 +16,7 @@ in {
     };
   };
   config = {
-    system.service.dnsmasq = liminix.callService ./service.nix {
+    system.service.dnsmasq = config.system.callService ./service.nix {
       user = mkOption {
         type = types.str;
         default = "dnsmasq";
