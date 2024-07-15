@@ -47,6 +47,7 @@ in rec {
     ../modules/watchdog
     ../modules/mount
     ../modules/ppp
+    ../modules/round-robin
   ];
   hostname = "thing";
 
@@ -59,17 +60,7 @@ in rec {
 
   services.wan =
     let
-      controller = longrun rec {
-        name = "wan-switcher";
-        run = ''
-            in_outputs ${name}
-            exec ${pkgs.s6-rc-round-robin}/bin/s6-rc-round-robin \
-               -p ${proxy.name} \
-               ${lib.concatStringsSep " "
-                 (builtins.map (f: f.name) [pppoe l2tp])}
-          '';
-      };
-      pppoe = (svc.pppoe.build {
+      pppoe = svc.pppoe.build {
         interface = config.hardware.networkInterfaces.wan;
 
         ppp-options = [
@@ -77,7 +68,7 @@ in rec {
           "name" rsecrets.l2tp.name
           "password" rsecrets.l2tp.password
         ];
-      }).overrideAttrs(o: { inherit controller; });
+      };
 
       l2tp =
         let
@@ -91,7 +82,7 @@ in rec {
             target = lns.address;
             dependencies = [services.dhcpc check-address];
           };
-        in (svc.l2tp.build {
+        in svc.l2tp.build {
           lns = lns.address;
           ppp-options = [
             "debug" "+ipv6" "noauth"
@@ -99,20 +90,11 @@ in rec {
             "password" rsecrets.l2tp.password
           ];
           dependencies = [config.services.lns-address route check-address];
-        }).overrideAttrs(o: { inherit controller; });
-      proxy = oneshot rec {
-        name = "wan-proxy";
-        inherit controller;
-        buildInputs = [ pppoe l2tp];
-        up = ''
-            echo start proxy ${name}
-            set -x
-            (in_outputs ${name}
-             cp -rv $(output_path ${controller} active)/* .
-            )
-          '';
-      };
-    in proxy;
+        };
+    in svc.round-robin.build {
+      name = "wan";
+      services = [ l2tp pppoe ];
+    };
 
   services.sshd = svc.ssh.build { };
 
