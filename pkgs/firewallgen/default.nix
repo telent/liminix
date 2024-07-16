@@ -31,7 +31,7 @@ let
 
   indent = text : indentLines 0 (splitString "\n" text);
 
-  dochain = { name, type, rules,
+  dochain = { name, type, family, rules,
               policy ? null,
               priority ? "filter",
               hook ? null } : ''
