@@ -317,7 +317,7 @@
         };
 #        tplink-safeloader.board = "ARCHER-AX23-V1";
         boot = {
-          commandLine = [ "console=ttyS0,57600" ];
+          commandLine = lib.mkBefore [ "console=ttyS0,57600" ];
           tftp = {
             # Should be a segment of free RAM, where the tftp artifact
             # can be stored before unpacking it to the 'hardware.loadAddress'
@@ -326,6 +326,7 @@
             # to 0x90000000. Let's put it at the 100MB mark at
             # 0x80000000+0x06400000=0x86400000
             loadAddress = lim.parseInt "0x86400000";
+            appendDTB = true;
           };
         };
         filesystem =
@@ -372,9 +373,9 @@
           # 0x000000740000-0x00000ff00000 : "ubi"
 
           flash = {
-            # from the OEM bootlog 'Booting image at bc040000'
-            # (0x40000 from 0xbc000000)
-            address = lim.parseInt "0xbc040000";
+            # from the OEM bootlog 'Booting image at at bfd40000 ...'
+            # (0x40000 from 0xbfd00000)
+            address = lim.parseInt "0xbfd40000";
             # 0x000000040000-0x000000fa0000
             size = lim.parseInt "0xf60000";
             # TODO: find in /proc/mtd on a running system
@@ -382,7 +383,8 @@
           };
 
           # since this is mentioned in the partition table as well?
-          defaultOutput = "tplink-safeloader";
+#          defaultOutput = "mtdimage";
+          defaultOutput = "tftpboot";
           # taken from openwrt sysupgrade image:
           # openwrt-23.05.2-ramips-mt7621-tplink_archer-ax23-v1-squashfs-sysupgrade.bin: u-boot legacy uImage, MIPS OpenWrt Linux-5.15.137, Linux/MIPS, OS Kernel Image (lzma), 2797386 bytes, Tue Nov 14 13:38:11 2023, Load Address: 0X80001000, Entry Point: 0X80001000, Header CRC: 0X19F74C5B, Data CRC: 0XF685563C
 
@@ -390,7 +392,8 @@
           entryPoint = lim.parseInt "0x80001000";
           rootDevice = "/dev/mtdblock3";
           dts = {
-            src = "${openwrt.src}/target/linux/ramips/dts/mt7621_tplink_archer-ax23-v1.dts";
+#            src = "${openwrt.src}/target/linux/ramips/dts/mt7621_tplink_archer-ax23-v1.dts";
+            src = "${openwrt.src}/target/linux/ramips/dts/mt7621_ubnt_edgerouter-x.dts";
             includes =  [
               "${openwrt.src}/target/linux/ramips/dts"
               "${config.system.outputs.kernel.modulesupport}/arch/arm64/boot/dts/mediatek/"
