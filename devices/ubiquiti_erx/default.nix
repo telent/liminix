@@ -1,14 +1,20 @@
 {
   description = ''
+    Ubiquiti EdgeRouter X (ER-X)
+    ****************************
+
+    Hardware summary
+    ================
+
+    - MediaTek MT7621AT (880MHz)
+    - 256MB NAND Flash
+    - 256MB RAM
+    - 5x gigE ports (1x PoE in; 1x PoE out @ 24V)
+
     Limitations
     ===========
 
-    Status LEDs do not work yet.
-
-    Uploading an image via tftp doesn't work yet, because the Archer uboot
-    version is so old it doesn't support overriding the DTB from the mboot
-    command. The tftpboot module doesn't support this yet, see
-    https://gti.telent.net/dan/liminix/pulls/5 for the WiP.
+    Currently only tftp boots, actual networking currently untested!
   '';
 
   system = {
@@ -35,7 +41,6 @@
       imports = [
         ../../modules/arch/mipsel.nix
         ../../modules/outputs/tftpboot.nix
-#        ../../modules/outputs/tplink-safeloader.nix
       ];
       config = {
         kernel = {
@@ -315,7 +320,6 @@
             MT7621_WDT = "y";  # or it might be this one
           };
         };
-#        tplink-safeloader.board = "ARCHER-AX23-V1";
         boot = {
           commandLine = lib.mkBefore [ "console=ttyS0,57600" ];
           tftp = {
@@ -376,23 +380,24 @@
             # from the OEM bootlog 'Booting image at at bfd40000 ...'
             # (0x40000 from 0xbfd00000)
             address = lim.parseInt "0xbfd40000";
+
+            # TODO: what should this be for the ER-X??
             # 0x000000040000-0x000000fa0000
             size = lim.parseInt "0xf60000";
             # TODO: find in /proc/mtd on a running system
             eraseBlockSize = 65536;
           };
 
-          # since this is mentioned in the partition table as well?
-#          defaultOutput = "mtdimage";
           defaultOutput = "tftpboot";
-          # taken from openwrt sysupgrade image:
-          # openwrt-23.05.2-ramips-mt7621-tplink_archer-ax23-v1-squashfs-sysupgrade.bin: u-boot legacy uImage, MIPS OpenWrt Linux-5.15.137, Linux/MIPS, OS Kernel Image (lzma), 2797386 bytes, Tue Nov 14 13:38:11 2023, Load Address: 0X80001000, Entry Point: 0X80001000, Header CRC: 0X19F74C5B, Data CRC: 0XF685563C
+          # taken from openwrt factory image:
+          # openwrt-23.05.3-ramips-mt7621-ubnt_edgerouter-x-initramfs-kernel.bin: u-boot legacy uImage, MIPS OpenWrt Linux-5.15.150, Linux/MIPS, OS Kernel Image (Not compressed), 5749688 bytes, Fri Mar 22 22:09:42 2024, Load Address: 0X80001000, Entry Point: 0X80001000, Header CRC: 0XE557A849, Data CRC: 0XFD57C463
 
           loadAddress = lim.parseInt "0x80001000";
           entryPoint = lim.parseInt "0x80001000";
+
+          # TODO: what should this be?
           rootDevice = "/dev/mtdblock3";
           dts = {
-#            src = "${openwrt.src}/target/linux/ramips/dts/mt7621_tplink_archer-ax23-v1.dts";
             src = "${openwrt.src}/target/linux/ramips/dts/mt7621_ubnt_edgerouter-x.dts";
             includes =  [
               "${openwrt.src}/target/linux/ramips/dts"
