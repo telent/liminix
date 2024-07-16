@@ -103,3 +103,15 @@ a bit more useful :-)
       };
     })
   ];
+
+2024-07-16
+
+* structured parameters are available for the pppoe service
+
+* The "wan" configuration in modules/profiles/gateway.nix has changed:
+instead of passing options that are used to create a pppoe interface,
+callers should create a (pppoe or other) interface and pass that as
+the value of profile.gateway.wan. For the pppoe case this is now only
+very slightly more verbose, and it allows using the gateway profile
+with other kinds of upstream.
+

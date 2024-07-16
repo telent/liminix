@@ -52,8 +52,6 @@ in {
 
     wan = {
       interface = mkOption { type = liminix.lib.types.interface; };
-      username = mkOption { type = types.str; };
-      password =  mkOption { type = types.str; };
       dhcp6.enable = mkOption { type = types.bool; };
     };
 
@@ -86,9 +84,7 @@ in {
       members = cfg.lan.interfaces;
     };
 
-    services.wan = svc.pppoe.build {
-      inherit (cfg.wan) interface username password;
-    };
+    services.wan = cfg.wan.interface;
 
     services.packet_forwarding = svc.network.forward.build { };
 

@@ -53,9 +53,17 @@ in rec {
       };
     };
     wan = {
-      interface = config.hardware.networkInterfaces.wan;
-      username = secrets.l2tp.name;
-      password = secrets.l2tp.password;
+      # wan interface depends on your upstream - could be dhcp, static
+      # ethernet, a pppoe, ppp over serial, a complicated bonded
+      # failover ... who knows what else?
+      interface = svc.pppoe.build {
+        interface = config.hardware.networkInterfaces.wan;
+        username = secrets.l2tp.name;
+        password = secrets.l2tp.password;
+      };
+      # once the wan has ipv4 connnectivity, should we run dhcp6
+      # client to potentially get an address range ("prefix
+      # delegation")
       dhcp6.enable = true;
     };
     firewall = {
