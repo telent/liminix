@@ -62,12 +62,9 @@ in rec {
     let
       pppoe = svc.pppoe.build {
         interface = config.hardware.networkInterfaces.wan;
-
-        ppp-options = [
-          "debug" "+ipv6" "noauth"
-          "name" rsecrets.l2tp.name
-          "password" rsecrets.l2tp.password
-        ];
+        debug = true;
+        username = rsecrets.l2tp.name;
+        password = rsecrets.l2tp.password;
       };
 
       l2tp =

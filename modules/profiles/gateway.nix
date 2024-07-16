@@ -87,12 +87,7 @@ in {
     };
 
     services.wan = svc.pppoe.build {
-      inherit (cfg.wan) interface;
-      ppp-options = [
-        "debug" "+ipv6" "noauth"
-        "name" cfg.wan.username
-        "password" cfg.wan.password
-      ];
+      inherit (cfg.wan) interface username password;
     };
 
     services.packet_forwarding = svc.network.forward.build { };

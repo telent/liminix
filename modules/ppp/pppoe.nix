@@ -6,11 +6,16 @@
 , writeAshScript
 , serviceFns
 } :
-{ interface, ppp-options }:
+{ interface,
+  ppp-options,
+  lcpEcho,
+  username,
+  password,
+  debug
+}:
 let
   inherit (liminix.services) longrun;
-  lcp-echo-interval = 4;
-  lcp-echo-failure = 3;
+  inherit (lib) optional optionals;
   name = "${interface.name}.pppoe";
   ip-up = writeAshScript "ip-up" {} ''
     . ${serviceFns} 
@@ -33,25 +38,35 @@ let
     )
     echo >/proc/self/fd/10
   '';
-  ppp-options' = ppp-options ++ [
-    "ip-up-script" ip-up
-    "ipv6-up-script" ip6-up
-    "ipparam" name
-    "nodetach"
-    "usepeerdns"
-    "lcp-echo-interval" (builtins.toString lcp-echo-interval)
-    "lcp-echo-failure" (builtins.toString lcp-echo-failure)
-    "logfd" "2"
-  ];
+  ppp-options' = ["+ipv6" "noauth"]
+    ++ optional debug "debug"
+    ++ optionals (username != null) ["name" username]
+    ++ optionals (password != null) ["password" password]
+    ++ optional lcpEcho.adaptive "lcp-echo-adaptive"
+    ++ optionals (lcpEcho.interval != null)
+      ["lcp-echo-interval" (builtins.toString lcpEcho.interval)]
+    ++ optionals (lcpEcho.failure != null)
+      ["lcp-echo-failure" (builtins.toString lcpEcho.failure)]
+    ++ ppp-options
+    ++ ["ip-up-script" ip-up
+        "ipv6-up-script" ip6-up
+        "ipparam" name
+        "nodetach"
+        "usepeerdns"
+        "logfd" "2"
+       ];
+  timeoutOpt = if lcpEcho.interval != null then "-T ${builtins.toString (4 * lcpEcho.interval)}" else "";
 in
 longrun {
   inherit name;
   run = ''
     . ${serviceFns}
     echo Starting pppoe, pppd pid is $$
-    exec ${ppp}/bin/pppd pty "${pppoe}/bin/pppoe -T ${builtins.toString (4 * lcp-echo-interval)}  -I $(output ${interface} ifname)" ${lib.concatStringsSep " " ppp-options'}
+    exec ${ppp}/bin/pppd pty "${pppoe}/bin/pppoe ${timeoutOpt}  -I $(output ${interface} ifname)" ${lib.concatStringsSep " " ppp-options'}
   '';
   notification-fd = 10;
-  timeout-up = (10 + lcp-echo-failure * lcp-echo-interval) * 1000;
+  timeout-up = if lcpEcho.failure != null
+               then (10 + lcpEcho.failure * lcpEcho.interval) * 1000
+               else 60 * 1000;
   dependencies = [ interface ];
 }

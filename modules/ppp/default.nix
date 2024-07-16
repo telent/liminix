@@ -12,6 +12,8 @@
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
+  mkStringOption =
+    description: mkOption { type = types.str; inherit description; };
 in {
   options = {
     system.service.pppoe = mkOption {
@@ -27,9 +29,34 @@ in {
         type = liminix.lib.types.service;
         description = "ethernet interface to run PPPoE over";
       };
+      username = mkStringOption "username";
+      password = mkStringOption "password";
+      lcpEcho = {
+        adaptive = mkOption {
+          description = "send LCP echo-request frames only if no traffic was received from the peer since the last echo-request was sent";
+          type = types.bool;
+          default = true;
+        };
+        interval = mkOption {
+          type = types.nullOr types.int;
+          default = 3;
+          description = "send an LCP echo-request frame to the peer every n seconds";
+        };
+        failure =  mkOption {
+          type = types.nullOr types.int;
+          default = 3;
+          description = "terminate connection if n LCP echo-requests are sent without receiving a valid LCP echo-reply";
+        };
+      };
+      debug = mkOption {
+        description = "log the contents of all control packets sent or received";
+        default = false;
+        type = types.bool;
+      };
       ppp-options = mkOption {
         type = types.listOf types.str;
         description = "options supplied on ppp command line";
+        default = [];
       };
     };
     system.service.l2tp = config.system.callService ./l2tp.nix {
