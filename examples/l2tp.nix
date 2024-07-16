@@ -71,7 +71,7 @@ in rec {
         let
           check-address = oneshot rec {
             name = "check-lns-address";
-            up = "grep -Fx ${ lns.address} $(output_path ${services.lns-address} addresses)";
+            up = "grep -Fx ${lns.address} $(output_path ${services.lns-address} addresses)";
             dependencies = [ services.lns-address ];
           };
           route = svc.network.route.build {
