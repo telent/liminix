@@ -1,10 +1,8 @@
-# This is not part of Liminix per se. This is my "scratchpad"
-# configuration for the device I'm testing with.
-#
-# Parts of it do do things that Liminix eventually needs to do, but
-# don't look in here for solutions - just for identifying the
-# problems.
-
+# This is an example that uses the "gateway" profile to create a
+# "typical home wireless router" configuration suitable for a Gl.inet
+# gl-ar750 router. It should be fairly simple to edit it for other
+# devices: mostly you will need to attend to the number of wlan and lan
+# interfaces
 
 { config, pkgs, lib, modulesPath, ... } :
 let
@@ -30,21 +28,18 @@ in rec {
 
   imports = [
     "${modulesPath}/profiles/gateway.nix"
-    "${modulesPath}/schnapps"
-    "${modulesPath}/outputs/btrfs.nix"
-    "${modulesPath}/outputs/extlinux.nix"
   ];
   hostname = "rotuer";
-  rootfsType = "btrfs";
-  rootOptions = "subvol=@";
-  boot.loader.extlinux.enable = true;
 
   profile.gateway = {
     lan = {
       interfaces =  with config.hardware.networkInterfaces;
         [
+          # EDIT: these are the interfaces exposed by the gl.inet gl-ar750:
+          # if your device has more or differently named lan interfaces,
+          # specify them here
           wlan wlan5
-          lan0 lan1 lan2 lan3 lan4
+          lan
         ];
       inherit (secrets.lan) prefix;
       address = {
@@ -68,6 +63,10 @@ in rec {
       rules = secrets.firewallRules;
     };
     wireless.networks = {
+      # EDIT: if you have more or fewer wireless radios, here is where
+      # you need to say so.  hostapd tuning is hardware-specific and
+      # left as an exercise for the reader :-).
+
       "${secrets.ssid}" = {
         interface = config.hardware.networkInterfaces.wlan;
         hw_mode = "g";
