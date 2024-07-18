@@ -5400,3 +5400,24 @@ generalising the failover example:
 - usb stick may or may not need a modeswitch
 - may need a different chat script
 - usb ids
+
+Mon Jul 15 17:52:57 BST 2024
+
+DONE 1) Should round-robin be a callService service or a function a la
+longrun/oneshot, or even an overridable package?
+
+DONE 2) maybe we should replace all liminix.callService with
+ config.system.callService
+
+3) for consistency, can we make the networking "primitives" into
+services? answer: no.  the only thing left there is `ifup` which is a
+function returning a string, not a derivation
+
+Tue Jul 16 18:25:41 BST 2024
+
+can we make the gateway profile able to use failover?  perhaps if we
+add username and password as options to the pppoe service, then call
+gateway with the pppoe service instead of building it _in_ the profile,
+we can have gateways with other-than-pppoe for the wan
+
+(for a straight lte uplink, could pass the wwan interface as wan)
