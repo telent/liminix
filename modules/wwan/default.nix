@@ -9,6 +9,7 @@ let
 in {
   imports = [
     ../service-trigger
+    ../mdevd.nix
   ];
 
   options = {
