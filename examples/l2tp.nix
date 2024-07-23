@@ -114,21 +114,21 @@ in rec {
     };
   };
 
-  services.dhcpc = svc.network.dhcp.client.build {
+  services.bootstrap-dhcpc = svc.network.dhcp.client.build {
     interface = config.services.wwan;
     dependencies = [ config.services.hostname ];
   };
 
   services.lns-address = let
-    ns = "$(output_word ${services.dhcpc} dns 1)";
+    ns = "$(output_word ${services.bootstrap-dhcpc} dns 1)";
     route-to-bootstrap-nameserver = svc.network.route.build {
-      via = "$(output ${services.dhcpc} router)";
+      via = "$(output ${services.bootstrap-dhcpc} router)";
       target = ns;
-      dependencies = [services.dhcpc];
+      dependencies = [services.bootstrap-dhcpc];
     };
   in oneshot rec {
     name = "resolve-l2tp-server";
-    dependencies = [ services.dhcpc route-to-bootstrap-nameserver ];
+    dependencies = [ services.bootstrap-dhcpc route-to-bootstrap-nameserver ];
     up = ''
       (in_outputs ${name}
        DNSCACHEIP="${ns}" ${pkgs.s6-dns}/bin/s6-dnsip4 ${lns.hostname} \
