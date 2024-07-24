@@ -141,6 +141,10 @@ extraPkgs // {
       });
     in h.override { openssl = null; sqlite = null; };
 
+  # berlekey db needs libatomic which we haven't figured out yet.
+  # disabling it means we don't have arpd
+  iproute2 = prev.iproute2.override { db = null; };
+
   kexec-tools-static = prev.kexec-tools.overrideAttrs(o: {
     # For kexecboot we copy kexec into a ramdisk on the system being
     # upgraded from. This is more likely to work if kexec is
