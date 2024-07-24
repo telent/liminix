@@ -113,6 +113,21 @@ extraPkgs // {
     '';
   });
 
+  elfutils =
+    let native = (with final.stdenv; (buildPlatform == hostPlatform));
+    in if native
+       then prev.elfutils
+       else
+         let
+           e = prev.elfutils.overrideAttrs(o: {
+             configureFlags = o.configureFlags ++[
+               "ac_cv_has_stdatomic=no"
+             ];
+           });
+         in e.override {
+           enableDebuginfod = false;
+         };
+
   hostapd =
     let
       config =  [
