@@ -38,9 +38,10 @@
 (fn dir [name]
   (let [dp (assert (ll.opendir name) name)]
     (fn []
-      (match (ll.readdir dp)
-        (name type) (values name type)
-        (nil err) (do (if err (print err)) (ll.closedir dp) nil)))))
+      (case (ll.readdir dp)
+        (name filetype) (values name filetype)
+        (nil err) (do (if (> err 0) (print "ERR" err)) (ll.closedir dp) nil)
+        ))))
 
 (fn rmtree [pathname]
   (case (file-type pathname)
