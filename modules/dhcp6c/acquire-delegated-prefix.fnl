@@ -27,6 +27,6 @@
         dir (svc.open state-directory)]
     (accumulate [addresses []
                  v (dir:events)]
-      (update-prefixes lan-device addresses (v:output "prefix") system))))
+      (update-prefixes lan-device addresses (or (v:output "prefix") []) system))))
 
 { : changes : run }

@@ -27,6 +27,6 @@
         dir (svc.open state-directory)]
     (accumulate [addresses []
                  v (dir:events)]
-      (update-addresses wan-device addresses (v:output "address") system))))
+      (update-addresses wan-device addresses (or (v:output "address") []) system))))
 
 { : update-addresses : deletions : run }
