@@ -72,10 +72,46 @@ domains, or you want to run two SSH daemons on different ports.
 Services
 ********
 
-We use the `s6-rc service manager <https://www.skarnet.org/software/s6-rc/overview.html>`_  to start/stop/restart services and handle
-service dependencies. Any attribute in `config.services` will become
-part of the default set of services that s6-rc will try to bring up on
-boot.
+In Liminix a service is any kind of long-running task or process on
+the system, that is managed (started, stopped, and monitored) by a
+service supervisor.  A typical SOHO router might have services to
+
+* answer DHCP and DNS requests from the LAN
+* provide a wireless access point
+* connect using PPPoE or L2TP to an upstream network
+* start/stop the firewall
+* enable/disable IP packet forwarding
+* mount filesystems
+
+(Some of these might not be considered services using other definitions
+of the term: for example, this use of L2TP would be a "client" in the
+client/server classification; and enabling packet forwarding doesn't
+require any long-lived process - just a setting to be toggled.
+However, there is value in being able to use the same abstractions for
+all the things to manage them and specify their dependency
+relationships - so in Liminix "everything is a service")
+
+Any attribute in `config.services` will become part of the default set
+of services that s6-rc will try to bring up.
+
+Services are usually started at boot time, but **controlled services**
+are those that are required only in particular contexts.  For example,
+a service to mount a USB backup drive should run only when the drive
+is attached to the system. Liminix currently implements two kinds of
+controlled service:
+
+* "uevent-rule" service controllers use sysfs/uevent to identify when
+  particular hardware devices are present, and start/stop a controlled
+  service appropriately.
+
+* the "round-robin" service controller is used for service failover:
+  it allows you to specify a list of services and runs each of them
+  in turn until it exits, then runs the next.
+
+
+
+Writing services
+================
 
 For the most part, for common use cases, hopefully the services you
 need will be defined by modules and you will only have to pass the
