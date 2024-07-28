@@ -8,7 +8,7 @@ let
   };
 in {
   imports = [
-    ../service-trigger
+    ../uevent-rule
     ../mdevd.nix
   ];
 

@@ -14,7 +14,7 @@ in {
       type = liminix.lib.types.serviceDefn;
     };
   };
-  imports = [ ../mdevd.nix ../service-trigger ];
+  imports = [ ../mdevd.nix ../uevent-rule ];
   config.system.service.mount =
     let svc = config.system.callService ./service.nix {
           partlabel = mkOption {
