@@ -83,22 +83,28 @@ service supervisor.  A typical SOHO router might have services to
 * enable/disable IP packet forwarding
 * mount filesystems
 
-(Some of these might not be considered services using other definitions
-of the term: for example, this use of L2TP would be a "client" in the
-client/server classification; and enabling packet forwarding doesn't
-require any long-lived process - just a setting to be toggled.
-However, there is value in being able to use the same abstractions for
-all the things to manage them and specify their dependency
-relationships - so in Liminix "everything is a service")
+(Some of these might not be considered services using other
+definitions of the term: for example, this L2TP process would be a
+"client" in the client/server classification; and enabling packet
+forwarding doesn't require any long-lived process - just a setting to
+be toggled.  However, there is value in being able to use the same
+abstractions for all the things to manage them and specify their
+dependency relationships - so in Liminix "everything is a service")
+
+The service supervision system enables service health monitoring,
+restart of unhealthy services, and failover to "backup" services when
+a primary service fails or its dependencies are unavailable. The
+intention is that you have a framework in which you can specify policy
+requirements like "ethernet wan dhcp-client should be restarted if it
+crashes, but if it can't start because the hardware link is down, then
+4G ppp service should be started instead".
 
 Any attribute in `config.services` will become part of the default set
-of services that s6-rc will try to bring up.
-
-Services are usually started at boot time, but **controlled services**
-are those that are required only in particular contexts.  For example,
-a service to mount a USB backup drive should run only when the drive
-is attached to the system. Liminix currently implements two kinds of
-controlled service:
+of services that s6-rc will try to bring up.  Services are usually
+started at boot time, but **controlled services** are those that are
+required only in particular contexts.  For example, a service to mount
+a USB backup drive should run only when the drive is attached to the
+system. Liminix currently implements three kinds of controlled service:
 
 * "uevent-rule" service controllers use sysfs/uevent to identify when
   particular hardware devices are present, and start/stop a controlled
@@ -108,6 +114,10 @@ controlled service:
   it allows you to specify a list of services and runs each of them
   in turn until it exits, then runs the next.
 
+* the "health-check" service wraps another service, and runs a "health
+  check" command at regular intervals. When the health check fails,
+  indicating that the wrapped service is not working, it is terminated
+  and allowed to restart
 
 
 Writing services
