@@ -47,6 +47,7 @@ extraPkgs // {
   # liminix library functions
   lim = {
     parseInt = s: (builtins.fromTOML "r=${s}").r;
+    orEmpty = x: if x != null then x else [];
   };
 
   # keep these alphabetical

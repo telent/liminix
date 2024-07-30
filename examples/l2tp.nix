@@ -53,6 +53,7 @@ in rec {
     # ../modules/mount
     ../modules/ppp
     ../modules/round-robin
+    ../modules/health-check
     ../modules/profiles/gateway.nix
   ];
   hostname = "thing";
@@ -106,18 +107,28 @@ in rec {
               target = lns.address;
               dependencies = [services.bootstrap-dhcpc check-address];
             };
-          in svc.l2tp.build {
-            lns = lns.address;
-            ppp-options = [
-              "debug" "+ipv6" "noauth"
-              "name" rsecrets.l2tp.name
-              "password" rsecrets.l2tp.password
-            ];
-            dependencies = [config.services.lns-address route check-address];
-          };
+            l2tpd= svc.l2tp.build {
+              lns = lns.address;
+              ppp-options = [
+                "debug" "+ipv6" "noauth"
+                "name" rsecrets.l2tp.name
+                "password" rsecrets.l2tp.password
+              ];
+              dependencies = [config.services.lns-address route check-address];
+            };
+          in
+            svc.health-check.build {
+              service = l2tpd;
+              threshold = 3;
+              interval = 2;
+              healthCheck = pkgs.writeAshScript "ping-check" {} "ping 1.1.1.1";
+            };
       in svc.round-robin.build {
         name = "wan";
-        services = [ l2tp pppoe ];
+        services = [
+          pppoe
+          l2tp
+        ];
       };
       dhcp6.enable = true;
     };
