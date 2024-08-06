@@ -1,5 +1,7 @@
 final: prev:
 let
+  isCross = final.stdenv.buildPlatform != final.stdenv.hostPlatform;
+  crossOnly = pkg : amendFn : if isCross then (amendFn pkg) else pkg;
   extraPkgs = import ./pkgs/default.nix {
     inherit (final) lib callPackage;
   };
@@ -52,10 +54,12 @@ extraPkgs // {
 
   # keep these alphabetical
 
-  btrfs-progs = prev.btrfs-progs.override {
-    udevSupport = false;
-    udev = null;
-  };
+  btrfs-progs = crossOnly prev.btrfs-progs (
+    d: d.override {
+      udevSupport = false;
+      udev = null;
+    }
+  );
 
   chrony =
     let chrony' = prev.chrony.overrideAttrs(o: {
@@ -82,17 +86,13 @@ extraPkgs // {
   # but https://github.com/NixOS/nixpkgs/issues/284734
   # so we do surgery on the cmake derivation until that's fixed
 
-  cmake = prev.cmake.overrideAttrs(o:
-    # don't override the build cmake or we'll have to rebuild
-    # half the known universe to no useful benefit
-    if final.stdenv.buildPlatform != final.stdenv.hostPlatform
-    then {
+  cmake = crossOnly prev.cmake
+    (d: d.overrideAttrs(o: {
       preConfigure =
         builtins.replaceStrings
           ["$configureFlags"] ["$configureFlags $cmakeFlags"] o.preConfigure;
     }
-    else {}
-  );
+    ));
 
   dnsmasq =
     let d =  prev.dnsmasq.overrideAttrs(o: {
@@ -114,20 +114,15 @@ extraPkgs // {
     '';
   });
 
-  elfutils =
-    let native = (with final.stdenv; (buildPlatform == hostPlatform));
-    in if native
-       then prev.elfutils
-       else
-         let
-           e = prev.elfutils.overrideAttrs(o: {
-             configureFlags = o.configureFlags ++[
-               "ac_cv_has_stdatomic=no"
-             ];
-           });
-         in e.override {
-           enableDebuginfod = false;
-         };
+  elfutils = crossOnly prev.elfutils
+    (d: let e = d.overrideAttrs(o: {
+              configureFlags = o.configureFlags ++[
+                "ac_cv_has_stdatomic=no"
+              ];
+            });
+        in e.override {
+          enableDebuginfod = false;
+        });
 
   hostapd =
     let
@@ -159,7 +154,7 @@ extraPkgs // {
 
   # berlekey db needs libatomic which we haven't figured out yet.
   # disabling it means we don't have arpd
-  iproute2 = prev.iproute2.override { db = null; };
+  iproute2 = crossOnly prev.iproute2 (d: d.override { db = null; });
 
   kexec-tools-static = prev.kexec-tools.overrideAttrs(o: {
     # For kexecboot we copy kexec into a ramdisk on the system being
@@ -197,41 +192,54 @@ extraPkgs // {
     ];
   });
 
-  openssl = prev.openssl.overrideAttrs (o:
-    with final;
-    let cross = stdenv.buildPlatform != stdenv.hostPlatform;
-    in
-      {
-        # we want to apply
-        # https://patch-diff.githubusercontent.com/raw/openssl/openssl/pull/20273.patch";
-        # which disables overriding the -march cflags to the wrong values,
-        # but openssl is used for bootstrapping so that's easier said than
-        # done. Do it the ugly way..
-        postPatch =
-          o.postPatch
-          + (
-            lib.optionalString cross ''
-              sed -i.bak 's/linux.*-mips/linux-mops/' Configure
-            ''
-          );
-        # openssl with threads requires stdatomic which drags in libgcc
-        # as a dependency
-        configureFlags = []
-                         ++ (lib.optional cross "no-threads")
-                         ++ o.configureFlags;
+  openssl = crossOnly prev.openssl
+    (d: d.overrideAttrs (o:
+      with final; {
+      # we want to apply
+      # https://patch-diff.githubusercontent.com/raw/openssl/openssl/pull/20273.patch";
+      # which disables overriding the -march cflags to the wrong values,
+      # but openssl is used for bootstrapping so that's easier said than
+      # done. Do it the ugly way..
+      postPatch =
+        o.postPatch
+        +  ''
+           sed -i.bak 's/linux.*-mips/linux-mops/' Configure
+        '';
+      # openssl with threads requires stdatomic which drags in libgcc
+      # as a dependency
+      configureFlags = ["no-threads"] ++ o.configureFlags;
 
-        # don't need or want this bash script
-        postInstall = o.postInstall +
-                      (lib.optionalString cross "rm $bin/bin/c_rehash\n");
-      });
+      # don't need or want this bash script
+      postInstall = o.postInstall + "rm $bin/bin/c_rehash\n";
+      }
+    ));
 
   pppBuild = prev.ppp;
 
   qemuLim = let q = prev.qemu.overrideAttrs (o: {
     patches = o.patches ++ [
       ./pkgs/qemu/arm-image-friendly-load-addr.patch
+      (final.fetchpatch {
+        url = "https://lore.kernel.org/qemu-devel/20220322154658.1687620-1-raj.khem@gmail.com/raw";
+        hash = "sha256-jOsGka7xLkJznb9M90v5TsJraXXTAj84lcphcSxjYLU=";
+      })
     ];
-  }); in q.override { nixosTestRunner = true; sdlSupport = false; };
+  }); in q.override {
+    nixosTestRunner = true;
+    hostCpuTargets = map (f: "${f}-softmmu") [
+      "arm" "aarch64" "mips" "mipsel"
+    ];
+    sdlSupport = false;
+    numaSupport = false;
+    seccompSupport = false;
+    usbredirSupport = false;
+    libiscsiSupport = false;
+    tpmSupport = false;
+    uringSupport = false;
+    capstoneSupport = false;
+
+    texinfo = null;
+  };
 
   rsyncSmall =
     let
@@ -304,16 +312,16 @@ extraPkgs // {
     '';
   };
 
-  libusb1 =
-    let u = prev.libusb1.overrideAttrs(o: {
-          # don't use gcc libatomic because it vastly increases the
-          # closure size
-          preConfigure = "sed -i.bak /__atomic_fetch_add_4/c\: configure.ac";
-        });
-    in u.override {
-      enableUdev = final.stdenv.buildPlatform == final.stdenv.hostPlatform;
-      withDocs = false;
-    };
+  libusb1 = crossOnly prev.libusb1 (
+    d: let u = d.overrideAttrs(o: {
+             # don't use gcc libatomic because it vastly increases the
+             # closure size
+             preConfigure = "sed -i.bak /__atomic_fetch_add_4/c\: configure.ac";
+           });
+       in u.override {
+         enableUdev = false;
+         withDocs = false;
+       });
 
   util-linux-small = prev.util-linux.override {
     ncursesSupport = false;
