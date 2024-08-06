@@ -117,7 +117,7 @@ system. Liminix currently implements three kinds of controlled service:
 * the "health-check" service wraps another service, and runs a "health
   check" command at regular intervals. When the health check fails,
   indicating that the wrapped service is not working, it is terminated
-  and allowed to restart
+  and allowed to restart.
 
 
 Writing services
