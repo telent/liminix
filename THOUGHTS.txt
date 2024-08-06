@@ -5421,3 +5421,76 @@ gateway with the pppoe service instead of building it _in_ the profile,
 we can have gateways with other-than-pppoe for the wan
 
 (for a straight lte uplink, could pass the wwan interface as wan)
+
+Fri Aug  2 20:18:38 BST 2024
+
+Some thoughts about secrets
+
+1) clevis/tang is a mechanism to have encrypted local secrets that
+can't be decrypted unless a particular network host is present. This
+means we can reboot it unattended without having plaintext on the device,
+but it doesn't address getting the secrets onto the device.
+
+when is this useful?
+
+- someone steals the router and doesn't steal the tang server, they can't have my secrets
+
+when not?
+
+- someone compromises the machine, gets root, and looks in /run
+- doesn't address key rotation
+
+2) hashicorp vault or something like it can download secrets from
+a networked server - then we just plonk them in /run. But I don't want
+to pay for vault itself, so "something like" are the key words there
+
+3) Is sops relevant here? could we keep secrets in a big sops json/yaml
+and serve the decrypted file over https?
+
+==== so we have a plan, I think =====
+
+1) a secrets service that retrieves the secrets from some directory1
+that isn't /nix/store and copies them to its outputs with minimal
+permissions.  Services that need secrets can depend on the secrets
+service and be restarted when secrets change
+
+1b) a service that monitors changes in secrets (e.g. using inotify
+on /run/services/outputs/foo/bar) potentially doesn't need to restart
+when the secrets change, so how do we know which ones to pass over?
+This is a performance optimisation not a correctness issue
+
+2) as (1) but the secrets are encrypted and we use clevis to decrypt
+
+3) a secrets service that fetches the decrypted secrets as a JSON file
+using HTTPS.  We can use this ourselves with SOPS and it will be easy
+to adapt for Vault users.
+
+(What about fetching _encrypted_ secrets with https and then
+decrypting locally? I don't think we can do this with clevis because
+the machine that encypts has to be the machine that decrypts (ICBW).
+
+Sat Aug  3 22:28:24 BST 2024
+
+It would be useful maybe if the secrets could survive a reboot. Fetch
+using HTTPS and then store locally using clevis. But actually all that
+does is mean we've shifted from "can see the secrets server" to "can
+see the tangd server" so maybe not especially useful
+
+* We can't put passwords in the secrets unless we have a service that
+will change /etc/passwd if they change *
+
+we need a service that does the HTTPS call, parses the JSON response
+and writes it as nested subdirectories
+
+can we encode permissions and ownership into the file? should we?
+will some other secret store (say, Vault) know how to encode permissions
+in the same way as we arbitrarily choose to?
+
+
+Tue Aug  6 18:41:16 BST 2024
+
+I would like to know
+
+- why the docs aren't being built
+- min-copy-closure error:  "cpio: unsupported cpio format, use newc or crc"
+- can we avoid rebuilding this crapload of build packages?
