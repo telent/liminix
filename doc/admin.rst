@@ -72,12 +72,27 @@ time.  For example:
   active when a particular hardware device (identified by uevent/sysfs
   directory) is present.
 
-* :command:`s6-rc-round-robin` can be used in a service controller to
-  invoke two or more services in turn, running the next one when the
+* ``svc.round-robin.build`` creates a service controller that
+  invokes two or more services in turn, running the next one when the
   process providing the previous one exits. We use this for failover
   from one network connection to a backup connection, for example.
 
-The Configuration section of the manual describes this in more detail.
+* ``svc.health-check.build`` creates a service controller that
+  runs a controlled service and periodically tests whether it is
+  healthy by running an external health check command or script. If the
+  check command repeatedly fails, the controlled service is
+  restarted.
+
+  The Configuration section of the manual describes controlled
+  services in more detail. Some operational considerations
+
+* ``round-robin`` detects a service status by looking at its
+  :file:`outputs` directory, so it won't work unless the service
+  creates some outputs. This is considered a bug and will be
+  fixed in a future release
+
+* ``health-check`` works for longruns but not for oneshots, as it
+  internally relies on ``s6-svc`` to restart the process
 
 Logs
 ====
