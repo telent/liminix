@@ -15,7 +15,6 @@ stdenv.mkDerivation {
     mkdir -p $out/bin
     cp -p ${writeFennel "s6-rc-up-tree" {
       packages = [fennel
-                  # anoia nellie
                   lualinux ] ;
       mainFunction = "run";
     } ./s6-rc-up-tree.fnl } $out/bin/s6-rc-up-tree
@@ -59,6 +58,7 @@ stdenv.mkDerivation {
 
     # descendants which depend on a _different_ controlled service, which is up, do start
     ATZ=up fennelrepl ./test.fnl ${./test-services} modeswitch
+    set -x
     expect "modeswitch atz ifconfig"
   '';
 }
