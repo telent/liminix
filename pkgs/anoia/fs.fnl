@@ -9,6 +9,12 @@
 (local S_IFCHR  0x2000)
 (local S_IFIFO  0x1000)
 
+(macro errno-check [x]
+  `(match ,x
+     val# val#
+     (nil errno#) (assert nil (.. "system call failed, errno=" errno#))
+     ))
+
 (fn ifmt-bits [mode] (and mode (band mode 0xf000)))
 
 (fn file-type [pathname]
@@ -33,10 +39,10 @@
   (or (directory? pathname)
       (let [parent (string.gsub pathname "/[^/]+/?$" "")]
         (or (directory? parent) (mktree parent))
-        (assert (ll.mkdir pathname)))))
+        (errno-check (ll.mkdir pathname)))))
 
 (fn dir [name]
-  (let [dp (assert (ll.opendir name) name)]
+  (let [dp (errno-check (ll.opendir name) name)]
     (fn []
       (case (ll.readdir dp)
         (name filetype) (values name filetype)
