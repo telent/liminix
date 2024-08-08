@@ -5494,3 +5494,13 @@ I would like to know
 - why the docs aren't being built
 - min-copy-closure error:  "cpio: unsupported cpio format, use newc or crc"
 - can we avoid rebuilding this crapload of build packages?
+
+Wed Aug  7 18:36:09 BST 2024
+
+* a lua script that downloads a json file and turns it into outputs
+* a service that runs the script and then pauses for 30 minutes
+* the service will be restarted when it exits
+
+export SOPS_AGE_KEY=$(age -d key.age)  ; sops -a age1vearrjhv4x4cw6rfg2hdgqp46p4k673avezk3td5rd9ktrcrmslsljjsfq -e secrets.yaml > secrets.enc.yaml
+
+EDITOR="emacs -nw" SOPS_AGE_KEY=$(age -d key.age)  sops  secrets.enc.yaml
