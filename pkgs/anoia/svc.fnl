@@ -1,6 +1,6 @@
 (local inotify (require :inotify))
-(local { : file-exists? } (require :anoia))
-(local { : file-type : dir &as fs } (require :anoia.fs))
+(local { : file-exists? : dirname } (require :anoia))
+(local { : file-type : dir : mktree &as fs } (require :anoia.fs))
 
 (fn read-line [name]
   (with-open [f (assert (io.open name :r) (.. "can't open file " name))]
@@ -17,6 +17,15 @@
                      inotify.IN_MOVED_TO
                      inotify.IN_CLOSE_WRITE)
     handle))
+
+(fn write-value [pathname value]
+  (mktree (dirname pathname))
+  (match (type value)
+    "string"
+    (with-open [f (assert (io.open pathname :w) (.. "can't open " pathname))]
+      (f:write value))
+    "table" (each [k v (pairs value)]
+              (write-value (.. pathname "/" k) v))))
 
 (fn read-value [pathname]
   (case (file-type pathname)
@@ -46,8 +55,10 @@
      :wait #(watcher:read)
      :ready? (fn [self]
                (and (has-file? "state") (not (has-file? ".lock"))))
-     :output (fn [_ filename]
-               (read-value (.. directory "/" filename)))
+     :output (fn [_ filename new-value]
+               (if new-value
+                   (write-value (.. directory "/" filename) new-value)
+                   (read-value (.. directory "/" filename))))
      :close #(watcher:close)
      : events
      }))

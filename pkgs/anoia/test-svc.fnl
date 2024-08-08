@@ -15,3 +15,12 @@
                         :3 {:attribute "a33"}
                         :5 {:attribute "a55"}
                         :6 {:attribute "a66"}})))
+
+(let [dir (. arg 1)
+      ex2 (svc.open dir)]
+  (ex2:output "fish" "food")
+  (ex2:output "nested/path/name" "value")
+  (ex2:output "nested/path/complex" {
+                                     :attribute "val"
+                                     :other "42"
+                                     }))
