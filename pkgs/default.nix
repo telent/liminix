@@ -54,6 +54,7 @@ in {
 
   anoia = callPackage ./anoia { };
   devout = callPackage ./devout { };
+  fetch-freebsd = callPackage ./fetch-freebsd { };
   fennel = callPackage ./fennel { };
   fennelrepl = callPackage ./fennelrepl { };
   firewallgen = callPackage ./firewallgen { };
