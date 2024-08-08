@@ -2,6 +2,7 @@
   cmake,
   stdenv,
   openssl,
+  lua,
   fetchFromGitHub
 }: stdenv.mkDerivation {
   pname = "fetch-freebsd";
@@ -17,9 +18,14 @@
     "-DFETCH_LIBRARY=ON"
     "-DUSE_SYSTEM_SSL=ON"
   ];
+  postBuild = ''
+    $CC -shared -o fetch-lua.so ${./lua-glue.c} -I$src -Llibrary -lssl -lfetch -llua
+  '';
   nativeBuildInputs = [ cmake ];
-  buildInputs = [ openssl ];
+  buildInputs = [ lua openssl ];
   postInstall = ''
     rm -r $out/lib/lib*.a
+    mkdir -p $out/lib/lua/${lua.luaversion}
+    install fetch-lua.so  $out/lib/lua/${lua.luaversion}/fetch.so
   '';
 }
