@@ -1,3 +1,6 @@
+# A demonstration config for a home/soho router with PPPoE upstream
+# and fallback to an L2TP tunnel over a USB WWAN device
+
 {
   config,
   pkgs,
@@ -46,11 +49,8 @@ in rec {
   imports = [
     ../modules/wwan
     ../modules/network
-    # ../modules/vlan
     ../modules/ssh
     ../modules/usb.nix
-    # ../modules/watchdog
-    # ../modules/mount
     ../modules/ppp
     ../modules/round-robin
     ../modules/health-check
@@ -177,12 +177,6 @@ in rec {
       )
     '';
   };
-
-  # services.ntp = svc.ntp.build {
-  #   pools = { "pool.ntp.org" = ["iburst"]; };
-  #   makestep = { threshold = 1.0; limit = 3; };
-  #   dependencies = with config.services; [ defaultroute4 defaultroute6 ];
-  # };
 
   users.root = rsecrets.root;
 
