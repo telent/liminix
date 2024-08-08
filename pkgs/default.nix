@@ -93,6 +93,7 @@ in {
   preinit = callPackage ./preinit { };
   pseudofile = callPackage ./pseudofile { };
   routeros = callPackage ./routeros { };
+  rxi-json = callPackage ./rxi-json { };
   run-liminix-vm = callPackage ./run-liminix-vm { };
   s6-init-bin = callPackage ./s6-init-bin { };
   s6-rc-database = callPackage ./s6-rc-database { };
