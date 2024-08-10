@@ -5504,3 +5504,69 @@ Wed Aug  7 18:36:09 BST 2024
 export SOPS_AGE_KEY=$(age -d key.age)  ; sops -a age1vearrjhv4x4cw6rfg2hdgqp46p4k673avezk3td5rd9ktrcrmslsljjsfq -e secrets.yaml > secrets.enc.yaml
 
 EDITOR="emacs -nw" SOPS_AGE_KEY=$(age -d key.age)  sops  secrets.enc.yaml
+
+Fri Aug  9 21:51:18 BST 2024
+
+we have a service that periodically fetches a json and writes the values
+to its outputs
+
+we need to figure how to *use* that data
+
+- services that can't look in a file for their secrets might need a config
+file to be rewritten
+- service may need restarting to pick up a changed secret
+- maybe service accepts secrets using environment variables (see also
+ previous point)
+
+we already have  a mechanism for watching service output changes, it's the
+thing we use for picking up dhcp6 config
+
+it doesn't do the diff for you, you have to remember the old value and
+see for yourself if the change is useful.
+
+what we'd like is something like this:
+
+svc.secret-watcher.build {
+  source = config.services.secret-service;
+  watch = ["wlan" "telent5"];
+  service = svc.hostapd {
+    params = {
+      # ....
+      wpa_passphrase = "$(output secret-watcher "wlan/telent5/wpa_passphrase")";
+    };
+  };
+}
+
+but output is a shell function, so how do we get this substituted into
+the config file? something at runtime needs to rewrite the config file
+into /run and interpolate the values.
+
+the hostap service "run" script, before starting hostapd, needs to
+copy the config file from the store into /run/somewhere and
+interpolate secrets.
+
+we could have a reasonably general command to do interpolation
+
+echo 'wpa_passphrase={[ wpa_passphrase ]}' |  \
+  patch-secrets /run/services/outputs/secrets-service/wlan/telent5 {[ ]} \
+  > /run/services/state/${name}/hostapd.conf
+
+
+The values might need quoting/escaping, and the quoting rules will
+depend on the format of the file that needs to be generated. What if
+we do an Erb-style thing and evaluate the bit inside quotes as
+Lua - then we can provide any kind of escapes needed as lua functions
+
+wpa_passphrase={[ string.format("%q", wpa_passphrase) ]}
+
+We could for convenience provide squote(), dquote() etc functions
+but the necessary rules for escaping might vary. How about
+having shell() or json() or ? (what else? html?)  functions that
+format and escape per the encoding rules for that language?
+
+myenv = {
+
+
+string.gsub(template_string, "%{%[.-%]%}", function(x)
+  load(x, x, "t", myenv)
+end
