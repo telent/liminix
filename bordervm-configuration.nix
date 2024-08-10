@@ -89,6 +89,16 @@ in {
       };
     };
 
+    services.nginx = {
+      enable = true;
+      user = "liminix";
+      virtualHosts.${config.networking.hostName} = {
+        root = "/home/liminix";
+        default = true;
+      };
+    };
+    systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
+
     systemd.services.sshd.wantedBy = pkgs.lib.mkForce [ "multi-user.target" ];
 
     virtualisation = {
