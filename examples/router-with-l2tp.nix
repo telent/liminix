@@ -54,9 +54,22 @@ in rec {
     ../modules/ppp
     ../modules/round-robin
     ../modules/health-check
+    ../modules/secrets
     ../modules/profiles/gateway.nix
   ];
   hostname = "thing";
+
+  services.wan-address-for-secrets = svc.network.address.build {
+    interface = config.hardware.networkInterfaces.wan;
+    family = "inet"; address ="10.0.0.10"; prefixLength = 24;
+  };
+
+  services.secrets = svc.secrets.outboard.build {
+    name = "secret-service";
+    url = "http://10.0.0.1/liminix/examples/secrets.json";
+    interval = 5;
+    dependencies = [ services.wan-address-for-secrets ];
+  };
 
   services.wwan = svc.wwan.huawei-e3372.build {
     apn = "data.uk";
@@ -139,7 +152,13 @@ in rec {
         hw_mode = "g";
         channel = "6";
         ieee80211n = 1;
-      } // wirelessConfig;
+      } // wirelessConfig //{
+        wpa_passphrase = {
+          service = config.services.secrets;
+          path = "wpa_passphrase";
+        };
+      };
+
       "${rsecrets.ssid}5" = rec {
         interface = config.hardware.networkInterfaces.wlan5;
         hw_mode = "a";
@@ -149,7 +168,12 @@ in rec {
         vht_oper_centr_freq_seg0_idx = channel + 6;
         ieee80211n = 1;
         ieee80211ac = 1;
-      } // wirelessConfig;
+      } // wirelessConfig // {
+        wpa_passphrase = {
+          service = config.services.secrets;
+          path = "wpa_passphrase";
+        };
+      };
     };
   };
 

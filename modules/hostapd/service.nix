@@ -1,6 +1,7 @@
 {
   liminix
 , hostapd
+, output-template
 , writeText
 , lib
 }:
@@ -23,15 +24,28 @@ let
     ctrl_interface = "/run/hostapd";
     ctrl_interface_group = 0;
   };
-
-  conf = writeText "hostapd.conf"
-    (concatStringsSep
-      "\n"
-      (mapAttrsToList
-        (name: value: "${name}=${toString value}")
-        (defaults // params)));
+  attrs = defaults // params ;
+  literal_or_output = o:
+    let typ =  builtins.typeOf o;
+    in if typ == "string"
+    then builtins.toJSON o
+       else if typ == "int"
+       then builtins.toJSON o
+       else "output(${builtins.toJSON o.service}, ${builtins.toJSON o.path})";
+  format_value = n : v:
+    "${n}={{ ${literal_or_output v} }}";
+  conf =
+    (writeText "hostapd.conf.in"
+      ((concatStringsSep
+        "\n"
+        (mapAttrsToList
+          format_value
+          attrs)) + "\n"));
 in longrun {
   inherit name;
   dependencies = [ interface ];
-  run = "${hostapd}/bin/hostapd -i $(output ${interface} ifname)  -P /run/${name}.pid -S ${conf}";
+  run = ''
+    ${output-template}/bin/output-template '{{' '}}'  < ${conf}  > /run/${name}.conf
+    exec ${hostapd}/bin/hostapd -i $(output ${interface} ifname)  -P /run/${name}.pid -S /run/${name}.conf
+  '';
 }
