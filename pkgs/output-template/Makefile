@@ -1,3 +1,3 @@
 check:
-	./output-template ./example-output/ '{{' '}}' < example.ini > output
+	./output-template  '{{' '}}' < example.ini > output
 	diff -u output example.ini.expected

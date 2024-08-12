@@ -20,11 +20,14 @@
        (fn [x] (string.format "\\u%04X" (string.byte x))))))
 
 
-(fn substitute [text service opening closing]
+(fn substitute [text opening closing]
   (let [delim (.. opening "(.-)" closing)
         myenv {
                : string
-               :secret (fn [x] (service:output x))
+               :output
+               (fn [service-path path]
+                 (let [s (assert (svc.open (.. service-path "/.outputs")))]
+                   (s:output path)))
                :lua_quote #(string.format "%q" %1)
                :json_quote (fn [x] (.. "\"" (json-escape x) "\""))
                }]
@@ -34,10 +37,8 @@
                            (string.format "missing value for %q" x))))))
 
 (fn run []
-  (let [[service-dir opening closing] arg
-        service (assert (svc.open service-dir))
-        out  (substitute (: (io.input) :read "*a") service opening closing)]
+  (let [[opening closing] arg
+        out (substitute (: (io.input) :read "*a") opening closing)]
     (io.write out)))
-
 
 { : run }
