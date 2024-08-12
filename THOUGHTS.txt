@@ -5564,9 +5564,97 @@ but the necessary rules for escaping might vary. How about
 having shell() or json() or ? (what else? html?)  functions that
 format and escape per the encoding rules for that language?
 
-myenv = {
-
 
 string.gsub(template_string, "%{%[.-%]%}", function(x)
   load(x, x, "t", myenv)
 end
+
+Sat Aug 10 23:43:15 BST 2024
+
+Every service that can be configured with secrets (at least, that uses
+a configuration file) will need to be altered to interpolate at
+startup
+
+Any service that passes params on the command line may be able to
+use the "$(output " syntax still, but it does feel brittle (it always did)
+
+will we see any kind of pattern emerge so that we can provide
+secrets-interpolation for config files in one place instead of
+everywhere?
+
+svc.secret-watcher.build {
+  source = config.services.secret-service;
+  watch = ["wlan" "telent5"];
+  service = svc.hostapd.build {
+    params = {
+      # ....
+      wpa_passphrase = "{{ $(output secret-watcher "wlan/telent5/wpa_passphrase")";
+    };
+  };
+}
+
+how does the watcher communicate to the inner service that it needs secrets
+from x place?
+
+svc.secret-watcher.build {
+  source = config.services.secret-service;
+  watch = "wlan/telent5";
+  service = svc.hostapd.build {
+    secrets = config.services.secret-service;
+    params = {
+      # ....
+      wpa_passphrase = "{{ $(output secret-watcher "wlan/telent5/wpa_passphrase")";
+    };
+  };
+}
+
+or something like
+
+let
+ secret = name: get-output config.services.secret-service name;
+in svc.secret-watcher.build {
+  watch = "wlan/telent5";
+  service = svc.hostapd.build {
+    params = {
+      # ....
+      wpa_passphrase = secret "wlan/telent5/wpa_passphrase";
+    };
+  };
+}
+
+which is transformed into some kind of attrset that the service can
+interrogate and figure out how to interpolate? this would be an improvement
+as the knowledge of what kind of quoting to use is within the service
+
+A reasonable question would be what happens if we reference outputs
+from more than one service. Honestly I'd be happy to not support it
+but it's made quite easy by this form of syntax
+
+Mon Aug 12 19:42:48 BST 2024
+
+what about if when we build the output template we'd have something
+like this:
+
+wpa_passphrase={{
+  json_quote(output("/nix/store/eeeee-servicename/.outputs", "foo/bar"))
+}}
+
+which it will get partly from its own knowledge and partly from
+the thing that called it
+
+
+let
+  literal_or_output = o:
+    if builtins.typeOf(o) == "string"
+    then builtins.toJSON o
+    else "output(${builtins.toJSON o.service}, ${builtins.toJSON o.path})"
+in
+''
+wpa_passphrase={{
+  json_quote(${literal_or_output(wpa_passphrase)$})
+}}
+''
+
+builtins.toJSON is not the "correct" quoting regime for Lua strings,
+but it's sufficient for printable ascii, and using unprintable
+characters in Nix strings is asking for trouble in the first place
