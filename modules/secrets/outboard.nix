@@ -7,13 +7,13 @@ let
 in longrun {
   inherit name;
   buildInputs = [ http-fstree ];
-  # this script runs once and expects the service superviser
-  # to restart it
   run = ''
     . ${serviceFns}
     ( in_outputs ${name}
-      ${http-fstree}/bin/http-fstree ${url} .
-      sleep ${builtins.toString (interval * 60)}
+      while : ; do
+        ${http-fstree}/bin/http-fstree ${url} .
+        sleep ${builtins.toString (interval * 60)}
+      done
     )
   '';
 }
