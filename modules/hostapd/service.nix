@@ -25,13 +25,11 @@ let
     ctrl_interface_group = 0;
   };
   attrs = defaults // params ;
-  literal_or_output = o:
-    let typ =  builtins.typeOf o;
-    in if typ == "string"
-    then builtins.toJSON o
-       else if typ == "int"
-       then builtins.toJSON o
-       else "output(${builtins.toJSON o.service}, ${builtins.toJSON o.path})";
+  literal_or_output = o: ({
+    string = builtins.toJSON;
+    int = builtins.toJSON;
+    set = (o: "output(${builtins.toJSON o.service}, ${builtins.toJSON o.path})");
+  }.${builtins.typeOf o}) o;
   format_value = n : v:
     "${n}={{ ${literal_or_output v} }}";
   conf =
