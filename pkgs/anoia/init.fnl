@@ -36,6 +36,31 @@
                c (str:gmatch ".")]
     (+ (* h 33) (string.byte c))))
 
+(fn table= [a b]
+  (if (= a b)
+      true
+      (and (= (type a) :table) (= (type b) :table)
+           (accumulate [equal true
+                        k v1 (pairs a)
+                        &until (not equal)]
+             ;; all keys in a have the same value in a and b
+             (and equal
+                  (let [v2 (. b k)] (and v2 (table= v1 v2)))))
+           (accumulate [present true
+                        k _ (pairs b)
+                        &until (not present)]
+             ;; there are no keys in b which are not also in a
+             (and present (. a k))))))
+
+(comment
+ (assert (table= {:a 1 :b 2} {:b 2 :a 1}))
+ (assert (not (table= {:a 1 :b 2 :k :l}  {:b 2 :a 1})))
+ (assert (not (table= {:a 1 :b 2}  {:b 2 :a 1 :k :l})))
+
+ (assert (table= {:a 1 :b {:l 17}} {:b {:l 17} :a 1}))
+ (assert (table= {:a [4 5 6 7] } {:a [4 5 6 7]}))
+ (assert (not (table= {:a [4 5 6 7] } {:a [4 5 6 7 8]})))
+ (assert (not (table= {:a [4 5 7 6] } {:a [4 5 6 7 ]}))))
 
 (local
  base64-indices
@@ -85,4 +110,5 @@
  : merge
  : split
  : system
+ : table=
  }
