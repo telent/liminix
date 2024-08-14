@@ -21,7 +21,7 @@ let
     driver = "nl80211";
     logger_syslog = "-1";
     logger_syslog_level = 1;
-    ctrl_interface = "/run/hostapd";
+    ctrl_interface = "/run/${name}";
     ctrl_interface_group = 0;
   };
   attrs = defaults // params ;
@@ -43,7 +43,9 @@ in longrun {
   inherit name;
   dependencies = [ interface ];
   run = ''
-    ${output-template}/bin/output-template '{{' '}}'  < ${conf}  > /run/${name}.conf
-    exec ${hostapd}/bin/hostapd -i $(output ${interface} ifname)  -P /run/${name}.pid -S /run/${name}.conf
+    mkdir -p /run/${name}
+    chmod 0700 /run/${name}
+    ${output-template}/bin/output-template '{{' '}}'  < ${conf}  > /run/${name}/hostapd.conf
+    exec ${hostapd}/bin/hostapd -i $(output ${interface} ifname)  -P /run/${name}/hostapd.pid -S /run/${name}/hostapd.conf
   '';
 }
