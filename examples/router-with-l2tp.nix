@@ -177,6 +177,17 @@ in rec {
     };
   };
 
+  services.restart-on-change = longrun {
+    name = "wlan0-restart-on-change";
+    run = ''
+      ${pkgs.watch-outputs}/bin/watch-outputs -r wlan0.link.hostapd ${config.services.secrets} wpa_passphrase
+    '';
+    dependencies = [
+      config.services.hostap-liminix
+      config.services.hostap-liminix5
+    ];
+  };
+
   services.bootstrap-dhcpc = svc.network.dhcp.client.build {
     interface = config.services.wwan;
     dependencies = [ config.services.hostname ];

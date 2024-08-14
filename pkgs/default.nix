@@ -114,6 +114,7 @@ in {
   tufted = callPackage ./tufted { };
   uevent-watch = callPackage ./uevent-watch { };
   usb-modeswitch = callPackage ./usb-modeswitch { };
+  watch-outputs = callPackage ./watch-outputs { };
   writeAshScript = callPackage ./write-ash-script { };
   writeAshScriptBin = callPackage ./write-ash-script/bin.nix { };
   writeFennel = callPackage ./write-fennel { };
