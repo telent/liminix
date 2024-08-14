@@ -1,6 +1,8 @@
-(fn assoc [tbl k v]
+(fn assoc [tbl k v & more]
   (tset tbl k v)
-  tbl)
+  (case more
+    [k v] (assoc tbl k v)
+    _ tbl))
 
 (fn merge [table1 table2]
   (collect [k v (pairs table2) &into table1]
