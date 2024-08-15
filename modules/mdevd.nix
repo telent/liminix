@@ -12,6 +12,7 @@ in {
         name = "devout";
         notification-fd = 10;
         run = "exec ${pkgs.devout}/bin/devout /run/devout.sock 4";
+        dependencies = [ mdevd ];
       };
       coldplug = oneshot {
         name = "coldplug";
