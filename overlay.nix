@@ -81,6 +81,21 @@ extraPkgs // {
       texinfo = null;
     };
 
+  # clevis without luks/tpm
+  clevis = crossOnly prev.clevis
+    (d: let c = d.overrideAttrs(o: {
+              outputs = ["out"];
+              preConfigure = ''
+                 rm -rf src/luks
+                 sed -i -e '/luks/d' src/meson.build
+              '';
+            }); in c.override {
+              asciidoc = null;
+              cryptsetup = null;
+              luksmeta = null;
+              tpm2-tools = null;
+            });
+
   # luarocks wants a cross-compiled cmake (which seems like a bug,
   # we're never going to run luarocks on the device, but ...)
   # but https://github.com/NixOS/nixpkgs/issues/284734
