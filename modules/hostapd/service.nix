@@ -1,5 +1,6 @@
 {
   liminix
+, svc
 , hostapd
 , output-template
 , writeText
@@ -39,13 +40,21 @@ let
         (mapAttrsToList
           format_value
           attrs)) + "\n"));
-in longrun {
-  inherit name;
-  dependencies = [ interface ];
-  run = ''
-    mkdir -p /run/${name}
-    chmod 0700 /run/${name}
-    ${output-template}/bin/output-template '{{' '}}'  < ${conf}  > /run/${name}/hostapd.conf
-    exec ${hostapd}/bin/hostapd -i $(output ${interface} ifname)  -P /run/${name}/hostapd.pid -S /run/${name}/hostapd.conf
-  '';
+  service = longrun {
+    inherit name;
+    dependencies = [ interface ];
+    run = ''
+      mkdir -p /run/${name}
+      chmod 0700 /run/${name}
+      ${output-template}/bin/output-template '{{' '}}'  < ${conf}  > /run/${name}/hostapd.conf
+      exec ${hostapd}/bin/hostapd -i $(output ${interface} ifname)  -P /run/${name}/hostapd.pid -S /run/${name}/hostapd.conf
+    '';
+  };
+in svc.secrets.subscriber.build {
+  watch = {
+    service = attrs.wpa_passphrase.service;
+    paths = ["wpa_passphrase"];
+  };
+  inherit service;
+  action = "restart-all";
 }

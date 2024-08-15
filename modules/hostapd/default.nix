@@ -16,6 +16,7 @@ let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
 in {
+  imports = [ ../secrets ];
   options = {
     system.service.hostapd = mkOption {
       type = liminix.lib.types.serviceDefn;

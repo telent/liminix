@@ -33,12 +33,13 @@
                _ path (ipairs paths)]
     (or changed? (not (table= (dig old-tree path) (dig new-tree path))))))
 
+(fn %% [fmt ...] (string.format fmt ...))
 
 (fn do-action [action service]
   (case action
-    :restart (system "s6-svc -r /run/service/%s" service)
-    :restart-all (system "s6-rc -b -d %q; s6-rc-up-tree %q" service service)
-    [:signal n] (system "s6-svc -s %d /run/service/%s" n service)))
+    :restart (system (%% "s6-svc -r /run/service/%s" service))
+    :restart-all (system (%% "s6-rc -b -d %q; s6-rc-up-tree %q" service service))
+    [:signal n] (system (%% "s6-svc -s %d /run/service/%s" n service))))
 
 (fn run []
   (let [{
