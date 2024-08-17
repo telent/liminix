@@ -10,6 +10,7 @@
 let
   inherit (liminix.services) longrun;
   inherit (lib) concatStringsSep mapAttrsToList;
+  inherit (builtins) map filter attrValues length head typeOf;
 
   # This is not a friendly interface to configuring a wireless AP: it
   # just passes everything straight through to the hostapd config.
@@ -46,14 +47,22 @@ let
     run = ''
       mkdir -p /run/${name}
       chmod 0700 /run/${name}
-      ${output-template}/bin/output-template '{{' '}}'  < ${conf}  > /run/${name}/hostapd.conf
-      exec ${hostapd}/bin/hostapd -i $(output ${interface} ifname)  -P /run/${name}/hostapd.pid -S /run/${name}/hostapd.conf
+      ${output-template}/bin/output-template '{{' '}}' < ${conf} > /run/${name}/hostapd.conf
+      exec ${hostapd}/bin/hostapd -i $(output ${interface} ifname) -P /run/${name}/hostapd.pid -S /run/${name}/hostapd.conf
     '';
   };
+  watched-services =
+    (filter (f: typeOf f == "set") (attrValues attrs));
+
 in svc.secrets.subscriber.build {
   watch = {
-    service = attrs.wpa_passphrase.service;
-    paths = ["wpa_passphrase"];
+    service = assert (length watched-services == 1); (head watched-services).service;
+    paths = unique (
+      map (s: s.path)
+        (filter
+          (f: f.service == (head watched-services).service)
+          watched-services
+        ));
   };
   inherit service;
   action = "restart-all";
