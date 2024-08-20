@@ -1,6 +1,7 @@
 {
   liminix
 , lib
+, output-template
 , ppp
 , pppoe
 , writeAshScript
@@ -15,7 +16,7 @@
 }:
 let
   inherit (liminix.services) longrun;
-  inherit (lib) optional optionals;
+  inherit (lib) optional optionals concatStringsSep;
   name = "${interface.name}.pppoe";
   ip-up = writeAshScript "ip-up" {} ''
     . ${serviceFns} 
@@ -61,8 +62,11 @@ longrun {
   inherit name;
   run = ''
     . ${serviceFns}
+    mkdir -p /run/${name}
+    chmod 0700 /run/${name}
+    echo ${concatStringsSep " " ppp-options'} | ${output-template}/bin/output-template '{{' '}}' > /run/${name}/${name}.conf
     echo Starting pppoe, pppd pid is $$
-    exec ${ppp}/bin/pppd pty "${pppoe}/bin/pppoe ${timeoutOpt}  -I $(output ${interface} ifname)" ${lib.concatStringsSep " " ppp-options'}
+    exec ${ppp}/bin/pppd pty "${pppoe}/bin/pppoe ${timeoutOpt}  -I $(output ${interface} ifname)" file /run/${name}/${name}.conf
   '';
   notification-fd = 10;
   timeout-up = if lcpEcho.failure != null
