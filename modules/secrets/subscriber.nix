@@ -11,6 +11,19 @@ let
   watched-services = unique (map (f: f.service) watch);
   paths = unique (map (f: f.path) watch);
 
+  restart-flag = {
+    restart = "-r";
+    restart-all = "-R";
+    "hup" = "-s 1";
+    "int" = "-s 2";
+    "quit" = "-s 3";
+    "kill" = "-s 9";
+    "term" = "-s 15";
+    "winch" = "-s 28";
+    "usr1" = "-s 10";
+    "usr2" = "-s 12";
+  }.${action};
+
   watched-service =
     if length watched-services == 0
     then null
@@ -26,7 +39,7 @@ let
       if test -e $dir/notification-fd; then flag="-U"; else flag="-u"; fi
       ${s6}/bin/s6-svwait $flag /run/service/${name} || exit
       PATH=${s6-rc}/bin:${s6}/bin:$PATH
-      ${watch-outputs}/bin/watch-outputs -r ${name} ${watched-service.name} ${lib.concatStringsSep " " paths}
+      ${watch-outputs}/bin/watch-outputs ${restart-flag} ${name} ${watched-service.name} ${lib.concatStringsSep " " paths}
     '';
   };
 in service.overrideAttrs(o: {
