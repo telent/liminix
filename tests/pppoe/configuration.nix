@@ -17,11 +17,8 @@ in rec {
   services.pppoe =
     svc.pppoe.build {
       interface = config.hardware.networkInterfaces.wan;
-      ppp-options = [
-        "debug" "+ipv6" "noauth"
-        "name" "db123@a.1"
-        "password" "NotReallyTheSecret"
-      ];
+      username = "db123@a.1";
+      password= "NotReallyTheSecret";
     };
 
   services.defaultroute4 = svc.network.route.build {
