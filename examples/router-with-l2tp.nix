@@ -66,7 +66,7 @@ in rec {
 
   services.secrets = svc.secrets.outboard.build {
     name = "secret-service";
-    url = "http://10.0.0.1/liminix/examples/secrets.json";
+    url = "http://10.0.0.1/liminix/examples/real-secrets.json";
     interval = 5;
     dependencies = [ services.wan-address-for-secrets ];
   };
@@ -101,11 +101,12 @@ in rec {
     };
     wan = {
       interface = let
+        secret = path: { service = config.services.secrets; inherit path; };
         pppoe = svc.pppoe.build {
           interface = config.hardware.networkInterfaces.wan;
           debug = true;
-          username = rsecrets.l2tp.name;
-          password = rsecrets.l2tp.password;
+          username = secret "ppp/username";
+          password = secret "ppp/password";
         };
 
         l2tp =
