@@ -32,14 +32,13 @@ let
     int = builtins.toJSON;
     set = (o: "output(${builtins.toJSON o.service}, ${builtins.toJSON o.path})");
   }.${builtins.typeOf o}) o;
-  format_value = n : v:
-    "${n}={{ ${literal_or_output v} }}";
+
   conf =
     (writeText "hostapd.conf.in"
       ((concatStringsSep
         "\n"
         (mapAttrsToList
-          format_value
+          (n : v : "${n}={{ ${literal_or_output v} }}")
           attrs)) + "\n"));
   service = longrun {
     inherit name;
