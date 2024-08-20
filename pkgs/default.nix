@@ -30,7 +30,7 @@ in {
       };
     lib = {
       types =
-        let inherit (lib) types isDerivation;
+        let inherit (lib) mkOption types isDerivation;
         in  rec {
           service = types.package // {
             name = "service";
@@ -43,6 +43,18 @@ in {
             description = "parametrisable s6-rc service definition";
             check = x: lib.isAttrs x && x ? parameters && x ? build;
           };
+          replacable = types.either
+            types.str
+            (types.submodule {
+              options = {
+                service = mkOption {
+                  type = service;
+                };
+                path = mkOption {
+                  type = types.str;
+                };
+              };
+            });
         };
       inherit typeChecked;
     };
