@@ -37,16 +37,9 @@ in {
       };
     };
     subscriber = config.system.callService ./subscriber.nix {
-      watch = {
-        service = mkOption {
-          description = "secrets service to subscribe to";
-          type = liminix.lib.types.service;
-        };
-        paths = mkOption {
-          description = "list of output paths we are interested in";
-          example = ["wan/l2tp" "wifi/wlan5"];
-          type = types.listOf types.str;
-        };
+      watch = mkOption {
+        description = "secrets paths to subscribe to";
+        type = types.listOf types.attrs;
       };
       service = mkOption {
         description = "subscribing service that will receive notification";
