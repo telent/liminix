@@ -16,7 +16,7 @@
 }:
 let
   inherit (liminix.services) longrun;
-  inherit (lib) optional optionals concatStringsSep;
+  inherit (lib) optional optionals escapeShellArgs concatStringsSep;
   name = "${interface.name}.pppoe";
   ip-up = writeAshScript "ip-up" {} ''
     . ${serviceFns} 
@@ -39,10 +39,18 @@ let
     )
     echo >/proc/self/fd/10
   '';
+
+  literal_or_output =
+    let v = o: ({
+          string = builtins.toJSON;
+          int = builtins.toJSON;
+          set = (o: "output(${builtins.toJSON o.service}, ${builtins.toJSON o.path})");
+        }.${builtins.typeOf o}) o;
+    in  o: "{{ ${v o} }}";
   ppp-options' = ["+ipv6" "noauth"]
     ++ optional debug "debug"
-    ++ optionals (username != null) ["name" username]
-    ++ optionals (password != null) ["password" password]
+    ++ optionals (username != null) ["name" (literal_or_output username)]
+    ++ optionals (password != null) ["password" (literal_or_output password)]
     ++ optional lcpEcho.adaptive "lcp-echo-adaptive"
     ++ optionals (lcpEcho.interval != null)
       ["lcp-echo-interval" (builtins.toString lcpEcho.interval)]
@@ -64,7 +72,7 @@ longrun {
     . ${serviceFns}
     mkdir -p /run/${name}
     chmod 0700 /run/${name}
-    echo ${concatStringsSep " " ppp-options'} | ${output-template}/bin/output-template '{{' '}}' > /run/${name}/${name}.conf
+    echo ${escapeShellArgs ppp-options'} | ${output-template}/bin/output-template '{{' '}}' > /run/${name}/${name}.conf
     echo Starting pppoe, pppd pid is $$
     exec ${ppp}/bin/pppd pty "${pppoe}/bin/pppoe ${timeoutOpt}  -I $(output ${interface} ifname)" file /run/${name}/${name}.conf
   '';

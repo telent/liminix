@@ -33,8 +33,14 @@ in {
         type = liminix.lib.types.service;
         description = "ethernet interface to run PPPoE over";
       };
-      username = mkStringOption "username";
-      password = mkStringOption "password";
+      username = mkOption {
+        type = liminix.lib.types.replacable;
+        description = "username";
+      };
+      password = mkOption {
+        type = liminix.lib.types.replacable;
+        description = "password";
+      };
       lcpEcho = {
         adaptive = mkOption {
           description = "send LCP echo-request frames only if no traffic was received from the peer since the last echo-request was sent";
