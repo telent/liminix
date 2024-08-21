@@ -11,6 +11,7 @@ in {
       devout = longrun {
         name = "devout";
         notification-fd = 10;
+        timeout-up = 60 * 1000;
         run = "exec ${pkgs.devout}/bin/devout /run/devout.sock 4";
         dependencies = [ mdevd ];
       };
