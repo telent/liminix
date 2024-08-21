@@ -47,7 +47,8 @@ let
           set = (o: "output(${builtins.toJSON o.service}, ${builtins.toJSON o.path})");
         }.${builtins.typeOf o}) o;
     in  o: "{{ ${v o} }}";
-  ppp-options' = ["+ipv6" "noauth"]
+  ppp-options' =
+    ["+ipv6" "noauth"]
     ++ optional debug "debug"
     ++ optionals (username != null) ["name" (literal_or_output username)]
     ++ optionals (password != null) ["password" (literal_or_output password)]
@@ -69,12 +70,11 @@ in
 longrun {
   inherit name;
   run = ''
-    . ${serviceFns}
     mkdir -p /run/${name}
     chmod 0700 /run/${name}
-    echo ${escapeShellArgs ppp-options'} | ${output-template}/bin/output-template '{{' '}}' > /run/${name}/${name}.conf
-    echo Starting pppoe, pppd pid is $$
-    exec ${ppp}/bin/pppd pty "${pppoe}/bin/pppoe ${timeoutOpt}  -I $(output ${interface} ifname)" file /run/${name}/${name}.conf
+    in_outputs ${name}
+    echo ${escapeShellArgs ppp-options'} | ${output-template}/bin/output-template '{{' '}}' > /run/${name}/ppp-options
+    exec ${ppp}/bin/pppd pty "${pppoe}/bin/pppoe ${timeoutOpt}  -I $(output ${interface} ifname)" file /run/${name}/ppp-options
   '';
   notification-fd = 10;
   timeout-up = if lcpEcho.failure != null

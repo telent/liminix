@@ -1,12 +1,18 @@
 ## PPP
 ## ===
 ##
-## A PPPoE (PPP over Ethernet) configuration to address the case where
-## your Liminix device is connected to an upstream network using
+## ``ppoe`` (PPP over Ethernet) provides a service to address the case
+## where your Liminix device is connected to an upstream network using
 ## PPPoE. This is typical for UK broadband connections where the
 ## physical connection is made by OpenReach ("Fibre To The X") and
-## common in some other localities as well: ask your ISP if this is
+## common in some other localities as well: check with your ISP if this is
 ## you.
+##
+## ``l2tp`` (Layer 2 Tunelling Protocol) provides a service that
+## tunnels PPP over the Internet.  This may be used by some ISPs in
+## conjunction with a DHCP uplink, or other more creative forms of
+## network connection
+
 
 { lib, pkgs, config, ...}:
 let
@@ -34,11 +40,13 @@ in {
         description = "ethernet interface to run PPPoE over";
       };
       username = mkOption {
-        type = liminix.lib.types.replacable;
+        type = types.nullOr liminix.lib.types.replacable;
+        default = null;
         description = "username";
       };
       password = mkOption {
-        type = liminix.lib.types.replacable;
+        type = types.nullOr liminix.lib.types.replacable;
+        default = null;
         description = "password";
       };
       lcpEcho = {
@@ -73,6 +81,38 @@ in {
       lns = mkOption {
         type = types.str;
         description = "hostname or address of the L2TP network server";
+      };
+      username = mkOption {
+        type = types.nullOr liminix.lib.types.replacable;
+        default = null;
+        description = "username";
+      };
+      password = mkOption {
+        type = types.nullOr liminix.lib.types.replacable;
+        default = null;
+        description = "password";
+      };
+      lcpEcho = {
+        adaptive = mkOption {
+          description = "send LCP echo-request frames only if no traffic was received from the peer since the last echo-request was sent";
+          type = types.bool;
+          default = true;
+        };
+        interval = mkOption {
+          type = types.nullOr types.int;
+          default = 3;
+          description = "send an LCP echo-request frame to the peer every n seconds";
+        };
+        failure =  mkOption {
+          type = types.nullOr types.int;
+          default = 3;
+          description = "terminate connection if n LCP echo-requests are sent without receiving a valid LCP echo-reply";
+        };
+      };
+      debug = mkOption {
+        description = "log the contents of all control packets sent or received";
+        default = false;
+        type = types.bool;
       };
       ppp-options = mkOption {
         type = types.listOf types.str;
