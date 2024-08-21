@@ -129,12 +129,11 @@
 
 
 (fn unix-socket [name]
-  (let [addr (string.pack "=Hz" AF_LOCAL name)]
-    (case (ll.socket AF_LOCAL SOCK_STREAM 0)
-      fd (case (ll.bind fd addr)
-           0 (doto fd (ll.listen 32))
-           (nil err) (values nil err))
-      (nil err) (values nil err))))
+  (let [addr (string.pack "=Hz" AF_LOCAL name)
+        fd (check-errno (ll.socket AF_LOCAL SOCK_STREAM 0))]
+    (check-errno (ll.bind fd addr))
+    (check-errno (ll.listen fd 32))
+    fd))
 
 (fn pollfds-for [fds]
   (icollect [_ v (ipairs fds)]
@@ -173,10 +172,10 @@
     (nil err) (do (print err) false)))
 
 (fn open-netlink [groups]
-  (match (ll.socket AF_NETLINK SOCK_RAW NETLINK_KOBJECT_UEVENT)
-    fd (doto fd (ll.bind (string.pack "I2I2I4I4" ; family pad pid groups
-                                      AF_NETLINK 0 0 groups)))
-    (nil errno) (values nil errno)))
+  (let [fd (check-errno (ll.socket AF_NETLINK SOCK_RAW NETLINK_KOBJECT_UEVENT))]
+    (check-errno (ll.bind fd (string.pack "I2I2I4I4" ; family pad pid groups
+                                          AF_NETLINK 0 0 groups)))
+    fd))
 
 (fn event-loop []
   (let [fds {}]
