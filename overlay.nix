@@ -120,14 +120,28 @@ extraPkgs // {
       nettle = null;
     };
 
-  dropbear = prev.dropbear.overrideAttrs (o: {
-    postPatch = ''
-     (echo '#define DSS_PRIV_FILENAME "/run/dropbear/dropbear_dss_host_key"'
-      echo '#define RSA_PRIV_FILENAME "/run/dropbear/dropbear_rsa_host_key"'
-      echo '#define ECDSA_PRIV_FILENAME "/run/dropbear/dropbear_ecdsa_host_key"'
-      echo '#define ED25519_PRIV_FILENAME "/run/dropbear/dropbear_ed25519_host_key"') > localoptions.h
-    '';
-  });
+  dropbear = crossOnly prev.dropbear
+    (d: d.overrideAttrs (o: rec {
+      version = "2024.85";
+      src = final.fetchurl {
+        url = "https://matt.ucc.asn.au/dropbear/releases/dropbear-${version}.tar.bz2";
+        sha256 = "sha256-hrA2xDOmnYnOUeuuM11lxHc4zPkNE+XrD+qDLlVtpQI=";
+      };
+      patches =
+        # need to update nixpkgs patch for new version of dropbear
+        let passPath = final.runCommand "pass-path" {} ''
+        sed < ${builtins.head o.patches} -e 's,svr-chansession.c,src/svr-chansession.c,g' > $out
+      '';
+        in [
+          passPath
+        ];
+      postPatch = ''
+       (echo '#define DSS_PRIV_FILENAME "/run/dropbear/dropbear_dss_host_key"'
+        echo '#define RSA_PRIV_FILENAME "/run/dropbear/dropbear_rsa_host_key"'
+        echo '#define ECDSA_PRIV_FILENAME "/run/dropbear/dropbear_ecdsa_host_key"'
+        echo '#define ED25519_PRIV_FILENAME "/run/dropbear/dropbear_ed25519_host_key"') > localoptions.h
+      '';
+    }));
 
   elfutils = crossOnly prev.elfutils
     (d: let e = d.overrideAttrs(o: {
