@@ -19,6 +19,7 @@ in {
       type = liminix.lib.types.serviceDefn;
     };
   };
+  config.programs.busybox.options.FEATURE_FANCY_ECHO = "y";
   config.system.service = {
     ssh = config.system.callService ./ssh.nix {
       address = mkOption {
@@ -40,6 +41,16 @@ in {
       allowRemoteConnectionToForwardedPorts = mkOption {
         type = types.bool; default = false;
         description = "Allow remote hosts to connect to local forwarded ports (by default they are bound to loopback)";
+      };
+      authorizedKeys = mkOption {
+        type = types.nullOr (types.attrsOf (types.listOf types.nonEmptyStr));
+        example = {
+          root = ["ssh-rsa AAAAB3N...aZaZ"];
+          alice = ["ssh-rsa AAAAB3N...qS4r"];
+          bob = [];
+        };
+        default = null;
+        description = "Authorized SSH public keys for each username. If this optin is provided it overrides any keys found in /home/{username}/.ssh";
       };
       extraConfig = mkOption {
         type = types.separatedString " ";

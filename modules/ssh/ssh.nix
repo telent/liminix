@@ -3,10 +3,11 @@
 , dropbear
 , lib
 }:
-p :
+{authorizedKeys, ...} @ p :
 let
+  name = "sshd";
   inherit (liminix.services) longrun;
-  inherit (lib) concatStringsSep;
+  inherit (lib) concatStringsSep mapAttrs mapAttrsToList;
   options =
     [
       "-e" #  pass environment to child
@@ -21,19 +22,34 @@ let
     (lib.optional (! p.allowLocalPortForward) "-j") ++
     (lib.optional (! p.allowRemotePortForward) "-k") ++
     (lib.optional (! p.allowRemoteConnectionToForwardedPorts) "-a") ++
+    (lib.optionals (authorizedKeys != null)
+      ["-U" "/run/${name}/authorized_keys/%n"]) ++
     [(if p.address != null
       then "-p ${p.address}:${p.port}"
       else "-p ${builtins.toString p.port}")] ++
     [p.extraConfig];
+  authKeysConcat =
+    if authorizedKeys != null
+    then mapAttrs
+      (n : v : concatStringsSep "\\n" v)
+      authorizedKeys
+    else {};
 in
 longrun {
-  name = "sshd";
+  inherit name;
   # we need /run/dropbear to point to hostkey storage, as that
   # pathname is hardcoded into the binary.
   # env -i clears the environment so we don't pass anything weird to
   # ssh sessions
   run = ''
     ln -s $(mkstate dropbear) /run
+    mkdir -p /run/${name}/authorized_keys
+    ${concatStringsSep "\n"
+      (mapAttrsToList
+        (n : v : "echo -e '${v}' > /run/${name}/authorized_keys/${n} ")
+        authKeysConcat
+      )
+     }
     . /etc/profile # sets PATH but do we need this?  it's the same file as ashrc
     exec env -i ENV=/etc/ashrc PATH=$PATH ${dropbear}/bin/dropbear ${concatStringsSep " " options}
   '';

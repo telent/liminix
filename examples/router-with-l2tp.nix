@@ -184,7 +184,11 @@ in rec {
     dependencies = [ config.services.hostname ];
   };
 
-  services.sshd = svc.ssh.build { };
+  services.sshd = svc.ssh.build {
+    authorizedKeys = {
+      root = rsecrets.root.openssh.authorizedKeys.keys;
+    };
+  };
 
   services.lns-address = let
     ns = "$(output_word ${services.bootstrap-dhcpc} dns 1)";
