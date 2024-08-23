@@ -1,0 +1,386 @@
+commit bd51aae2e40814ac2ae5801fd9f83f6a4a886fb1
+Author: Daniel Barlow <dan@telent.net>
+Date:   Fri Aug 23 11:33:24 2024 +0100
+
+    add -U otion to set path to authorized_keys file
+    
+    based on https://github.com/mkj/dropbear/pull/35
+    by Salvador Fandino sfandino@yahoo.com
+    
+    - Allow authorized keys inside dirs with the sticky bit set
+    
+    - Add option -U for customizing authorized_keys path
+    
+    - Updated for dropbear 2024.85 (source files moved to src/)
+    
+    - allow %u, %d, %n "format specifiers" in pathname so that the user's
+      username/homedir/uid can be embedded into the path
+
+diff --git a/Makefile.in b/Makefile.in
+index 5ebfca2..686fbfb 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -51,7 +51,7 @@ COMMONOBJS = $(patsubst %,$(OBJ_DIR)/%,$(_COMMONOBJS))
+ _SVROBJS=svr-kex.o svr-auth.o sshpty.o \
+ 		svr-authpasswd.o svr-authpubkey.o svr-authpubkeyoptions.o svr-session.o svr-service.o \
+ 		svr-chansession.o svr-runopts.o svr-agentfwd.o svr-main.o svr-x11fwd.o\
+-		svr-tcpfwd.o svr-authpam.o
++		svr-tcpfwd.o svr-authpam.o pathexpand.o
+ SVROBJS = $(patsubst %,$(OBJ_DIR)/%,$(_SVROBJS))
+ 
+ _CLIOBJS=cli-main.o cli-auth.o cli-authpasswd.o cli-kex.o \
+diff --git a/manpages/dropbear.8 b/manpages/dropbear.8
+index bdb2ea0..c8d450d 100644
+--- a/manpages/dropbear.8
++++ b/manpages/dropbear.8
+@@ -29,6 +29,9 @@ or automatically with the '-R' option. See "Host Key Files" below.
+ .B \-R
+ Generate hostkeys automatically. See "Host Key Files" below.
+ .TP
++.B \-U \fIauthorized_keys
++Absolute pathname to file containing authorized user keys. May contain the sequences %d, %n, %u which are expanded to the user's home directory, username and numeric uid respectively. Default '%d/.ssh/authorized_keys'.
++.TP
+ .B \-F
+ Don't fork into background.
+ .TP
+diff --git a/src/pathexpand.c b/src/pathexpand.c
+new file mode 100644
+index 0000000..2028733
+--- /dev/null
++++ b/src/pathexpand.c
+@@ -0,0 +1,132 @@
++#include <limits.h>
++#include <string.h>
++#include <stdio.h>
++
++#ifdef TEST_PATHEXPAND
++
++/* to run tests:
++  gcc -Wall -o pathexpand -D TEST_PATHEXPAND=1 src/pathexpand.c && ./pathexpand
++*/
++
++char * pathexpand(char *relfilename);
++
++
++#define m_malloc(c) malloc(c)
++#define m_strdup(c) strdup(c)
++
++struct session {
++    struct AuthState {
++	char * pw_dir;
++	char * pw_name;
++	uid_t pw_uid;
++    } authstate;
++};
++
++struct session ses = {
++    .authstate = {
++	.pw_dir = "/home/dan",
++	.pw_name = "dan",
++	.pw_uid = 12345,
++    }
++};
++
++int exit_status = 0;
++
++int expect_expansion(char * input, char * expected) {
++    char *actual = pathexpand(input);
++    if(strcmp(actual, expected) != 0) {
++	printf("expected %s for %s, got %s\n", expected, input, actual);
++	exit_status++;
++    }
++    free(actual);
++    return exit_status;
++}
++
++int main(int argc, char *argv[]) {
++    for(int i = 1; i < argc; i++) {
++	char *actual =  pathexpand(argv[i]);
++	printf("%s => %s\n", argv[i], pathexpand(argv[i]));
++	free(actual);
++    }
++
++    /* a string without % is unaltered */
++    expect_expansion("hello", "hello");
++
++    /* discards single trailing % */
++    expect_expansion("hello%", "hello");
++
++    /* %% is transformed to % */
++    expect_expansion("hello%%", "hello%");
++    expect_expansion("hello%%goodbye", "hello%goodbye");
++
++    /* %u is transformed to uid */
++    expect_expansion("/run/user/%u/authorized_keys", "/run/user/12345/authorized_keys");
++    /* % sequences work when at start of string */
++    expect_expansion("%u/authorized_keys", "12345/authorized_keys");
++
++    /* %d expands to home directory */
++    expect_expansion("%d/.ssh", "/home/dan/.ssh");
++
++    /* %n expands to username */
++    expect_expansion("/tmp/%n/.ssh", "/tmp/dan/.ssh");
++
++    /* unrecognised specifiers are discarded */
++    expect_expansion("/hi/%q/.ssh", "/hi//.ssh");
++
++    exit(exit_status);
++}
++
++#else
++#include "session.h"
++#include "debug.h"
++#endif
++#define NUMLEN(c) strlen(#c)
++
++char * pathexpand(char *relfilename)
++{
++    char * filename;
++    int len;
++
++    len = strlen(relfilename);
++    for(char *p = relfilename; p; p = strchr(p, '%')) {
++	switch(*(p+1)) {
++	case 'd': len += strlen(ses.authstate.pw_dir); break;
++	case 'n': len += strlen(ses.authstate.pw_name); break;
++	case 'u': len += NUMLEN(INT_MAX); break;
++	}
++	if(*(p+1) == '\0') break;
++	p=p+2;
++    }
++    filename = m_malloc(len+1);
++    filename[0] = '\0';
++
++    char *start = relfilename;
++    char *out = filename;
++    char *p = relfilename;
++    do {
++	p = strchrnul(start, '%');
++	strncat(out, start, p - start);
++
++	if(*p == '\0') break;
++
++	switch(*(p+1)) {
++	case '\0':
++	    p++; break;
++	case 'd':
++	    strcat(out, ses.authstate.pw_dir); break;
++	case 'n':
++	    strcat(out, ses.authstate.pw_name); break;
++	case 'u':
++	    snprintf(out + strlen(out),
++		     NUMLEN(INT_MAX),
++		     "%d",
++		     ses.authstate.pw_uid);
++	    break;
++	case '%':
++	    strcat(out, "%"); break;
++	}
++	start = p+2;
++    }
++    while (*p);
++    return filename;		/* caller must free */
++}
+diff --git a/src/runopts.h b/src/runopts.h
+index 1c88b5c..707008f 100644
+--- a/src/runopts.h
++++ b/src/runopts.h
+@@ -128,7 +128,8 @@ typedef struct svr_runopts {
+ 	char * pidfile;
+ 
+ 	char * forced_command;
+-	char* interface;
++	char * authkeysfile;
++	char * interface;
+ 
+ #if DROPBEAR_PLUGIN
+ 	/* malloced */
+diff --git a/src/svr-authpubkey.c b/src/svr-authpubkey.c
+index 5d298cb..54502f4 100644
+--- a/src/svr-authpubkey.c
++++ b/src/svr-authpubkey.c
+@@ -73,7 +73,7 @@
+ 
+ static int checkpubkey(const char* keyalgo, unsigned int keyalgolen,
+ 		const unsigned char* keyblob, unsigned int keybloblen);
+-static int checkpubkeyperms(void);
++static int checkpubkeyperms(char *filename, char *base);
+ static void send_msg_userauth_pk_ok(const char* sigalgo, unsigned int sigalgolen,
+ 		const unsigned char* keyblob, unsigned int keybloblen);
+ static int checkfileperm(char * filename);
+@@ -431,6 +431,7 @@ out:
+ 	return ret;
+ }
+ 
++extern char *pathexpand(char *input);
+ 
+ /* Checks whether a specified publickey (and associated algorithm) is an
+  * acceptable key for authentication */
+@@ -458,19 +459,12 @@ static int checkpubkey(const char* keyalgo, unsigned int keyalgolen,
+ 		dropbear_exit("Failed to set euid");
+ 	}
+ #endif
++	filename = pathexpand(svr_opts.authkeysfile);
++
+ 	/* check file permissions, also whether file exists */
+-	if (checkpubkeyperms() == DROPBEAR_FAILURE) {
+-		TRACE(("bad authorized_keys permissions, or file doesn't exist"))
++	if (checkpubkeyperms(filename, ses.authstate.pw_dir) == DROPBEAR_FAILURE) {
++		TRACE(("bad authorized keys permissions on %s, or file doesn't exist", filename))
+ 	} else {
+-		/* we don't need to check pw and pw_dir for validity, since
+-		 * its been done in checkpubkeyperms. */
+-		len = strlen(ses.authstate.pw_dir);
+-		/* allocate max required pathname storage,
+-		 * = path + "/.ssh/authorized_keys" + '\0' = pathlen + 22 */
+-		filename = m_malloc(len + 22);
+-		snprintf(filename, len + 22, "%s/.ssh/authorized_keys",
+-					ses.authstate.pw_dir);
+-
+ 		authfile = fopen(filename, "r");
+ 		if (!authfile) {
+ 			TRACE(("checkpubkey: failed opening %s: %s", filename, strerror(errno)))
+@@ -486,7 +480,7 @@ static int checkpubkey(const char* keyalgo, unsigned int keyalgolen,
+ 	if (authfile == NULL) {
+ 		goto out;
+ 	}
+-	TRACE(("checkpubkey: opened authorized_keys OK"))
++	TRACE(("checkpubkey: opened %s OK", filename))
+ 
+ 	line = buf_new(MAX_AUTHKEYS_LINE);
+ 	line_num = 0;
+@@ -524,53 +518,47 @@ out:
+ 
+ /* Returns DROPBEAR_SUCCESS if file permissions for pubkeys are ok,
+  * DROPBEAR_FAILURE otherwise.
+- * Checks that the user's homedir, ~/.ssh, and
+- * ~/.ssh/authorized_keys are all owned by either root or the user, and are
++ * Checks filename and its parent directories recursively until the
++ * base directory (usually ~/) or one of its ancestors (up to /) is
++ * reached.
++ * The files and directories must be all owned by root or the user, and be
+  * g-w, o-w */
+-static int checkpubkeyperms() {
+-
+-	char* filename = NULL;
++static int checkpubkeyperms(char *filename, char *base) {
++	char* path = NULL;
+ 	int ret = DROPBEAR_FAILURE;
+ 	unsigned int len;
+ 
+-	TRACE(("enter checkpubkeyperms"))
+-
+-	if (ses.authstate.pw_dir == NULL) {
+-		goto out;
+-	}
++	TRACE(("enter checkpubkeyperms(%s, %s)", filename, base))
+ 
+-	if ((len = strlen(ses.authstate.pw_dir)) == 0) {
++	if ((base == NULL) || (base[0] != '/') ||
++	    (filename == NULL) || (filename[0] != '/')) {
++		/* both filename and base must be absolute paths */
+ 		goto out;
+ 	}
+ 
+-	/* allocate max required pathname storage,
+-	 * = path + "/.ssh/authorized_keys" + '\0' = pathlen + 22 */
+-	len += 22;
+-	filename = m_malloc(len);
+-	strlcpy(filename, ses.authstate.pw_dir, len);
++	len = strlen(filename);
++	path = m_strdup(filename);
+ 
+-	/* check ~ */
+-	if (checkfileperm(filename) != DROPBEAR_SUCCESS) {
+-		goto out;
+-	}
+-
+-	/* check ~/.ssh */
+-	strlcat(filename, "/.ssh", len);
+-	if (checkfileperm(filename) != DROPBEAR_SUCCESS) {
+-		goto out;
+-	}
++	while (checkfileperm(len ? path : "/") == DROPBEAR_SUCCESS) {
++		/* check if we are on base trail and if this is the
++		 * case, return success */
++		if ((strncmp(base, path, len) == 0) &&
++		    (!len || (base[len] == '\0') || (base[len] == '/'))) {
++			ret = DROPBEAR_SUCCESS;
++			break;
++		}
+ 
+-	/* now check ~/.ssh/authorized_keys */
+-	strlcat(filename, "/authorized_keys", len);
+-	if (checkfileperm(filename) != DROPBEAR_SUCCESS) {
+-		goto out;
++		/* look for parent directory */
++		while (--len) {
++			if (path[len] == '/') {
++				path[len] = '\0';
++				break;
++			}
++		}
+ 	}
+ 
+-	/* file looks ok, return success */
+-	ret = DROPBEAR_SUCCESS;
+-
+ out:
+-	m_free(filename);
++	m_free(path);
+ 
+ 	TRACE(("leave checkpubkeyperms"))
+ 	return ret;
+@@ -596,7 +584,9 @@ static int checkfileperm(char * filename) {
+ 		TRACE(("wrong ownership"))
+ 	}
+ 	/* check permissions - don't want group or others +w */
+-	if (filestat.st_mode & (S_IWGRP | S_IWOTH)) {
++	/* (unless sticky dir, which is allowed) */
++	if ((filestat.st_mode & (S_IWGRP | S_IWOTH)) &&
++	    !(S_ISDIR(filestat.st_mode) && (filestat.st_mode & S_ISVTX))) {
+ 		badperm = 1;
+ 		TRACE(("wrong perms"))
+ 	}
+diff --git a/src/svr-runopts.c b/src/svr-runopts.c
+index c4f83c1..faddfa2 100644
+--- a/src/svr-runopts.c
++++ b/src/svr-runopts.c
+@@ -147,6 +147,7 @@ void svr_getopts(int argc, char ** argv) {
+ 	char* maxauthtries_arg = NULL;
+ 	char* reexec_fd_arg = NULL;
+ 	char* keyfile = NULL;
++	char* authkeysfile = NULL;
+ 	char c;
+ #if DROPBEAR_PLUGIN
+         char* pubkey_plugin = NULL;
+@@ -173,6 +174,8 @@ void svr_getopts(int argc, char ** argv) {
+ 	svr_opts.hostkey = NULL;
+ 	svr_opts.delay_hostkey = 0;
+ 	svr_opts.pidfile = expand_homedir_path(DROPBEAR_PIDFILE);
++	svr_opts.authkeysfile = "%d/.ssh/authorized_keys";
++
+ #if DROPBEAR_SVR_LOCALANYFWD
+ 	svr_opts.nolocaltcp = 0;
+ #endif
+@@ -322,6 +325,9 @@ void svr_getopts(int argc, char ** argv) {
+ 				case 'u':
+ 					/* backwards compatibility with old urandom option */
+ 					break;
++				case 'U':
++					next = &authkeysfile;
++					break;
+ #if DROPBEAR_PLUGIN
+                                 case 'A':
+                                         next = &pubkey_plugin;
+@@ -372,6 +378,10 @@ void svr_getopts(int argc, char ** argv) {
+ 				addhostkey(keyfile);
+ 				keyfile = NULL;
+ 			}
++			if (authkeysfile) {
++				svr_opts.authkeysfile = m_strdup(authkeysfile);
++				authkeysfile = NULL;
++			}
+ 		}
+ 	}
+ 

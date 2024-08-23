@@ -134,6 +134,7 @@ extraPkgs // {
       '';
         in [
           passPath
+          ./pkgs/dropbear/add-authkeyfile-option.patch
         ];
       postPatch = ''
        (echo '#define DSS_PRIV_FILENAME "/run/dropbear/dropbear_dss_host_key"'
