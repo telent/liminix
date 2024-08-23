@@ -4564,10 +4564,77 @@ introduce uevent-watcher command, update test to use it
 
 make mount service use it
 
+
+
+
 Tue Apr 16 18:59:25 BST 2024
 
 Another idea for maybe-not-now: tftp local/peer addresses could be
 provided as top-level params (e.g. to nix-build).
+
+Wednesday
+
+Here's irony: this doesn't work with arhcive when the disk is already
+plugged at boot time because mdevd-coldplug has already run by the
+time uevent-watch has started. Perhaps it turns out after all that we
+do need to be looking at state not events? (Not that we'd ever really
+believed otherwise but it hadn't been apparent so far)
+
+
+options
+
+- we could delay coldplugd to later in boot process. Don't know how:
+  it would have to depend on all trigger services.  (Actually this
+  is kind-of possible as they're all marked isTrigger)
+
+- we could make uevent-watch look in sysfs for matches before it opens
+  netlink socket. This would be an in-process recursive walk of sysfs
+  reading all the uevent files, which may or may not be an improvment
+  on having multiple mdevd-coldplug processes do a recursive walk
+  of sysfs writing all the uevent files so that they trigger events
+  for uevent-watch to pick up.
+
+- we could construct some kind of queryable sysfs database so that
+  all the watchers could use the same source of state, and we could
+  make mdevd-coldplug depend on its presence.
+
+Favouring option 3 as cleanest, and actually it doesn't need to read sysfs
+if it gets all the coldplug events.
+
+
+for each event
+ parse into path and attributes
+ paths[event.path] += event.attributes # only if add/change
+ do something with indexes to make queries cheaper
+
+a first guess for indices would be to index everything:
+
+index[attribute.name][attribute.value] +=  event
+
+and then throw away the indices that are useless: let's say, the
+ones with more than 10% of events (we can tune this).
+
+To query, look at query field names and first get the corresponding
+index that (1) exists; (2) has the smallest number of values, then
+scan through that looking for paths that match on the other fields
+
+We don't need to be ludicrously fast because there is probably some
+human event here that triggers this (disk added, network device
+unplugged). We don't want to use all the RAM in the world, though.
+Maybe 10% is too much.
+
+
+We can probably TDD the hell out of this.
+
+How should we provide the query interface? Needs to be some kind of
+IPC, like a socket.
+
+----
+
+Could we do something quick in the meantime so I can make arhcive work
+again? maybe add a second mdevd-coldplug oneshot that depends on our
+mount service
+
 
 Wed Apr 17 18:57:49 BST 2024
 
@@ -5658,3 +5725,144 @@ wpa_passphrase={{
 builtins.toJSON is not the "correct" quoting regime for Lua strings,
 but it's sufficient for printable ascii, and using unprintable
 characters in Nix strings is asking for trouble in the first place
+
+Tue Aug 13 18:37:59 BST 2024
+
+next thing is secret-watcher service
+
+svc.secret-watcher.build {
+  watch = { service = config.services.secrets; path= "wlan/telent5"; };
+  service = svc.hostapd.build {
+    params = {
+      # ....
+      wpa_passphrase = {service= config.services.secrets; path= "wlan/telent5/wpa_passphrase"};
+    };
+  };
+  action = "restart"; # or "sighup" or "stop-start" or ?
+}
+
+we can implement this using the same output watching thing as acquire-*.fnl
+use
+
+- a fennel script that opens the service and calls events
+- when an event path matches, do the action
+
+[ should the watched service do this restart thing itself? ]
+
+watch-outputs -r controlled-service watched-service path1 path2 ...
+[-r or -R or -s n to send that signal number ]
+
+
+TODO stack
+
+1) should we move all of the veneer-on-s6 scripts into a single package? s6-rc-up-tree, s6-rc-round-robin, watch-outputs, output-template
+
+2) convert all writeFennelScript calls to writeFennel
+
+3) implement if-modified-since in http-fstree
+
+Wed Aug 14 23:00:12 BST 2024
+
+we have a watch-outputs program, just need to hook it up to services
+that need restarting
+
+if we follow the pattern that health-check uses, define a service
+that runs a script to do
+
+ s6-svwait -U /run/service/${name}
+ watch-outputs -r ${name} .....
+
+and then insert it into the dependencies of the service that needs
+restarting
+
+Sat Aug 17 22:25:44 BST 2024
+
+hostapd is wrapping itself in a watch-outputs, so it restarts
+when the secrets change. TODO
+
+[not worth it] 1) be smarter about the watched paths? e.g. find common prefixes?
+
+[done] 2) don't need to wrap at all if there were no secrets
+
+[done] 3) implement different kinds of restart
+
+4) extend to other services
+- dnsmasq
+[done] - pppoe / l2tp
+- ssh keys
+
+5) other sources
+- local filesystem
+- local filesystem with tang unlocking
+
+6) should we send authorization header?
+
+7) install on router
+
+Tue Aug 20 22:45:04 BST 2024
+
+pppd is different because we do the stuff on the command line instead
+of using a config file.  Though I suppose we could convert to a config
+file if it makes it simpler to reuse the template code, and that would
+mean that secrets were in the filesystem instead of exposed on the
+command line
+
+Wed Aug 21 23:28:41 BST 2024
+
+We may need to patch dropbear to make it look for authorized keys in
+somewhere under /run that we can control. Or we could have a separate
+dropbearpubkeyagent service that overwrites those files when things
+change (but only if home is writable, which it isn't). Or we could install
+those files as symlinks to writable storage
+
+https://github.com/fabriziobertocci/dropbear-epka useful?
+
+Fri Aug 23 11:51:34 BST 2024
+
+Wrote a patch to dropbear that permits us to -U /run/dropbear/authorized_keys/%n
+
+We need to write dropbearpubkeyagent service, which listens alongside
+the ssh service to create those files when secrets change. it doesn't need
+to interact with the actual sshd, but we _do_ need to invoke the
+sshd with -U if keys-from-secrets were requested
+
+we need somewhere to specify the secrets path to the keys
+
+sshd = svc.ssh.build {
+  port = 2222;
+  authorizedKeys = {
+    service = config.services.secrets;
+    path = "ssh/authorized_keys";
+  };
+}
+
+will
+
+ - start the pubkey watcher service
+ - add it as a dependency of sshd service
+
+vaguely uneasy about the difference between how we reference a
+directory full of secrets here and how we reference a single static
+secret in e.g pppoe. But maybe it's ok. the output reference just says
+where the value is, it's up to the implementing service script to say
+how it gets converted to useful form
+
+How do we reconcile this with config.users, which also has ssh auth
+keys? Maybe we just say it overrides.
+
+What if someone provided static data for authorizedKeys?
+(1) we would want it to be a attrset not a string
+ (how do we distinguish an attrset from a secret reference, hmm?)
+
+(2) we would convert it to  /run/${name}/authorized_keys/ and use -U
+ anyway
+
+[done] - make ssh service accept keys as a param, use -U to point dropbear at them
+- turn replacable into a function which takes a param and returns
+ service or path
+- replacable type definition  takes a param to indicate the "underlying"
+type: i.e. an attr can be replacable int or replacable attrset, not
+just replacable string
+- write fennel script that watches a secret ref and writes authorized
+keys when it changes
+- destructure args in ssh.nix
