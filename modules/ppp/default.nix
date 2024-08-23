@@ -40,12 +40,12 @@ in {
         description = "ethernet interface to run PPPoE over";
       };
       username = mkOption {
-        type = types.nullOr liminix.lib.types.replacable;
+        type = types.nullOr (liminix.lib.types.replacable types.str);
         default = null;
         description = "username";
       };
       password = mkOption {
-        type = types.nullOr liminix.lib.types.replacable;
+        type = types.nullOr (liminix.lib.types.replacable types.str);
         default = null;
         description = "password";
       };
@@ -83,12 +83,12 @@ in {
         description = "hostname or address of the L2TP network server";
       };
       username = mkOption {
-        type = types.nullOr liminix.lib.types.replacable;
+        type = types.nullOr (liminix.lib.types.replacable types.str);
         default = null;
         description = "username";
       };
       password = mkOption {
-        type = types.nullOr liminix.lib.types.replacable;
+        type = types.nullOr (liminix.lib.types.replacable types.str);
         default = null;
         description = "password";
       };
@@ -116,6 +116,7 @@ in {
       };
       ppp-options = mkOption {
         type = types.listOf types.str;
+        default = [];
         description = "options supplied on ppp command line";
       };
     };

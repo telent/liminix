@@ -14,6 +14,9 @@ in {
       uimage = callPackage ./kernel/uimage.nix { };
       kernel = callPackage ./kernel { };
     };
+    outputRef = service : path :
+      let h = { inherit service path; };
+      in x : h.${x};
     callService = path : parameters :
       let pkg = callPackage path {};
           checkTypes = t : p : typeChecked (builtins.toString path) t p;
@@ -43,18 +46,10 @@ in {
             description = "parametrisable s6-rc service definition";
             check = x: lib.isAttrs x && x ? parameters && x ? build;
           };
-          replacable = types.either
-            types.str
-            (types.submodule {
-              options = {
-                service = mkOption {
-                  type = service;
-                };
-                path = mkOption {
-                  type = types.str;
-                };
-              };
-            });
+          replacable = t : types.either
+            t
+            # function might return a service or a path
+            (types.functionTo types.anything);
         };
       inherit typeChecked;
     };

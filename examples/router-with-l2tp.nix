@@ -30,6 +30,7 @@
   lns = { hostname = "l2tp.aaisp.net.uk"; address = "194.4.172.12"; };
 
   inherit (pkgs.liminix.services) oneshot longrun target;
+  inherit (pkgs.liminix) outputRef;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs) serviceFns;
   svc = config.system.service;
@@ -99,53 +100,53 @@ in rec {
         localDomain = "lan";
       };
     };
-    wan = {
-      interface = let
-        secret = path: { service = config.services.secrets; inherit path; };
-        pppoe = svc.pppoe.build {
-          interface = config.hardware.networkInterfaces.wan;
-          debug = true;
-          username = secret "ppp/username";
-          password = secret "ppp/password";
-        };
-
-        l2tp =
+    wan =
+      let
+        secret = outputRef config.services.secrets;
+        username = secret "ppp/username";
+        password = secret "ppp/password";
+      in {
+        interface =
           let
-            check-address = oneshot rec {
-              name = "check-lns-address";
-              up = "grep -Fx ${lns.address} $(output_path ${services.lns-address} addresses)";
-              dependencies = [ services.lns-address ];
+            pppoe = svc.pppoe.build {
+              interface = config.hardware.networkInterfaces.wan;
+              debug = true;
+              inherit username password;
             };
-            route = svc.network.route.build {
-              via = "$(output ${services.bootstrap-dhcpc} router)";
-              target = lns.address;
-              dependencies = [services.bootstrap-dhcpc check-address];
-            };
-            l2tpd= svc.l2tp.build {
-              lns = lns.address;
-              ppp-options = [
-                "debug" "+ipv6" "noauth"
-                "name" rsecrets.l2tp.name
-                "password" rsecrets.l2tp.password
-              ];
-              dependencies = [config.services.lns-address route check-address];
-            };
-          in
-            svc.health-check.build {
-              service = l2tpd;
-              threshold = 3;
-              interval = 2;
-              healthCheck = pkgs.writeAshScript "ping-check" {} "ping 1.1.1.1";
-            };
-      in svc.round-robin.build {
-        name = "wan";
-        services = [
-          pppoe
-          l2tp
-        ];
+
+            l2tp =
+              let
+                check-address = oneshot rec {
+                  name = "check-lns-address";
+                  up = "grep -Fx ${lns.address} $(output_path ${services.lns-address} addresses)";
+                  dependencies = [ services.lns-address ];
+                };
+                route = svc.network.route.build {
+                  via = "$(output ${services.bootstrap-dhcpc} router)";
+                  target = lns.address;
+                  dependencies = [services.bootstrap-dhcpc check-address];
+                };
+                l2tpd= svc.l2tp.build {
+                  lns = lns.address;
+                  inherit username password;
+                  dependencies = [config.services.lns-address route check-address];
+                };
+              in
+                svc.health-check.build {
+                  service = l2tpd;
+                  threshold = 3;
+                  interval = 2;
+                  healthCheck = pkgs.writeAshScript "ping-check" {} "ping 1.1.1.1";
+                };
+          in svc.round-robin.build {
+            name = "wan";
+            services = [
+              pppoe
+              l2tp
+            ];
+          };
+        dhcp6.enable = true;
       };
-      dhcp6.enable = true;
-    };
 
     wireless.networks = {
       "${rsecrets.ssid}" = {
@@ -153,11 +154,8 @@ in rec {
         hw_mode = "g";
         channel = "6";
         ieee80211n = 1;
-      } // wirelessConfig //{
-        wpa_passphrase = {
-          service = config.services.secrets;
-          path = "wpa_passphrase";
-        };
+      } // wirelessConfig // {
+        wpa_passphrase = outputRef config.services.secrets "wpa_passphrase";
       };
 
       "${rsecrets.ssid}5" = rec {
@@ -170,14 +168,10 @@ in rec {
         ieee80211n = 1;
         ieee80211ac = 1;
       } // wirelessConfig // {
-        wpa_passphrase = {
-          service = config.services.secrets;
-          path = "wpa_passphrase";
-        };
+        wpa_passphrase = outputRef config.services.secrets "wpa_passphrase";
       };
     };
   };
-
 
   services.bootstrap-dhcpc = svc.network.dhcp.client.build {
     interface = config.services.wwan;

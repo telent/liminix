@@ -44,7 +44,7 @@ let
     let v = o: ({
           string = builtins.toJSON;
           int = builtins.toJSON;
-          set = (o: "output(${builtins.toJSON o.service}, ${builtins.toJSON o.path})");
+          lambda = (o: "output(${builtins.toJSON (o "service")}, ${builtins.toJSON (o "path")})");
         }.${builtins.typeOf o}) o;
     in  o: "{{ ${v o} }}";
 
