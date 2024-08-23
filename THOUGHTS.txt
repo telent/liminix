@@ -5858,11 +5858,11 @@ What if someone provided static data for authorizedKeys?
  anyway
 
 [done] - make ssh service accept keys as a param, use -U to point dropbear at them
-- turn replacable into a function which takes a param and returns
+[done] - turn replacable into a function which takes a param and returns
  service or path
-- replacable type definition  takes a param to indicate the "underlying"
+[done] - replacable type definition  takes a param to indicate the "underlying"
 type: i.e. an attr can be replacable int or replacable attrset, not
 just replacable string
 - write fennel script that watches a secret ref and writes authorized
 keys when it changes
-- destructure args in ssh.nix
+[done] - destructure args in ssh.nix
