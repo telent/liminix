@@ -3,9 +3,21 @@
 , dropbear
 , lib
 }:
-{authorizedKeys, ...} @ p :
+{
+  address,
+  allowLocalPortForward,
+  allowPasswordLogin,
+  allowPasswordLoginForRoot,
+  allowRemoteConnectionToForwardedPorts,
+  allowRemotePortForward,
+  allowRoot,
+  authorizedKeys,
+  port,
+  extraConfig
+}:
 let
   name = "sshd";
+  inherit (builtins) toString;
   inherit (liminix.services) longrun;
   inherit (lib) concatStringsSep mapAttrs mapAttrsToList;
   options =
@@ -16,18 +28,18 @@ let
       "-P /run/dropbear.pid"
       "-F" #  don't fork into background
     ] ++
-    (lib.optional (! p.allowRoot) "-w") ++
-    (lib.optional (! p.allowPasswordLogin) "-s") ++
-    (lib.optional (! p.allowPasswordLoginForRoot) "-g") ++
-    (lib.optional (! p.allowLocalPortForward) "-j") ++
-    (lib.optional (! p.allowRemotePortForward) "-k") ++
-    (lib.optional (! p.allowRemoteConnectionToForwardedPorts) "-a") ++
+    (lib.optional (! allowRoot) "-w") ++
+    (lib.optional (! allowPasswordLogin) "-s") ++
+    (lib.optional (! allowPasswordLoginForRoot) "-g") ++
+    (lib.optional (! allowLocalPortForward) "-j") ++
+    (lib.optional (! allowRemotePortForward) "-k") ++
+    (lib.optional (! allowRemoteConnectionToForwardedPorts) "-a") ++
     (lib.optionals (authorizedKeys != null)
       ["-U" "/run/${name}/authorized_keys/%n"]) ++
-    [(if p.address != null
-      then "-p ${p.address}:${p.port}"
-      else "-p ${builtins.toString p.port}")] ++
-    [p.extraConfig];
+    [(if address != null
+      then "-p ${address}:${toString port}"
+      else "-p ${toString port}")] ++
+    [extraConfig];
   authKeysConcat =
     if authorizedKeys != null
     then mapAttrs
