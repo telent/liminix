@@ -1,4 +1,4 @@
-(local { : system : assoc : split : table= } (require :anoia))
+(local { : system : assoc : split : table= : dig } (require :anoia))
 (local svc (require :anoia.svc))
 (local { : view } (require :fennel))
 (local { : kill } (require :lualinux))
@@ -21,12 +21,6 @@
     [watched-service & paths] { : watched-service
                                 :paths (split-paths paths)
                                 }))
-
-(fn dig [tree path]
-  (match path
-    [el & more] (dig (. tree el) more)
-    [el] (. tree el)
-    [] tree))
 
 (fn changed? [paths old-tree new-tree]
   (accumulate [changed? false

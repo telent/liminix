@@ -62,6 +62,12 @@
  (assert (not (table= {:a [4 5 6 7] } {:a [4 5 6 7 8]})))
  (assert (not (table= {:a [4 5 7 6] } {:a [4 5 6 7 ]}))))
 
+(fn dig [tree path]
+  (match path
+    [el & more] (dig (. tree el) more)
+    [el] (. tree el)
+    [] tree))
+
 (local
  base64-indices
  (doto [
@@ -103,6 +109,7 @@
  : assoc
  : base64url
  : basename
+ : dig
  : dirname
  : dup
  : file-exists?
