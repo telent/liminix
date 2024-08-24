@@ -88,6 +88,8 @@
 ;;    return s:sub(1, #s-pad) .. rep('=', pad)
 ;; end
 
+(fn %% [fmt ...] (string.format fmt ...))
+
 (fn base64url [s]
   "URL-safe Base64-encoded form of s (no trailing padding)"
   (let [pad (- 2 (% (- (# s) 1)  3))
@@ -118,4 +120,5 @@
  : split
  : system
  : table=
+ : %%
  }
