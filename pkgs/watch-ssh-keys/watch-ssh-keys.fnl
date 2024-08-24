@@ -1,0 +1,59 @@
+(local { : system : assoc : split : dup : table= : dig } (require :anoia))
+(local svc (require :anoia.svc))
+(import-macros { :  define-tests : expect : expect= } :anoia.assert)
+
+(fn parse-args [args]
+  (match args
+    ["-d" path & rest] (assoc (parse-args rest)
+                              :out-path path)
+    [watched-service path] { : watched-service
+                             : path }))
+
+(fn write-changes [path old-tree new-tree]
+  (when (not (table= old-tree new-tree))
+    (each [username pubkeys (pairs new-tree)]
+      (with-open [f (assert (io.open (.. path "/" username) :w))]
+        (each [_ k (ipairs pubkeys)]
+          (f:write k)
+          (f:write "\n")))))
+  (each [k v (pairs old-tree)]
+    (when (not (. new-tree k))
+      (os.remove (.. path "/" k))))
+  new-tree)
+
+(define-tests
+  (local { : file-exists? } (require :anoia))
+  (print "running tests")
+  (let [tree {
+              "dan" ["f1" "f2"]
+              "root" ["f1"]
+              }
+        out-dir (: (assert (io.popen "mktemp -d -p '' fennel-XXXXXXX" :r))  :read "l")]
+    ;; if the trees are identical, nothing is written
+    (write-changes out-dir tree tree)
+    (expect (not (file-exists? (.. out-dir "/dan"))))
+
+    ;; add an entry
+    (write-changes out-dir tree (assoc (dup tree) "geoffrey" ["rr"]))
+    (expect (file-exists? (.. out-dir "/dan")))
+    (expect= (with-open [f (io.open (.. out-dir "/geoffrey"))] (f:read "*a")) "rr\n")
+
+    ;; newly-missing entries are removed
+    (write-changes out-dir (assoc (dup tree) "geoffrey" ["rr"]) tree)
+    (expect (not (file-exists? (.. out-dir "/geoffrey"))))
+
+    (write-changes out-dir tree {})
+    (os.remove out-dir)
+    ))
+
+
+(fn run []
+  (let [{: out-path : watched-service : path } (parse-args arg)
+        dir (.. watched-service "/.outputs")
+        service (assert (svc.open dir))]
+    (accumulate [tree (service:output path)
+                 v (service:events)]
+      (write-changes out-path tree (service:output path)))))
+
+
+{ : run }

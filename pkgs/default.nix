@@ -122,6 +122,7 @@ in {
   uevent-watch = callPackage ./uevent-watch { };
   usb-modeswitch = callPackage ./usb-modeswitch { };
   watch-outputs = callPackage ./watch-outputs { };
+  watch-ssh-keys = callPackage ./watch-ssh-keys { };
   writeAshScript = callPackage ./write-ash-script { };
   writeAshScriptBin = callPackage ./write-ash-script/bin.nix { };
   writeFennel = callPackage ./write-fennel { };
