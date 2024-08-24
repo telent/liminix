@@ -18,4 +18,8 @@
                (.. "\nexpected " ve# "\ngot " va#)
                ))))
 
-{ : expect : expect= }
+(fn define-tests [& body]
+  (when _G.RUNNING_TESTS
+    `(do ,(unpack body))))
+
+{ : define-tests : expect : expect=  }
