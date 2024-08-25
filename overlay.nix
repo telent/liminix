@@ -246,31 +246,35 @@ extraPkgs // {
 
   pppBuild = prev.ppp;
 
-  qemuLim = let q = prev.qemu.overrideAttrs (o: {
-    patches = o.patches ++ [
-      ./pkgs/qemu/arm-image-friendly-load-addr.patch
-      (final.fetchpatch {
-        url = "https://lore.kernel.org/qemu-devel/20220322154658.1687620-1-raj.khem@gmail.com/raw";
-        hash = "sha256-jOsGka7xLkJznb9M90v5TsJraXXTAj84lcphcSxjYLU=";
-      })
-    ];
-  }); in q.override {
-    nixosTestRunner = true;
-    hostCpuTargets = map (f: "${f}-softmmu") [
-      "arm" "aarch64" "mips" "mipsel"
-    ];
-    sdlSupport = false;
-    numaSupport = false;
-    seccompSupport = false;
-    usbredirSupport = false;
-    libiscsiSupport = false;
-    tpmSupport = false;
-    uringSupport = false;
-    capstoneSupport = false;
-
-    texinfo = null;
-  };
-
+  qemuLim =
+    let
+      inherit (final) lib;
+      q = prev.qemu.overrideAttrs (o: {
+        patches = o.patches ++ [
+          ./pkgs/qemu/arm-image-friendly-load-addr.patch
+          (final.fetchpatch {
+            url = "https://lore.kernel.org/qemu-devel/20220322154658.1687620-1-raj.khem@gmail.com/raw";
+            hash = "sha256-jOsGka7xLkJznb9M90v5TsJraXXTAj84lcphcSxjYLU=";
+          })
+        ];
+      });
+      overrides = {
+        nixosTestRunner = true;
+        hostCpuTargets = map (f: "${f}-softmmu") [
+          "arm" "aarch64" "mips" "mipsel"
+        ];
+        sdlSupport = false;
+        numaSupport = false;
+        seccompSupport = false;
+        usbredirSupport = false;
+        libiscsiSupport = false;
+        tpmSupport = false;
+        uringSupport = false;
+        capstoneSupport = false;
+      } // lib.optionalAttrs (lib.versionOlder lib.version "24.11") {
+        texinfo = null;
+      };
+    in q.override overrides;
   rsyncSmall =
     let
       r = prev.rsync.overrideAttrs (o: {
