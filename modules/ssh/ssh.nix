@@ -2,6 +2,7 @@
   liminix
 , dropbear
 , lib
+, watch-ssh-keys
 }:
 {
   address,
@@ -17,9 +18,10 @@
 }:
 let
   name = "sshd";
-  inherit (builtins) toString;
+  inherit (builtins) toString typeOf;
   inherit (liminix.services) longrun;
   inherit (lib) concatStringsSep mapAttrs mapAttrsToList;
+  keydir = "/run/${name}/authorized_keys";
   options =
     [
       "-e" #  pass environment to child
@@ -34,18 +36,26 @@ let
     (lib.optional (! allowLocalPortForward) "-j") ++
     (lib.optional (! allowRemotePortForward) "-k") ++
     (lib.optional (! allowRemoteConnectionToForwardedPorts) "-a") ++
-    (lib.optionals (authorizedKeys != null)
-      ["-U" "/run/${name}/authorized_keys/%n"]) ++
+    (lib.optionals (authorizedKeys != null) ["-U" "${keydir}/%n"]) ++
     [(if address != null
       then "-p ${address}:${toString port}"
       else "-p ${toString port}")] ++
     [extraConfig];
+  isKeyservice = typeOf authorizedKeys == "lambda";
   authKeysConcat =
-    if authorizedKeys != null
+    if authorizedKeys != null && !isKeyservice
     then mapAttrs
       (n : v : concatStringsSep "\\n" v)
       authorizedKeys
     else {};
+  keyservice = longrun {
+    name = "${name}-watch-keys";
+    run = ''
+      mkdir -p ${keydir}
+      exec ${watch-ssh-keys}/bin/watch-ssh-keys -d ${keydir} ${authorizedKeys "service"} ${authorizedKeys "path"}
+    '';
+    dependencies = [ (authorizedKeys "service") ] ;
+  };
 in
 longrun {
   inherit name;
@@ -65,4 +75,5 @@ longrun {
     . /etc/profile # sets PATH but do we need this?  it's the same file as ashrc
     exec env -i ENV=/etc/ashrc PATH=$PATH ${dropbear}/bin/dropbear ${concatStringsSep " " options}
   '';
+  dependencies = lib.optional isKeyservice keyservice;
 }

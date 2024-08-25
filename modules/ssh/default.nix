@@ -43,7 +43,7 @@ in {
         description = "Allow remote hosts to connect to local forwarded ports (by default they are bound to loopback)";
       };
       authorizedKeys = mkOption {
-        type = types.nullOr (types.attrsOf (types.listOf types.nonEmptyStr));
+        type = types.nullOr (liminix.lib.types.replacable (types.attrsOf (types.listOf types.nonEmptyStr)));
         example = {
           root = ["ssh-rsa AAAAB3N...aZaZ"];
           alice = ["ssh-rsa AAAAB3N...qS4r"];
