@@ -72,6 +72,15 @@ in rec {
     dependencies = [ services.wan-address-for-secrets ];
   };
 
+  services.ssh-keys = longrun {
+    name = "write-ssh-keys";
+    run = ''
+      mkdir -p /run/authorized_keys
+      exec ${pkgs.watch-ssh-keys}/bin/watch-ssh-keys -d /run/authorized_keys ${services.secrets} ssh/authorizedKeys
+    '';
+    dependencies = [ services.secrets ] ;
+  };
+
   services.wwan = svc.wwan.huawei-e3372.build {
     apn = "data.uk";
     username = "user";
