@@ -13,7 +13,8 @@
   (when (not (table= old-tree new-tree))
     (each [username pubkeys (pairs new-tree)]
       (with-open [f (assert (io.open (.. path "/" username) :w))]
-        (each [_ k (ipairs pubkeys)]
+        ;;  the keys are "1" "2" "3" etc, so pairs not ipairs
+        (each [_ k (pairs pubkeys)]
           (f:write k)
           (f:write "\n")))))
   (each [k v (pairs old-tree)]
