@@ -2,8 +2,11 @@ servicedir:=$(shell mktemp -d)
 
 default: fs.lua init.lua nl.lua svc.lua net/constants.lua
 
+CHECK=fs.fnl init.fnl  svc.fnl
+
 check:
 	ln -s . anoia
+	fennel ./run-tests.fnl $(CHECK)
 	fennel test.fnl
 	fennel test-svc.fnl $(servicedir)
 	test -f $(servicedir)/fish
