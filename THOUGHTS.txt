@@ -5787,9 +5787,9 @@ when the secrets change. TODO
 [done] 3) implement different kinds of restart
 
 4) extend to other services
-- dnsmasq
+[why?]- dnsmasq
 [done] - pppoe / l2tp
-- ssh keys
+[done] - ssh keys
 
 5) other sources
 - local filesystem
@@ -5798,6 +5798,9 @@ when the secrets change. TODO
 6) should we send authorization header?
 
 7) install on router
+
+8) docs/video
+
 
 Tue Aug 20 22:45:04 BST 2024
 
@@ -5854,7 +5857,7 @@ What if someone provided static data for authorizedKeys?
 (1) we would want it to be a attrset not a string
  (how do we distinguish an attrset from a secret reference, hmm?)
 
-(2) we would convert it to  /run/${name}/authorized_keys/ and use -U
+(2) we would convert it to /run/${name}/authorized_keys/ and use -U
  anyway
 
 [done] - make ssh service accept keys as a param, use -U to point dropbear at them
@@ -5863,6 +5866,79 @@ What if someone provided static data for authorizedKeys?
 [done] - replacable type definition  takes a param to indicate the "underlying"
 type: i.e. an attr can be replacable int or replacable attrset, not
 just replacable string
-- write fennel script that watches a secret ref and writes authorized
-keys when it changes
 [done] - destructure args in ssh.nix
+[done] - write fennel script that watches a secret ref and writes authorized
+keys when it changes
+[done] - update ssh service to start the watcher instead of constructing key files using echo
+
+Sun Aug 25 19:20:56 BST 2024
+
+5) other sources
+- local filesystem
+- local filesystem with tang unlocking
+
+should we use a json here, or nested directories like the outputs directly?
+I think json, then there's a single file to encrypt
+
+6) should we send authorization header?
+
+It's a form of protection against any random MOTP getting our secrets,
+but it does mean the device has to be configured with a secret as well
+as an URL, Is that OK?
+
+7) install on rotuer
+
+8) docs/video
+
+9) we're not using luaposix on the host so maybe we can drop it in
+write-fennel?
+
+Sun Aug 25 21:52:23 BST 2024
+
+It turns out that fetch-freebsd (and, therefore, http-fstree)
+can fetch file: urls, so we don't need to do anything for local files
+- except maybe rename that service?
+
+Sun Aug 25 21:55:17 BST 2024
+
+clevis-{en,de}crypt-tang are bash scripts that expect PATH to include
+jose, curl, cat. Most of the hard work seems to be done by jose
+
+Should we drag in bash (and curl ...) just to run these scripts?
+
+most of what clevis-decrypt-tang is doing is calling jose repeatedly
+to do base64 decoding and then json manipulation, then curl, then jose
+again for some actual jwk stuff. I think we could mostly rewrite this
+in fennel using rxi-json and fetch
+
+
+Wed Aug 28 09:40:41 BST 2024
+
+we have clevis-decrypt-tang but not encrypt
+
+Wed Aug 28 21:36:47 BST 2024
+
+
+new TODO
+
+1) to finish local secrets, we need a service and script that gets the
+file, decrypts it and turns it to outputs. Easiest way is to use a
+temp file in /run/${name} and then use json-to-tree: there's no
+extra risk to having the plaintext json there when it's in the
+same place anyway as fstree
+
+1.5) and test the process and write some docs
+
+2) perhaps we should use /run/services/var/${name} instead of /run/${name}
+to avoid surprise conflicts. or we could use the existing mkstate?
+
+
+3) http auth - we have netrc file support "for free", so to speak:
+fetch-freebsd looks for $NETRC or $HOME/.netrc. If we put the auth
+tokens in configuration, they will get embedded into the image and
+this will protect against leaked http server logs but not much else.
+
+Scenario: you have a LAN with untrusted devices on it, plus WAPs which
+want to get their config from a server. If the server logs leak, other
+LAN users still can't use the config URL to fetch your PPP auth data.
+
