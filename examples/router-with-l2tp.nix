@@ -68,6 +68,8 @@ in rec {
   services.secrets = svc.secrets.outboard.build {
     name = "secret-service";
     url = "http://10.0.0.1/liminix/examples/real-secrets.json";
+    username = "demo";
+    password = "demo";
     interval = 5;
     dependencies = [ services.wan-address-for-secrets ];
   };

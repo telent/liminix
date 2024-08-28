@@ -26,6 +26,15 @@ in {
         description = "source url";
         type = types.strMatching "https?://.*";
       };
+      username = mkOption {
+        description = "username for HTTP basic auth";
+        type = types.nullOr types.str;
+      };
+      password = mkOption {
+        description = "password for HTTP basic auth";
+        type = types.nullOr types.str;
+      };
+
       name = mkOption {
         description = "service name";
         type = types.str;
