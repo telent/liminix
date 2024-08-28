@@ -69,9 +69,9 @@ in {
   gen_init_cpio = callPackage ./gen_init_cpio { };
   go-l2tp = callPackage ./go-l2tp { };
   hi = callPackage ./hi { };
-  http-fstree = callPackage ./http-fstree { };
   ifwait = callPackage ./ifwait { };
   initramfs-peek = callPackage ./initramfs-peek { };
+  json-to-fstree = callPackage ./json-to-fstree { };
   kernel-backport = callPackage ./kernel-backport { };
   kmodloader = callPackage ./kmodloader { };
   levitate = callPackage ./levitate { };

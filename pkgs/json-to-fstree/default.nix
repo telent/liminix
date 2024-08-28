@@ -13,7 +13,7 @@
   rxi-json,
   stdenv
 }:
-let name = "http-fstree";
+let name = "json-to-fstree";
 in stdenv.mkDerivation {
   inherit name;
   src = ./.;
@@ -32,6 +32,6 @@ in stdenv.mkDerivation {
         linotify
       ] ;
       mainFunction = "run";
-    } ./http-fstree.fnl } $out/bin/${name}
+    } ./${name}.fnl } $out/bin/${name}
   '';
 }
