@@ -96,7 +96,7 @@
                  "application/x-www-form-urlencoded"
                  body)))
 
-(fn run []
+(fn decrypt []
   (let [b64 (base64 :url)
         raw (: (io.input) :read "*a")
         (_ _ ph undigested) (string.find raw "(.-)%.(.+)")
@@ -111,5 +111,60 @@
           rep (jwk-pub response)
           jwk (jwk-exc-noi rep tmp)]
       (print (jwe-dec jwk ph undigested)))))
+
+(fn perform-encryption [jwks url]
+  (let [enc (jose! [:jwk :use "-i-" "-r" "-u" "deriveKey" "-o-"]
+                   (json.encode jwks))
+        ;; adding a -s to jwk use will "Always output a JWKSet" which
+        ; ;presumably would make the following line redundant
+        enc_ (if enc.keys enc {:keys [enc]})]
+    (assert (= (# enc_.keys) 1)
+            (.. "Expected one exchange key, got " (# enc_.keys)))
+
+    (let [jwk (doto (. enc_.keys 1) (tset :key_ops nil) (tset :alg nil))
+          kid (josep! [:jwk :thp "-i-" "-a" (. thumbprint-algs 1)]
+                      (json.encode jwk))
+          jwe {:protected {
+                           :alg "ECDH-ES"
+                           :enc "A256GCM"
+                           :kid kid
+                           :clevis {:pin "tang"
+                                    :tang {:url url :adv jwks }}}}]
+      (josep! [:jwe :enc "-i-" "-k-" "-I-" "-c"]
+              (.. (json.encode jwe) (json.encode jwk)
+                  (: (io.input) :read "*a"))))))
+
+(fn usage []
+  (print "tangc\n=====\n")
+  (print "tangc decrypt < filename.enc # decrypt")
+  (print (%% "tangc encrypt %q # print available keys"
+             (json.encode {:url "http://tang.local"})))
+  (print (%% "tangc encrypt %q < plaintext > filename.enc # encrypt"
+             (json.encode {:thp "idGFpbiBhIHByZWJ1aWx0IGRhdGFiYXNlIGZyb20gaH"
+                           :url "http://tang.local"}))))
+
+
+(fn encrypt [cfg]
+  (let [{ : url : thp : adv } cfg
+        b64 (base64 :url)
+        adv (or adv (json.decode (http.fetch (.. url "/adv/" (or thp "")))))]
+    (assert adv.payload  "advertisement is malformed")
+    (let [jwks (json.decode (b64:decode adv.payload))
+          ver (jose! [:jwk :use "-i-" "-r" "-u" "verify" "-o-"]
+                     (json.encode jwks))]
+      (print (josep! [:jws :ver "-i" (json.encode adv) "-k-" "-a"]
+                     (json.encode ver)))
+
+      (if (and thp (search-key ver thp))
+          (print (perform-encryption jwks url))
+          (print (.. "Thumbrints of advertised keys are listed below. Set the thp attribute to preferred key\n"
+                     (josep! [:jwk :thp "-i-" "-a" (. thumbprint-algs 1)] (json.encode ver))))))))
+
+
+(fn run []
+  (case arg
+    ["decrypt"] (decrypt)
+    ["encrypt" cfg] (encrypt (json.decode cfg))
+    _ (error "usage: tangc [decrypt] | [encrypt cfg]")))
 
 { : run }
