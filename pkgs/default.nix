@@ -118,6 +118,7 @@ in {
   serviceFns = callPackage ./service-fns { };
   swconfig = callPackage ./swconfig { };
   systemconfig = callPackage ./systemconfig { };
+  tangc = callPackage ./tangc { };
   tufted = callPackage ./tufted { };
   uevent-watch = callPackage ./uevent-watch { };
   usb-modeswitch = callPackage ./usb-modeswitch { };
