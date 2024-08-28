@@ -39,8 +39,20 @@
         (error (%% "jose %q failed (exit=%d): %q"
                    (table.concat params " ") exitcode out)))))
 
+(fn josep! [params inputstr]
+  (let [(exitcode out) (jose params inputstr)]
+    (if (= exitcode 0)
+        out
+        (error (%% "jose %q failed (exit=%d): %q"
+                   (table.concat params " ") exitcode out)))))
+
 (fn has-key? [keys kid alg]
   (jose! ["jose" "jwk" "thp" "-i-" "-f" kid "-a" alg] (json.encode keys)))
+(fn search-key [keys kid]
+  (accumulate [ret nil
+               _ alg (ipairs thumbprint-algs)
+               &until ret]
+    (or ret (has-key? keys kid alg))))
 
 (fn jwk-generate [crv]
   (jose! ["jose" "jwk" "gen" "-i" (%% "{\"alg\":\"ECMR\",\"crv\":%q}" crv)] ""))
@@ -57,22 +69,15 @@
          (.. (json.encode clt) " " (json.encode eph))))
 
 (fn jwe-dec [jwk ph undigested]
-  (let [(exitcode plaintext)
-        (jose ["jose" "jwe" "dec" "-k-" "-i-"]
-              (.. (json.encode jwk) ph "." undigested))]
-    (if (= exitcode 0)
-        plaintext
-        (error (.. "Error calling jwe dec: " exitcode " / " plaintext )))))
+  (josep! [ "jwe" "dec" "-k-" "-i-"]
+          (.. (json.encode jwk) ph "." undigested)))
 
 (fn parse-jwe [jwe]
   (assert (= jwe.clevis.pin "tang") "invalid clevis.pin")
   (assert jwe.clevis.tang.adv "no advertised keys")
   (assert (>= (# jwe.kid) CLEVIS_DEFAULT_THP_LEN)
           "tang using a deprecated hash for the JWK thumbprints")
-  (let [srv (accumulate [ret nil
-                         _ alg (ipairs thumbprint-algs)
-                         &until ret]
-              (or ret (has-key? jwe.clevis.tang.adv jwe.kid alg)))]
+  (let [srv (search-key jwe.clevis.tang.adv jwe.kid)]
     {
      :kid jwe.kid
      :clt (assert jwe.epk)
