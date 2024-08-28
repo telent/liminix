@@ -14,6 +14,10 @@ in {
       description = "fetch secrets from external vault with https";
       type = liminix.lib.types.serviceDefn;
     };
+    tang = mkOption {
+      description = "fetch secrets from encrypted local pathname, using tang";
+      type = liminix.lib.types.serviceDefn;
+    };
     subscriber = mkOption {
       description = "wrapper around a service that needs notifying (e.g. restarting) when secrets change";
       type = liminix.lib.types.serviceDefn;
@@ -34,7 +38,21 @@ in {
         description = "password for HTTP basic auth";
         type = types.nullOr types.str;
       };
-
+      name = mkOption {
+        description = "service name";
+        type = types.str;
+      };
+      interval =  mkOption {
+        type = types.int;
+        default = 30;
+        description = "how often to check the source, in minutes";
+      };
+    };
+    tang = config.system.callService ./tang.nix {
+      path = mkOption {
+        description = "encrypted source pathname";
+        type = types.path;
+      };
       name = mkOption {
         description = "service name";
         type = types.str;
