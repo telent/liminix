@@ -52,7 +52,6 @@ in rec {
     dependencies = [ services.dhcpc ];
     name = "resolvconf";
     up = ''
-      . ${serviceFns}
       ( in_outputs ${name}
       for i in $(output ${services.dhcpc} dns); do
         echo "nameserver $i" > resolv.conf
@@ -93,7 +92,6 @@ in rec {
       secrets_file = oneshot rec {
         name = "rsync-secrets";
         up = ''
-          . ${serviceFns}
           (in_outputs ${name}
            echo  "backup:${secrets.rsync_secret}" > secrets)
         '';

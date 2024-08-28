@@ -60,7 +60,6 @@ in rec {
     dependencies = [ services.dhcpc ];
     name = "resolvconf";
     up = ''
-      . ${serviceFns}
       ( in_outputs ${name}
       for i in $(output ${services.dhcpc} dns); do
         echo "nameserver $i" > resolv.conf
@@ -72,7 +71,6 @@ in rec {
   services.growfs = let name = "growfs"; in oneshot {
     inherit name;
     up = ''
-      . ${serviceFns}
       device=$(grep /persist /proc/1/mountinfo | cut -f9 -d' ')
       ${pkgs.e2fsprogs}/bin/resize2fs $device
     '';

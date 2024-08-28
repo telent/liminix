@@ -137,7 +137,6 @@ in rec {
     dependencies = [ services.wan ];
     name = "resolvconf";
     up = ''
-      . ${serviceFns}
       ( in_outputs ${name}
        echo "nameserver $(output ${services.wan} ns1)" > resolv.conf
        echo "nameserver $(output ${services.wan} ns2)" >> resolv.conf

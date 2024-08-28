@@ -9,7 +9,6 @@ in longrun {
   inherit name;
   buildInputs = [ json-to-fstree ];
   run = ''
-    . ${serviceFns}
     ${optionalString (username != null) ''
       export NETRC=$(mkstate ${name})/netrc
       (echo default ; echo login ${username} ; echo password ${password} ) > $NETRC

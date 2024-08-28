@@ -26,7 +26,6 @@ longrun {
   inherit name;
   dependencies = [ interface ];
   run = ''
-    . ${serviceFns}
     ${dnsmasq}/bin/dnsmasq \
     --user=${user} \
     --domain=${domain} \

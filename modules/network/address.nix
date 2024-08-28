@@ -11,7 +11,6 @@ let
   # prefixes, or the same but different protocols
   name = "${interface.name}.a.${address}";
   up = ''
-    . ${serviceFns}
     dev=$(output ${interface} ifname)
     ip address add ${address}/${toString prefixLength} dev $dev
     (in_outputs ${name}

@@ -81,7 +81,6 @@ in {
       # 'A list of DNS server' but doesn't say what separates the
       # list members. Assuming it's a space or other IFS character
       up = ''
-        . ${serviceFns}
         ( in_outputs ${name}
         for i in $(output ${config.services.dhcpc} dns); do
           echo "nameserver $i" > resolv.conf
