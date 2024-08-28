@@ -13,23 +13,18 @@
     (pid status) (rshift (band status 0xff00) 8)
     (nil errno) (error (.. "waitpid: " errno))))
 
-(fn min [a b] (if (< a b) a b))
-
-(fn trace [s] (print :TRACE s) s)
-
 (fn write-all [fd str]
   (let [written (ll.write fd str)]
     (if (< written (# str))
         (write-all fd (string.sub str (+ written 1) -1)))))
 
-
 (fn jose [params inputstr]
   (let [env (ll.environ)
         (pid in out) (popen2 (os.getenv "JOSE_BIN") params env)]
-    ;(print "exec " (os.getenv "JOSE_BIN") (view params))
-    ;(print "writing")
+    ;; be careful if using this code for commands othert than jose: it
+    ;; may deadlock if we write more than 8k and the command doesn't
+    ;; read it.
     (when inputstr (write-all in inputstr))
-    ;(print :written)
     (ll.close in)
     (let [output
           (accumulate [o ""
@@ -64,7 +59,7 @@
 (fn jwe-dec [jwk ph undigested]
   (let [(exitcode plaintext)
         (jose ["jose" "jwe" "dec" "-k-" "-i-"]
-              (.. (json.encode jwk) ph undigested))]
+              (.. (json.encode jwk) ph "." undigested))]
     (if (= exitcode 0)
         plaintext
         (error (.. "Error calling jwe dec: " exitcode " / " plaintext )))))
@@ -94,13 +89,10 @@
                  "application/x-www-form-urlencoded"
                  body)))
 
-
 (fn run []
   (let [b64 (base64 :url)
         raw (: (io.input) :read "*a")
-        dot (string.find raw "." 1 true)
-        ph (string.sub raw 1 dot)
-        undigested (string.sub raw (+ 1 dot) -1)
+        (_ _ ph undigested) (string.find raw "(.-)%.(.+)")
         jwe (json.decode (b64:decode ph))
         { : srv : crv : clt : kid : url} (parse-jwe jwe)
         eph (jwk-generate crv)
