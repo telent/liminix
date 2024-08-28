@@ -37,61 +37,34 @@
             (.. o buf))]
       (values (exited pid) output))))
 
-(fn has-key? [keys kid alg]
-  (let [jkeys (json.encode keys)
-        (exitcode srv) (jose
-                        ["jose" "jwk" "thp" "-i-"
-                         "-f" kid
-                         "-a" alg]
-                        jkeys)]
+(fn jose! [params inputstr]
+  (let [(exitcode out) (jose params inputstr)]
     (if (= exitcode 0)
-        (json.decode srv)
-        nil)))
+        (json.decode out)
+        (error (%% "jose %q failed (exit=%d): %q"
+                   (table.concat params " ") exitcode out)))))
+
+(fn has-key? [keys kid alg]
+  (jose! ["jose" "jwk" "thp" "-i-" "-f" kid "-a" alg] (json.encode keys)))
 
 (fn jwk-generate [crv]
-  (let [(exitcode eph)
-        (jose ["jose" "jwk" "gen"
-               "-i" (%% "{\"alg\":\"ECMR\",\"crv\":%q}" crv)]
-              "")]
-    (if (= exitcode 0)
-        (json.decode eph)
-        (error (.. "Error generating ephemeral key: "  exitcode  "/"   eph) ))))
+  (jose! ["jose" "jwk" "gen" "-i" (%% "{\"alg\":\"ECMR\",\"crv\":%q}" crv)] ""))
 
 (fn jwk-pub [response]
-  (let [(exitcode pub)
-        (jose ["jose" "jwk" "pub" "-i-"]
-               (json.encode response))]
-    (if (= exitcode 0)
-        (json.decode pub)
-        (error (.. "Error pub "  exitcode  "/"   pub) ))))
+  (jose! ["jose" "jwk" "pub" "-i-"] (json.encode response)))
 
 (fn jwk-exc-noi [clt eph]
-  (let [payload (.. (json.encode clt) " " (json.encode eph))
-        (exitcode xfr)
-        (jose ["jose" "jwk" "exc"
-               "-l-" "-r-"]
-              payload)]
-    (if (= exitcode 0)
-        (json.decode xfr)
-        (error (.. "Error calling jwk exc: " exitcode " / " xfr  )))))
+  (jose! ["jose" "jwk" "exc" "-l-" "-r-"]
+         (.. (json.encode clt) " " (json.encode eph))))
 
 (fn jwk-exc [clt eph]
-  (let [payload (.. (json.encode clt) " " (json.encode eph))
-        (exitcode xfr)
-        (jose ["jose" "jwk" "exc"
-               "-i"   "{\"alg\":\"ECMR\"}"
-               "-l-" "-r-"]
-              payload)]
-    (if (= exitcode 0)
-        (json.decode xfr)
-        (error (.. "Error calling jwk exc: " exitcode " / " xfr  )))))
+  (jose! ["jose" "jwk" "exc" "-i"   "{\"alg\":\"ECMR\"}" "-l-" "-r-"]
+         (.. (json.encode clt) " " (json.encode eph))))
 
 (fn jwe-dec [jwk ph undigested]
-  (let [payload (.. (json.encode jwk) ph undigested)
-        ; _ (print :payload  payload)
-        (exitcode plaintext)
+  (let [(exitcode plaintext)
         (jose ["jose" "jwe" "dec" "-k-" "-i-"]
-              payload)]
+              (.. (json.encode jwk) ph undigested))]
     (if (= exitcode 0)
         plaintext
         (error (.. "Error calling jwe dec: " exitcode " / " plaintext )))))
@@ -133,7 +106,6 @@
         eph (jwk-generate crv)
         xfr (jwk-exc clt eph)
         response (http-post (.. url "/rec/" kid) (json.encode xfr))]
-
     (assert (and (= response.kty "EC") (= response.crv crv))
             "Received invalid server reply!")
     (let [tmp (jwk-exc eph srv)
