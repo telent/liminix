@@ -57,8 +57,38 @@ int lp_fetch(lua_State *L) {
     return lp_fetched(L, fp, &stat);
 }
 
+int lp_request(lua_State *L) {
+    const char * request_method = luaL_checkstring(L, 1);
+    const char * url_string = luaL_checkstring(L, 2);
+    const char * flags = luaL_optstring(L, 3, "");
+    time_t if_modified_since = luaL_optinteger(L, 4, 0);
+    const char * content_type = lua_tostring(L, 5);
+    const char * body = lua_tostring(L, 6);
+
+    struct url *url = fetchParseURL(url_string);
+    if(url == NULL) {
+	return lp_error(L, -1, "url not parseable");
+    }
+    url->ims_time = if_modified_since;
+    struct url_stat stat;
+
+    FXRETTYPE fp = http_request_body(url,
+				     request_method,
+				     &stat,
+				     NULL, /* no proxy */
+				     flags,
+				     content_type,
+				     body);
+    fetchFreeURL(url);
+    if(fp == NULL) {
+	return lp_error(L, fetchLastErrCode, fetchLastErrString);
+    }
+    return lp_fetched(L, fp, &stat);
+}
+
 static const struct luaL_Reg funcs [] = {
     {"fetch", lp_fetch},
+    {"request", lp_request},
     {NULL, NULL}  /* sentinel */
 };
 
