@@ -20,7 +20,8 @@
 
 (fn jose [params inputstr]
   (let [env (ll.environ)
-        (pid in out) (popen2 (os.getenv "JOSE_BIN") params env)]
+        argv (doto params (table.insert 1 "jose"))
+        (pid in out) (popen2 (os.getenv "JOSE_BIN") argv env)]
     ;; be careful if using this code for commands othert than jose: it
     ;; may deadlock if we write more than 8k and the command doesn't
     ;; read it.
@@ -47,7 +48,8 @@
                    (table.concat params " ") exitcode out)))))
 
 (fn has-key? [keys kid alg]
-  (jose! ["jose" "jwk" "thp" "-i-" "-f" kid "-a" alg] (json.encode keys)))
+  (jose! ["jwk" "thp" "-i-" "-f" kid "-a" alg] (json.encode keys)))
+
 (fn search-key [keys kid]
   (accumulate [ret nil
                _ alg (ipairs thumbprint-algs)
@@ -55,21 +57,21 @@
     (or ret (has-key? keys kid alg))))
 
 (fn jwk-generate [crv]
-  (jose! ["jose" "jwk" "gen" "-i" (%% "{\"alg\":\"ECMR\",\"crv\":%q}" crv)] ""))
+  (jose! ["jwk" "gen" "-i" (%% "{\"alg\":\"ECMR\",\"crv\":%q}" crv)] ""))
 
 (fn jwk-pub [response]
-  (jose! ["jose" "jwk" "pub" "-i-"] (json.encode response)))
+  (jose! ["jwk" "pub" "-i-"] (json.encode response)))
 
 (fn jwk-exc-noi [clt eph]
-  (jose! ["jose" "jwk" "exc" "-l-" "-r-"]
+  (jose! ["jwk" "exc" "-l-" "-r-"]
          (.. (json.encode clt) " " (json.encode eph))))
 
 (fn jwk-exc [clt eph]
-  (jose! ["jose" "jwk" "exc" "-i"   "{\"alg\":\"ECMR\"}" "-l-" "-r-"]
+  (jose! ["jwk" "exc" "-i"   "{\"alg\":\"ECMR\"}" "-l-" "-r-"]
          (.. (json.encode clt) " " (json.encode eph))))
 
 (fn jwe-dec [jwk ph undigested]
-  (josep! [ "jwe" "dec" "-k-" "-i-"]
+  (josep! ["jwe" "dec" "-k-" "-i-"]
           (.. (json.encode jwk) ph "." undigested)))
 
 (fn parse-jwe [jwe]
