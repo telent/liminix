@@ -21,19 +21,34 @@ int lp_error(lua_State *L, int code, char *message) {
 }
 
 int lp_fetched(lua_State *L, FXRETTYPE fp, struct url_stat *stat) {
-    void * content = malloc(stat->size);
-    size_t bytes_read;
-    es_read(fp, content,  stat->size, &bytes_read);
+    size_t bytes_read = 0;
+    char * content = 0;
+    if(stat->size > 0) {
+	content = (char *) malloc(stat->size);
+	es_read(fp, content,  stat->size, &bytes_read);
 
-    if(bytes_read != stat->size) {
-	lp_error(L, -1, "bytes read does not match content-length");
+	if(bytes_read != stat->size) {
+	    lp_error(L, -1, "bytes read does not match content-length");
+	}
+    } else {
+	/* no content-length header */
+	int block_size = 128;
+	int buf_size = block_size;
+	size_t bytes_read_block;
+	do {
+	    content = (char *) realloc(content, buf_size);
+	    es_read(fp, content + bytes_read,  block_size, &bytes_read_block);
+	    bytes_read += bytes_read_block;
+	    buf_size += block_size;
+	} while(bytes_read_block > 0);
     }
-    lua_pushlstring(L, (const char *) content, stat->size);
+
+    lua_pushlstring(L, (const char *) content, bytes_read);
     lua_newtable(L);
     lua_pushliteral(L, "last-modified");
     lua_pushinteger(L, stat->mtime);
     lua_settable(L, -3);
-
+    /* free(content) ? */
     return 2;
 }
 
