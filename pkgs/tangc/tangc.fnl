@@ -1,11 +1,8 @@
 (local json (require :json))
 (local http (require :fetch))
-(local { : view : join } (require :fennel))
-(local { : split : base64  : %%} (require :anoia))
+(local { : base64  : %%} (require :anoia))
 (local { : popen2 } (require :anoia.fs))
 (local ll (require :lualinux))
-
-
 
 (local CLEVIS_DEFAULT_THP_LEN 43)        ;  Length of SHA-256 thumbprint.
 (local thumbprint-algs ["S256" "S1"])
