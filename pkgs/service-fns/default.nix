@@ -23,7 +23,7 @@ writeText "service-fns.sh" ''
   }
   mkstate() {
     d=$SERVICE_STATE/$1
-    mkdir -m 2751 -p $d && chown root:system $d
+    mkdir -m 0700 -p $d && chown root:system $d
     echo $d
   }
   in_outputs() {
