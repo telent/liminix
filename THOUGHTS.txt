@@ -5921,24 +5921,51 @@ Wed Aug 28 21:36:47 BST 2024
 
 new TODO
 
-1) to finish local secrets, we need a service and script that gets the
-file, decrypts it and turns it to outputs. Easiest way is to use a
-temp file in /run/${name} and then use json-to-tree: there's no
-extra risk to having the plaintext json there when it's in the
-same place anyway as fstree
+[done, neeeds testing] 1) to finish local secrets, we need a service
+and script that gets the file, decrypts it and turns it to
+outputs. Easiest way is to use a temp file in /run/${name} and then
+use json-to-tree: there's no extra risk to having the plaintext json
+there when it's in the same place anyway as fstree
 
 1.5) and test the process and write some docs
 
 2) perhaps we should use /run/services/var/${name} instead of /run/${name}
 to avoid surprise conflicts. or we could use the existing mkstate?
+mkstate is setting perms 2751 and I don't know if that's important,
+but we want 0700 for secrets
 
-
-3) http auth - we have netrc file support "for free", so to speak:
+[done] 3) http auth - we have netrc file support "for free", so to speak:
 fetch-freebsd looks for $NETRC or $HOME/.netrc. If we put the auth
 tokens in configuration, they will get embedded into the image and
 this will protect against leaked http server logs but not much else.
-
 Scenario: you have a LAN with untrusted devices on it, plus WAPs which
 want to get their config from a server. If the server logs leak, other
 LAN users still can't use the config URL to fetch your PPP auth data.
 
+I think it just comes down to docs/video now
+
+
+-=----
+
+docs!
+
+to cover:
+
+- outputs
+  - what for
+  - how to read?
+    - one-off read in shell
+    - monitoring in fennel
+  - how to write
+
+- secrets
+  - sources
+    - https
+    - local/tang
+  - supported services/attributes
+    - how to add a new attribute
+    - how to add a service
+  - how it works (see outputs)
+
+
+think this is mostly to go in Configuration. Is there anything for Admin?
