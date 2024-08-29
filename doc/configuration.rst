@@ -119,6 +119,111 @@ system. Liminix currently implements three kinds of controlled service:
   indicating that the wrapped service is not working, it is terminated
   and allowed to restart.
 
+Runtime secrets (external vault)
+================================
+
+Secrets (such as wifi passphrases, PPP username/password, SSH keys,
+etc) that you provide as literal values in :file:`configuration.nix`
+are processed into into config files and scripts at build time, and
+eventually end up in various files in the (world-readable)
+:file:`/nix/store` before being baked into a flashable image. To
+change a secret - whether due to a compromise, or just as part of to a
+routine key rotation - you need to rebuild the configuration and
+potentially reflash the affected devices.
+
+To avoid this, you may instead use a "secrets service", which is a
+mechanism for your device to fetch secrets from a source external to
+the Nix store, and create at runtime the configuration files and
+scripts that start the services which require them.
+
+Not every possible parameter to every possible service is configurable
+using a secrets service. Parameters which can be configured this way
+are those with the type ``liminix.lib.types.replacable``. At the time
+this document was written, these include:
+
+* ppp (pppoe and l2tp): ``username``, ``password``
+* ssh: ``authorizedKeys``
+* hostapd: all parameters (most likely to be useful for ``wpa_passphrase``)
+
+To use a runtime secret for any of these parameters:
+
+* create a secrets service to specify the source of truth for secrets
+* use the :code:`outputRef` function in the service parameter to specify the secrets service and path
+
+For example, given you had an HTTPS server hosting a JSON file with the structure
+
+.. code-block:: json
+
+    "ssh": {
+      "authorizedKeys": {
+	"root": [ "ssh-rsa ....",  "ssh-rsa ....", ... ]
+	"guest": [ "ssh-rsa ....",  "ssh-rsa ....", ... ]
+      }
+    }
+ 
+you could use a :file:`configuration.nix` fragment something like this
+to make those keys visible to ssh:
+  
+.. code-block:: nix  
+
+    services.secrets = svc.secrets.outboard.build {
+      name = "secret-service";
+      url = "http://10.0.0.1/secrets.json";
+      username = "secrets";
+      password = "liminix";
+      interval = 30; # minutes
+      dependencies = [ config.services.lan ];
+    };
+    services.sshd = svc.ssh.build {
+      authorizedKeys = outputRef config.services.secrets "ssh/authorizedKeys";
+    };
+
+
+    
+There are presently two implementations of a secrets service:
+
+Outboard secrets (HTTPS)
+------------------------
+
+This service expects a URL to a JSON file containing all the secrets.
+
+You may specify a username and password along with the URL, which are
+used if the file is password-protected (HTTP Basic
+authentication). Note that this is not a protection against a
+malicious local user: the username and password are normal build-time
+parameters so will be readable in the Nix store.  This is a mitigation
+against the URL being accidentally discovered due to e.g. a log file
+or error message on the server leaking.
+
+
+Tang secrets (encrypted local file)
+-----------------------------------
+
+Aternatively, secrets may be stored locally on the device, in a file
+that has been encrypted using `Tang <https://github.com/latchset/tang>`_.
+
+    Tang is a server for binding data to network presence.
+
+    This sounds fancy, but the concept is simple. You have some data, but you only want it to be available when the system containing the data is on a certain, usually secure, network. 
+
+
+.. code-block:: nix
+
+    services.secrets = svc.secrets.tang.build {
+      name = "secret-service";
+      path = "/run/mnt/usbstick/secrets.json.jwe";
+      interval = 30; # minutes
+      dependencies = [ config.services.mount-usbstick ];
+    };
+
+The encryption uses the
+same scheme/algorithm as `Clevis <https://github.com/latchset/clevis>`_ : you may use the `Clevis instructions <https://github.com/latchset/clevis?tab=readme-ov-file#pin-tang>`_ to
+encrypt the file on another host and then copy it to your Liminix
+device, or you can use :command:`tangc encrypt` to encrypt directly on
+the device.  (That latter approach may pose a chicken/egg problem if
+the device needs secrets to boot up and run the services you are
+relying on in order to login).
+ 
 
 Writing services
 ================
@@ -169,11 +274,101 @@ Services may have dependencies: as you see above in the ``cowsayd``
 example, it depends on some service called ``config.services.lan``,
 meaning that it won't be started until that other service is up.
 
-..
-	TODO: explain service outputs
+Service outputs
+===============
 
-..
-	TODO: outputs that change, and services that poll other services
+Outputs are a mechanism by which a service can provide data which may
+be required by other services. For example:
+
+* the DHCP client service can expect to receive nameserver address
+  information as one of the fields in the response from the DHCP
+  server: we provide that as an output which a dependent service for a
+  stub name resolver can use to configure its upstream servers.
+
+* a service that creates a new network interface (e.g. ppp) will
+  provide the name of the interface (:code:`ppp0`, or :code:`ppp1` or
+  :code:`ppp7`) as an output so that a dependent service can reference
+  it to set up a route, or to configure firewall rules.
+
+A service :code:`myservice` should write its outputs as files in
+:file:`/run/services/outputs/myservice`: you can look around this
+directory on a running Liminix system to see how it's used currently.
+Usually we use the :code:`in_outputs` shell function in the
+:command:`up` or :command:`run` attributes of the service:
+
+.. code-block:: shell
+		
+    (in_outputs ${name}
+     for i in lease mask ip router siaddr dns serverid subnet opt53 interface ; do
+       (printenv $i || true) > $i
+     done)
+ 
+The outputs are just files, so technically you can read them using
+anything that can read a file. Liminix has two "preferred"
+mechanisms, though:
+
+One-off lookups
+---------------
+
+In any context that ends up being evaluated by the shell, use 
+:code:`output` to print the value of an output
+
+.. code-block:: nix
+		
+    services.defaultroute4 = svc.network.route.build {
+      via = "$(output ${services.wan} address)";
+      target = "default";
+      dependencies = [ services.wan ];
+    };	  
+
+    
+Continuous updates
+------------------
+
+The downside of using shell functions in downstream service startup
+scripts is that they only run when the service starts up: if a service
+output *changes*, the downstream service would have to be restarted to
+notice the change. Sometimes this is OK but other times the downstream
+has no other need to restart, if it can only get its new data.
+
+For this case, there is the :code:`anoia.svc` Fennel library, which
+allows you to write a simple loop which is iterated over whenever a
+service's outputs change. This code is from
+:file:`modules/dhcp6c/acquire-wan-address.fnl`
+
+.. code-block:: fennel
+
+    (fn update-addresses [wan-device addresses new-addresses exec]
+      ;; run some appropriate "ip address [add|remove]" commands
+      )
+
+    (fn run []
+      (let [[state-directory wan-device] arg
+	    dir (svc.open state-directory)]
+	(accumulate [addresses []
+		     v (dir:events)]
+	  (update-addresses wan-device addresses
+	                    (or (v:output "address") []) system))))		
+
+The :code:`output` method seen here accepts a filename (relative
+to the service's output directory), or a directory name. It 
+returns the first line of that file, or for directories it
+returns a table (Lua's key/value datastructure, similar to
+a hash/dictionary) of the outputs in that directory.
+	  
+    
+Output design considerations
+----------------------------
+
+For preference, outputs should be short and simple, and not require
+downstream services to do complicated parsing in order to use them.
+Shell commands in Liminix are run using the Busybox shell which
+doesn't have the niceties of an advanced shell like Bash let alone
+those of a real programming language.
+
+Note also that the Lua :code:`svc` library only reads the first line
+of each output.
+
 
 Module implementation
 *********************
