@@ -6,7 +6,7 @@
 
 {
   writeText,
-  writeFennelScript,
+  writeFennel,
   lib,
   s6-init-bin,
   closureInfo,
@@ -81,7 +81,7 @@ in attrset:
       cp $closure/store-paths $out/etc/nix-store-paths
       $STRIP --remove-section=.note  --remove-section=.comment --strip-all makedevs -o $out/bin/activate
       ln -s ${s6-init-bin}/bin/init $out/bin/init
-      cp -p ${writeFennelScript "restart-services" [] ./restart-services.fnl} $out/bin/restart-services
+      cp -p ${writeFennel "restart-services" {} ./restart-services.fnl} $out/bin/restart-services
       cat > $out/bin/install <<EOF
       #!/bin/sh -e
       prefix=\''${1-/}

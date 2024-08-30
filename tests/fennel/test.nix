@@ -5,10 +5,10 @@
 let
   overlay = import "${liminix}/overlay.nix";
   pkgs = import <nixpkgs> { overlays = [overlay]; };
-  script = pkgs.writeFennelScript "foo" [] ./hello.fnl;
+  script = pkgs.writeFennel "foo" {} ./hello.fnl;
   inherit (pkgs.lua.pkgs) fifo;
   netlink = pkgs.netlink-lua;
-  script2 = pkgs.writeFennelScript "foo2" [fifo netlink] ./hello.fnl;
+  script2 = pkgs.writeFennel "foo2" { packages = [fifo netlink];} ./hello.fnl;
 in pkgs.runCommand "check" {
   } ''
 set -e

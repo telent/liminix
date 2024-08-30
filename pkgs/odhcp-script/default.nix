@@ -1,6 +1,8 @@
 {
-  writeFennelScript,
+  writeFennel,
   anoia,
   lualinux,
 }:
-writeFennelScript  "odhcpc-script" [anoia lualinux] ./odhcp6-script.fnl
+writeFennel  "odhcpc-script" {
+  packages = [anoia lualinux];
+} ./odhcp6-script.fnl

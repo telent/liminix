@@ -127,5 +127,4 @@ in {
   writeAshScript = callPackage ./write-ash-script { };
   writeAshScriptBin = callPackage ./write-ash-script/bin.nix { };
   writeFennel = callPackage ./write-fennel { };
-  writeFennelScript = callPackage ./write-fennel-script { };
 }

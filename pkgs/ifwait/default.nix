@@ -1,15 +1,14 @@
 {
   netlink-lua,
-  writeFennelScript,
+  writeFennel,
   runCommand,
   anoia,
 }:
 runCommand "ifwait" { } ''
   mkdir -p $out/bin
   cp -p ${
-    writeFennelScript "ifwait" [
-      anoia
-      netlink-lua
-    ] ./ifwait.fnl
+    writeFennel "ifwait" {
+      packages = [ anoia netlink-lua ];
+    } ./ifwait.fnl
   } $out/bin/ifwait
 ''
