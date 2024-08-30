@@ -1,6 +1,7 @@
 {
   liminix
 , lib
+, svc
 , output-template
 , writeAshScript
 , writeText
@@ -78,16 +79,19 @@ let
     max redials = 2 # this gives 1 actual retry, as xl2tpd can't count
   '';
   control = "/run/${name}/control";
-in
-longrun {
-  inherit name;
-  run = ''
-    mkdir -p /run/${name}
-    chmod 0700 /run/${name}
-    touch ${control}
-    in_outputs ${name}
-    echo ${escapeShellArgs ppp-options'} | ${output-template}/bin/output-template '{{' '}}' > /run/${name}/ppp-options
-    exec ${xl2tpd}/bin/xl2tpd -D -p /run/${name}/${name}.pid -c ${conf} -C ${control} 
-  '';
-  notification-fd = 10;
+  service = longrun {
+    inherit name;
+    run = ''
+      mkdir -p /run/${name}
+      chmod 0700 /run/${name}
+      touch ${control}
+      in_outputs ${name}
+      echo ${escapeShellArgs ppp-options'} | ${output-template}/bin/output-template '{{' '}}' > /run/${name}/ppp-options
+      exec ${xl2tpd}/bin/xl2tpd -D -p /run/${name}/${name}.pid -c ${conf} -C ${control} 
+    '';
+    notification-fd = 10;
+  };
+in svc.secrets.subscriber.build {
+  watch = [ username password ];
+  inherit service;
 }

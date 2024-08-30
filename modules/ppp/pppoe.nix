@@ -1,5 +1,6 @@
 {
   liminix
+, svc
 , lib
 , output-template
 , ppp
@@ -66,19 +67,23 @@ let
         "logfd" "2"
        ];
   timeoutOpt = if lcpEcho.interval != null then "-T ${builtins.toString (4 * lcpEcho.interval)}" else "";
-in
-longrun {
-  inherit name;
-  run = ''
-    mkdir -p /run/${name}
-    chmod 0700 /run/${name}
-    in_outputs ${name}
-    echo ${escapeShellArgs ppp-options'} | ${output-template}/bin/output-template '{{' '}}' > /run/${name}/ppp-options
-    exec ${ppp}/bin/pppd pty "${pppoe}/bin/pppoe ${timeoutOpt}  -I $(output ${interface} ifname)" file /run/${name}/ppp-options
-  '';
-  notification-fd = 10;
-  timeout-up = if lcpEcho.failure != null
-               then (10 + lcpEcho.failure * lcpEcho.interval) * 1000
-               else 60 * 1000;
-  dependencies = [ interface ];
+  service = longrun {
+    inherit name;
+    run = ''
+      mkdir -p /run/${name}
+      chmod 0700 /run/${name}
+      in_outputs ${name}
+      echo ${escapeShellArgs ppp-options'} | ${output-template}/bin/output-template '{{' '}}' > /run/${name}/ppp-options
+      exec ${ppp}/bin/pppd pty "${pppoe}/bin/pppoe ${timeoutOpt}  -I $(output ${interface} ifname)" file /run/${name}/ppp-options
+    '';
+    notification-fd = 10;
+    timeout-up = if lcpEcho.failure != null
+                 then (10 + lcpEcho.failure * lcpEcho.interval) * 1000
+                 else 60 * 1000;
+    dependencies = [ interface ];
+  };
+in svc.secrets.subscriber.build {
+  watch = [ username password ];
+  inherit service;
+  action = "restart-all";
 }
