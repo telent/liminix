@@ -50,9 +50,8 @@ let
       exec ${hostapd}/bin/hostapd -i $(output ${interface} ifname) -P /run/${name}/hostapd.pid -S /run/${name}/hostapd.conf
     '';
   };
-  watch = filter (f: typeOf f == "set") (attrValues attrs);
+  watch = filter (f: typeOf f == "lambda") (attrValues attrs);
 in svc.secrets.subscriber.build {
-  inherit watch;
-  inherit service;
+  inherit service watch;
   action = "restart-all";
 }

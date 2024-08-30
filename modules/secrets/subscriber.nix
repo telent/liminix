@@ -8,8 +8,8 @@ let
   inherit (lib) unique optional;
   inherit (service) name;
 
-  watched-services = unique (map (f: f.service) watch);
-  paths = unique (map (f: f.path) watch);
+  watched-services = unique (map (f: f "service") watch);
+  paths = unique (map (f: f "path") watch);
 
   restart-flag = {
     restart = "-r";

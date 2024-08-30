@@ -66,7 +66,7 @@ in {
     subscriber = config.system.callService ./subscriber.nix {
       watch = mkOption {
         description = "secrets paths to subscribe to";
-        type = types.listOf types.attrs;
+        type = types.listOf (types.functionTo types.anything);
       };
       service = mkOption {
         description = "subscribing service that will receive notification";
