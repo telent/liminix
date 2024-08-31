@@ -121,7 +121,7 @@
           jwk (jwk-exc-noi rep tmp)]
       (print (jwe-dec jwk ph undigested)))))
 
-(fn perform-encryption [jwks url]
+(fn perform-encryption [jwks url input]
   (let [enc (jose! [:jwk :use "-i-" "-r" "-u" "deriveKey" "-o-"]
                    (json.encode jwks))
         ;; adding a -s to jwk use will "Always output a JWKSet" which
@@ -140,8 +140,7 @@
                            :clevis {:pin "tang"
                                     :tang {:url url :adv jwks }}}}]
       (josep! [:jwe :enc "-i-" "-k-" "-I-" "-c"]
-              (.. (json.encode jwe) (json.encode jwk)
-                  (: (io.input) :read "*a"))))))
+              (.. (json.encode jwe) (json.encode jwk) input)))))
 
 (fn usage []
   (print "tangc\n=====\n")
@@ -157,6 +156,7 @@
 (fn encrypt [cfg]
   (let [{ : url : thp : adv } cfg
         _  (or url (usage))
+        raw-input (: (io.input) :read "*a")
         b64 (base64 :url)
         adv (or adv (http-get (.. url "/adv/" (or thp ""))))]
     (assert adv.payload  "advertisement is malformed")
