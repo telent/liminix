@@ -90,11 +90,20 @@
    }))
 
 (fn http-post [url body]
-  (json.decode
+  (match
    (http.request "POST" url
                  "" 0
                  "application/x-www-form-urlencoded"
-                 body)))
+                 body)
+   s (json.decode s)
+   (nil err) (error err)))
+
+
+(fn http-get [url body]
+  (match
+   (http.fetch url)
+   s (json.decode s)
+   (nil code msg) (error (.. "Error: " code ": " msg))))
 
 (fn decrypt []
   (let [b64 (base64 :url)
@@ -141,13 +150,15 @@
              (json.encode {:url "http://tang.local"})))
   (print (%% "tangc encrypt %q < plaintext > filename.enc # encrypt"
              (json.encode {:thp "idGFpbiBhIHByZWJ1aWx0IGRhdGFiYXNlIGZyb20gaH"
-                           :url "http://tang.local"}))))
+                           :url "http://tang.local"})))
+  (os.exit 1))
 
 
 (fn encrypt [cfg]
   (let [{ : url : thp : adv } cfg
+        _  (or url (usage))
         b64 (base64 :url)
-        adv (or adv (json.decode (http.fetch (.. url "/adv/" (or thp "")))))]
+        adv (or adv (http-get (.. url "/adv/" (or thp ""))))]
     (assert adv.payload  "advertisement is malformed")
     (let [jwks (json.decode (b64:decode adv.payload))
           ver (jose! [:jwk :use "-i-" "-r" "-u" "verify" "-o-"]
@@ -165,6 +176,6 @@
   (case arg
     ["decrypt"] (decrypt)
     ["encrypt" cfg] (encrypt (json.decode cfg))
-    _ (error "usage: tangc [decrypt] | [encrypt cfg]")))
+    _ (usage)))
 
 { : run }
