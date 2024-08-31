@@ -18,6 +18,10 @@
     (if (< written (# str))
         (write-all fd (string.sub str (+ written 1) -1)))))
 
+(fn read-all [fd]
+  (let [buf (ll.read fd)]
+    (if (> (# buf) 0) (.. buf (read-all fd)) buf)))
+
 (fn jose [params inputstr]
   (let [env (ll.environ)
         argv (doto params (table.insert 1 "jose"))
@@ -29,7 +33,7 @@
     (ll.close in)
     (let [output
           (accumulate [o ""
-                       buf #(match (ll.read out) "" nil s s)]
+                       buf #(match (read-all out) "" nil s s)]
             (.. o buf))]
       (values (exited pid) output))))
 
