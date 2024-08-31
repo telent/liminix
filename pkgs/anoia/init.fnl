@@ -110,16 +110,32 @@
                          (. bs (bor (lshift (band a 3) 4)  (rshift b 4)))
                          (. bs (bor (lshift (band b 15) 2) (rshift c 6)))
                          (. bs (band c 63)))))))]
-    (s:sub 1 (- (# s) pad))))
+    (.. (s:sub 1 (- (# s) pad))
+        (string.rep "=" pad))))
+
 
 (fn base64-decode [input rindices]
   ;; take groups of 4 characters, reverse-look them up in base64-indices,
   ;; convert to 24 bit number,
   ;; convert to three characters
-  (let [padding (if (= (string.sub input -2 -1) "==") -3
-                    (= (string.sub input -1 -1) "=") -2
-                    -1)
-        input (string.sub (.. input "===") 1 (* (/ (# input) 4) 4))]
+
+  ;; things that might happen at the end of the string:
+  ;;  1) if the input string length was n * 3, it will have been
+  ;;  encoded as n * 4 base64 digits, no special handling required
+  ;;  2) if the input string length was (n * 3) + 2, the last 16 bits
+  ;;  are encoded into 3 base64 digits which are followed by an '='
+  ;;  3) if the input string length was (n * 3) + 1, the last 8 bits
+  ;;  are encoded into 2 base64 digits which are followed by '=='
+  ;;  0) there is never an '===' padding, because an 8 bit byte
+  ;; can never be encoded into a single 6 bit  base64 digit
+
+  (let [input (.. input (string.rep "=" (% (- 4 (# input)) 4)))
+        pad-chars (# (or (string.match input "(=+)$") ""))
+        trim-index (case pad-chars
+                     0 -1
+                     1 -2
+                     2 -3
+                     3 (assert nil "3 pad bytes??"))]
     (->
      (icollect [s (string.gmatch input "(....)")]
        (let [(a b c d) (string.byte s 1 4)
@@ -128,14 +144,12 @@
                     (lshift (ri c) 6)
                     (lshift (ri b) 12)
                     (lshift (ri a) 18))]
-
-
          (string.pack "bbb"
                       (rshift (band 0xff0000 n) 16)
                       (rshift (band 0x00ff00 n) 8)
                       (band 0x0000ff n))))
      (table.concat "")
-     (string.sub 1 padding)
+     (string.sub 1 trim-index)
      )))
 
 (fn base64 [alphabet-des]
@@ -149,8 +163,10 @@
      :decode (fn [_ str] (base64-decode str ralphabet))
      }))
 
-(fn base64url [str] (: (base64 :url) :encode str))
-
+(fn base64url [str]
+  ;; for backward-compatibility, this does not pad the encoded string
+  (let [encoded (: (base64 :url) :encode str)]
+    (pick-values 1 (string.gsub encoded "=+$" ""))))
 
 
 (define-tests
@@ -164,7 +180,25 @@
     (let [a (b64:decode "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcms=")]
       (assert (= a "Many hands make light work") (view  a)))
     (let [a (b64:encode "hello world")]
-      (assert (= a "aGVsbG8gd29ybGQ") a))))
+      (assert (= a "aGVsbG8gd29ybGQ=") a))
+
+    (fn check [plain enc]
+      (let [a (b64:encode plain)] (assert (= a enc) (.. "encode " a)))
+      (let [a (b64:decode enc)] (assert (= a plain) (.. "decode " a))))
+
+    (check ""  "")
+    (check "f"  "Zg==")
+    (check "fo"  "Zm8=")
+    (check "foo"  "Zm9v")
+    (check "foob"  "Zm9vYg==")
+    (check "fooba"  "Zm9vYmE=")
+    (check "foobar"  "Zm9vYmFy")
+
+    (let [x (b64:decode "REtOdUtNS05BNEJWLXdfcUhtNU9YV2liOUxkX3RTdVJTQWVUR0dkWldBdVEyaURObDZ2b3pSbEJwMzlzOEltdkhWdmpzZmMiLCJ5IjoiQVlDY1QwOGZrNFZWZ2lZSVIxbkU4UlJGaGZOSGdBUEFzckRITmJtRGNfUGtWZmdDR0xTMTIweU5SNncwdjd5RUY4WDN1OGpvazhkU0pqN0hnWjZCZHAzcSJ9LCJraWQiOiJlalVDaXBCUE9BeDRWQ1dQdUtkVGlYNDNadW5XTDNjSWN6V1h1RVZyTVNFIn0")]
+      (assert (string.match x "}$") x))
+
+    ))
+
 
 
     ;; doesn't work if the padding is missing
