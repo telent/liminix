@@ -163,12 +163,16 @@
     (let [jwks (json.decode (b64:decode adv.payload))
           ver (jose! [:jwk :use "-i-" "-r" "-u" "verify" "-o-"]
                      (json.encode jwks))]
-      (print (josep! [:jws :ver "-i" (json.encode adv) "-k-" "-a"]
-                     (json.encode ver)))
+      (match
+          (josep! [:jws :ver "-i" (json.encode adv) "-k-" "-a"] (json.encode ver))
+        "" nil
+        str (error "jws verify of advertised keys failed: " str))
 
       (if (and thp (search-key ver thp))
-          (print (perform-encryption jwks url))
-          (print (.. "Thumbrints of advertised keys are listed below. Set the thp attribute to preferred key\n"
+          (: (io.output) :write (perform-encryption jwks url raw-input))
+          ;; the command line options are currently the same as clevis
+          ;; but unless I can greatly improve this wording, that's gonna change
+          (print (.. "\ntangc: Thumbprints of advertised keys are listed below. Rerun this command\nproviding the thp attribute to specify the preferred key\n\n"
                      (josep! [:jwk :thp "-i-" "-a" (. thumbprint-algs 1)] (json.encode ver))))))))
 
 
