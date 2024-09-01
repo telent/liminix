@@ -75,8 +75,15 @@
          (.. (json.encode clt) " " (json.encode eph))))
 
 (fn jwe-dec [jwk ph undigested]
-  (josep! ["jwe" "dec" "-k-" "-i-"]
-          (.. (json.encode jwk) ph "." undigested)))
+  ;; sometimes jose jwe dec decrypts the file and exits
+  ;; non-zero anyway. FIXME find out why
+  (let [inputstr (.. (json.encode jwk) ph "." undigested)
+        (exitcode out) (jose ["jwe" "dec" "-k-" "-i-"] inputstr)]
+    (if (> exitcode 0)
+        (: io.stderr :write (%% "jose jwe dec exited %d\n" exitcode)))
+    (if (not (= out ""))
+        out
+        (error (%% "jose jwe dec produced no output, exited %d" exitcode)))))
 
 (fn parse-jwe [jwe]
   (assert (= jwe.clevis.pin "tang") "invalid clevis.pin")
