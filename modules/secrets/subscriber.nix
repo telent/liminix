@@ -46,5 +46,6 @@ in service.overrideAttrs(o: {
   buildInputs =  (lim.orEmpty o.buildInputs) ++
                  optional (watched-service != null) watcher;
   dependencies = (lim.orEmpty o.dependencies) ++
-                 optional (watched-service != null)  watcher;
+                 optional (watched-service != null)  watcher ++
+                 optional (watched-service != null)  watched-service;
 })
