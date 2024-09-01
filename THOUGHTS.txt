@@ -5969,3 +5969,16 @@ to cover:
 
 
 think this is mostly to go in Configuration. Is there anything for Admin?
+
+
+
+Sat Aug 31 17:52:10 BST 2024
+
+Still having trouble with tangc, which I think is just poor coding in
+popen2.  Hard to test it without access on loaclhost to the tangd on
+bordervm
+
+ - use a hostname instead of an ip address
+ - set the hostname somehow on loaclhost
+    (actually we could just hardcode the url in tangc.fnl)
+ - export 7654 in qemu somewhow
