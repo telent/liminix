@@ -52,9 +52,9 @@
   (let [{: out-path : watched-service : path } (parse-args arg)
         dir (.. watched-service "/.outputs")
         service (assert (svc.open dir))]
-    (accumulate [tree (service:output path)
+    (accumulate [tree (or (service:output path) {})
                  v (service:events)]
-      (write-changes out-path tree (service:output path)))))
+      (write-changes out-path tree (or (service:output path) {})))))
 
 
 { : run }
