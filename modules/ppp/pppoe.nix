@@ -64,6 +64,7 @@ let
         "ipparam" name
         "nodetach"
         "usepeerdns"
+        "nodefaultroute"
         "logfd" "2"
        ];
   timeoutOpt = if lcpEcho.interval != null then "-T ${builtins.toString (4 * lcpEcho.interval)}" else "";

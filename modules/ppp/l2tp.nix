@@ -65,6 +65,7 @@ let
         "ipparam" name
         "nodetach"
         "usepeerdns"
+        "nodefaultroute"
         "logfd" "2"
        ];
 
