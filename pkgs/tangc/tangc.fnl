@@ -102,19 +102,19 @@
 
 (fn http-post [url body]
   (match
-   (http.request "POST" url
-                 "" 0
-                 "application/x-www-form-urlencoded"
-                 body)
-   s (json.decode s)
-   (nil err) (error err)))
+      (http.request "POST" url
+                    "" 0
+                    "application/x-www-form-urlencoded"
+                    body)
+    s (json.decode s)
+    (nil code msg) (error (.. "Error " code " POST " url ": " msg))))
 
 
 (fn http-get [url body]
   (match
-   (http.fetch url)
-   s (json.decode s)
-   (nil code msg) (error (.. "Error: " code ": " msg))))
+      (http.fetch url)
+    s (json.decode s)
+    (nil code msg) (error (.. "Error " code " GET " url ": " msg))))
 
 (fn decrypt []
   (let [b64 (base64 :url)
