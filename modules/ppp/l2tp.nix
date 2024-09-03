@@ -1,12 +1,12 @@
 {
-  liminix
-, lib
-, svc
-, output-template
-, writeAshScript
-, writeText
-, serviceFns
-, xl2tpd
+  lib,
+  liminix,
+  output-template,
+  serviceFns,
+  svc,
+  writeAshScript,
+  writeText,
+  xl2tpd,
 } :
 { lns,
   ppp-options,

@@ -1,12 +1,12 @@
 {
-  liminix
-, svc
-, lib
-, output-template
-, ppp
-, pppoe
-, writeAshScript
-, serviceFns
+  lib,
+  liminix,
+  output-template,
+  ppp,
+  pppoe,
+  serviceFns,
+  svc,
+  writeAshScript,
 } :
 { interface,
   ppp-options,
@@ -48,6 +48,7 @@ let
           lambda = (o: "output(${builtins.toJSON (o "service")}, ${builtins.toJSON (o "path")})");
         }.${builtins.typeOf o}) o;
     in  o: "{{ ${v o} }}";
+
   ppp-options' =
     ["+ipv6" "noauth"]
     ++ optional debug "debug"
@@ -86,5 +87,4 @@ let
 in svc.secrets.subscriber.build {
   watch = [ username password ];
   inherit service;
-  action = "restart-all";
 }
