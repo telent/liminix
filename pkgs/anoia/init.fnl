@@ -66,7 +66,10 @@
  (assert (table= {:a 1 :b {:l 17}} {:b {:l 17} :a 1}))
  (assert (table= {:a [4 5 6 7] } {:a [4 5 6 7]}))
  (assert (not (table= {:a [4 5 6 7] } {:a [4 5 6 7 8]})))
- (assert (not (table= {:a [4 5 7 6] } {:a [4 5 6 7 ]}))))
+ (assert (not (table= {:a [4 5 7 6] } {:a [4 5 6 7 ]})))
+
+ (assert (table= {} {}))
+ )
 
 (fn dig [tree path]
   (match path
