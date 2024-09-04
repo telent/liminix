@@ -11,6 +11,7 @@
 
 (fn write-changes [path old-tree new-tree]
   (when (not (table= old-tree new-tree))
+    (io.stderr:write "new ssh keys\n")
     (each [username pubkeys (pairs new-tree)]
       (with-open [f (assert (io.open (.. path "/" username) :w))]
         ;;  the keys are "1" "2" "3" etc, so pairs not ipairs
@@ -47,12 +48,11 @@
     (os.remove out-dir)
     ))
 
-
 (fn run []
   (let [{: out-path : watched-service : path } (parse-args arg)
         dir (.. watched-service "/.outputs")
         service (assert (svc.open dir))]
-    (accumulate [tree (or (service:output path) {})
+    (accumulate [tree {}
                  v (service:events)]
       (write-changes out-path tree (or (service:output path) {})))))
 
