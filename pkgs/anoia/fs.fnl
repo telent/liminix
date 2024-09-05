@@ -1,4 +1,5 @@
 (local ll (require :lualinux))
+(import-macros { :  define-tests : expect : expect= } :anoia.assert)
 
 (local S_IFMT   0xf000)
 (local S_IFSOCK 0xc000)
@@ -88,6 +89,22 @@
         (values pid cin-d cout-s))
       (nil err) (error (.. "popen pipe out: " err)))
     (nil err) (error (.. "popen pipe in: " err))))
+;; lualinux doesn't publish access(2), this is not exactly
+;; the same but will suffice until we can add it
+(fn executable? [f]
+  (let [statbuf {}
+        stat (ll.lstat f statbuf 1)]
+    (and stat (> (band (. stat 3) 73) 0)))) ; \0111
+
+(fn find-executable [exe search-path]
+  (accumulate [full-path nil
+               p (string.gmatch search-path "(.-):")]
+    (or full-path (let [f (.. p "/" exe)] (and (executable? f) f)))))
+
+(define-tests
+  (let [p (find-executable "yes" (os.getenv "PATH"))]
+    (expect (string.match p "coreutils.+bin/yes$"))))
+
 
 {
  : mktree
@@ -96,5 +113,6 @@
  : dir
  : file-type
  : popen2
+ : find-executable
  :symlink (fn [from to] (ll.symlink from to))
  }
