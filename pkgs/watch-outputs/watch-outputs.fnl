@@ -1,4 +1,4 @@
-(local { : system : assoc : split : table= : dig } (require :anoia))
+(local { : %% : system : assoc : split : table= : dig } (require :anoia))
 (local svc (require :anoia.svc))
 (local { : view } (require :fennel))
 (local { : kill } (require :lualinux))
@@ -27,8 +27,6 @@
                _ path (ipairs paths)]
     (or changed? (not (table= (dig old-tree path) (dig new-tree path))))))
 
-(fn %% [fmt ...] (string.format fmt ...))
-
 (fn do-action [action service]
   (case action
     :restart (system (%% "s6-svc -r /run/service/%s" service))
@@ -42,9 +40,8 @@
          : watched-service
          : paths } (parse-args arg)
         dir (.. watched-service "/.outputs")
-        _ (print :service-dir dir)
         service (assert (svc.open dir))]
-    (print "watching " watched-service)
+    (print (%% "watching %q" watched-service))
     (accumulate [tree (service:output ".")
                  v (service:events)]
       (let [new-tree (service:output ".")]
