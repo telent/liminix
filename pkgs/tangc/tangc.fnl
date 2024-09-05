@@ -1,41 +1,32 @@
 (local json (require :json))
 (local http (require :fetch))
 (local { : base64  : %%} (require :anoia))
-(local { : popen2 } (require :anoia.fs))
+(local { : spawn } (require :anoia.process))
+(local { : find-executable } (require :anoia.fs))
 (local ll (require :lualinux))
 
 (local CLEVIS_DEFAULT_THP_LEN 43)        ;  Length of SHA-256 thumbprint.
 (local thumbprint-algs ["S256" "S1"])
 
-(fn exited [pid]
-  (match (ll.waitpid pid)
-    (0 status) false
-    (pid status) (rshift (band status 0xff00) 8)
-    (nil errno) (error (.. "waitpid: " errno))))
-
-(fn write-all [fd str]
-  (let [written (ll.write fd str)]
-    (if (< written (# str))
-        (write-all fd (string.sub str (+ written 1) -1)))))
-
-(fn read-all [fd]
-  (let [buf (ll.read fd)]
-    (if (> (# buf) 0) (.. buf (read-all fd)) buf)))
-
 (fn jose [params inputstr]
+  (var buf inputstr)
   (let [env (ll.environ)
         argv (doto params (table.insert 1 "jose"))
-        (pid in out) (popen2 (os.getenv "JOSE_BIN") argv env)]
-    ;; be careful if using this code for commands othert than jose: it
-    ;; may deadlock if we write more than 8k and the command doesn't
-    ;; read it.
-    (when inputstr (write-all in inputstr))
-    (ll.close in)
-    (let [output
-          (accumulate [o ""
-                       buf #(match (read-all out) "" nil s s)]
-            (.. o buf))]
-      (values (exited pid) output))))
+        output []
+        exitstatus
+        (spawn
+         (find-executable "jose" (os.getenv "PATH")) argv envp
+         (fn [stream fd]
+           (match stream
+             :out (let [b (ll.read fd)]
+                    (if (> (# b) 0)
+                        (do (table.insert output b) true)
+                        (do (ll.close fd) false)))
+             :in (let [b (string.sub buf (+ 1 (ll.write fd buf)) -1)]
+                   (if (> (# b) 0)
+                       (do (set buf b) true)
+                       (do (ll.close fd) false))))))]
+    (values exitstatus (table.concat output))))
 
 (fn jose! [params inputstr]
   (let [(exitcode out) (jose params inputstr)]
