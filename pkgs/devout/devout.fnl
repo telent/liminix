@@ -131,6 +131,7 @@
 (fn unix-socket [name]
   (let [addr (string.pack "=Hz" AF_LOCAL name)
         fd (check-errno (ll.socket AF_LOCAL SOCK_STREAM 0))]
+    (os.remove name)
     (check-errno (ll.bind fd addr))
     (check-errno (ll.listen fd 32))
     fd))
