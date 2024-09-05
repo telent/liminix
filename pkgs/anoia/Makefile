@@ -1,8 +1,8 @@
 servicedir:=$(shell mktemp -d)
 
-default: fs.lua init.lua nl.lua svc.lua net/constants.lua
+default: fs.lua init.lua nl.lua svc.lua process.lua net/constants.lua
 
-CHECK=fs.fnl init.fnl  svc.fnl
+CHECK=fs.fnl init.fnl svc.fnl process.fnl
 
 check:
 	ln -s . anoia
@@ -22,4 +22,4 @@ net/constants.lua: net/constants.c
 
 
 %.lua: %.fnl
-	fennel --compile $< > $@
+	fennel --add-macro-path './assert.fnl'  --compile $< > $@

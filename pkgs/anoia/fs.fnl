@@ -66,29 +66,6 @@
     unknown
     (error (.. "can't remove " pathname " of mode \"" unknown "\""))))
 
-(fn popen2 [pname argv envp]
-  (case (ll.pipe2)
-    (cin-s cin-d)
-    (match (ll.pipe2)
-      (cout-s cout-d)
-      (let [(pid err) (ll.fork)]
-        (if (not pid) (error (.. "error: " err))
-            (= pid 0)
-            (do
-              (ll.close cin-d)
-              (ll.close cout-s)
-              (ll.dup2 cin-s 0)
-              (ll.dup2 cout-d 1)
-              (ll.dup2 cout-d 2)
-              (ll.execve pname argv envp)
-              (error "execve failed"))
-            (> pid 0)
-            (do
-              (ll.close cin-s)
-              (ll.close cout-d)))
-        (values pid cin-d cout-s))
-      (nil err) (error (.. "popen pipe out: " err)))
-    (nil err) (error (.. "popen pipe in: " err))))
 ;; lualinux doesn't publish access(2), this is not exactly
 ;; the same but will suffice until we can add it
 (fn executable? [f]
@@ -112,7 +89,6 @@
  : directory?
  : dir
  : file-type
- : popen2
  : find-executable
  :symlink (fn [from to] (ll.symlink from to))
  }

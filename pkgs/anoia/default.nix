@@ -1,4 +1,5 @@
 {
+  bc, # for tests
   fennel,
   stdenv,
   linotify,
@@ -11,7 +12,7 @@ in stdenv.mkDerivation {
   inherit pname;
   version = "0.1";
   src = ./.;
-  nativeBuildInputs = [ fennel cpio ];
+  nativeBuildInputs = [ fennel cpio bc ];
   buildInputs = with lua.pkgs; [ linotify lualinux ];
   outputs = [ "out" "dev" ];
 
