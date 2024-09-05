@@ -115,6 +115,7 @@ in {
   # vendor OS, or even to derisk Liminix updates on that device
   schnapps = callPackage ./schnapps { };
 
+  seedrng = callPackage ./seedrng {};
   serviceFns = callPackage ./service-fns { };
   swconfig = callPackage ./swconfig { };
   systemconfig = callPackage ./systemconfig { };
