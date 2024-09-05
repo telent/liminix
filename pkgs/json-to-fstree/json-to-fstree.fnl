@@ -4,19 +4,25 @@
 (local { : utime } (require :lualinux))
 
 (fn download [url dest]
-  (match (http.fetch url)
-    (nil code str)
-    (assert nil (.. "error " code ": " str))
+  (let [state (.. dest "/state")
+        previously (ll.lstat state 12)]
+    (match (http.fetch url "i" previously)
+      (nil 10 _) ; not modified
+      (print (.. url " not modified, already up to date"))
 
-    (body { : last-modified })
-    (let [service (svc.open dest)
-          lock (.. dest "/.lock")
-          state (.. dest "/state")]
-      (with-open [fout (io.open lock :w)] (fout:write ""))
-      (service:output "." (json.decode body))
-      (with-open [fout (io.open state :w)] (fout:write "ok"))
-      (os.remove lock)
-      (utime dest last-modified))))
+      (nil code str)
+      (assert nil (.. "error " code ": " str))
+
+      (body { : last-modified })
+      (let [service (svc.open dest)
+            lock (.. dest "/.lock")]
+        (with-open [fout (io.open lock :w)] (fout:write ""))
+        (service:output "." (json.decode body))
+        (with-open [fout (io.open state :w)] (fout:write "ok"))
+        (utime state last-modified)
+        (os.remove lock))
+
+      )))
 
 (fn run [] (download (. arg 1) (. arg 2)))
 
