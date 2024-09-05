@@ -5,7 +5,7 @@
 let
   inherit (liminix.services) oneshot longrun;
   inherit (builtins) length head toString;
-  inherit (lib) unique optional;
+  inherit (lib) unique optional optionals;
   inherit (service) name;
 
   watched-services = unique (map (f: f "service") watch);
@@ -46,6 +46,6 @@ in service.overrideAttrs(o: {
   buildInputs =  (lim.orEmpty o.buildInputs) ++
                  optional (watched-service != null) watcher;
   dependencies = (lim.orEmpty o.dependencies) ++
-                 optional (watched-service != null)  watcher ++
-                 optional (watched-service != null)  watched-service;
+                 optionals (watched-service != null)
+                   [ watcher watched-service ];
 })

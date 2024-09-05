@@ -78,6 +78,6 @@ let
     inherit dependencies;
   };
 in svc.secrets.subscriber.build {
-  watch = [ username password ];
+  watch = lib.filter (n: typeOf n=="lambda") [ username password ];
   inherit service;
 }

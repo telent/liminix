@@ -25,6 +25,7 @@ let
       inherit description;
     };
 in {
+  imports = [ ../secrets ];
   options = {
     system.service.pppoe = mkOption {
       type = liminix.lib.types.serviceDefn;
