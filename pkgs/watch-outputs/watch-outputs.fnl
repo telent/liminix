@@ -1,6 +1,5 @@
 (local { : %% : system : assoc : split : table= : dig } (require :anoia))
 (local svc (require :anoia.svc))
-(local { : view } (require :fennel))
 (local { : kill } (require :lualinux))
 
 (fn split-paths [paths]
@@ -45,7 +44,6 @@
     (accumulate [tree (service:output ".")
                  v (service:events)]
       (let [new-tree (service:output ".")]
-        (print :was (view tree) :now (view new-tree))
         (when (changed? paths tree new-tree)
           (print "watched path event:"  action controlled-service)
           (do-action action controlled-service))
