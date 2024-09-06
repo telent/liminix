@@ -5982,3 +5982,208 @@ bordervm
  - set the hostname somehow on loaclhost
     (actually we could just hardcode the url in tangc.fnl)
  - export 7654 in qemu somewhow
+
+Mon Sep  2 21:49:05 BST 2024
+
+TODO - Things we haven't done yet, ideas to consider
+
+[done] 1) improve popen2, maybe using coroutines for proper async chat
+
+2) allow on-device not-in-store netrc so it could be kept in 0700.
+Could just do authFile = "/mnt/store/blah"
+
+[done] 3) we're not using luaposix on the host so maybe we can drop it in
+write-fennel?
+
+[done] 4) add nodefaultroute to default ppp-options
+
+[done] 5) implement if-modified-since in json-to-fstree
+
+6) clean up some copy-paste (e.g. literal_or_output or whatever we call it)
+- [done] ppp variants are consolidated, but there's still more to do here
+
+7) remove references to kexecboot
+
+8) performance testing
+
+9) revive ax3200 port and fix ubifs
+
+10) rebuild our wifi APs and lenscap to use levitate and outboard secrets
+
+11) [outside scope] secrets server on arthur, and oidc too?
+
+12) remove errors from ersatz coldplug
+
+13) teach anoia.svc how to write/remove .lock and state
+
+14) log kernel messages
+
+15) log shipping to something useful
+
+16) standardise error messages in fennel. using assert() is not good
+for errors like "the file is missing or can't be opened" because
+the backtrace is voluminous and usually inaccurate
+
+we could have something like check-ok which looks for the
+common multiple-return (nil errmsg) pattern, we'd like a similar
+one for the lualinux (nill errno) pattern.
+
+17) fix with nixpkgs unstable
+
+Wed Sep  4 21:45:07 BST 2024
+
+blurb for audit:
+
+Liminix is a Linux/Nix-based OS that can be flashed to consumer WiFi
+routers of the kind that OpenWrt usually runs on (usually small MIPS
+or ARM SBCs). Its USP is that because it's based on Nix, the
+configuration of your device is based on a text file: there's no GUI
+or other imperative interface allowing you to make changes that you
+will forget you did six months later and have to recreate when you
+update to a new version of the system.
+
+tl;dr C, nftables, Lua (Fennel even better), shell, Nix. No specific
+timeline from my end (unless nlnet have told you otherwise). IMO,
+emphasis on network vulnerabilities rather than anything involving local
+escalation: nobody is expected to be logged in locally except for
+maintenance purposes in which case they're trusted by definition.
+
+If you want to start by seeing it running, unless you have a
+supported device then your best bet would be to build it for Qemu
+<https://www.liminix.org/doc/tutorial.html#running-in-qemu>.  It boots
+to a root console shell (there is no password on the serial console
+because if you have that level of physical access on a real device
+it's game over anyway) so take a look at the process list and
+filesystem and generally poke around. The filesystem is read-only
+unless you configure it otherwise.
+
+
+To do a "static" audit: a rough breakdown of the contents, by volume, would look like this:
+
+1) 95% of it is packages in the Nix package system (and the Linux
+kernel).  Some of the packages are built with different compilation
+options to produce smaller output, and in a few cases I've patched
+them, so someone with C experience might be suited to look at those
+patches.
+
+```
+[dan@loaclhost:~/src/liminix]$ find pkgs/ -name \*.patch
+pkgs/kernel/phram-allow-cached-mappings.patch           # relevant to dev devices not production
+pkgs/kernel/mips-malta-fdt-from-bootloader.patch        # for qemu only
+pkgs/kernel/cmdline-cookie.patch
+pkgs/dropbear/add-authkeyfile-option.patch
+pkgs/u-boot/0002-virtio-init-for-malta.patch            # only used in tests
+pkgs/u-boot/0001-add-ubifs-to-boot-targets.patch        # only used in tests
+pkgs/xl2tpd-exit-on-close.patch
+pkgs/qemu/arm-image-friendly-load-addr.patch            # only used in tests
+pkgs/kernel-backport/gentree-writable-outputs.patch     # unused
+pkgs/openwrt/make-mtdsplit-jffs2-endian-agnostic.patch
+pkgs/mtdutils/0001-mkfs.jffs2-add-graft-option.patch    # can be removed
+pkgs/kexec-map-file.patch                               # can be removed
+```
+
+dropbear (ssh) and xl2tpd (l2tp) are network-accessible. The kernel
+is a high-impact target, but cmdline-cookie.patch is the only "production"
+patch there so hopefully easy to review
+
+Significant packages with custom config options:
+
+* hostapd (configured for libtommath, internal TLS)
+* nftables (--with-mini-gmp)
+* openssl "no-threads" and patches to Configure to build on MIPS
+
+My assumption with all of these is that the package authors wouldn't
+provide these as configuration knobs if they weren't reasonably confident
+they work as advertised, but I am willing to hear otherwise.
+
+2) the device has a firewall using nftables. The user gets to choose
+their firewall rules, but the default ruleset
+https://gti.telent.net/dan/liminix/src/branch/main/modules/firewall/default-rules.nix
+is based on RFC 6092 for IPv6 and "received wisdom" for IPv4: I would
+very much like a second pair of eyes on this.
+
+3) Code which is original to Liminix: as far as possible I've used a
+high-level language (Fennel, which is a Lisp syntax that transpiles to
+Lua) for "original" development. There is one C package
+(pkgs/preinit) and some C glue to expose interfaces to Lua.
+
+None of the original code listens to the network (except Unix-domain
+sockets). At least, it was never intended to :-)
+
+Highlights:
+
+pkgs/devout : fills the same role as udev (listens to a kernel socket
+ and a unix domain socket)
+
+pkgs/json-to-fstree : does HTTP GET and POST requests, using a port of the
+FreeBSD libfetch code (see pkgs/fetch-freebsd)
+
+pkgs/tangc : is a transliteration from bash script to Fennel of
+https://github.com/latchset/clevis/blob/master/src/pins/tang/clevis-decrypt-tang
+and
+https://github.com/latchset/clevis/blob/master/src/pins/tang/clevis-encrypt-tang
+
+I call this one out specially because it's crypto-adjacent, but all the
+actual cryptography happens in "jose" which it invokes as a subprocess
+
+pkgs/min-copy-closure contains some shell scripts which leverage cpio
+and ssh to update a running device over the network. My shell
+scripting is probably worse than my C, so take a look
+
+4) there is a mechanism to configure the device's secrets (PPP
+password, ssh keys, etc) by fetching a JSON file from an HTTPS server,
+and then generating configuration files for the various services that
+use those secrets. This is mostly Fennel (so, Lua)
+
+
+5) the init/service supervision system is based on s6/s6-rc (again, C
+software). I don't know if this has ever had an external audit, but to
+my eyes it looks like it's been written with security in mind.
+
+Thu Sep  5 10:12:11 BST 2024
+
+if-modified-since and fenceposts ...
+
+we set the mtime of "." to last-modified on retrieve. what resolution
+is the timestamp? empirically (using stat(1)), tmpfs seems to have
+sub-second resolution, so no loss of data
+
+Thu Sep  5 11:15:24 BST 2024
+
+how do we do deadlock-free popen2? need to use select or poll
+on the input and output fds, and read/write a chunk when one of them is ready
+
+(subprocess ["/usr/games/advent" "advent"]
+  {
+    :on-stdout #(print (ll.read %1))
+    :on-stderr #(print "ERR" (ll.read %1))
+    :on-stdin #(ll.write %1 "go north\n")
+  })
+
+for send/expect things, a single callback would be preferable if
+it has a reason it's being called
+
+(subprocess ["/usr/games/advent" "advent"]
+  (fn talk [stream fd]
+    (match stream
+      :out (print (ll.read fd))
+      :err (print "ERR" (ll.read fd))
+      :in (ll.write %1 "go north\n"))))
+
+because it can be hooked up to a coroutine. The coroutine is then
+responsible for doing things in the right order to avoid letting buffers
+fill up - probably this is just a matter of dealing with the
+subprocess output before sending it more that it can choke on
+
+wat about partial writes? the coroutine is presumably keeping some
+kind of state so it can check the return of ll.write when it updates that
+state
+
+
+Fri Sep  6 19:57:37 BST 2024
+
+video editing
+
+* there are ppp credentials onscreen at 13:00
+
+* should finish at 33:00
