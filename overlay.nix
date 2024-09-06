@@ -6,7 +6,7 @@ let
     inherit (final) lib callPackage;
   };
   inherit (final) fetchpatch;
-  lua_no_readline = prev.lua5_3.overrideAttrs(o: {
+  luaHost = prev.lua5_3.overrideAttrs(o: {
     name = "lua-tty";
     preBuild = ''
       makeFlagsArray+=(PLAT="posix" SYSLIBS="-Wl,-E -ldl"  CFLAGS="-O2 -fPIC -DLUA_USE_POSIX -DLUA_USE_DLOPEN")
@@ -43,7 +43,6 @@ let
         (if o ? patches then o.patches else []) ++
         (if patch_needed then [ patch ] else []);
     });
-  lua = let s = lua_no_readline.override { self = s; }; in s;
 in
 extraPkgs // {
   # liminix library functions
@@ -204,8 +203,7 @@ extraPkgs // {
     ];
   });
 
-  luaFull = prev.lua;
-  inherit lua;
+  lua = crossOnly prev.lua5_3 (_: luaHost);
 
   mtdutils = prev.mtdutils.overrideAttrs(o: {
     patches = (if o ? patches then o.patches else []) ++ [
