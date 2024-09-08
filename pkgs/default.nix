@@ -71,6 +71,7 @@ in {
   hi = callPackage ./hi { };
   ifwait = callPackage ./ifwait { };
   initramfs-peek = callPackage ./initramfs-peek { };
+  incz = callPackage ./incz { };
   json-to-fstree = callPackage ./json-to-fstree { };
   kernel-backport = callPackage ./kernel-backport { };
   kmodloader = callPackage ./kmodloader { };
