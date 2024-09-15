@@ -38,6 +38,10 @@ struct pollfd fds[] = {
     { .fd = -1, .events = POLLERR },
 };
 
+int is_connected(void) {
+    return (fds[2].fd >= 0);
+}
+
 
 int main(int argc, char * argv[]) {
 
@@ -67,7 +71,7 @@ int main(int argc, char * argv[]) {
 		if(out_bytes == 0) {
 		    exit(0);
 		};
-		if(fds[2].fd >= 0) tee_bytes = out_bytes;
+		if(is_connected()) tee_bytes = out_bytes;
 	    };
 
 	    if(out_bytes) {
@@ -76,7 +80,7 @@ int main(int argc, char * argv[]) {
 	    if(fds[1].revents & (POLLERR|POLLHUP)) {
 		exit(1); // can't even log an error if the logging stream fails
 	    };
-	    if(fds[2].fd >= 0) {
+	    if(is_connected()) {
 		if(tee_bytes) {
 		    tee_bytes -= write(fds[2].fd, buf, tee_bytes);
 		};
@@ -87,7 +91,7 @@ int main(int argc, char * argv[]) {
 		};
 	    };
 	} else {
-	    if(fds[2].fd < 0) {
+	    if(! is_connected()) {
 		if(argc>1) fds[2].fd = open_shipper_socket(argv[1]);
 	    }
 	};
