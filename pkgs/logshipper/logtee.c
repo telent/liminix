@@ -31,13 +31,14 @@ int open_shipper_socket(char *pathname) {
     return fd;
 }
 
+struct pollfd fds[] = {
+    { .fd = 0, .events = POLLIN },
+    { .fd = 1, .events = POLLERR },
+    { .fd = -1, .events = POLLERR },
+};
+
 
 int main(int argc, char * argv[]) {
-    struct pollfd fds[] = {
-	{ .fd = 0, .events = POLLIN },
-	{ .fd = 1, .events = POLLERR },
-	{ .fd = -1, .events = POLLERR },
-    };
 
     char * buf = malloc(8192);
     int out_bytes = 0;
