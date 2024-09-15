@@ -24,6 +24,7 @@ int open_shipper_socket(char *pathname) {
     if(fd >= 0) {
 	if(connect(fd, (struct sockaddr *) &sa, sizeof sa)) {
 	    error(0, errno, "connect socket \"%s\"", pathname);
+	    close(fd);
 	    return -1;
 	}
 	int flags = fcntl(fd, F_GETFL);
