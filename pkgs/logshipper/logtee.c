@@ -70,7 +70,8 @@ int main(int argc, char * argv[]) {
     int flags = fcntl(STDOUT_FILENO, F_GETFL);
     fcntl(STDOUT_FILENO, F_SETFL, flags | O_NONBLOCK);
 
-    while(1) {
+    int quitting = 0;
+    while(! quitting) {
 	int nfds = poll(fds, 3, 2000);
 	if(nfds > 0) {
 	    if((fds[0].revents & (POLLIN|POLLHUP)) &&
@@ -78,7 +79,9 @@ int main(int argc, char * argv[]) {
 	       (tee_bytes == 0)) {
 		out_bytes = read(fds[0].fd, buf, 8192);
 		if(out_bytes == 0) {
-		    exit(0);
+		    quitting = 1;
+		    buf = "logtee detected eof of file on stdin, exiting\n";
+		    out_bytes = strlen(buf);
 		};
 		if(is_connected()) tee_bytes = out_bytes;
 	    };
