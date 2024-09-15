@@ -49,14 +49,23 @@ int main(int argc, char * argv[]) {
     int out_bytes = 0;
     int tee_bytes = 0;
 
-    if(argc > 1 && (strlen(argv[1]) > 108)) {
-	error(1, 0, "socket pathname \"%s\" is too long, max 108 bytes",
-	      argv[1]);
-    };
-    signal(SIGPIPE, SIG_IGN);
+    if(argc != 3) {
+	error(1, 0, "usage: logtee /path/to/socket cookie-text");
+    }
+    char * socket_pathname = argv[1];
+    char * cookie = argv[2];
+    char * start_cookie = malloc(strlen(cookie) + 8);
+    char * stop_cookie = malloc(strlen(cookie) + 7);
 
-    char * start_cookie = "COOKIE-START\n";
-    char * stop_cookie = "COOKIE-STOP\n";
+    if(strlen(socket_pathname) > 108) {
+	error(1, 0, "socket pathname \"%s\" is too long, max 108 bytes",
+	      socket_pathname);
+    };
+
+    strcpy(start_cookie, cookie); strcat(start_cookie, " START\n");
+    strcpy(stop_cookie, cookie); strcat(stop_cookie, " STOP\n");
+
+    signal(SIGPIPE, SIG_IGN);
 
     int flags = fcntl(STDOUT_FILENO, F_GETFL);
     fcntl(STDOUT_FILENO, F_SETFL, flags | O_NONBLOCK);
@@ -92,7 +101,13 @@ int main(int argc, char * argv[]) {
 	    };
 	} else {
 	    if(! is_connected()) {
-		if(argc>1) fds[2].fd = open_shipper_socket(argv[1]);
+		fds[2].fd = open_shipper_socket(argv[1]);
+		if(is_connected()) {
+		    /* write cookie to stdout so that the backfill
+		     * process knows we are now logging realtime
+		     */
+		    write(fds[1].fd, start_cookie, strlen(start_cookie));
+		}
 	    }
 	};
     };
