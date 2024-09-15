@@ -78,6 +78,7 @@ in {
   levitate = callPackage ./levitate { };
   libubootenv = callPackage ./libubootenv { };
   linotify = callPackage ./linotify { };
+  logshipper = callPackage ./logshipper { };
   lualinux = callPackage ./lualinux { };
 
   # we need to build real lzma instead of using xz, because the lzma
