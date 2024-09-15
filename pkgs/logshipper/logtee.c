@@ -10,6 +10,7 @@
 #include <signal.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <errno.h>
 
 int open_shipper_socket(char *pathname) {
     int fd;
@@ -22,7 +23,7 @@ int open_shipper_socket(char *pathname) {
     fd = socket(AF_LOCAL, SOCK_STREAM, 0);
     if(fd >= 0) {
 	if(connect(fd, (struct sockaddr *) &sa, sizeof sa)) {
-	    perror("connect socket");
+	    error(0, errno, "connect socket \"%s\"", pathname);
 	    return -1;
 	}
 	int flags = fcntl(fd, F_GETFL);
@@ -82,7 +83,7 @@ int main(int argc, char * argv[]) {
 		if(fds[2].revents & (POLLERR|POLLHUP)) {
 		    close(fds[2].fd);
 		    fds[2].fd = -1;
-		    (void) write(1, stop_cookie , strlen(stop_cookie));
+		    (void) write(1, stop_cookie, strlen(stop_cookie));
 		};
 	    };
 	} else {
