@@ -14,6 +14,7 @@
 
 int open_shipper_socket(char *pathname) {
     int fd;
+    static int fail_count = 0;
 
     struct sockaddr_un sa = {
 	.sun_family = AF_LOCAL
@@ -23,7 +24,12 @@ int open_shipper_socket(char *pathname) {
     fd = socket(AF_LOCAL, SOCK_STREAM, 0);
     if(fd >= 0) {
 	if(connect(fd, (struct sockaddr *) &sa, sizeof sa)) {
-	    error(0, errno, "connect socket \"%s\"", pathname);
+	    if((fail_count % 30) == 0)
+		printf("logtee: cannot connect socket \"%s\": %s\n",
+		       pathname,
+		       strerror(errno));
+
+	    fail_count++;
 	    close(fd);
 	    return -1;
 	}
