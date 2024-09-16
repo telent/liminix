@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, lim,  ... }:
 let
   inherit (pkgs)
     execline
@@ -9,7 +9,7 @@ let
   inherit (lib.lists) unique concatMap;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs.liminix.services) oneshot bundle;
-
+  inherit (lib) mkIf mkEnableOption mkOption types;
   s6-rc-db =
     let
       # In the default bundle we need to have all the services
@@ -110,6 +110,9 @@ let
               #!${execline}/bin/execlineb -P
               ${execline}/bin/redirfd -w 1 /dev/null
               ${execline}/bin/redirfd -rnb 0 fifo
+              ${if config.logshipper.enable then ''
+              pipeline { ${pkgs.logshipper}/bin/logtee /run/uncaught-logs/shipping logshipper-socket-event }
+              '' else ""}
               ${s6}/bin/s6-log -bpd3 -- t /run/uncaught-logs
           '';
         mode = "0755";
@@ -203,6 +206,15 @@ let
       };
   };
 in {
+  options = {
+    logshipper = {
+      enable = mkEnableOption "log shipping";
+      service = mkOption {
+        description = "log shipper";
+        type = pkgs.liminix.lib.types.service;
+      };
+    };
+  };
   config = {
     filesystem = dir {
       etc = dir {
