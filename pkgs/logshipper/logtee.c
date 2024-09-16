@@ -6,11 +6,27 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <error.h>
 #include <signal.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <errno.h>
+
+#ifdef _GNU_SOURCE
+#include <error.h>
+#else
+#include <stdarg.h>
+static void error(int status, int errnum, const char * fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+
+    fprintf(stderr, "logtee: ");
+    vfprintf(stderr, fmt, ap);
+    if(errnum) fprintf(stderr, ": %s", strerror(errnum));
+    fprintf(stderr, "\n");
+    if(status) exit(status);
+}
+#endif
+
 
 int open_shipper_socket(char *pathname) {
     int fd;
