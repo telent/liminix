@@ -10,6 +10,7 @@ let
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs.liminix.services) oneshot bundle;
   inherit (lib) mkIf mkEnableOption mkOption types;
+  cfg = config.logging;
   s6-rc-db =
     let
       # In the default bundle we need to have all the services
@@ -110,10 +111,13 @@ let
               #!${execline}/bin/execlineb -P
               ${execline}/bin/redirfd -w 1 /dev/null
               ${execline}/bin/redirfd -rnb 0 fifo
-              ${if config.logshipper.enable then ''
-              pipeline { ${pkgs.logshipper}/bin/logtee /run/uncaught-logs/shipping logshipper-socket-event }
-              '' else ""}
-              ${s6}/bin/s6-log -bpd3 -- t /run/uncaught-logs
+              ${if cfg.shipping.enable then ''
+                pipeline { ${s6}/bin/s6-log -bpd3 -- ${cfg.script} 1 }
+                pipeline { ${pkgs.logshipper}/bin/logtap ${cfg.shipping.socket} logshipper-socket-event }
+                ${s6}/bin/s6-log -- ${cfg.directory}
+              '' else ''
+                ${s6}/bin/s6-log -bpd3 -- ${cfg.script} ${cfg.directory}
+              ''}
           '';
         mode = "0755";
       };
@@ -207,14 +211,38 @@ let
   };
 in {
   options = {
-    logshipper = {
-      enable = mkEnableOption "log shipping";
-      service = mkOption {
-        description = "log shipper";
-        type = pkgs.liminix.lib.types.service;
+    logging = {
+      shipping = {
+        enable = mkEnableOption "unix socket for log shipping";
+        socket = mkOption {
+          description = "socket pathname"; type = types.path;
+          default = "/run/.log-shipping.sock";
+        };
+        service = mkOption {
+          description = "log shipper service";
+          type = pkgs.liminix.lib.types.service;
+        };
+      };
+      script = mkOption {
+        description = "\"log script\" used by fallback s6-log process";
+        type = types.str;
+        default = "p${config.hostname} t";
+      };
+      directory = mkOption {
+        description = "default log directory";
+        default = "/run/log";
+        type = types.path;
       };
     };
   };
+  imports = [
+    ( {config, pkgs, lib, ...}:
+      let cfg = config.logging;
+      in mkIf cfg.shipping.enable {
+        services.${cfg.shipping.service.name} = cfg.shipping.service;
+      }
+    )];
+
   config = {
     filesystem = dir {
       etc = dir {
