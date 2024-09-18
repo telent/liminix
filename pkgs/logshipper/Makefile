@@ -1,5 +1,5 @@
-TARGETS=logtee # ship-zinc backfill
+TARGETS=logtap
 default: $(TARGETS)
 
 install: $(TARGETS)
-	install -Dt $(PREFIX)/bin/ logtee
+	install -Dt $(PREFIX)/bin/ logtap

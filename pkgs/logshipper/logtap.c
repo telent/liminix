@@ -11,6 +11,8 @@
 #include <sys/un.h>
 #include <errno.h>
 
+#define PROGRAM_NAME "logtap"
+
 #ifdef _GNU_SOURCE
 #include <error.h>
 #else
@@ -19,7 +21,7 @@ static void error(int status, int errnum, const char * fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
 
-    fprintf(stderr, "logtee: ");
+    fprintf(stderr, PROGRAM_NAME  ": ");
     vfprintf(stderr, fmt, ap);
     if(errnum) fprintf(stderr, ": %s", strerror(errnum));
     fprintf(stderr, "\n");
@@ -41,7 +43,7 @@ int open_shipper_socket(char *pathname) {
     if(fd >= 0) {
 	if(connect(fd, (struct sockaddr *) &sa, sizeof sa)) {
 	    if((fail_count % 30) == 0)
-		printf("logtee: cannot connect socket \"%s\": %s\n",
+		printf(PROGRAM_NAME ": cannot connect socket \"%s\": %s\n",
 		       pathname,
 		       strerror(errno));
 
@@ -73,7 +75,7 @@ int main(int argc, char * argv[]) {
     int tee_bytes = 0;
 
     if(argc != 3) {
-	error(1, 0, "usage: logtee /path/to/socket cookie-text");
+	error(1, 0, "usage: " PROGRAM_NAME " /path/to/socket cookie-text");
     }
     char * socket_pathname = argv[1];
     char * cookie = argv[2];
@@ -103,7 +105,7 @@ int main(int argc, char * argv[]) {
 		out_bytes = read(fds[0].fd, buf, 8192);
 		if(out_bytes == 0) {
 		    quitting = 1;
-		    buf = "logtee detected eof of file on stdin, exiting\n";
+		    buf = PROGRAM_NAME " detected eof of file on stdin, exiting\n";
 		    out_bytes = strlen(buf);
 		};
 		if(is_connected()) tee_bytes = out_bytes;
