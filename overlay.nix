@@ -6,19 +6,22 @@ let
     inherit (final) lib callPackage;
   };
   inherit (final) fetchpatch;
-  luaHost = prev.lua5_3.overrideAttrs(o: {
-    name = "lua-tty";
-    preBuild = ''
-      makeFlagsArray+=(PLAT="posix" SYSLIBS="-Wl,-E -ldl"  CFLAGS="-O2 -fPIC -DLUA_USE_POSIX -DLUA_USE_DLOPEN")
+  luaHost =
+    let
+      l = prev.lua5_3.overrideAttrs(o: {
+        name = "lua-tty";
+        preBuild = ''
+          makeFlagsArray+=(PLAT="posix" SYSLIBS="-Wl,-E -ldl"  CFLAGS="-O2 -fPIC -DLUA_USE_POSIX -DLUA_USE_DLOPEN")
     '';
-    # lua in nixpkgs has a postInstall stanza that assumes only
-    # one output, we need to override that if we're going to
-    # convert to multi-output
-    # outputs = ["bin" "man" "out"];
-    makeFlags =
-      builtins.filter (x: (builtins.match "(PLAT|MYLIBS).*" x) == null)
-        o.makeFlags;
-  });
+        # lua in nixpkgs has a postInstall stanza that assumes only
+        # one output, we need to override that if we're going to
+        # convert to multi-output
+        # outputs = ["bin" "man" "out"];
+        makeFlags =
+          builtins.filter (x: (builtins.match "(PLAT|MYLIBS).*" x) == null)
+            o.makeFlags;
+      });
+    in l.override { self = l; };
 
   s6 = prev.s6.overrideAttrs(o:
     let
