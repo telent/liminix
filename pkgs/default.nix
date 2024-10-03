@@ -60,6 +60,7 @@ in {
   # please keep the rest of this list alphabetised :-)
 
   anoia = callPackage ./anoia { };
+  certifix-client = callPackage ./certifix-client { };
   devout = callPackage ./devout { };
   fetch-freebsd = callPackage ./fetch-freebsd { };
   fennel = callPackage ./fennel { };
