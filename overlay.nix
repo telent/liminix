@@ -205,6 +205,15 @@ extraPkgs // {
 
   lua = crossOnly prev.lua5_3 (_: luaHost);
 
+  luaossl' = luaHost.pkgs.luaossl.overrideAttrs(o: {
+    patches = [
+      (fetchpatch {
+        url = "https://patch-diff.githubusercontent.com/raw/wahern/luaossl/pull/218.patch";
+        hash = "sha256-2GOliY4/RUzOgx3rqee3X3szCdUVxYDut7d+XFcUTJw=";
+      })
+    ] ++ final.lib.optionals (o ? patches) o.patches;
+  });
+
   mtdutils = prev.mtdutils.overrideAttrs(o: {
     patches = (if o ? patches then o.patches else []) ++ [
       ./pkgs/mtdutils/0001-mkfs.jffs2-add-graft-option.patch
