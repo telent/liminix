@@ -8,7 +8,7 @@ let
     stdenvNoCC;
   inherit (lib.lists) unique concatMap;
   inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs.liminix.services) oneshot bundle;
+  inherit (pkgs.liminix.services) oneshot bundle longrun;
   inherit (lib) mkIf mkEnableOption mkOption types;
   cfg = config.logging;
   s6-rc-db =
@@ -237,9 +237,28 @@ in {
   };
   imports = [
     ( {config, pkgs, lib, ...}:
-      let cfg = config.logging;
+      let
+        cfg = config.logging;
+        pipeline = shipper: bundle {
+          name = "log-shipping-pipe";
+          contents = let
+            eat = longrun {
+              name = "log-shipping-pipe-eat";
+              run = ''
+                fdmove -c 12 1 \
+                ${pkgs.s6}/bin/s6-ipcserver ${cfg.shipping.socket} \
+                fdmove -c 1 12 \
+                cat
+              '';
+              producer-for = spew.name;
+            };
+            spew = shipper.override {
+              consumer-for ="log-shipping-pipe-eat";
+            };
+          in [ eat spew ];
+        };
       in mkIf cfg.shipping.enable {
-        services.${cfg.shipping.service.name} = cfg.shipping.service;
+        services.${cfg.shipping.service.name} = pipeline cfg.shipping.service;
       }
     )];
 
