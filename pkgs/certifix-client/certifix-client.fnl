@@ -3,6 +3,7 @@
 
 (local ctx (require :openssl.ssl.context))
 (local csr (require :openssl.x509.csr))
+(local altname (require :openssl.x509.altname))
 (local pkey (require :openssl.pkey))
 (local xn (require :openssl.x509.name))
 
@@ -20,6 +21,13 @@
       (let [(k v) (string.match c "(.-)=(.+)")]
         (n:add k v)))
     n))
+
+(fn x509-altname [subj]
+  (let [an (altname.new)]
+    (each [_ c (ipairs (split "," subj))]
+      (let [(k v) (string.match c "(.-)=(.+)")]
+        (if (= k "CN") (an:add "DNS" v))))
+    an))
 
 (fn parse-args [args]
   (case args
@@ -49,6 +57,7 @@
   (doto (csr.new)
     (: :setVersion 3)
     (: :setSubject (x509-name options.subject))
+    (: :setSubjectAlt (x509-altname options.subject))
     (: :setPublicKey pk)
     (: :addAttribute :challengePassword [options.secret])
     (: :sign pk)))
