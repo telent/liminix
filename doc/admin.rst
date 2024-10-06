@@ -97,7 +97,7 @@ time.  For example:
 Logs
 ====
 
-Logs for all services are collated into :file:`/run/uncaught-logs/current`.
+Logs for all services are collated into :file:`/run/log/current`.
 The log file is rotated when it reaches a threshold size, into another
 file in the same directory whose name contains a TAI64 timestamp.
 
@@ -108,7 +108,7 @@ human-readable format, use :command:`s6-tai64nlocal`.
 
 .. code-block:: console
 
-  # ls -l /run/uncaught-logs/
+  # ls -l /run/log/
   -rw-r--r--    1         0 lock
   -rw-r--r--    1         0 state
   -rwxr--r--    1     98059 @4000000000025cb629c311ac.s
@@ -122,10 +122,10 @@ human-readable format, use :command:`s6-tai64nlocal`.
   -rwxr--r--    1     98023 @4000000000027e6f0ed24a6c.s
   -rw-r--r--    1     42374 current
   
-  # tail -2 /run/uncaught-logs/current 
+  # tail -2 /run/log/current
   @40000000000284f130747343 wan.link.pppoe Connect: ppp0 <--> /dev/pts/0
   @40000000000284f230acc669 wan.link.pppoe sent [LCP ConfReq id=0x1 <asyncmap 0x0> <magic 0x667a9594> <pcomp> <accomp>]
-  # tail -2 /run/uncaught-logs/current  | s6-tai64nlocal 
+  # tail -2 /run/log/current  | s6-tai64nlocal
   1970-01-02 21:51:45.828598156 wan.link.pppoe sent [LCP ConfReq id=0x1 <asyncmap 0x0> <magic 0x667a9594> <pcomp> <accom
   p>]
   1970-01-02 21:51:48.832588765 wan.link.pppoe sent [LCP ConfReq id=0x1 <asyncmap 0x0> <magic 0x667a9594> <pcomp> <accom

@@ -71,7 +71,7 @@ stdin/stdout.
 You should now see Linux boot messages and after a few seconds be
 presented with a root shell prompt.  You can run commands to look at
 the filesystem, see what processes are running, view log messages (in
-:file:/run/uncaught-logs.current), etc. To kill the emulator, press ^P
+:file:/run/log/current), etc. To kill the emulator, press ^P
 (Control P) then c to enter the "QEMU Monitor", then type ``quit`` at
 the ``(qemu)`` prompt.
 

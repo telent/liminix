@@ -14,7 +14,7 @@ expect {
 }
 expect "#"
 while { $FINISHED < 10 } {
-  send "date && grep AP-ENABLED /run/uncaught-logs/* || echo \$NOT\r\n"
+  send "date && grep AP-ENABLED /run/log/* || echo \$NOT\r\n"
   
   expect {
     "wlan0: AP-ENABLED" { set FINISHED 999; set EXIT 0; }
@@ -24,7 +24,7 @@ while { $FINISHED < 10 } {
 }
 
 if { $EXIT > 0 } {
-  send "tail -40 /run/uncaught-logs/current\r\n"
+  send "tail -40 /run/log/current\r\n"
   expect "#"
 }
 exit $EXIT
