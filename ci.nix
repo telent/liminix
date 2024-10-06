@@ -72,5 +72,8 @@ let
     };
 in jobs //
    {
-     all = pkgs.lib.collect pkgs.lib.isDerivation jobs;
+     all = pkgs.mkShell {
+       name = "all tests";
+       contents = pkgs.lib.collect pkgs.lib.isDerivation jobs;
+     };
    }
