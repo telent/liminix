@@ -232,18 +232,13 @@ Running tests
 *************
 
 You can run all of the tests by evaluating :file:`ci.nix`, which is the
-input I use in Hydra. Note that it expects Nixpkgs stable `and` unstable
-as inputs, because it builds the qemu device against both.
+input I use in Hydra. 
 
 .. code-block:: console
 
-    nix-build --argstr liminix `pwd`  --arg  nixpkgs "<nixpkgs>" \
-     --argstr unstable `pwd`/../unstable-nixpkgs/ ci.nix
-
-To run a single named test, use the ``-A`` flag. For example, ``-A pppoe``
-
-
-
+    nix-build -I liminix=`pwd`  ci.nix -A pppoe # run one job
+    nix-build -I liminix=`pwd`  ci.nix -A all # run all jobs
+    
 
 Troubleshooting
 ***************

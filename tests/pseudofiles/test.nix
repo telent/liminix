@@ -1,9 +1,9 @@
 let
   overlay = import <liminix/overlay.nix>;
-  nixpkgs = import <nixpkgs> { overlays = [overlay]; };
-  fixture = nixpkgs.callPackage ./fixture.nix {};
-in nixpkgs.runCommand "check" {
-    nativeBuildInputs = with <nixpkgs>; [ squashfsTools qprint ] ;
+  pkgs = import <nixpkgs> { overlays = [overlay]; };
+  fixture = pkgs.callPackage ./fixture.nix {};
+in pkgs.runCommand "check" {
+    nativeBuildInputs = with pkgs; [ squashfsTools qprint ] ;
   } ''
 set -e
 diff ${fixture} ${./result.expected}

@@ -70,4 +70,7 @@ let
           '';
       };
     };
-in  (genAttrs devices for-device) # tests # jobs
+in jobs //
+   {
+     all = pkgs.lib.collect pkgs.lib.isDerivation jobs;
+   }
