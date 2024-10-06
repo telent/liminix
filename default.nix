@@ -2,14 +2,13 @@
   deviceName ? null,
   device ? (import ./devices/${deviceName}),
   liminix-config ? <liminix-config>,
-  nixpkgs ? <nixpkgs>,
   borderVmConf ? ./bordervm.conf.nix,
   imageType ? "primary",
 }:
 
 let
   overlay = import ./overlay.nix;
-  pkgs = import nixpkgs (
+  pkgs = import <nixpkgs> (
     device.system
     // {
       overlays = [ overlay ];

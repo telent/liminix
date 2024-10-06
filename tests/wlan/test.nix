@@ -1,9 +1,5 @@
-{
-  liminix
-, nixpkgs
-}:
-let img = (import liminix {
-      device = import "${liminix}/devices/qemu-armv7l/";
+let img = (import <liminix> {
+      device = import <liminix/devices/qemu-armv7l>;
       liminix-config = ./configuration.nix;
     }).outputs.default;
     pkgs = import <nixpkgs> { overlays = [(import ../../overlay.nix)]; };

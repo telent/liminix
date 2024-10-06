@@ -1,9 +1,6 @@
-{
-  liminix
-}:
 let check = deviceName  : config :
-let derivation = (import liminix {
-      device = import "${liminix}/devices/${deviceName}/";
+let derivation = (import <liminix> {
+      device = import (<liminix/devices> + "/${deviceName}");
       liminix-config = { ... } : {
         imports = [./configuration.nix];
         inherit config;

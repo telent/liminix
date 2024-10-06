@@ -1,9 +1,5 @@
-{
-  liminix
-, nixpkgs
-}:
-let lmx = (import liminix {
-      device = import "${liminix}/devices/qemu/";
+let lmx = (import <liminix> {
+      device = import <liminix/devices/qemu>;
       liminix-config = ./configuration.nix;
     });
     rogue = lmx.pkgs.rogue;

@@ -1,9 +1,5 @@
-{
-  liminix
-, nixpkgs
-}:
 let
-  overlay = import "${liminix}/overlay.nix";
+  overlay = import <liminix/overlay.nix>;
   pkgs = import <nixpkgs> { overlays = [overlay]; };
   script = pkgs.writeFennel "foo" {} ./hello.fnl;
   inherit (pkgs.lua.pkgs) fifo;

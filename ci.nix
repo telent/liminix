@@ -1,11 +1,6 @@
-{
-  nixpkgs,
-  unstable,
-  liminix,
-  ...
-}:
 let
-  pkgs = (import nixpkgs { });
+  pkgs = import <nixpkgs> { };
+  liminix = <liminix>;
   borderVmConf = ./bordervm.conf-example.nix;
   inherit (pkgs.lib.attrsets) genAttrs;
   devices = [
@@ -21,7 +16,7 @@ let
   vanilla = ./vanilla-configuration.nix;
   for-device = name:
     (import liminix {
-      inherit nixpkgs borderVmConf;
+      inherit borderVmConf;
       device = import (liminix + "/devices/${name}");
       liminix-config = vanilla;
     }).outputs.default;
@@ -32,7 +27,7 @@ let
     // {
       buildEnv =
         (import liminix {
-          inherit nixpkgs borderVmConf;
+          inherit borderVmConf;
           device = import (liminix + "/devices/qemu");
           liminix-config = vanilla;
         }).buildEnv;
@@ -40,7 +35,7 @@ let
         let
           json =
             (import liminix {
-              inherit nixpkgs borderVmConf;
+              inherit borderVmConf;
               device = import (liminix + "/devices/qemu");
               liminix-config =
                 { ... }:
@@ -74,11 +69,5 @@ let
                 > $out/nix-support/hydra-build-products
           '';
       };
-      with-unstable = (import liminix {
-        nixpkgs = unstable;
-        inherit borderVmConf;
-        device = import (liminix + "/devices/qemu");
-        liminix-config = vanilla;
-      }).outputs.default;
     };
-in jobs
+in  (genAttrs devices for-device) # tests # jobs
