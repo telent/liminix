@@ -102,6 +102,12 @@ in {
     systemd.services.sshd.wantedBy = pkgs.lib.mkForce [ "multi-user.target" ];
 
     virtualisation = {
+      forwardPorts = [ {
+        from = "host";
+        host.port = 7654;
+#        guest.address = "10.0.2.15";
+        guest.port =7654;
+      } ];
       qemu = {
         networkingOptions = [ ];
         options =
@@ -124,6 +130,12 @@ in {
         };
       };
     };
+
+    services.tang = {
+      enable = true;
+      ipAddressAllow = [ "10.0.0.0/24" "0.0.0.0/0" ];
+    };
+
     environment.systemPackages =
       let wireshark-nogui = pkgs.wireshark.override { withQt = false ; };
           in with pkgs; [
@@ -134,6 +146,7 @@ in {
             iptables
             usbutils
             busybox
+            clevis
           ];
     security.sudo.wheelNeedsPassword = false;
     networking = {
