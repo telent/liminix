@@ -281,7 +281,7 @@ extraPkgs // {
         tpmSupport = false;
         uringSupport = false;
         capstoneSupport = false;
-      } // lib.optionalAttrs (lib.versionOlder lib.version "24.11") {
+      } // lib.optionalAttrs (lib.versionOlder lib.version "24.10") {
         texinfo = null;
       };
     in q.override overrides;
