@@ -53,6 +53,7 @@ let
     , run
     , notification-fd ? null
     , buildInputs ? []
+    , producer-for ? null
     , ...
   } @ args:
     let logger = service {
@@ -64,11 +65,11 @@ let
           pipeline-name = "${name}-pipeline";
         };
     in service (args // {
-      buildInputs = buildInputs ++ [ logger ];
+      buildInputs = buildInputs ++ lib.optional (producer-for == null) logger;
       serviceType = "longrun";
       run = serviceScript run;
       finish = cleanupScript name;
-      producer-for = "${name}-log";
+      producer-for = if producer-for != null then producer-for else "${name}-log";
     });
 
   oneshot = {
@@ -92,5 +93,6 @@ let
   });
   target = bundle;
 in {
-  inherit target bundle oneshot longrun output;
+  inherit target bundle oneshot output;
+  longrun = lib.makeOverridable longrun;
 }
