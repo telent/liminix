@@ -6187,3 +6187,340 @@ video editing
 * there are ppp credentials onscreen at 13:00
 
 * should finish at 33:00
+
+
+Sat Sep  7 22:21:12 BST 2024
+
+what is causing these messages?
+
+@400000000001620127a096b3 watch-for-modem-modeswitch /nix/store/4q3swc0mg28ja30anap4id3gics3h7fk-lua-tty-mips-unknown-linux-mus
+l/bin/lua: ...lr-uevent-watch-mips-unknown-linux-musl/bin/uevent-watch:4: unexpected symbol near '/'
+@400000000001620127a0ec7e watch-for-modem-modeswitch stack traceback:
+@400000000001620127a11c42 watch-for-modem-modeswitch    [C]: in function 'dofile'
+@400000000001620127a14dec watch-for-modem-modeswitch    (command line):1: in main chunk
+@400000000001620127a41b1c watch-for-modem-modeswitch    [C]: in ?
+@
+
+Sun Sep  8 10:15:56 BST 2024
+
+If we could produce logs in JSON then we could push them to zinc (or
+elasticsearch, which has the same api). We'd like fields for
+timestamp, message, pid, host.
+
+* we can add host when we post to elasticsearch,  no need to repeat it
+on every field
+
+* there is no (sensible) way to get the pid of the other end of a pipe.
+But we could print it from the sender before execing the process. But then
+it'll only appear once instead of every entry. Maybe we could log the
+logger pid as well, then we can correlate
+
+TBH given that we already have to process the log lines to get them
+into zinc, and that we already can unambiguously parse the log line
+(provided we disallow whitespace in the service name, and we mandate
+that the message is always the final field) there's not much value in
+producing a different json.
+
+Actually the logger pid probably won't help us tell when the service
+has been restarted, because the logger won't be restarted at the time
+time due to fdholder stuff
+
+so perhaps there are no logging changes we can easily/reasonably make
+and we should just write a log processor that ships to a collector.
+
+- open connection to zinc (s6-tlsclient)
+- send http headers
+- while not eof(stdin)
+ - read line
+ - split fields
+ - send command, send data
+
+{ "index" : { "_index" : "olympics" } }
+{"Year": 1896, "City": "Athens", "Sport": "Aquatics", "Discipline": "Swimming", "Athlete": "HAJOS, Alfred", "Country": "HUN", "Gender": "Men", "Event": "100M Freestyle", "Medal": "Gold", "Season": "summer"}
+
+
+we can't calculate content-length. maybe we can use chunks
+
+Transfer-Encoding: chunked
+
+size-of-chunk-in-hex CRLF
+chunk-data  CRLF
+
+0 CRLF
+CRLF
+
+to generate test data:
+$ nix-shell -p s6 --run " sort --random-sort ~/src/liminix/THOUGHTS.txt  | head -1 | sed 's/^/servicename /g' |tr -cd '[a-z0-9 ]' |  s6-tai64n"
+
+Sun Sep  8 16:39:55 BST 2024
+
+* how do we add incz to the logging infra and configure it?
+* how do we get zinc on loaclhost to be visible to test lan (port forward
+ on border?)
+* shall we rig up a service on loaclhost so that zinc starts at boot?
+
+Mon Sep  9 17:58:46 BST 2024
+
+We can use this as a log processor. However, a log processor doesn't
+ship the segment until the log writer has finished with it, therefore,
+some latency is introduced.
+
+We can write logs to the network as they are generated. However, what if:
+
+- the network is not available
+- the collector is not keeping up
+
+s6-log says "if a processor fails, s6-log will try it again after some
+cooldown time.".  Laurent says "if a processor fails [if you're using
+-b] then the rotation cannot happen, and s6-log will stop reading
+until the processor succeeds.  Without -b, logs keep accumulating in
+RAM, and s6-log may crash if it runs oom before the processor
+succeeds"
+
+.... so, maybe we shouldn't use log processors here.
+
+shipping finished log segments outside of the s6-log framework is
+quite straightforward. the issue is how to send the in-progress log.
+Challenges
+
+- if we are sending the in-progress log, how _not_ to resend all the
+same entries when the segment is rotated
+- how do we know when the segment is rotated and should start reading
+the new file
+
+Maybe
+
+1) we have a logshipper service that listens on a unix socket
+2) s6-log is hooked to the logshipper-client logger, which checks
+ for the unix socket and only writes data to it if it exists.
+ Probably it should check periodically for the socket to exist
+ and not just try it on every write
+ (Would be good if it could tell whether the socket had a
+ listener or not. Maybe abstract sockets)
+
+
+ (and also writes to stdout so the s6 logging chain is unbroken)
+3) when logshipper is ready, it reads all past log entries whose
+ timestamps are from before when it started, and writes them.
+ and/or it could write a cookie to the log, then it would know
+ to stop reading the logs when it encounters its own cookie
+
+Mon Sep 16 19:54:35 BST 2024
+
+incz won't work as-is because it uses stdin/stdout for communicating
+with http and reads the logs from a filename.  unless we make it use
+/proc/self/fd/3 for the filename? Even then, ideally we kind of want
+to adapt it for streaming
+
+Wed Sep 18 18:23:38 BST 2024
+
+we can run
+
+socat tcp-listen:19612,reuseaddr,fork | s6-log -b /var/log/clients
+
+on the log collection host (or use openssl-listen if you're going to set up ssl certs)
+
+then our logshipper program can basically be "open socket and cat to s6-tcpclient" (though it would be better if we can add the hostname in the process)
+
+let's make the logging script a config option
+
+
+pipeline { s6-ipcserver -1 /run/uncaught-logs/shipping }
+pipeline { s6-tcpclient loghost:19612 }
+fdmove -c 1 7
+cat
+
+Wed Sep 18 20:32:54 BST 2024
+
+s6-log will create its directory but the parent must exist. incidentally,
+putting /run/uncaught-logs in pseudofiles is pointless because /run is a
+mountpoint
+
+ip addr add 10.0.2.15/24 dev lan
+
+s6-rc -d change sshd; s6-rc -u change sshd;
+
+Sun Sep 22 21:13:15 BST 2024
+
+This works for the collector (but note that it collects logs from
+*anywhere* that can write to that port, so please firewall responsibly)
+
+
+  systemd.services."s6-log-collector" = {
+    after = [ "network.target" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "exec";
+      WorkingDirectory = "/var/log";
+      ExecStart = ''
+        ${pkgs.bash}/bin/sh -c "${pkgs.socat}/bin/socat tcp4-listen:17345,reuseaddr,fork stdout | ${pkgs.s6}/bin/s6-log -b /var/log/remote"
+      '';
+    };
+  };
+
+
+Tue Sep 24 18:14:42 BST 2024
+
+"Raw" TCP is not the ideal transport for logs because I don't want the
+whole internet able to write to my log server, and writing
+only-from-the-LAN iptables rules is messy with a gazillion ipv6
+addresses to account for.
+
+. SSL with client certificates would be nice, but there is the issue
+of how to get the private key onto the device and sign it. My idea is
+
+1) device generates a private key on first boot (or every boot, if no
+persistent storage). Private key includes some field with a value that
+was set at build time (PSK, effectively)
+
+2) there is an API-driven CA signing thingy that the client can use to
+get a cert based on their key. It checks the field for the presence
+of the PSK. It should probably expose HTTPS only so that the client
+can be sure it's getting signed by the correct CA
+
+
+3) the log collector refuses connections unless the client is signed by the
+local CA
+
+This is quite a lot of work insofar as it would appear to require
+writing the CA.
+
+We could alternatively do something much more ad hoc where the client
+just writes the PSK to the server when it opens the stream, before
+sending any data. We'd have to write the server end, then, instead of
+just using socat - but that is probably less work than an API-driven CA.
+On the other hand, TLS logs would also be encrypted which is a good thing
+if the LAN is not trusted.
+
+Sat Sep 28 16:04:15 BST 2024
+
+OK, so we wrote the CA.
+
+To do HTTPS on the client we need
+
+1) to generate a csr
+2) to https it to the server
+3) store the generated thingy as a service output
+
+looking at x86-64 sizes for ballpark
+
+-r-xr-xr-x 1 root root 987K Jan  1  1970 /nix/store/s45wy1ssim1dkxzligx09xjp4n0668i2-openssl-3.0.14-bin/bin/openssl
+-r-xr-xr-x 1 root root 263K Jan  1  1970 /nix/store/z28bxdnsw2gr1xwx7qj6px9iz5sr84i9-lua-5.3.6-env/lib/lua/5.3/_openssl.so
+
+suggesting that we'd use _less_ disk doing the whole thing in lua than
+
+Sun Sep 29 10:20:49 BST 2024
+
+We need luaossl support for setting attributes in a CSR
+
+https://www.rfc-editor.org/rfc/rfc2986#page-5
+
+   Attributes { ATTRIBUTE:IOSet } ::= SET OF Attribute{{ IOSet }}
+
+   CRIAttributes  ATTRIBUTE  ::= {
+        ... -- add any locally defined attributes here -- }
+
+   Attribute { ATTRIBUTE:IOSet } ::= SEQUENCE {
+        type   ATTRIBUTE.&id({IOSet}),
+        values SET SIZE(1..MAX) OF ATTRIBUTE.&Type({IOSet}{@type})
+   }
+
+I don't understand this 100% but it looks like the raw data is _not_
+the same format as an x509 attribute. See e.g.
+https://github.com/golang/go/commit/e78e654c1de0a7bfe0314d6954d42b046f14f1bb#diff-a789286d7e257f148c437404f8cf5d3379688597381ff13352e62ac406be295aL1712
+in support of my hypothesis (background: iiuc, "critical" is a boolean flag,
+but x509 attributes aren't allowed to be booleans)
+
+https://en.wikipedia.org/wiki/Certificate_signing_request
+
+  388:d=2  hl=2 l=  35 cons:   cont [ 0 ]
+  390:d=3  hl=2 l=  33 cons:    SEQUENCE
+  392:d=4  hl=2 l=   9 prim:     OBJECT            :challengePassword
+  403:d=4  hl=2 l=  20 cons:     SET
+  405:d=5  hl=2 l=  18 prim:      UTF8STRING        :loves labours lost
+  425:d=1  hl=2 l=  13 cons:  SEQUENCE
+  427:d=2  hl=2 l=   9 prim:   OBJECT            :sha256WithRSAEncryption
+
+
+(csr:getAttribute "challengePassword")
+(csr:getAttributeNames)
+(csr:setAttribute "challengePassword" :IA5STRING ["loves labours lost"])
+
+how do we know the asn1 type of the attribute values? it looks like they're
+defined by the object: see e.g. https://www.rfc-editor.org/rfc/rfc2985#page-16
+
+   A challenge-password attribute must have a single attribute value.
+
+   ChallengePassword attribute values generated in accordance with this
+   version of this document SHOULD use the PrintableString encoding
+   whenever possible.  If internationalization issues make this
+   impossible, the UTF8String alternative SHOULD be used.  PKCS #9-
+   attribute processing systems MUST be able to recognize and process
+   all string types in DirectoryString values.
+
+crypto/asn1/tbl_standard.h:    {NID_pkcs9_challengePassword, 1, -1, PKCS9STRING_TYPE, 0},
+include/openssl/asn1.h.in:# define PKCS9STRING_TYPE (DIRSTRING_TYPE|B_ASN1_IA5STRING)
+
+I assume there's something in openssl that will do lookups in this table
+to give us the type for the oid, then maybe something in luaossl that
+would lua-ize it?
+5
+
+or we could put that burden on the caller, as x509.name:add does
+
+Sun Sep 29 20:46:16 BST 2024
+
+
+OBJ_txt2nid("challengePassword"); works with short/long names
+
+the get call is complicated because there can be multiple
+attributes with the same type. There probably aren't but ...
+
+(csr:getAttribute "challengePassword") => multivals attr, index
+
+(csr:getAttribute "challengePassword" index) => multivals attr, index
+
+(csr:addAttribute "challengePassword" :IA5String ["loves labours"])
+
+(csr:clearAttribute index)
+
+
+Tue Oct  1 21:55:25 BST 2024
+
+on server, we need to reconfigure socat to give it our CA cert and
+expect peer to authenticate
+
+on client, I am not sure if we can persuade s6-tlsclient to use the same
+file for cert and private key.  perhaps certifix-client could write
+two separate files with --out-key and --out-certificate
+
+
+CAFILE=ca.crt KEYFILE=client.key CERTFILE=client.crt s6-tlsclient -k localhost -y -v localhost 19612 socat 'fd:6!!fd:7'  -
+
+
+socat ssl-l:19612,reuseaddr,fork,cert=server-combined.pem,cafile=ca.crt  stdout
+
+suggest creating /var/lib/s6-log-collector/{private,cert} on loaclhost
+wherein we keep the server and ca keys, then socat and the signing
+server can both see them
+
+
+ip addr add 10.0.2.15/24 dev lan
+
+Sat Oct  5 22:35:41 BST 2024
+
+We had it working in a VM, and the service is installed on loaclhost
+
+TODO
+
+1) make a module-based service for client-cert
+caCertificateFile
+secretFile
+subject
+url
+
+2) make the shipping service a consumer-for
+
+3) can we reduce the verbiage in the shipping service somehow?
+
+4) rebuild an actual device with all this stuff
