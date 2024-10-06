@@ -35,7 +35,7 @@ if { $when eq "early" } {
 
 expect "BusyBox"
 chat "#" "PS1=RE\\ADY_\\ ; stty -echo \r"
-chat "READY_"  "tail -f /run/uncaught-logs/current & \rs6-rc -b  -a list\r"
+chat "READY_"  "tail -f /run/log/current & \rs6-rc -b  -a list\r"
 
 chat "mount" "\r"
 
