@@ -62,6 +62,7 @@ let
           ../../modules/busybox.nix
           base
           ({ ... } : paramConfig)
+          ({ ... } : { config = { logging.script = "t"; }; })
           ../../modules/s6
         ];
       };
