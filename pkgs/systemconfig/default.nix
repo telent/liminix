@@ -7,6 +7,7 @@
 {
   writeText,
   writeFennel,
+  buildPackages,
   lib,
   s6-init-bin,
   closureInfo,
@@ -82,6 +83,8 @@ in attrset:
       $STRIP --remove-section=.note  --remove-section=.comment --strip-all makedevs -o $out/bin/activate
       ln -s ${s6-init-bin}/bin/init $out/bin/init
       cp -p ${writeFennel "restart-services" {} ./restart-services.fnl} $out/bin/restart-services
+      substitute ${./build-system-install.sh} $out/install.sh --subst-var-by min-copy-closure ${buildPackages.min-copy-closure}
+      chmod +x $out/install.sh
       cat > $out/bin/install <<EOF
       #!/bin/sh -e
       prefix=\''${1-/}
