@@ -293,14 +293,17 @@ the hostname) and then run
 
 .. code-block:: console
 
-    nix-shell --run "liminix-rebuild root@address-of-the-device  -I liminix-config=./my-router.nix --arg device "import ./devices/gl-ar750""
+    nix-build  -I liminix-config=./my-router.nix \
+      --arg device "import ./devices/gl-ar750" \
+      -A outputs.systemConfiguration && \
+    result/install.sh root@address-of-the-device 
 
 (This requires the device to be network-accessible from your build
 machine, which for a test/demo system might involve a second network
 device in your build system - USB ethernet adapters are cheap - or
 a bit of messing around unplugging cables.)
 
-For more information about :code:`liminix-rebuild`, see the manual section :ref:`Rebuilding the system`.
+For more information about in-place-updates, see the manual section :ref:`Rebuilding the system`.
 
 
 Final thoughts

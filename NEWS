@@ -115,3 +115,21 @@ the value of profile.gateway.wan. For the pppoe case this is now only
 very slightly more verbose, and it allows using the gateway profile
 with other kinds of upstream.
 
+2024-8-16
+
+As part of implementing log shipping, the default directory for system
+logs has beenchanged from /run/uncaught-logs to /run/log
+
+2024-10-09
+
+liminix-rebuild is being deprecated. From hereon in, the preferred way
+to do an incremental update on an installed device with a writable
+filesystem is to build the systemConfiguration output
+
+    nix-build  -I liminix-config=hosts/myhost.nix --argstr deviceName turris-omnia -A outputs.systemConfiguration 
+
+and then run the generated `install.sh` script
+
+    result/install.sh root@192.168.8.1
+
+

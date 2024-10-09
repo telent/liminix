@@ -15,7 +15,7 @@ Liminix uses the Nix language to provide congruent configuration
 management.  This means that to change anything about the way in
 which a Liminix system works, you make that change in
 your :file:`configuration.nix` (or one of the other files it references),
-and rerun :command:`nix-build` or :command:`liminix-rebuild` to action
+and rerun :command:`nix-build` to action
 the change. It is not possible (at least, without shenanigans) to make
 changes by logging into the device and running imperative commands
 whose effects may later be overridden: :file:`configuration.nix`

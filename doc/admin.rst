@@ -161,17 +161,32 @@ any profile to add it to ``$PATH``
 Rebuilding the system
 =====================
 
-:command:`liminix-rebuild` is the Liminix analogue of :command:`nixos-rebuild`, although its operation is a bit different because it expects to run on a build machine and then copy to the host device. Run it with the same ``liminix-config`` and ``device`` parameters as you would run :command:`nix-build`, and it will build any new/changed packages and then copy them to the device using SSH. For example:
+Liminix has a mechanism for in-place updates of a running system which
+is analogous to :command:`nixos-rebuild`, but its operation is a
+bit different because it expects to run on a build machine and then
+copy to the host device. To use this, build the `outputs.systemConfiguration`
+target and then run the :command:`result/install.sh` script it generates.
 
 .. code-block:: console
 
-     liminix-rebuild root@the-device  -I liminix-config=./examples/rotuer.nix --arg device "import ./devices/gl-ar750"
+    nix-build -I liminix-config=./my-configuration.nix \
+       --arg device "import ./devices/mydevice" \
+       -A outputs.systemConfiguration
+    ./result/install.sh root@the-device 
 
-This will
+The install script uses min-copy-closure to copy new or changed
+packages to the device, then (perhaps) reboots it. The reboot
+behaviour can be affected by flags:
 
-* build anything that needs building
-* copy new or changed packages to the device
-* reboot the device
+* `--no-reboot` will cause it not to reboot at all, if you would
+  rather do that yourself. Note that none of the newly-installed or
+  updated services will be running until you do.
+
+* `--fast` causes it tn not do a full reboot, but instead to restart
+  only the services that have been changed. This will restart all of
+  the services that have updated store paths (and anything that
+  depends on them), but will not affect services that haven't changed.
+
 
 It doesn't delete old packages automatically: to do that run
 :command:`min-collect-garbage`, which will delete any packages not in
