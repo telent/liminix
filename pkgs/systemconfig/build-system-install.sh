@@ -32,7 +32,7 @@ shift
 test -n "$target_host" || \
     die "Usage: $0 [--no-reboot] [--fast] target-host"
 
-toplevel=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+toplevel=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && readlink `pwd` )
 test -e $toplevel/etc/nix-store-paths || die "missing etc/nix-store-paths, is this really a system configuration?"
 echo installing from systemConfiguration $toplevel to host $target_host
 
