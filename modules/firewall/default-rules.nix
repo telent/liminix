@@ -90,7 +90,7 @@ in {
       # accept inbound from the WAN
       (if allow-incoming
        then accept "oifname \"int\" iifname \"ppp0\""
-       else "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip6"
+       else "iifname \"ppp0\" jump incoming-allowed-ip6"
       )
       # allow all outbound and any inbound that's part of a
       # recognised (outbound-initiated) flow
@@ -210,7 +210,7 @@ in {
       "icmp type { echo-request, echo-reply } accept"
       "iifname int jump input-ip4-lan"
       "iifname ppp0 jump input-ip4-wan"
-      "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip4"
+      "iifname ppp0 jump incoming-allowed-ip4"
       "ct state established,related accept"
       "log prefix \"DENIED CHAIN=input-ip4 \""
     ];
