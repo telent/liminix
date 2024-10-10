@@ -9,7 +9,9 @@ die() {
     exit 1
 }
 
-PATH=@min-copy-closure@/bin:$PATH
+# add min-copy-closure to the path. removing junk characters
+# inserted by default.nix (q.v.)
+min_copy_closure=@min-copy-closure@; PATH=${min_copy_closure//_/}/bin:$PATH
 
 ssh_command=${SSH_COMMAND-ssh}
 
@@ -37,6 +39,7 @@ test -e $toplevel/etc/nix-store-paths || die "missing etc/nix-store-paths, is th
 echo installing from systemConfiguration $toplevel to host $target_host
 
 min-copy-closure $target_host $toplevel
+set -x
 $ssh_command $target_host $toplevel/bin/install
 case "$reboot" in
     reboot)
