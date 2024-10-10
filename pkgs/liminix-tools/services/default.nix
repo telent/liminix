@@ -14,8 +14,9 @@ let
     . ${serviceFns}
     ${commands}
   '';
-  cleanupScript = name : ''
+  cleanupScript = name : cmds : ''
     #!/bin/sh
+    ${if cmds != null then cmds else ""}
     if test -d ${prefix}/${name} ; then rm -rf ${prefix}/${name} ; fi
   '';
   service = {
@@ -51,6 +52,7 @@ let
   longrun = {
     name
     , run
+    , finish ? null
     , notification-fd ? null
     , buildInputs ? []
     , producer-for ? null
@@ -68,7 +70,7 @@ let
       buildInputs = buildInputs ++ lib.optional (producer-for == null) logger;
       serviceType = "longrun";
       run = serviceScript run;
-      finish = cleanupScript name;
+      finish = cleanupScript name finish;
       producer-for = if producer-for != null then producer-for else "${name}-log";
     });
 
@@ -82,7 +84,7 @@ let
     up = writeScript "${name}-up" (serviceScript up);
     down = writeScript
       "${name}-down"
-      "${serviceScript down}\n${cleanupScript name}";
+      "${serviceScript down}\n${cleanupScript name null}";
   });
   bundle = { contents ? []
     , dependencies ? []
