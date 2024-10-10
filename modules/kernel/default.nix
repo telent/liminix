@@ -91,7 +91,6 @@ in {
         IKCONFIG_PROC = "y";
         PROC_FS = "y";
 
-        KEXEC = "y";
         MODULES = if modular then "y" else "n";
         MODULE_SIG = if modular then "y" else "n";
         DEBUG_FS = "y";
