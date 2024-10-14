@@ -6513,14 +6513,29 @@ We had it working in a VM, and the service is installed on loaclhost
 
 TODO
 
-1) make a module-based service for client-cert
+[done] 1) make a module-based service for client-cert
 caCertificateFile
 secretFile
 subject
 url
 
-2) make the shipping service a consumer-for
+[done] 2) make the shipping service a consumer-for
 
-3) can we reduce the verbiage in the shipping service somehow?
+[not by much] 3) can we reduce the verbiage in the shipping service somehow?
 
 4) rebuild an actual device with all this stuff
+
+Tue Oct  8 23:50:00 BST 2024
+
+idea: create outputs.update which builds a systemConfiguration and
+also a result/install.sh which does  min-copy-closure and
+restart-services as per liminix-rebuild, then we don't have
+to nix-shell liminix-rebuild
+
+nix-build ../liminix/ -I liminix-config=hosts/rotuer.nix --argstr deviceName turris-omnia -A outputs.update-system  -o rotuer && ./rotuer/install.sh
+
+this would make it much more straightforward to build a bunch of hosts
+using a Makefile
+
+idea 2: when a configuration contains levitate, something similar
+but necessarily more "manual" to do the analogous thing
