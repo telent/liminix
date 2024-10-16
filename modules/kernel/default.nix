@@ -92,7 +92,6 @@ in {
         PROC_FS = "y";
 
         MODULES = if modular then "y" else "n";
-        MODULE_SIG = if modular then "y" else "n";
         DEBUG_FS = "y";
 
         # basic networking protocols
