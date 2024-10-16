@@ -58,7 +58,6 @@ let
         "ipv6-up-script" ip6-up
         "ipparam" name
         "nodetach"
-        "usepeerdns"
         "nodefaultroute"
         "logfd" "2"
        ];
