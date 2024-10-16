@@ -33,7 +33,7 @@ let
      echo $4 > ipv6-address
      echo $5 > ipv6-peer-address
     )
-    echo >/proc/self/fd/10
+    test -e tty && echo >/proc/self/fd/10
   '';
   literal_or_output =
     let v = o: ({
