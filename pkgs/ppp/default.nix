@@ -3,12 +3,10 @@
   stdenv,
   autoreconfHook,
   substituteAll,
-# , openssl
 }: stdenv.mkDerivation {
   pname  = "ppp";
   version = "2.5.0";
   nativeBuildInputs = [ autoreconfHook ];
-#  buildInputs= [ openssl ];
 
   src = fetchFromGitHub {
     repo = "ppp";
@@ -22,6 +20,7 @@
     "--disable-peap"
     "--disable-openssl-engine"
     "--without-openssl"
+    "--with-runtime-dir=/run/"
   ];
 
   postPatch = ''
