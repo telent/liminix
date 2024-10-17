@@ -58,6 +58,10 @@ let
         "ipv6-up-script" ip6-up
         "ipparam" name
         "nodetach"
+        # usepeerdns requests DNS servers from peer (which is good),
+        # then attempts to write them to /nix/store/xxxx/ppp/resolv.conf
+        # which causes an unsightly but inconsequential error message
+        "usepeerdns"
         "nodefaultroute"
         "logfd" "2"
        ];
