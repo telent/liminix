@@ -6,6 +6,7 @@
 }:
 params:
 let
+  name = "ntp"; # bad name, needs to be unique
   inherit (liminix.services) longrun;
   inherit (lib) concatStringsSep mapAttrsToList;
   configFile = p:
@@ -23,11 +24,15 @@ let
     ++ (lib.optional (p.bindaddress != null) "bindaddress ${p.bindaddress}")
     ++ (lib.optional (p.binddevice != null) "binddevice ${p.binddevice}")
     ++ (lib.optional (p.dumpdir != null) "dumpdir ${p.dumpdir}")
+    ++ [
+      "bindcmdaddress /" # disable unix socket
+      "pidfile /run/${name}.pid"
+    ]
     ++ [p.extraConfig];
 
   config = writeText "chrony.conf"
     (concatStringsSep "\n" (configFile params));
 in longrun {
-  name = "ntp"; # bad name, needs to be unique
+  inherit name;
   run = "${chrony}/bin/chronyd -f ${config} -d";
 }
