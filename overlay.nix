@@ -5,7 +5,7 @@ let
   extraPkgs = import ./pkgs/default.nix {
     inherit (final) lib callPackage;
   };
-  inherit (final) fetchpatch;
+  inherit (final) fetchpatch lib;
   luaHost =
     let
       l = prev.lua5_3.overrideAttrs(o: {
@@ -73,14 +73,15 @@ extraPkgs // {
         });
     in chrony'.override {
       gnutls = null;
-      nss = null;
-      nspr = null;
-      readline = null;
       libedit = null;
       libseccomp = null;
       # should texinfo be in nativeBuildInputs instead of
       # buildInputs?
       texinfo = null;
+    } // lib.optionalAttrs (lib.versionOlder lib.version "24.10") {
+      nss = null;
+      nspr = null;
+      readline = null;
     };
 
   # clevis without luks/tpm
