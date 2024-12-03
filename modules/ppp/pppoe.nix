@@ -24,7 +24,7 @@ let
 in common {
   inherit name debug username password lcpEcho ppp-options;
   command = ''
-    exec ${ppp}/bin/pppd pty "${pppoe}/bin/pppoe ${timeoutOpt}  -I $(output ${interface} ifname)" file /run/${name}/ppp-options
+    ${ppp}/bin/pppd pty "${pppoe}/bin/pppoe ${timeoutOpt}  -I $(output ${interface} ifname)" file /run/${name}/ppp-options
   '';
   dependencies = [ interface ];
 }

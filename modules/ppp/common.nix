@@ -24,17 +24,21 @@ let
     echo $4 > address
     echo $5 > peer-address
     set +o nounset
+    set +o errexit
     if test -n "''${DNS1}" ;then echo ''${DNS1} > ns1 ; fi
     if test -n "''${DNS2}" ;then echo ''${DNS2} > ns2 ; fi
-    test -e ipv6-address && echo >/proc/self/fd/10
+    set +o pipefail
+    ls -l /proc/self/fd
+    echo >/proc/self/fd/10
   '';
   ip6-up = writeAshScript "ip6-up" {} ''
     exec >&5 2>&5
     . ${serviceFns} 
     in_outputs ${name}
+    set +o nounset
+    set +o errexit
     echo $4 > ipv6-address
     echo $5 > ipv6-peer-address
-    test -e ifname && echo >/proc/self/fd/10
   '';
   literal_or_output =
     let v = o: ({
@@ -73,7 +77,7 @@ let
       chmod 0700 /run/${name}
       in_outputs ${name}
       echo ${escapeShellArgs ppp-options'} | ${output-template}/bin/output-template '{{' '}}' > /run/${name}/ppp-options
-      fdmove -c 5 2 \
+      exec fdmove -c 5 2 \
       ${command}
     '';
     notification-fd = 10;

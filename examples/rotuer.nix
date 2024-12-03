@@ -16,11 +16,11 @@ let
     inherit (secrets) wpa_passphrase;
     wmm_enabled = 1;
   };
-
+  inherit (pkgs.liminix.services) longrun;
 in rec {
   boot = {
     tftp = {
-      freeSpaceBytes = 3 * 1024 * 1024;
+      freeSpaceBytes = 2 * 1024 * 1024;
       serverip = "10.0.0.1";
       ipaddr = "10.0.0.8";
     };
@@ -28,8 +28,24 @@ in rec {
 
   imports = [
     "${modulesPath}/profiles/gateway.nix"
+    "${modulesPath}/tls-certificate"
   ];
+
   hostname = "rotuer";
+#  rootfsType = "jffs2";
+
+  filesystem =
+    let inherit (pkgs.pseudofile) file dir symlink;
+    in dir {
+      mnt = dir {};
+      etc = dir {
+        hosts = {
+          type = "f";
+          file = "127.0.0.1 localhost\n10.0.0.1 loaclhost.telent.net\n";
+          mode = "0444";
+        };
+      };
+    };
 
   profile.gateway = {
     lan = {
@@ -106,9 +122,11 @@ in rec {
   defaultProfile.packages = with pkgs; [
     min-collect-garbage
     nftables
-    strace
-    tcpdump
+    # strace
+    # tcpdump
     s6
+    dtc
+    # certifix-client
   ];
 
   programs.busybox = {
@@ -117,6 +135,49 @@ in rec {
     ];
     options = {
       FEATURE_FANCY_TAIL = "y";
+    };
+  };
+
+  services.wan-address-for-secrets =
+    let
+      interface = config.hardware.networkInterfaces.wan;
+      addr =
+        svc.network.address.build {
+          inherit interface;
+          family = "inet"; address ="10.0.0.10"; prefixLength = 24;
+        };
+    in svc.network.route.build {
+      target = "10.0.0.1";
+      inherit interface;
+      via = "10.0.0.10";
+      metric = 1;
+      dependencies = [ addr ];
+    };
+
+  # services.client-cert = svc.tls-certificate.certifix-client.build {
+  #   caCertificate = builtins.readFile /var/lib/certifix/certs/ca.crt;
+  #   subject = "C=GB,ST=London,O=Telent,OU=devices,CN=${config.hostname}";
+  #   secret = builtins.readFile ../challengePassword;
+  #   serviceUrl = "https://loaclhost.telent.net:19613/sign";
+  #   dependencies = [ services.wan-address-for-secrets ];
+  # };
+
+  logging.pstore = true;
+  logging.shipping = {
+    enable = false;
+    service = longrun {
+      name = "ship-logs";
+      dependencies = [ config.services.client-cert ];
+      run =
+        let path = lib.makeBinPath (with pkgs; [ s6-networking s6 ]);
+        in ''
+          PATH=${path}:$PATH \
+          CAFILE=${/var/lib/certifix/certs/ca.crt} \
+          KEYFILE=$(output_path ${services.client-cert} key) \
+          CERTFILE=$(output_path ${services.client-cert} cert) \
+          s6-tlsclient -k loaclhost.telent.net -h -y loaclhost.telent.net 19612 \
+          fdmove -c 1 7 cat
+        '';
     };
   };
 }

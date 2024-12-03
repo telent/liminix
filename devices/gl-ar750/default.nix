@@ -114,12 +114,27 @@
           eraseBlockSize = 65536;
         };
         rootDevice = "/dev/mtdblock5";
-        dts = {
-          src = "${openwrt.src}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";
-          includes =  [
-            "${openwrt.src}/target/linux/ath79/dts"
-          ];
-        };
+        dts =
+          let
+            upstream = {
+              src = "${openwrt.src}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";
+              includes =  [
+                "${openwrt.src}/target/linux/ath79/dts"
+              ];
+            };
+            cppDtSearchFlags = builtins.concatStringsSep " " (map (f: "-I${f}") upstream.includes);
+            dtcSearchFlags = builtins.concatStringsSep " " (map (f: "-i${f}") upstream.includes);
+
+            patched = pkgs.runCommand "patch-dts" {
+              nativeBuildInputs = with pkgs.pkgsBuildBuild; [pkgs.stdenv.cc dtc ];
+            }
+              ''
+                echo patching dts
+                ${pkgs.stdenv.cc.targetPrefix}cpp -nostdinc -x assembler-with-cpp ${cppDtSearchFlags} -undef -D__DTS__  -o dts.tmp ${upstream.src}
+                dtc -I dts ${dtcSearchFlags} -o $out -O dts dts.tmp
+              '';
+          in upstream // { src = patched; };
+
 
         networkInterfaces =
           let inherit (config.system.service.network) link;

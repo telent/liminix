@@ -107,17 +107,22 @@ let
       };
       notification-fd = { file = "3"; };
       run = {
-        file = ''
-              #!${execline}/bin/execlineb -P
-              ${execline}/bin/redirfd -w 1 /dev/null
-              ${execline}/bin/redirfd -rnb 0 fifo
-              ${if cfg.shipping.enable then ''
-                pipeline { ${s6}/bin/s6-log -bpd3 -- ${cfg.script} 1 }
-                pipeline { ${pkgs.logshipper}/bin/logtap ${cfg.shipping.socket} logshipper-socket-event }
-                ${s6}/bin/s6-log -- ${cfg.directory}
-              '' else ''
-                ${s6}/bin/s6-log -bpd3 -- ${cfg.script} ${cfg.directory}
-              ''}
+        file =
+          let pstore = if cfg.pstore then "pipeline { tee /dev/pmsg0 }" else "";
+          in ''
+            #!${execline}/bin/execlineb -P
+            ${execline}/bin/redirfd -w 1 /dev/null
+            ${execline}/bin/redirfd -rnb 0 fifo
+            ${if cfg.shipping.enable then ''
+              pipeline { ${s6}/bin/s6-log -bpd3 -- ${cfg.script} 1 }
+              pipeline { ${pkgs.logshipper}/bin/logtap ${cfg.shipping.socket} logshipper-socket-event }
+              ${pstore}
+              ${s6}/bin/s6-log -- ${cfg.directory}
+            '' else ''
+              pipeline { ${s6}/bin/s6-log -bpd3 -- ${cfg.script} 1 }
+              ${pstore}
+              ${s6}/bin/s6-log --  ${cfg.directory}
+            ''}
           '';
         mode = "0755";
       };
@@ -212,6 +217,7 @@ let
 in {
   options = {
     logging = {
+      pstore = mkEnableOption "system logs in pstore for retention after reboot";
       shipping = {
         enable = mkEnableOption "unix socket for log shipping";
         socket = mkOption {
@@ -263,6 +269,12 @@ in {
     )];
 
   config = {
+    kernel.config = mkIf cfg.pstore {
+      PSTORE = "y";
+      PSTORE_PMSG = "y";
+    };
+    programs.busybox.applets =  mkIf cfg.pstore [ "tee" ];
+    
     filesystem = dir {
       etc = dir {
         s6-rc = dir {
