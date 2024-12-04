@@ -17,6 +17,8 @@ serverstatedir=$(mktemp -d -t routeros-XXXXXX)
 # python scapy drags in matplotlib which doesn't enjoy running in
 # a sandbox with no $HOME, hence this environment variable
 export MPLCONFIGDIR=$(mktemp -d -t routeros-XXXXXX)
+export XDG_CONFIG_HOME=/tmp
+export XDG_CACHE_HOME=/tmp
 
 . ${../test-helpers.sh}
 
