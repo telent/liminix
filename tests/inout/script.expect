@@ -19,6 +19,7 @@ proc adddevice { } {
     global monitor_id console_id spawn_id
     set spawn_id $monitor_id
 
+    send "\r\n"
     chat "QEMU" "device_add usb-storage,bus=xhci.0,drive=usbstick\n"
     chat "(qemu)" "version\r"
 
