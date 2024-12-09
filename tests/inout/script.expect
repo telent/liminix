@@ -2,6 +2,9 @@ set timeout 10
 
 set when [lindex $argv 0];
 
+send_user "\n\n\n\n#################################\n running $when"
+
+
 spawn socat -,echo=0,icanon=1 unix-connect:vm/monitor
 set monitor_id $spawn_id
 
@@ -19,6 +22,7 @@ proc adddevice { } {
     global monitor_id console_id spawn_id
     set spawn_id $monitor_id
 
+    send_user "inserting usb device"
     send "\r\n"
     chat "QEMU" "device_add usb-storage,bus=xhci.0,drive=usbstick\n"
     chat "(qemu)" "version\r"
@@ -28,6 +32,7 @@ proc adddevice { } {
       "sda: sda1" { }
       timeout { exit 1 }
     }
+    send_user "done inserting usb device"	
 }
 
 if { $when eq "early" } {
@@ -44,9 +49,10 @@ if { $when eq "late" } {
   adddevice
 }
 
+send_user "\n\n\nwaiting for mount to happen"
 send "\r"
 set timeout 20
-
+##  1234
 chat "READY_" "sleep 5; grep /srv /proc/mounts && hostname\r"
 
 expect {
