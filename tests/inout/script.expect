@@ -1,4 +1,5 @@
-set timeout 10
+set timeout 40
+fconfigure stdout -buffering  none
 
 set when [lindex $argv 0];
 
@@ -7,9 +8,11 @@ send_user "\n\n\n\n#################################\n running $when"
 
 spawn socat -,echo=0,icanon=1 unix-connect:vm/monitor
 set monitor_id $spawn_id
+fconfigure $monitor_id -buffering none
 
 spawn socat unix-connect:vm/console -
 set console_id $spawn_id
+fconfigure $console_id -buffering  none
 
 proc chat {instr outstr} {
     expect {
@@ -22,17 +25,20 @@ proc adddevice { } {
     global monitor_id console_id spawn_id
     set spawn_id $monitor_id
 
-    send_user "inserting usb device"
+    send_user "\n#### inserting usb device"
     send "\r\n"
     chat "QEMU" "device_add usb-storage,bus=xhci.0,drive=usbstick\n"
-    chat "(qemu)" "version\r"
 
     set spawn_id $console_id
+
     expect {
       "sda: sda1" { }
-      timeout { exit 1 }
+      timeout {
+          puts stderr "timeout waiting for disk"
+          exit 1
+      }
     }
-    send_user "done inserting usb device"	
+    send_user "done inserting usb device"       
 }
 
 if { $when eq "early" } {
@@ -41,21 +47,25 @@ if { $when eq "early" } {
 
 expect "BusyBox"
 chat "#" "PS1=RE\\ADY_\\ ; stty -echo \r"
+# script needs klogd output to tell when sda1 appears. Then
+# run s6-rc -b  -a list to wait for booting to finish
 chat "READY_"  "tail -f /run/log/current & \rs6-rc -b  -a list\r"
-
-chat "mount" "\r"
 
 if { $when eq "late" } {
   adddevice
 }
 
 send_user "\n\n\nwaiting for mount to happen"
-send "\r"
-set timeout 20
-##  1234
-chat "READY_" "sleep 5; grep /srv /proc/mounts && hostname\r"
 
-expect {
-  "inout" { }
-  timeout { exit 1 }
+set FINISHED 0
+set EXIT "1" 
+while { $FINISHED < 10 } {
+  chat "READY_" "grep /srv /proc/mounts\r\n"
+  expect {
+    "backup-disk" { set FINISHED 20; set EXIT 0; }
+    "READY_" { send_user "waiting ...\n" ; send "\r\n"; sleep 6 }
+  }
+  set FINISHED [ expr $FINISHED + 1 ]
 }
+
+exit $EXIT
