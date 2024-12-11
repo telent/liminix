@@ -82,7 +82,6 @@
   (let [p (find-executable "yes" (os.getenv "PATH"))]
     (expect (string.match p "coreutils.+bin/yes$"))))
 
-
 {
  : mktree
  : rmtree

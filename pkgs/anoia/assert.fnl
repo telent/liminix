@@ -3,7 +3,6 @@
 
 ;; e.g. (import-macros { : expect= } :anoia.assert)
 
-
 (fn expect [assertion]
   (let [msg (.. "expectation failed: " (view assertion))]
     `(when (not ,assertion)

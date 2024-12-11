@@ -1,8 +1,4 @@
-;; importing assert.fnl macros here would be circular, so we can't use
-;; the full test functionality
-(macro define-tests [& body]
-  (when _G.RUNNING_TESTS
-    `(do ,(unpack body))))
+(import-macros { :  define-tests : expect : expect= } :anoia.assert)
 
 (fn assoc [tbl k v & more]
   (tset tbl k v)
@@ -59,16 +55,16 @@
              (and present (. a k))))))
 
 (define-tests
- (assert (table= {:a 1 :b 2} {:b 2 :a 1}))
- (assert (not (table= {:a 1 :b 2 :k :l}  {:b 2 :a 1})))
- (assert (not (table= {:a 1 :b 2}  {:b 2 :a 1 :k :l})))
+ (expect (table= {:a 1 :b 2} {:b 2 :a 1}))
+ (expect (not (table= {:a 1 :b 2 :k :l}  {:b 2 :a 1})))
+ (expect (not (table= {:a 1 :b 2}  {:b 2 :a 1 :k :l})))
 
- (assert (table= {:a 1 :b {:l 17}} {:b {:l 17} :a 1}))
- (assert (table= {:a [4 5 6 7] } {:a [4 5 6 7]}))
- (assert (not (table= {:a [4 5 6 7] } {:a [4 5 6 7 8]})))
- (assert (not (table= {:a [4 5 7 6] } {:a [4 5 6 7 ]})))
+ (expect (table= {:a 1 :b {:l 17}} {:b {:l 17} :a 1}))
+ (expect (table= {:a [4 5 6 7] } {:a [4 5 6 7]}))
+ (expect (not (table= {:a [4 5 6 7] } {:a [4 5 6 7 8]})))
+ (expect (not (table= {:a [4 5 7 6] } {:a [4 5 6 7 ]})))
 
- (assert (table= {} {}))
+ (expect (table= {} {}))
  )
 
 (fn dig [tree path]
@@ -177,17 +173,17 @@
         b64 (base64 :url)]
 
     (let [a (b64:decode "YWxsIHlvdXIgYmFzZQ==")]
-      (assert (= a "all your base") (view a)))
+      (expect= a "all your base"))
     (let [a (b64:decode "ZmVubmVsIHRoaW5n")]
-      (assert (= a "fennel thing")  a))
+      (expect= a "fennel thing"))
     (let [a (b64:decode "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcms=")]
-      (assert (= a "Many hands make light work") (view  a)))
+      (expect= a "Many hands make light work"))
     (let [a (b64:encode "hello world")]
-      (assert (= a "aGVsbG8gd29ybGQ=") a))
+      (expect= a "aGVsbG8gd29ybGQ="))
 
     (fn check [plain enc]
-      (let [a (b64:encode plain)] (assert (= a enc) (.. "encode " a)))
-      (let [a (b64:decode enc)] (assert (= a plain) (.. "decode " a))))
+      (let [a (b64:encode plain)] (expect (= a enc) (.. "encode " a)))
+      (let [a (b64:decode enc)] (expect (= a plain) (.. "decode " a))))
 
     (check ""  "")
     (check "f"  "Zg==")
@@ -198,11 +194,9 @@
     (check "foobar"  "Zm9vYmFy")
 
     (let [x (b64:decode "REtOdUtNS05BNEJWLXdfcUhtNU9YV2liOUxkX3RTdVJTQWVUR0dkWldBdVEyaURObDZ2b3pSbEJwMzlzOEltdkhWdmpzZmMiLCJ5IjoiQVlDY1QwOGZrNFZWZ2lZSVIxbkU4UlJGaGZOSGdBUEFzckRITmJtRGNfUGtWZmdDR0xTMTIweU5SNncwdjd5RUY4WDN1OGpvazhkU0pqN0hnWjZCZHAzcSJ9LCJraWQiOiJlalVDaXBCUE9BeDRWQ1dQdUtkVGlYNDNadW5XTDNjSWN6V1h1RVZyTVNFIn0")]
-      (assert (string.match x "}$") x))
+      (expect (string.match x "}$") x))
 
     ))
-
-
 
     ;; doesn't work if the padding is missing
     ;; (let [a (from-base64 "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcms")]
