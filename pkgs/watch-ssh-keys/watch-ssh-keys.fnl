@@ -1,4 +1,4 @@
-(local { : system : assoc : split : dup : table= : dig } (require :anoia))
+(local { : system : assoc : split : dup : table= : dig : append-path } (require :anoia))
 (local svc (require :anoia.svc))
 (import-macros { :  define-tests : expect : expect= } :anoia.assert)
 
@@ -13,14 +13,14 @@
   (when (not (table= old-tree new-tree))
     (io.stderr:write "new ssh keys\n")
     (each [username pubkeys (pairs new-tree)]
-      (with-open [f (assert (io.open (.. path "/" username) :w))]
+      (with-open [f (assert (io.open (append-path path username) :w))]
         ;;  the keys are "1" "2" "3" etc, so pairs not ipairs
         (each [_ k (pairs pubkeys)]
           (f:write k)
           (f:write "\n")))))
   (each [k v (pairs old-tree)]
     (when (not (. new-tree k))
-      (os.remove (.. path "/" k))))
+      (os.remove (append-path path k))))
   new-tree)
 
 (define-tests

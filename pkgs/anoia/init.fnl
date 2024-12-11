@@ -28,6 +28,18 @@
 (fn dirname [path]
   (string.match path "(.*)/[^/]-$"))
 
+(fn append-path [dirname filename]
+  (let [base (or (string.match dirname "(.*)/$") dirname)
+        result []]
+    (each [component (string.gmatch filename "([^/]+)")]
+      (if (and (= component "..") (> (# result) 0))
+          (table.remove result)
+          (= component "..")
+          (error "path traversal attempt")
+          true
+          (table.insert result component)))
+    (.. base "/" (table.concat result "/"))))
+
 (fn system [s]
   (match (os.execute s)
     res (do (print (.. "Executed \"" s "\", exit code " (tostring res)))  res)
@@ -65,6 +77,16 @@
  (expect (not (table= {:a [4 5 7 6] } {:a [4 5 6 7 ]})))
 
  (expect (table= {} {}))
+
+ (let [traps (fn [b p]
+               (match (pcall append-path b p)
+                 (true f) (error "didn't trap path traversal")
+                 (false err) (expect (string.match err "path traversal"))))]
+   (expect= (append-path "/tmp" "hello") "/tmp/hello")
+   (expect= (append-path "/tmp/" "hello") "/tmp/hello")
+   (traps "/tmp/" "../hello")
+   (expect= (append-path "/tmp/" "hello/../goodbye") "/tmp/goodbye")
+   (traps "/tmp/" "hello/../../goodbye"))
  )
 
 (fn dig [tree path]
@@ -206,6 +228,7 @@
 
 
 {
+ : append-path
  : assoc
  : base64
  : base64url
