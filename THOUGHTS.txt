@@ -6539,3 +6539,32 @@ using a Makefile
 
 idea 2: when a configuration contains levitate, something similar
 but necessarily more "manual" to do the analogous thing
+
+
+Sun Dec 15 18:55:55 GMT 2024
+
+Where we left off with this, rotuer was crashing randomly or failing
+to boot every time we tried to add log shipping, which is not very
+ideal. I started doing something with logging to /dev/pmsg0
+(CONFIG_PSTORE_PMSG) but I think (there seems not to be anything
+written down :-( ) that the gl-ar750 kernel needs it added to kconfig and device tree
+
+https://wiki.postmarketos.org/wiki/User:Knuxify/Enabling_pstore_and_ramoops
+
+we could add a new hardware.dts.dtsi = [] option so that any module
+could add a new chunk of dts. (Ideally we'd call it `includes`
+but that conflicts with the existing use of `includes` to specify
+search path. Maybe rename?)
+
+would we ever use it except in a hardware device definition?
+(Or user config?) I guess if we were consistent with names
+then we could set up nodes in the device file with status="disabled"
+and enable them in the module, except that dt doesn't consistently
+use status and in fact there isn't one for reserved-memory
+
+we could use global config to enable pstore_msg and check it in
+the device module to enable the needed hw support
+
+
+
+00PA727 00PA735
