@@ -16,10 +16,18 @@
 
 (print (.. "TFTP serving from " options.base-directory))
 
-(fn merge-pathname [directory filename]
-  (if (directory:match "/$")
-      (.. directory  filename)
-      (.. directory "/" filename)))
+;; this is a copy of anoia append-path
+(fn  merge-pathname [dirname filename]
+  (let [base (or (string.match dirname "(.*)/$") dirname)
+        result []]
+    (each [component (string.gmatch filename "([^/]+)")]
+      (if (and (= component "..") (> (# result) 0))
+          (table.remove result)
+          (= component "..")
+          (error "path traversal attempt")
+          true
+          (table.insert result component)))
+    (.. base "/" (table.concat result "/"))))
 
 (->
  (tftp:listen
