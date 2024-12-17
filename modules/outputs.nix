@@ -104,7 +104,7 @@ in
     system.outputs = rec {
       dtb = liminix.builders.dtb {
         inherit (config.boot) commandLine;
-        dts = config.hardware.dts.includes ++ [config.hardware.dts.src];
+        dts = [config.hardware.dts.src] ++ config.hardware.dts.includes;
         includes = config.hardware.dts.includePaths ++ [
           "${o.kernel.headers}/include"
         ];

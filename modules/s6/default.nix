@@ -212,6 +212,9 @@ let
 in {
   options = {
     logging = {
+      persistent = {
+        enable = mkEnableOption "store logs across reboots";
+      };
       shipping = {
         enable = mkEnableOption "unix socket for log shipping";
         socket = mkOption {
@@ -263,6 +266,11 @@ in {
     )];
 
   config = {
+    kernel.config = mkIf config.logging.persistent.enable {
+      PSTORE = "y";
+      PSTORE_PMSG = "y";
+      PSTORE_RAM = "y";
+    };
     filesystem = dir {
       etc = dir {
         s6-rc = dir {
