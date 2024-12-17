@@ -6,7 +6,7 @@
 { lib, pkgs, config, ...}:
 let
   inherit (lib) mkOption types ;
-  inherit (pkgs) liminix;
+  inherit (pkgs) liminix openwrt;
 
   mergeConditionals = conf : conditions :
     # for each key in conditions, if it is present in conf
@@ -21,8 +21,8 @@ let
 in {
   options = {
     kernel = {
-      src = mkOption { type = types.path; } ;
-      version = mkOption { type = types.str; default = "5.15.137";} ;
+      src = mkOption { type = types.path; default = openwrt.kernelSrc; } ;
+      version = mkOption { type = types.str; default = openwrt.kernelVersion;} ;
       modular = mkOption {
         type = types.bool;
         default = true;
