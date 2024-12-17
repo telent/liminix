@@ -29,6 +29,17 @@ let
   '';
 in {
   inherit src;
+
+  # The kernel sources typically used with this version of openwrt
+  # You can find this in `include/kernel-5.15` or similar in the
+  # openwrt sources
+  kernelSrc = pkgsBuildBuild.fetchurl {
+    name = "linux.tar.gz";
+    url = "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.137.tar.gz";
+    hash = "sha256-PkdzUKZ0IpBiWe/RS70J76JKnBFzRblWcKlaIFNxnHQ=";
+  };
+  kernelVersion = "5.15.137";
+
   applyPatches.ath79 = doPatch "ath79";
   applyPatches.ramips = doPatch "ramips";
   applyPatches.mediatek = doPatch "mediatek"; # aarch64
