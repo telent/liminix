@@ -157,12 +157,6 @@
         appendDTB = true;
       };
       kernel = {
-        src = pkgs.pkgsBuildBuild.fetchurl {
-          name = "linux.tar.gz";
-          url = "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.137.tar.gz";
-          hash = "sha256-PkdzUKZ0IpBiWe/RS70J76JKnBFzRblWcKlaIFNxnHQ=";
-        };
-
         # Mainline linux 5.19 doesn't have device-tree support for
         # this device or even for the SoC, so we use the extensive
         # OpenWrt kernel patches

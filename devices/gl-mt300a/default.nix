@@ -114,11 +114,6 @@
      };
 
       kernel = {
-        src = pkgs.fetchurl {
-          name = "linux.tar.gz";
-          url = "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.137.tar.gz";
-          hash = "sha256-PkdzUKZ0IpBiWe/RS70J76JKnBFzRblWcKlaIFNxnHQ=";
-        };
         extraPatchPhase = ''
           ${openwrt.applyPatches.ramips}
           ${openwrt.applyPatches.rt2x00}
