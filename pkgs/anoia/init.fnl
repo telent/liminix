@@ -84,6 +84,8 @@
                  (false err) (expect (string.match err "path traversal"))))]
    (expect= (append-path "/tmp" "hello") "/tmp/hello")
    (expect= (append-path "/tmp/" "hello") "/tmp/hello")
+   (expect= (append-path "/tmp/" "///hello") "/tmp/hello")
+   (expect= (append-path "/tmp/" "///hello/../fish") "/tmp/fish")
    (traps "/tmp/" "../hello")
    (expect= (append-path "/tmp/" "hello/../goodbye") "/tmp/goodbye")
    (traps "/tmp/" "hello/../../goodbye"))
