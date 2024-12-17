@@ -134,6 +134,11 @@ and then run the generated `install.sh` script
 
 2024-12-16
 
-config option rename: config.hardware.dts.includes is now
-hardware.dts.includePaths, which is a better name and  also
-means I can use hardware.dts.includes for a different purpose
+Config options changed: if you had set config.hardware.dts.includes
+(maybe in an out-of-tree device port) to specify the search paths
+in which dtc finds include files, you will need to change this to 
+hardware.dts.includePaths.
+
+The "new" hardware.dts.includes option is now for dtsi files which
+should be merged into the device tree.
+
