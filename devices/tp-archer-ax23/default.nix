@@ -410,7 +410,7 @@
           rootDevice = "/dev/mtdblock3";
           dts = {
             src = "${openwrt.src}/target/linux/ramips/dts/mt7621_tplink_archer-ax23-v1.dts";
-            includes =  [
+            includePaths =  [
               "${openwrt.src}/target/linux/ramips/dts"
               "${config.system.outputs.kernel.modulesupport}/arch/arm64/boot/dts/mediatek/"
             ];

@@ -197,7 +197,7 @@
         rootDevice = "ubi0:liminix";
         dts = {
           src = "${openwrt.src}/target/linux/mediatek/dts/mt7622-linksys-e8450-ubi.dts";
-          includes =  [
+          includePaths =  [
             "${openwrt.src}/target/linux/mediatek/dts"
             "${config.system.outputs.kernel.modulesupport}/arch/arm64/boot/dts/mediatek/"
           ];

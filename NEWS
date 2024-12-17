@@ -132,4 +132,8 @@ and then run the generated `install.sh` script
 
     result/install.sh root@192.168.8.1
 
+2024-12-16
 
+config option rename: config.hardware.dts.includes is now
+hardware.dts.includePaths, which is a better name and  also
+means I can use hardware.dts.includes for a different purpose

@@ -348,7 +348,7 @@
 
           dts = {
             src = "${config.system.outputs.kernel.modulesupport}/arch/arm/boot/dts/marvell/armada-385-turris-omnia.dts";
-            includes =  [
+            includePaths =  [
               "${config.system.outputs.kernel.modulesupport}/arch/arm/boot/dts/marvell/"
             ];
           };

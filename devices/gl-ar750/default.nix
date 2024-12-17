@@ -116,7 +116,7 @@
         rootDevice = "/dev/mtdblock5";
         dts = {
           src = "${openwrt.src}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";
-          includes =  [
+          includePaths =  [
             "${openwrt.src}/target/linux/ath79/dts"
           ];
         };

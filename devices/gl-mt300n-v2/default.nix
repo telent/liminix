@@ -78,7 +78,7 @@
 
         dts = {
           src = "${openwrt.src}/target/linux/ramips/dts/mt7628an_glinet_gl-mt300n-v2.dts";
-          includes = [
+          includePaths = [
             "${openwrt.src}/target/linux/ramips/dts"
           ];
         };
