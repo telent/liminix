@@ -131,6 +131,26 @@ human-readable format, use :command:`s6-tai64nlocal`.
   1970-01-02 21:51:48.832588765 wan.link.pppoe sent [LCP ConfReq id=0x1 <asyncmap 0x0> <magic 0x667a9594> <pcomp> <accom
   p>]
 
+Log persistence
+---------------
+
+Logs written to :file:`/run/log/` will not survive a reboot or crash,
+as it is an ephemeral filesystem.
+
+On supported hardware you can enable logging to `pstore
+<https://www.kernel.org/doc/Documentation/ABI/testing/pstore>` which
+means the most recent log messages will be preserved on reboot.
+Set the config option ``logging.persistent.enable = true``, log messages will be written to :file:/dev/pmsg0.  After rebooting,
+
+.. code-block:: console
+
+    # mount -t pstore pstore /sys/fs/pstore/
+    # ls -l /sys/fs/pstore/
+    -r--r--r--    1     43071 pmsg-ramoops-0
+    # cat /sys/fs/pstore/pmsg-ramoops-0
+    @40000000000000282c997d29 mydevice klogd <6>[   30.793756] int: port 2(wlan0) entered blocking state
+    [log messages from before the reboot follow]
+
 
 
 Updating an installed system (JFFS2)
