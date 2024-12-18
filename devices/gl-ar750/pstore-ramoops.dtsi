@@ -3,8 +3,7 @@ reserved-memory {
 		ramoops@03f00000 {
 			compatible = "ramoops";
 			reg = <0x03f00000 0x10000>;
-			record-size = <0x1000>;
-			pmsg-size = <0x1000>;
+			pmsg-size = <0x10000>;
 		};
 	};
 };
