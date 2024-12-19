@@ -56,31 +56,31 @@ let
                     else "";
           in "unlink(${qpathname}); ${cmd} ${chown}";
     in mapAttrsToList (makeFile prefix) attrset;
-  activateScript = attrset: writeText "makedevs.c" ''
-    #include "defs.h"
-    int main(int argc, char* argv[]) {
-      chdir(argv[1]);
-      ${(builtins.concatStringsSep "\n" (visit "." attrset))}
-    }
-  '';
 in attrset:
-  let makedevs = activateScript attrset;
+  let
+    activateScript = writeText "activate.c" ''
+      #include "defs.h"
+      int main(int argc, char* argv[]) {
+        chdir(argv[1]);
+        ${(builtins.concatStringsSep "\n" (visit "." attrset))}
+      }
+    '';
   in stdenv.mkDerivation {
-    name="make-stuff";
+    name="system-configuration";
     src = ./.;
 
     CFLAGS = "-Os";
     LDFLAGS  = "-static -Xlinker -static";
 
     postConfigure = ''
-      cp ${makedevs} makedevs.c
+      cp ${activateScript} activate.c
     '';
-    makeFlags = ["makedevs"];
+    makeFlags = ["activate"];
     installPhase = ''
-      closure=${closureInfo { rootPaths = [ makedevs ]; }}
+      closure=${closureInfo { rootPaths = [ activateScript ]; }}
       mkdir -p $out/bin $out/etc
       cp $closure/store-paths $out/etc/nix-store-paths
-      $STRIP --remove-section=.note  --remove-section=.comment --strip-all makedevs -o $out/bin/activate
+      $STRIP --remove-section=.note  --remove-section=.comment --strip-all activate -o $out/bin/activate
       ln -s ${s6-init-bin}/bin/init $out/bin/init
       cp -p ${writeFennel "restart-services" {} ./restart-services.fnl} $out/bin/restart-services
       # obfuscate the store path of min-copy-closure so that the output
