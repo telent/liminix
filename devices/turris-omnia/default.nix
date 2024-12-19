@@ -225,11 +225,6 @@
             # WARNING: unmet direct dependencies detected for ARCH_WANT_LIBATA_LEDS
             ATA = "y";
 
-            PSTORE = "y";
-            PSTORE_RAM = "y";
-            PSTORE_CONSOLE = "y";
-#            PSTORE_DEFLATE_COMPRESS = "n";
-
             BLOCK = "y";
             MMC="y";
             PWRSEQ_EMMC="y";        # ???
