@@ -138,9 +138,15 @@ Logs written to :file:`/run/log/` will not survive a reboot or crash,
 as it is an ephemeral filesystem.
 
 On supported hardware you can enable logging to `pstore
-<https://www.kernel.org/doc/Documentation/ABI/testing/pstore>` which
-means the most recent log messages will be preserved on reboot.
-Set the config option ``logging.persistent.enable = true``, log messages will be written to :file:/dev/pmsg0.  After rebooting,
+<https://www.kernel.org/doc/Documentation/ABI/testing/pstore>`_ which
+means the most recent log messages will be preserved on reboot.  Set
+the config option ``logging.persistent.enable = true`` to log messages
+to :file:`/dev/pmsg0` as well as to the regular log. This is a
+circular buffer, so when it fills up newer messages will overwrite the
+oldest messages.
+
+To check the previous messages after a (planned or forced) reboot,
+you need to mooun the pstore filesystem.
 
 .. code-block:: console
 
