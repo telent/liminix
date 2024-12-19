@@ -173,6 +173,7 @@
         ../../modules/outputs/tftpboot.nix
         ../../modules/outputs/mbrimage.nix
         ../../modules/outputs/extlinux.nix
+        ../../modules/outputs/system-configuration.nix
       ];
 
       config = {
@@ -341,7 +342,7 @@
             targets = ["ath9k" "ath10k_pci"];
           };
         in {
-          defaultOutput = "mtdimage";
+          defaultOutput = "systemConfiguration";
           loadAddress = lim.parseInt "0x00800000"; # "0x00008000";
           entryPoint = lim.parseInt "0x00800000"; # "0x00008000";
           rootDevice = "/dev/mmcblk0p1";
