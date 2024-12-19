@@ -9,6 +9,7 @@ let
   inherit (pkgs) runCommand;
 in
 {
+  imports = [ ./system-configuration.nix ];
   options = {
     boot.initramfs = {
       enable = mkEnableOption "initramfs";
@@ -21,14 +22,6 @@ in
           Initramfs image capable of mounting the real root
           filesystem
         '';
-      };
-      systemConfiguration = mkOption {
-        type = types.package;
-        description = ''
-          pkgs.systemconfig for the configured filesystem,
-          contains 'activate' and 'init' commands
-        '';
-        internal = true;
       };
     };
   };
@@ -53,8 +46,6 @@ in
           file /init ${pkgs.preinit}/bin/preinit 0755 0 0
           SPECIALS
         '';
-      systemConfiguration =
-        pkgs.systemconfig config.filesystem.contents;
     };
   };
 }
