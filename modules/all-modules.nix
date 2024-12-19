@@ -30,7 +30,6 @@
    ./outputs/vmroot.nix
    ./ppp
    ./ramdisk.nix
-   ./squashfs.nix
    ./ssh
    ./users.nix
    ./vlan

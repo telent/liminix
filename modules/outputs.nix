@@ -11,7 +11,7 @@ let
 in
 {
   imports = [
-    ./squashfs.nix
+    ./outputs/squashfs.nix
     ./outputs/vmroot.nix
     ./outputs/extlinux.nix
   ];
