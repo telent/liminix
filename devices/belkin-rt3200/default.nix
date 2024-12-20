@@ -7,12 +7,10 @@
     and is "work in progress" in Liminix.
 
     .. note:: The factory flash image contains ECC errors that make it
-              incompatible with Liminix: you need to use the `OpenWrt
+              incompatible with Liminix: use the `OpenWrt
               UBI Installer <https://github.com/dangowrt/owrt-ubi-installer>`_ to
-              rewrite the partition layout before you can flash
-              Liminix onto it (or even use it with
-              :ref:`system-outputs-tftpboot`, if you want the wireless
-              to work).
+              rewrite the partition layout before you can use
+              Liminix with it
 
     Hardware summary
     ================
@@ -27,8 +25,31 @@
     Installation
     ============
 
-    Installation is currently a manual process (you need a :ref:`serial <serial>` conection and
-    TFTP) following the instructions at :ref:`system-outputs-ubimage`
+    Installation is currently a manual process.
+
+    Preparation
+    -----------
+
+    To prepare the device for Liminix you first need to use the
+    `OpenWrt UBI Installer
+    <https://github.com/dangowrt/owrt-ubi-installer>`_ image to
+    rewrite the flash layout. You can do this in onw of two ways:
+    either follow the instructions to do it through the vendor web
+    interface, or you can drop to U-boot and use TFTP
+
+    .. code-block:: console
+
+        MT7622> setenv ipaddr 10.0.0.6
+        MT7622> setenv serverip 10.0.0.1
+        MT7622> tftpboot 0x42000000  openwrt-mediatek-mt7622-linksys_e8450-ubi-initramfs-recovery-installer.itb
+        MT7622> bootm 0x42000000
+
+     Once it's finished booted into Linux you can safely reboot
+
+     Installing Liminix
+     ------------------
+
+     This is a manual process: you need a :ref:`serial <serial>` conection and TFTP : follow the instructions at :ref:`system-outputs-ubimage`
 
 '';
 
