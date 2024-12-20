@@ -142,3 +142,13 @@ hardware.dts.includePaths.
 The "new" hardware.dts.includes option is now for dtsi files which
 should be merged into the device tree.
 
+2024-12-19
+
+Incremental updates changed again (but not massively). From hereon in,
+the preferred way to do an incremental update on an installed device
+with a writable filesystem is to build the updater output
+
+    nix-build  -I liminix-config=hosts/myhost.nix --argstr deviceName turris-omnia -A outputs.updater
+
+and then run the generated `update.sh` script. See 
+https://www.liminix.org/doc/admin.html#updating-an-installed-system

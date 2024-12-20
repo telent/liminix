@@ -83,11 +83,6 @@ in attrset:
       $STRIP --remove-section=.note  --remove-section=.comment --strip-all activate -o $out/bin/activate
       ln -s ${s6-init-bin}/bin/init $out/bin/init
       cp -p ${writeFennel "restart-services" {} ./restart-services.fnl} $out/bin/restart-services
-      # obfuscate the store path of min-copy-closure so that the output
-      # closure doesn't include a bunch of build system stuff
-      f=${buildPackages.min-copy-closure}; f=$(echo $f | sed 's/\(.....\)/\1_/g')
-      substitute ${./build-system-install.sh} $out/install.sh --subst-var-by min-copy-closure $f
-      chmod +x $out/install.sh
       cat > $out/bin/install <<EOF
       #!/bin/sh -e
       prefix=\''${1-/}

@@ -14,6 +14,7 @@ in
     ./outputs/squashfs.nix
     ./outputs/vmroot.nix
     ./outputs/extlinux.nix
+    ./outputs/updater
   ];
   options = {
     system.outputs = {

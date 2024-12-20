@@ -159,48 +159,26 @@ you need to mooun the pstore filesystem.
 
 
 
-Updating an installed system (JFFS2)
-************************************
+Updating an installed system
+****************************
 
+If your system has a writable root filesystem (JFFS2, btrfs etc -
+anything but squashfs), we have mechanisms for in-places updates
+analogous to :command:`nixos-rebuild`, but the operation is a bit
+different because it expects to run on a build machine and then copy
+to the host device using :command:`ssh`.
 
-Adding packages
-===============
-
-If your device is running a JFFS2 root filesystem, you can build
-extra packages for it on your build system and copy them to the
-device: any package in Nixpkgs or in the Liminix overlay is available
-with the ``pkgs`` prefix:
-
-.. code-block:: console
-
-    nix-build -I liminix-config=./my-configuration.nix \
-     --arg device "import ./devices/mydevice" -A pkgs.tcpdump
-
-    nix-shell -p min-copy-closure root@the-device result/
-
-Note that this only copies the package to the device: it doesn't update
-any profile to add it to ``$PATH``
-
-
-.. _rebuilding the system:
-
-Rebuilding the system
-=====================
-
-Liminix has a mechanism for in-place updates of a running system which
-is analogous to :command:`nixos-rebuild`, but its operation is a
-bit different because it expects to run on a build machine and then
-copy to the host device. To use this, build the `outputs.systemConfiguration`
-target and then run the :command:`result/install.sh` script it generates.
+To use this, build the ``outputs.updater``
+target and then run the :command:`update.sh` script it generates.
 
 .. code-block:: console
 
     nix-build -I liminix-config=./my-configuration.nix \
        --arg device "import ./devices/mydevice" \
-       -A outputs.systemConfiguration
-    ./result/install.sh root@the-device 
+       -A outputs.updater
+    ./result/bin/update.sh root@the-device 
 
-The install script uses min-copy-closure to copy new or changed
+The update script uses min-copy-closure to copy new or changed
 packages to the device, then (perhaps) reboots it. The reboot
 behaviour can be affected by flags:
 
@@ -212,7 +190,6 @@ behaviour can be affected by flags:
   only the services that have been changed. This will restart all of
   the services that have updated store paths (and anything that
   depends on them), but will not affect services that haven't changed.
-
 
 It doesn't delete old packages automatically: to do that run
 :command:`min-collect-garbage`, which will delete any packages not in
@@ -232,6 +209,26 @@ Caveats
 * it cannot upgrade the kernel, only userland
 
 .. _levitate:  
+
+Adding packages
+===============
+
+If you simply wish to add a package without any change to services,
+you can call :command:`min-copy-closure` directly to install
+any package in Nixpkgs or in the Liminix overlay
+
+.. code-block:: console
+
+    nix-build -I liminix-config=./my-configuration.nix \
+     --arg device "import ./devices/mydevice" -A pkgs.tcpdump
+
+    nix-shell -p min-copy-closure root@the-device result/
+
+Note that this only copies the package and its dependencies to the
+device: it doesn't update any profile to add it to ``$PATH``
+
+
+.. _rebuilding the system:
 
 Reinstalling on a running system
 ********************************
