@@ -152,3 +152,8 @@ with a writable filesystem is to build the updater output
 
 and then run the generated `update.sh` script. See 
 https://www.liminix.org/doc/admin.html#updating-an-installed-system
+
+2024-12-22
+
+outputs.zimage is now outputs.kernel.zImage. This is unlikely to
+affect many people at all but I mention it anyway.
