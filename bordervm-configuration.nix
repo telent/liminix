@@ -102,12 +102,18 @@ in {
     systemd.services.sshd.wantedBy = pkgs.lib.mkForce [ "multi-user.target" ];
 
     virtualisation = {
-      forwardPorts = [ {
-        from = "host";
-        host.port = 7654;
-#        guest.address = "10.0.2.15";
-        guest.port =7654;
-      } ];
+      forwardPorts = [
+        {
+          from = "host";
+          host.port = 7654;
+          #        guest.address = "10.0.2.15";
+          guest.port =7654;
+        }
+        {
+          host.port = 2222;
+          guest.address = "10.0.2.15";
+          guest.port = 22;
+        }];
       qemu = {
         networkingOptions = [ ];
         options =
