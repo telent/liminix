@@ -218,11 +218,11 @@ extraPkgs // {
     ] ++ final.lib.optionals (o ? patches) o.patches;
   });
 
-  mtdutils = prev.mtdutils.overrideAttrs(o: {
+  mtdutils = (prev.mtdutils.overrideAttrs(o: {
     patches = (if o ? patches then o.patches else []) ++ [
       ./pkgs/mtdutils/0001-mkfs.jffs2-add-graft-option.patch
     ];
-  });
+  })).override { util-linux = final.util-linux-small ; };
 
   nftables = prev.nftables.overrideAttrs(o: {
     configureFlags = [
