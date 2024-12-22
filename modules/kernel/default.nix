@@ -68,19 +68,15 @@ in {
     };
   };
   config = {
-    system.outputs =
+    system.outputs.kernel =
       let
         mergedConfig = mergeConditionals
           config.kernel.config
           config.kernel.conditionalConfig;
-        k = liminix.builders.kernel.override {
-          config = mergedConfig;
-          inherit (config.kernel) version src extraPatchPhase;
-          targets = config.kernel.makeTargets;
-        };
-      in {
-        kernel = k.vmlinux;
-        zimage = k.zImage;
+      in liminix.builders.kernel.override {
+        config = mergedConfig;
+        inherit (config.kernel) version src extraPatchPhase;
+        targets = config.kernel.makeTargets;
       };
 
     kernel = rec {

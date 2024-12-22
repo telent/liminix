@@ -28,17 +28,7 @@ in
           kernel
           ******
 
-          Kernel vmlinux file (usually ELF)
-        '';
-      };
-      zimage = mkOption {
-        type = types.package;
-        internal = true;
-        description = ''
-          zimage
-          ******
-
-          Kernel in compressed self-extracting package
+          Kernel package (multi-output derivation)
         '';
       };
       dtb = mkOption {

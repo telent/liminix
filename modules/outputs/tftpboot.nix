@@ -61,7 +61,7 @@ in {
           o = config.system.outputs;
           image = let choices = {
             uimage = o.uimage;
-            zimage = o.zimage;
+            zimage = o.kernel.zImage;
           }; in choices.${cfg.kernelFormat};
           bootCommand = let choices = {
             uimage = "bootm";
