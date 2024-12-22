@@ -14,6 +14,7 @@ in
     ./outputs/squashfs.nix
     ./outputs/vmroot.nix
     ./outputs/extlinux.nix
+    ./outputs/uimage.nix
     ./outputs/updater
   ];
   options = {
@@ -39,16 +40,6 @@ in
           ***
 
           Compiled device tree (FDT) for the target device
-        '';
-      };
-      uimage = mkOption {
-        type = types.package;
-        internal = true;
-        description = ''
-          uimage
-          ******
-
-          Combined kernel and FDT in uImage (U-Boot compatible) format
         '';
       };
       tplink-safeloader = mkOption {
@@ -99,13 +90,6 @@ in
         includes = config.hardware.dts.includePaths ++ [
           "${o.kernel.headers}/include"
         ];
-      };
-      uimage = liminix.builders.uimage {
-        commandLine = concatStringsSep " " config.boot.commandLine;
-        inherit (config.boot) commandLineDtbNode;
-        inherit (config.hardware) loadAddress entryPoint alignment;
-        inherit (config.boot) imageFormat;
-        inherit (o) kernel dtb;
       };
       rootdir =
         let
