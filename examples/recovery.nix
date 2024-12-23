@@ -22,7 +22,6 @@ in rec {
     ../modules/outputs/ubimage.nix
     ../modules/outputs/jffs2.nix
     ../modules/outputs/ext4fs.nix
-    ../modules/outputs/extlinux.nix
   ];
 
   kernel.config = {

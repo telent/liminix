@@ -13,7 +13,7 @@ in
   imports = [
     ./outputs/squashfs.nix
     ./outputs/vmroot.nix
-    ./outputs/extlinux.nix
+    ./outputs/boot-extlinux.nix
     ./outputs/uimage.nix
     ./outputs/updater
   ];
