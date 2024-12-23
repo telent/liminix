@@ -14,6 +14,7 @@ in
     ./outputs/squashfs.nix
     ./outputs/vmroot.nix
     ./outputs/boot-extlinux.nix
+    ./outputs/boot-fit.nix
     ./outputs/uimage.nix
     ./outputs/updater
   ];
