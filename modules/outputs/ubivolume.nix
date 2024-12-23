@@ -81,7 +81,7 @@ in
           ]);
 
         disk = ubiDisk {
-          initramfs = config.system.outputs.rootubifs; # liminix.builders.squashfs config.filesystem.contents; #           # assert this is a proper FIT.
+          initramfs = config.system.outputs.rootfs; # ???
         };
 
       in
