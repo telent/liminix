@@ -31,7 +31,7 @@ on a system with pre-existing firmware and OS.
   config = mkIf (config.rootfsType == "ubifs") {
 
     system.outputs.zyxel-nwa-fit =
-      let 
+      let
         o = config.system.outputs;
         # 8129kb padding.
         paddedKernel = pkgs.runCommand "padded-kernel" {} ''
@@ -39,7 +39,7 @@ on a system with pre-existing firmware and OS.
           dd if=/dev/zero of=$out bs=1 count=1 seek=8388607
         '';
         firmwareImage = pkgs.runCommand "firmware-image" {} ''
-          cat ${paddedKernel} ${o.rootfs} > $out
+          cat ${paddedKernel} ${o.ubivolume} > $out
         '';
         dts = pkgs.writeText "image.its" ''
         /dts-v1/;

@@ -18,6 +18,9 @@ in
       eraseBlockSize = mkOption { type = types.str; }; # LEB
       maxLEBcount = mkOption { type = types.str; }; # LEB
     };
+    options.system.outputs.ubivolume = mkOption {
+      type = types.package;
+    };
 
     config = mkIf (config.rootfsType == "ubifs") {
       kernel.config = {
@@ -28,7 +31,7 @@ in
       };
       boot.initramfs.enable = true;
 
-      system.outputs.rootfs =
+      system.outputs.ubivolume =
       let
         inherit (pkgs.pkgsBuildBuild) runCommand;
         ubiVolume = ({ name, volumeId, image, flags ? [] }:
