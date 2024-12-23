@@ -82,12 +82,11 @@ automatically, you can try booting it by hand to see if it works:
 .. code-block:: console
 
     uboot> ubifsmount ubi0:liminix
-    uboot> ubifsload ''${loadaddr} boot/uimage
+    uboot> ubifsload ''${loadaddr} boot/fit
     uboot> bootm ''${loadaddr}
 
 Once you've done this and you're happy with it, reset the device to
-U-Boot. You don't need to recreate the volume but you do need to
-repeat step 3.
+return to U-Boot.
 
 5) Instructions for configuring autoboot are likely to be very
 device-dependent. On the Linksys E8450/Belkin RT3200, the environment
@@ -96,7 +95,10 @@ you could do
 
 .. code-block:: console
 
-    uboot> setenv boot_production 'led $bootled_pwr on ; ubifsmount ubi0:liminix; ubifsload ''${loadaddr} boot/uimage; bootm ''${loadaddr}'
+    uboot> setenv orig_boot_production $boot_production
+    uboot> setenv boot_production 'led $bootled_pwr on ; ubifsmount ubi0:liminix && ubifsload ''${loadaddr} boot/fit && bootm ''${loadaddr}'
+    uboot> saveenv
+    uboot> reset
 
 On other devices, some detective work may be needed. Try running
 `printenv` and look for likely commands, try looking at the existing
@@ -111,16 +113,13 @@ boot process, maybe even try looking for documentation for that device.
     };
   };
 
-  config = mkIf (config.rootfsType == "ubifs") {
-    system.outputs = {
-      ubimage =
-        let o = config.system.outputs; in
-        pkgs.runCommand "ubimage" {} ''
-          mkdir $out
-          cd $out
-          ln -s ${o.rootfs} rootfs
-          ln -s ${instructions} env.scr
-       '';
-    };
-  };
+  config.system.outputs.ubimage =
+    assert config.rootfsType == "ubifs";
+    let o = config.system.outputs; in
+    pkgs.runCommand "ubimage" {} ''
+      mkdir $out
+      cd $out
+      ln -s ${o.rootfs} rootfs
+      ln -s ${instructions} env.scr
+   '';
 }

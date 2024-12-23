@@ -44,7 +44,9 @@
         MT7622> tftpboot 0x42000000  openwrt-mediatek-mt7622-linksys_e8450-ubi-initramfs-recovery-installer.itb
         MT7622> bootm 0x42000000
 
-     Once it's finished booted into Linux you can safely reboot
+     This will write the new flash layout and then boot into a
+     "recovery" OpenWrt installation. Once it's finished booting into
+     Linux you can safely reboot
 
      Installing Liminix
      ------------------
@@ -73,6 +75,7 @@
         ../../modules/arch/aarch64.nix
         ../../modules/outputs/tftpboot.nix
         ../../modules/outputs/ubifs.nix
+        ../../modules/outputs/ubimage.nix
       ];
       config = {
     kernel = {
@@ -203,7 +206,8 @@
       in {
         ubi = {
           minIOSize = "2048";
-          eraseBlockSize = "126976";
+          logicalEraseBlockSize = "126976";
+          physicalEraseBlockSize = "131072";
           maxLEBcount = "1024"; # guessing
         };
 
