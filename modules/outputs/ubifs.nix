@@ -13,13 +13,6 @@ in
     ./initramfs.nix
   ];
 
-  options.hardware.ubi = {
-    minIOSize = mkOption { type = types.str; };
-    logicalEraseBlockSize = mkOption { type = types.str; }; # LEB
-    physicalEraseBlockSize = mkOption { type = types.str; }; # PEB
-    maxLEBcount = mkOption { type = types.str; }; # LEB
-  };
-
   config = mkIf (config.rootfsType == "ubifs") {
     kernel.config = {
       MTD_UBI="y";
