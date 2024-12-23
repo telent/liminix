@@ -64,6 +64,12 @@ in
           directory of files to package into root filesystem
         '';
       };
+      bootfiles = mkOption {
+        type = types.nullOr types.package;
+        internal = true;
+        default = null;
+        # description = "";
+      };
       bootablerootdir = mkOption {
         type = types.package;
         internal = true;
@@ -107,8 +113,8 @@ in
         let inherit (pkgs.pkgsBuildBuild) runCommand;
         in runCommand "add-slash-boot" { } ''
           cp -a ${o.rootdir} $out
-          ${if config.boot.loader.extlinux.enable
-            then "(cd $out && chmod -R +w . && rmdir boot && cp -a ${o.extlinux} boot)"
+          ${if o.bootfiles != null
+            then "(cd $out && chmod -R +w . && rmdir boot && cp -a ${o.bootfiles} boot)"
             else ""
            }
          '';

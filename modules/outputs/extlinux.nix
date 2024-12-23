@@ -12,14 +12,10 @@ let
   cmdline = concatStringsSep " " config.boot.commandLine;
   wantsDtb = config.hardware.dts ? src && config.hardware.dts.src != null;
 in {
-  options.system.outputs.extlinux = mkOption {
-    type = types.package;
-    # description = "";
-  };
   options.boot.loader.extlinux.enable = mkEnableOption "extlinux";
 
   config = mkIf cfg.enable {
-    system.outputs.extlinux = pkgs.runCommand "extlinux" {} ''
+    system.outputs.bootfiles = pkgs.runCommand "extlinux" {} ''
       mkdir $out
       cd $out
       ${if wantsDtb then "cp ${o.dtb} dtb" else "true"}
@@ -37,7 +33,7 @@ in {
       _EOF
     '';
     filesystem = dir {
-      boot = symlink config.system.outputs.extlinux;
+      boot = symlink config.system.outputs.bootfiles;
     };
   };
 }
