@@ -4,7 +4,8 @@
     ******************************
 
     This device is based on a 64 bit Mediatek MT7622 ARM platform,
-    and is "work in progress" in Liminix.
+    and is mostly feature-complete in Liminix but as of Dec 2024
+    has seen very little actual use.
 
     .. note:: The factory flash image contains ECC errors that make it
               incompatible with Liminix: use the `OpenWrt
@@ -25,7 +26,11 @@
     Installation
     ============
 
-    Installation is currently a manual process.
+    Liminix on this device uses the UBI volume management system to
+    perform wear leveling on the flash. This is not set up from the
+    factory, so a one-time step is needed to prepare it before Liminix
+    can be installed.
+
 
     Preparation
     -----------
@@ -33,7 +38,7 @@
     To prepare the device for Liminix you first need to use the
     `OpenWrt UBI Installer
     <https://github.com/dangowrt/owrt-ubi-installer>`_ image to
-    rewrite the flash layout. You can do this in onw of two ways:
+    rewrite the flash layout. You can do this in one of two ways:
     either follow the instructions to do it through the vendor web
     interface, or you can drop to U-boot and use TFTP
 
@@ -44,16 +49,50 @@
         MT7622> tftpboot 0x42000000  openwrt-mediatek-mt7622-linksys_e8450-ubi-initramfs-recovery-installer.itb
         MT7622> bootm 0x42000000
 
-     This will write the new flash layout and then boot into a
-     "recovery" OpenWrt installation. Once it's finished booting into
-     Linux you can safely reboot
+    This will write the new flash layout and then boot into a
+    "recovery" OpenWrt installation.
 
-     Installing Liminix
-     ------------------
+    Building/installing Liminix
+    ----------------
 
-     This is a manual process: you need a :ref:`serial <serial>` conection and TFTP : follow the instructions at :ref:`system-outputs-ubimage`
+    The default target for this device is ``outputs.ubimage`` which
+    makes a ubifs image suitable for use with :command:`ubiupdatevol`.
+    For a first-time installation the simplest way to achieve this is
+    using the OpenWrt recovery system that you installed in the
+    previous step. In this configuration the device assigns itself the
+    IP address 192.168.1.1/24 on its LAN ports and expects the
+    connected computer to have 192.168.1.254
 
-'';
+    The `ubi0_7` device in these instructions is correct as of Dec
+    2024 (dangowrt/owrt-ubi-installer commit d79e7928). If you are
+    installing some time later, it is important to check the output
+    from :command:`ubinfo -a` and make sure you are updating the
+    "liminix" volume and not some other one which had been introduced
+    since I wrote this.
+
+    .. code-block:: console
+
+        $ nix-build -I liminix-config=./my-configuration.nix  --arg device "import ./devices/belkin-rt3200" -A outputs.default
+        $ cat result/rootfs | ssh root@192.168.1.1 "cat > /tmp/rootfs"
+        $ ssh root@192.168.1.1
+        root@OpenWrt:~# ubimkvol /dev/ubi0 --name=liminix --maxavsize
+        root@OpenWrt:~# ubinfo -a
+        [...]
+        Volume ID:   7 (on ubi0)
+        Type:        dynamic
+        Alignment:   1
+        Size:        851 LEBs (108056576 bytes, 103.0 MiB)
+        State:       OK
+        Name:        liminix
+        Character device major/minor: 250:8
+        root@OpenWrt:~# ubiupdatevol /dev/ubi0_7 /tmp/rootfs
+
+     For subsequent Liminix reinstalls, you don't need to repeat the
+     "Preparation" step and in fact should seek to avoid it if
+     possible. Updating volumes with :command:`ubiupdatevol` will
+     preserve the erase counters used for write levelling, so is
+     preferred over any kind of "factory" wipe which will reset them.
+     '';
 
   system = {
     crossSystem = {
