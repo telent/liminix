@@ -87,7 +87,7 @@
         Character device major/minor: 250:8
         root@OpenWrt:~# ubiupdatevol /dev/ubi0_7 /tmp/rootfs
         root@OpenWrt:~# fw_setenv orig_boot_production $(fw_printenv boot_production | sed -E 's/.+?=//')
-        root@OpenWrt:~# fw_setenv boot_production 'led $bootled_pwr on ; ubifsmount ubi0:liminix && ubifsload ${loadaddr} boot/fit && bootm ${loadaddr}'
+        root@OpenWrt:~# fw_setenv boot_production 'led $bootled_pwr on ; ubifsmount ubi0:liminix && ubifsload ''${loadaddr} boot/fit && bootm ''${loadaddr}'
 
 
     For subsequent Liminix reinstalls, you don't need to repeat the
