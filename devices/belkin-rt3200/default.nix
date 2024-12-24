@@ -57,18 +57,18 @@
 
     The default target for this device is ``outputs.ubimage`` which
     makes a ubifs image suitable for use with :command:`ubiupdatevol`.
-    For a first-time installation the simplest way to achieve this is
-    using the OpenWrt recovery system that you installed in the
-    previous step. In this configuration the device assigns itself the
-    IP address 192.168.1.1/24 on its LAN ports and expects the
-    connected computer to have 192.168.1.254
+    To write this to the device we use the OpenWrt recovery system
+    installed in the previous step. In this configuration the
+    device assigns itself the IP address 192.168.1.1/24 on its LAN
+    ports and expects the connected computer to have 192.168.1.254
 
-    The `ubi0_7` device in these instructions is correct as of Dec
-    2024 (dangowrt/owrt-ubi-installer commit d79e7928). If you are
-    installing some time later, it is important to check the output
-    from :command:`ubinfo -a` and make sure you are updating the
-    "liminix" volume and not some other one which had been introduced
-    since I wrote this.
+    .. warning:: The `ubi0_7` device in these instructions is correct
+                 as of Dec 2024 (dangowrt/owrt-ubi-installer commit
+                 d79e7928). If you are installing some time later, it
+                 is important to check the output from
+                 :command:`ubinfo -a` and make sure you are updating
+                 the "liminix" volume and not some other one which had
+                 been introduced since I wrote this.
 
     .. code-block:: console
 
@@ -87,11 +87,12 @@
         Character device major/minor: 250:8
         root@OpenWrt:~# ubiupdatevol /dev/ubi0_7 /tmp/rootfs
 
-     For subsequent Liminix reinstalls, you don't need to repeat the
-     "Preparation" step and in fact should seek to avoid it if
-     possible. Updating volumes with :command:`ubiupdatevol` will
-     preserve the erase counters used for write levelling, so is
-     preferred over any kind of "factory" wipe which will reset them.
+
+    For subsequent Liminix reinstalls, you don't need to repeat the
+    "Preparation" step and in fact should seek to avoid it if
+    possible. Updating volumes with :command:`ubiupdatevol` will
+    preserve the erase counters used for write levelling, so is
+    preferred over any kind of "factory" wipe which will reset them.
      '';
 
   system = {
