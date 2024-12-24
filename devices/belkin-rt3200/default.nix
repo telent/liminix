@@ -114,7 +114,6 @@
         ../../modules/arch/aarch64.nix
         ../../modules/outputs/tftpboot.nix
         ../../modules/outputs/ubifs.nix
-        ../../modules/outputs/ubimage.nix
       ];
       config = {
     kernel = {

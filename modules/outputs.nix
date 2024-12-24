@@ -17,6 +17,7 @@ in
     ./outputs/boot-fit.nix
     ./outputs/uimage.nix
     ./outputs/updater
+    ./outputs/ubimage.nix
   ];
   options = {
     system.outputs = {
