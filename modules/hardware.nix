@@ -13,6 +13,12 @@ in
   options = {
     boot = { };
     hardware = {
+      ubi = {
+        minIOSize = mkOption { type = types.str; };
+        logicalEraseBlockSize = mkOption { type = types.str; }; # LEB
+        physicalEraseBlockSize = mkOption { type = types.str; }; # PEB
+        maxLEBcount = mkOption { type = types.str; }; # LEB
+      };
       dts = {
         src = mkOption {
           type = types.nullOr types.path;

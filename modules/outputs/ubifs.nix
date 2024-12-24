@@ -13,18 +13,6 @@ in
     ./initramfs.nix
   ];
 
-  options.system.outputs.rootubifs = mkOption {
-    type = types.package;
-    internal = true;
-  };
-
-  options.hardware.ubi = {
-    minIOSize = mkOption { type = types.str; };
-    logicalEraseBlockSize = mkOption { type = types.str; }; # LEB
-    physicalEraseBlockSize = mkOption { type = types.str; }; # PEB
-    maxLEBcount = mkOption { type = types.str; }; # LEB
-  };
-
   config = mkIf (config.rootfsType == "ubifs") {
     kernel.config = {
       MTD_UBI="y";
@@ -33,7 +21,7 @@ in
     };
     boot.initramfs.enable = true;
     system.outputs = {
-      rootubifs =
+      rootfs =
         let
           inherit (pkgs.pkgsBuildBuild) runCommand mtdutils;
           cfg = config.hardware.ubi;
