@@ -218,6 +218,7 @@
       tftp.loadAddress = lim.parseInt "0x4007ff28";
       imageFormat = "fit";
     };
+    rootfsType = lib.mkDefault "ubifs";
     filesystem =
       let inherit (pkgs.pseudofile) dir symlink;
            in
