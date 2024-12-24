@@ -7,10 +7,27 @@ let
     s6-linux-init
     stdenvNoCC;
   inherit (lib.lists) unique concatMap;
+  inherit (lib) concatStrings;
+  inherit (builtins) map;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs.liminix.services) oneshot bundle longrun;
   inherit (lib) mkIf mkEnableOption mkOption types;
   cfg = config.logging;
+
+  logger =
+    let pipecmds =
+          ["${s6}/bin/s6-log -bpd3 -- ${cfg.script} 1"] ++
+          (lib.optional cfg.persistent.enable
+            "/bin/tee /dev/pmsg0") ++
+          (lib.optional cfg.shipping.enable
+            "${pkgs.logshipper}/bin/logtap ${cfg.shipping.socket} logshipper-socket-event");
+    in ''
+      #!${execline}/bin/execlineb -P
+      ${execline}/bin/redirfd -w 1 /dev/null
+      ${execline}/bin/redirfd -rnb 0 fifo
+      ${concatStrings (map (l: "pipeline { ${l} }\n") pipecmds)}
+      ${s6}/bin/s6-log -- ${cfg.directory}
+    '';
   s6-rc-db =
     let
       # In the default bundle we need to have all the services
@@ -106,21 +123,7 @@ let
         mode = "0600";
       };
       notification-fd = { file = "3"; };
-      run = {
-        file = ''
-              #!${execline}/bin/execlineb -P
-              ${execline}/bin/redirfd -w 1 /dev/null
-              ${execline}/bin/redirfd -rnb 0 fifo
-              ${if cfg.shipping.enable then ''
-                pipeline { ${s6}/bin/s6-log -bpd3 -- ${cfg.script} 1 }
-                pipeline { ${pkgs.logshipper}/bin/logtap ${cfg.shipping.socket} logshipper-socket-event }
-                ${s6}/bin/s6-log -- ${cfg.directory}
-              '' else ''
-                ${s6}/bin/s6-log -bpd3 -- ${cfg.script} ${cfg.directory}
-              ''}
-          '';
-        mode = "0755";
-      };
+      run = { file = logger; mode = "0755"; };
     };
     getty = dir {
       run = {
@@ -212,6 +215,9 @@ let
 in {
   options = {
     logging = {
+      persistent = {
+        enable = mkEnableOption "store logs across reboots";
+      };
       shipping = {
         enable = mkEnableOption "unix socket for log shipping";
         socket = mkOption {
@@ -263,6 +269,11 @@ in {
     )];
 
   config = {
+    kernel.config = mkIf config.logging.persistent.enable {
+      PSTORE = "y";
+      PSTORE_PMSG = "y";
+      PSTORE_RAM = "y";
+    };
     filesystem = dir {
       etc = dir {
         s6-rc = dir {

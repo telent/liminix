@@ -52,8 +52,9 @@
 
   '';
 
-  module = {pkgs, config, lim, ... }:
+  module = {pkgs, config, lim, lib, ... }:
     let
+      inherit (lib) mkIf;
       openwrt = pkgs.openwrt;
       firmwareBlobs = pkgs.pkgsBuildBuild.fetchFromGitHub {
         owner = "kvalo";
@@ -116,8 +117,11 @@
         rootDevice = "/dev/mtdblock5";
         dts = {
           src = "${openwrt.src}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";
-          includes =  [
+          includePaths =  [
             "${openwrt.src}/target/linux/ath79/dts"
+          ];
+          includes = mkIf config.logging.persistent.enable [
+            ./pstore-ramoops.dtsi
           ];
         };
 

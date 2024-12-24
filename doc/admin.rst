@@ -131,50 +131,54 @@ human-readable format, use :command:`s6-tai64nlocal`.
   1970-01-02 21:51:48.832588765 wan.link.pppoe sent [LCP ConfReq id=0x1 <asyncmap 0x0> <magic 0x667a9594> <pcomp> <accom
   p>]
 
+Log persistence
+---------------
 
+Logs written to :file:`/run/log/` will not survive a reboot or crash,
+as it is an ephemeral filesystem.
 
-Updating an installed system (JFFS2)
-************************************
+On supported hardware you can enable logging to `pstore
+<https://www.kernel.org/doc/Documentation/ABI/testing/pstore>`_ which
+means the most recent log messages will be preserved on reboot.  Set
+the config option ``logging.persistent.enable = true`` to log messages
+to :file:`/dev/pmsg0` as well as to the regular log. This is a
+circular buffer, so when it fills up newer messages will overwrite the
+oldest messages.
 
-
-Adding packages
-===============
-
-If your device is running a JFFS2 root filesystem, you can build
-extra packages for it on your build system and copy them to the
-device: any package in Nixpkgs or in the Liminix overlay is available
-with the ``pkgs`` prefix:
+To check the previous messages after a (planned or forced) reboot,
+you need to mooun the pstore filesystem.
 
 .. code-block:: console
 
-    nix-build -I liminix-config=./my-configuration.nix \
-     --arg device "import ./devices/mydevice" -A pkgs.tcpdump
+    # mount -t pstore pstore /sys/fs/pstore/
+    # ls -l /sys/fs/pstore/
+    -r--r--r--    1     43071 pmsg-ramoops-0
+    # cat /sys/fs/pstore/pmsg-ramoops-0
+    @40000000000000282c997d29 mydevice klogd <6>[   30.793756] int: port 2(wlan0) entered blocking state
+    [log messages from before the reboot follow]
 
-    nix-shell -p min-copy-closure root@the-device result/
-
-Note that this only copies the package to the device: it doesn't update
-any profile to add it to ``$PATH``
 
 
-.. _rebuilding the system:
+Updating an installed system
+****************************
 
-Rebuilding the system
-=====================
+If your system has a writable root filesystem (JFFS2, btrfs etc -
+anything but squashfs), we have mechanisms for in-places updates
+analogous to :command:`nixos-rebuild`, but the operation is a bit
+different because it expects to run on a build machine and then copy
+to the host device using :command:`ssh`.
 
-Liminix has a mechanism for in-place updates of a running system which
-is analogous to :command:`nixos-rebuild`, but its operation is a
-bit different because it expects to run on a build machine and then
-copy to the host device. To use this, build the `outputs.systemConfiguration`
-target and then run the :command:`result/install.sh` script it generates.
+To use this, build the ``outputs.updater``
+target and then run the :command:`update.sh` script it generates.
 
 .. code-block:: console
 
     nix-build -I liminix-config=./my-configuration.nix \
        --arg device "import ./devices/mydevice" \
-       -A outputs.systemConfiguration
-    ./result/install.sh root@the-device 
+       -A outputs.updater
+    ./result/bin/update.sh root@the-device 
 
-The install script uses min-copy-closure to copy new or changed
+The update script uses min-copy-closure to copy new or changed
 packages to the device, then (perhaps) reboots it. The reboot
 behaviour can be affected by flags:
 
@@ -186,7 +190,6 @@ behaviour can be affected by flags:
   only the services that have been changed. This will restart all of
   the services that have updated store paths (and anything that
   depends on them), but will not affect services that haven't changed.
-
 
 It doesn't delete old packages automatically: to do that run
 :command:`min-collect-garbage`, which will delete any packages not in
@@ -206,6 +209,26 @@ Caveats
 * it cannot upgrade the kernel, only userland
 
 .. _levitate:  
+
+Adding packages
+===============
+
+If you simply wish to add a package without any change to services,
+you can call :command:`min-copy-closure` directly to install
+any package in Nixpkgs or in the Liminix overlay
+
+.. code-block:: console
+
+    nix-build -I liminix-config=./my-configuration.nix \
+     --arg device "import ./devices/mydevice" -A pkgs.tcpdump
+
+    nix-shell -p min-copy-closure root@the-device result/
+
+Note that this only copies the package and its dependencies to the
+device: it doesn't update any profile to add it to ``$PATH``
+
+
+.. _rebuilding the system:
 
 Reinstalling on a running system
 ********************************

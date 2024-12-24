@@ -12,6 +12,7 @@ let
     "qemu-armv7l"
     "tp-archer-ax23"
     "zyxel-nwa50ax"
+    "turris-omnia"
   ];
   vanilla = ./vanilla-configuration.nix;
   for-device = name:

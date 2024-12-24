@@ -24,9 +24,14 @@ in
             only for QEMU.
           '';
         };
-        includes = mkOption {
+        includePaths = mkOption {
           default = [ ];
           description = "List of directories to search for DTS includes (.dtsi files)";
+          type = types.listOf types.path;
+        };
+        includes = mkOption {
+          default = [ ];
+          description = "\"dtsi\" fragments to include in the generated device tree";
           type = types.listOf types.path;
         };
       };

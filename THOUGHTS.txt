@@ -6539,3 +6539,134 @@ using a Makefile
 
 idea 2: when a configuration contains levitate, something similar
 but necessarily more "manual" to do the analogous thing
+
+
+Sun Dec 15 18:55:55 GMT 2024
+
+Where we left off with this, rotuer was crashing randomly or failing
+to boot every time we tried to add log shipping, which is not very
+ideal. I started doing something with logging to /dev/pmsg0
+(CONFIG_PSTORE_PMSG) but I think (there seems not to be anything
+written down :-( ) that the gl-ar750 kernel needs it added to kconfig and device tree
+
+https://wiki.postmarketos.org/wiki/User:Knuxify/Enabling_pstore_and_ramoops
+
+we could add a new hardware.dts.dtsi = [] option so that any module
+could add a new chunk of dts. (Ideally we'd call it `includes`
+but that conflicts with the existing use of `includes` to specify
+search path. Maybe rename?)
+
+would we ever use it except in a hardware device definition?
+(Or user config?) I guess if we were consistent with names
+then we could set up nodes in the device file with status="disabled"
+and enable them in the module, except that dt doesn't consistently
+use status and in fact there isn't one for reserved-memory
+
+we could use global config to enable pstore_msg and check it in
+the device module to enable the needed hw support
+
+Tue Dec 17 23:39:28 GMT 2024
+
+I think we can just stick a tee in the fallback logger pipeline that
+writes to /dev/pmsg0
+
+Need to check it's a circular buffer
+
+do we want to do anything about recovering the log on boot?
+- we could just copy it to /run/log
+- if we have backfilling for shipped logs (we don't yet)
+  then we might want to ship it - but that may result in duplicate
+  logs if some of it was shipped before the crash
+
+perhaps we should truncate pmsg0 on orderly shutdown? or maybe it's
+good to see the late shutdown logs.
+
+Thu Dec 19 13:40:39 GMT 2024
+
+although we have PSTORE_foo in the omnia kconfig, I think this might
+be just because I copied it from RT3200
+
+Thu Dec 19 14:15:43 GMT 2024
+
+Omnia is not in ci.nix, and it's not trivial to add it because there
+is no output in the ci.nix configuration that makes sense for omnia.
+
+... OK, fixed by adding system-configuration as an independent module
+and importing in device config
+
+Thu Dec 19 21:59:47 GMT 2024
+
+The build-system shell script in outputs.systemConfiguration
+is ugly and requires we do bad things to avoid sucking build
+system stuff into the config
+
+I propose we make it a separate derivation.
+
+But first maybe we could improve some names
+
+Sun Dec 22 14:23:02 GMT 2024
+
+MT7622> echo $boot_default
+if env exists flag_recover ; then else run bootcmd ; fi ; run boot_recovery ; setenv replacevol 1 ; run boot_tftp_for
+ever
+MT7622> echo $bootcmd
+if pstore check ; then run boot_recovery ; else run boot_ubi ; fi
+MT7622> echo $boot_ubi
+ubi part ubi && run boot_production ; run boot_recovery
+MT7622> echo $boot_production
+led $bootled_pwr on ; run ubi_read_production && bootm $loadaddr#$bootconf ; led $bootled_pwr off
+MT7622> echo $ubi_read_production
+ubi read $loadaddr fit && iminfo $loadaddr && run ubi_prepare_rootfs
+MT7622> echo $ubi_prepare_rootfs
+if ubi check rootfs_data ; then else if env exists rootfs_data_max ; then ubi create rootfs_data $rootfs_data_max dynamic || ubi create rootfs_data - dynamic ; else ubi create rootfs_data - dynamic ; fi ; fi
+MT7622> echo $bootconf
+config-1
+MT7622> run boot_ubi
+UBI partition 'ubi' already selected
+No size specified -> Using max size (126976)
+Read 126976 bytes from volume fit to 0000000048000000
+
+## Checking Image at 48000000 ...
+Unknown image format!
+No size specified -> Using max size (7491584)
+Read 7491584 bytes from volume recovery to 0000000048000000
+## Loading kernel from FIT Image at 48000000 ...
+   Using 'config-1' configuration
+   Trying 'kernel-1' kernel subimage
+     Description:  ARM64 OpenWrt Linux-6.6.45
+
+Sun Dec 22 17:39:56 GMT 2024
+
+From the output above it looks like the device I have plugged in has
+an openwrt "recovery" image but not a "production" image
+
+It also looks like it will be quite hard work to persuade it to boot
+from usb or anything. It doesn't have any of the extlinux stuff
+but it does have uefi for what that's worth
+
+default boot_production command reads a ubi volume called 'fit' and
+calls bootm on what it finds
+
+we could define boot_production to ubifsmount liminix; ubifs load
+<addr> <filename> (which is a fit) and bootm it. *presumably* we could
+do this from the openwrt recovery image
+
+but could we install the whole system using said recovery image?  I
+expect we could do, it only requires getting a tarball onto it and
+unpacking it
+
+however, extlinux is not going to be helpful
+(actually it might be a bit, if we ask it to write the fit as
+well as/instead of the individual files)
+
+maybe we need separate concepts of "the filesystem contains
+stuff we need for boot" and "the stuff we need is the stuff
+that extlinux needs"
+
+each bootloader makes an output called bootfiles, and
+the bootablerootdir output copies from bootfiles
+
+Mon Dec 23 18:28:50 GMT 2024
+
+it might be worth moving ubi option decls into the hardware module, if
+they're hardware-dependent

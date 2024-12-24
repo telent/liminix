@@ -132,4 +132,28 @@ and then run the generated `install.sh` script
 
     result/install.sh root@192.168.8.1
 
+2024-12-16
 
+Config options changed: if you had set config.hardware.dts.includes
+(maybe in an out-of-tree device port) to specify the search paths
+in which dtc finds include files, you will need to change this to 
+hardware.dts.includePaths.
+
+The "new" hardware.dts.includes option is now for dtsi files which
+should be merged into the device tree.
+
+2024-12-19
+
+Incremental updates changed again (but not massively). From hereon in,
+the preferred way to do an incremental update on an installed device
+with a writable filesystem is to build the updater output
+
+    nix-build  -I liminix-config=hosts/myhost.nix --argstr deviceName turris-omnia -A outputs.updater
+
+and then run the generated `update.sh` script. See 
+https://www.liminix.org/doc/admin.html#updating-an-installed-system
+
+2024-12-22
+
+outputs.zimage is now outputs.kernel.zImage. This is unlikely to
+affect many people at all but I mention it anyway.

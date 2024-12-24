@@ -124,7 +124,7 @@
         hash = "sha256-ifriAjWzFACrxVWCANZpUaEZgB/0pdbhnTVQytx6ddg=";
       };
     in {
-      imports = [ 
+      imports = [
         # We include it to ensure the bridge functionality
         # is available on the target kernel.
         ../../modules/bridge
@@ -184,7 +184,7 @@
           # Actually, this is not what we want.
           # This DTS is insufficient.
           src = ./mt7621_zyxel_nwa50ax.dtsi;
-          includes = [
+          includePaths = [
             # Here's one weird trick to make `ubi` detection
             # out of the box.
             # We will write ubi on /dev/firmware_a:rootfs location
@@ -233,7 +233,7 @@
       services.zyxel-dual-image = config.boot.zyxel-dual-image.build {
         ensureActiveImage = "primary";
         # TODO: use mtd names rather…
-        # primary and secondary are always /dev/mtd3 by virtue of the 
+        # primary and secondary are always /dev/mtd3 by virtue of the
         # dtb being not too wrong…
         # TODO: remove this hack.
         primaryMtdPartition = "/dev/mtd3";

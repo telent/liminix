@@ -4,7 +4,7 @@ let
 in {
   imports = [
     ../../vanilla-configuration.nix
-    ../../modules/squashfs.nix
+    ../../modules/outputs/squashfs.nix
     ../../modules/outputs/jffs2.nix
   ];
   config.rootfsType = "jffs2";

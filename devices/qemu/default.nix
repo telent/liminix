@@ -66,7 +66,7 @@
         # *correct* but it does at least boot
         dts = lib.mkForce {
           src = "${config.system.outputs.kernel.modulesupport}/arch/mips/boot/dts/mti/malta.dts";
-          includes =  [
+          includePaths =  [
             "${config.system.outputs.kernel.modulesupport}/arch/mips/boot/dts/"
           ];
         };

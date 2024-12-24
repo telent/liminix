@@ -11,9 +11,12 @@ let
 in
 {
   imports = [
-    ./squashfs.nix
+    ./outputs/squashfs.nix
     ./outputs/vmroot.nix
-    ./outputs/extlinux.nix
+    ./outputs/boot-extlinux.nix
+    ./outputs/boot-fit.nix
+    ./outputs/uimage.nix
+    ./outputs/updater
   ];
   options = {
     system.outputs = {
@@ -27,17 +30,7 @@ in
           kernel
           ******
 
-          Kernel vmlinux file (usually ELF)
-        '';
-      };
-      zimage = mkOption {
-        type = types.package;
-        internal = true;
-        description = ''
-          zimage
-          ******
-
-          Kernel in compressed self-extracting package
+          Kernel package (multi-output derivation)
         '';
       };
       dtb = mkOption {
@@ -48,16 +41,6 @@ in
           ***
 
           Compiled device tree (FDT) for the target device
-        '';
-      };
-      uimage = mkOption {
-        type = types.package;
-        internal = true;
-        description = ''
-          uimage
-          ******
-
-          Combined kernel and FDT in uImage (U-Boot compatible) format
         '';
       };
       tplink-safeloader = mkOption {
@@ -82,6 +65,12 @@ in
           directory of files to package into root filesystem
         '';
       };
+      bootfiles = mkOption {
+        type = types.nullOr types.package;
+        internal = true;
+        default = null;
+        # description = "";
+      };
       bootablerootdir = mkOption {
         type = types.package;
         internal = true;
@@ -104,17 +93,10 @@ in
     system.outputs = rec {
       dtb = liminix.builders.dtb {
         inherit (config.boot) commandLine;
-        dts = config.hardware.dts.src;
-        includes = config.hardware.dts.includes ++ [
+        dts = [config.hardware.dts.src] ++ config.hardware.dts.includes;
+        includes = config.hardware.dts.includePaths ++ [
           "${o.kernel.headers}/include"
         ];
-      };
-      uimage = liminix.builders.uimage {
-        commandLine = concatStringsSep " " config.boot.commandLine;
-        inherit (config.boot) commandLineDtbNode;
-        inherit (config.hardware) loadAddress entryPoint alignment;
-        inherit (config.boot) imageFormat;
-        inherit (o) kernel dtb;
       };
       rootdir =
         let
@@ -132,8 +114,8 @@ in
         let inherit (pkgs.pkgsBuildBuild) runCommand;
         in runCommand "add-slash-boot" { } ''
           cp -a ${o.rootdir} $out
-          ${if config.boot.loader.extlinux.enable
-            then "(cd $out && chmod -R +w . && rmdir boot && cp -a ${o.extlinux} boot)"
+          ${if o.bootfiles != null
+            then "(cd $out && chmod -R +w . && rmdir boot && cp -a ${o.bootfiles} boot)"
             else ""
            }
          '';
