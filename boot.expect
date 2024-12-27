@@ -2,19 +2,37 @@
 # use expect as its "Script program" instead of runscript.  Try
 # Ctrl+A O -> Filenames and paths -> D
 
+fconfigure stderr -buffering  none
+fconfigure stdout -buffering  none
+
+proc waitprompt { } {
+    expect {
+      "BusyBox" { puts stderr  "DONE\r"; exit 0 }
+      "READY" { puts stderr ";;; READY\r"; }
+      timeout { puts stderr ";;; timed out waiting after $line\r" }
+    }
+}
+
+proc sendline { line } {
+     send "$line; echo \$ready \r"
+}
+
 log_user 0
 log_file -a -open stderr
+
 set f [open "result/boot.scr"]
-send "version\r"
-set timeout 60
+
+send "setenv ready REA\rsetenv ready \${ready}DY\r"
+
+set timeout 300
+expect_before timeout abort
 while {[gets $f line] >= 0} {
-    puts stderr "next line $line\r"
-    puts stderr "waiting for prompt\r"	
-    expect {
-      "ath>" {}
-      "BusyBox" { puts stderr  "DONE"; exit 0 }
-    }
-    send "$line\r\n"
+    puts stderr ";;; next line $line\r"
+    puts stderr ";;; waiting for prompt\r"
+    puts stderr ";;; sending\r"	
+    sendline $line
+    waitprompt
 }
+
 puts stderr "done\r\n"
 close $f
