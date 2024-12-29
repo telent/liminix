@@ -7,6 +7,7 @@
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
+  inherit (pkgs.pseudofile) dir file;
   mkBoolOption = description : mkOption {
     type = types.bool;
     inherit description;
@@ -20,6 +21,13 @@ in {
     };
   };
   config.programs.busybox.options.FEATURE_FANCY_ECHO = "y";
+  config.filesystem = dir {
+    etc = dir {
+      shells = {
+        file = "/bin/sh\n";
+      };
+    };
+  };
   config.system.service = {
     ssh = config.system.callService ./ssh.nix {
       address = mkOption {
