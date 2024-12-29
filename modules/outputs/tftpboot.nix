@@ -57,6 +57,8 @@ in {
 
     system.outputs = rec {
       tftpboot =
+        # no ubifs on an mtd directly, it needs ubi volumes
+        assert config.rootfsType != "ubifs";
         let
           o = config.system.outputs;
           image = let choices = {
