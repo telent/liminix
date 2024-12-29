@@ -192,11 +192,6 @@
         NET_DSA_MT7530="y";
         NET_DSA_TAG_MTK="y";
 
-        PSTORE = "y";
-        PSTORE_RAM = "y";
-        PSTORE_CONSOLE = "y";
-        PSTORE_DEFLATE_COMPRESS = "n";
-
         SERIAL_8250 = "y";
         SERIAL_8250_CONSOLE = "y";
         SERIAL_8250_MT6577="y";
