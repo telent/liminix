@@ -1,20 +1,28 @@
-commit bd51aae2e40814ac2ae5801fd9f83f6a4a886fb1
-Author: Daniel Barlow <dan@telent.net>
-Date:   Fri Aug 23 11:33:24 2024 +0100
+From 9c0ac9e41a393e0f16a57e36d9369d61d39e9aa5 Mon Sep 17 00:00:00 2001
+From: Daniel Barlow <dan@telent.net>
+Date: Fri, 23 Aug 2024 11:33:24 +0100
+Subject: [PATCH] add -U otion to set path to authorized_keys file
 
-    add -U otion to set path to authorized_keys file
-    
-    based on https://github.com/mkj/dropbear/pull/35
-    by Salvador Fandino sfandino@yahoo.com
-    
-    - Allow authorized keys inside dirs with the sticky bit set
-    
-    - Add option -U for customizing authorized_keys path
-    
-    - Updated for dropbear 2024.85 (source files moved to src/)
-    
-    - allow %u, %d, %n "format specifiers" in pathname so that the user's
-      username/homedir/uid can be embedded into the path
+based on https://github.com/mkj/dropbear/pull/35
+by Salvador Fandino sfandino@yahoo.com
+
+- Allow authorized keys inside dirs with the sticky bit set
+
+- Add option -U for customizing authorized_keys path
+
+- Updated for dropbear 2024.85 (source files moved to src/)
+
+- allow %u, %d, %n "format specifiers" in pathname so that the user's
+  username/homedir/uid can be embedded into the path
+---
+ Makefile.in          |   2 +-
+ manpages/dropbear.8  |   3 +
+ src/pathexpand.c     | 149 +++++++++++++++++++++++++++++++++++++++++++
+ src/runopts.h        |   3 +-
+ src/svr-authpubkey.c |  86 +++++++++++--------------
+ src/svr-runopts.c    |  10 +++
+ 6 files changed, 203 insertions(+), 50 deletions(-)
+ create mode 100644 src/pathexpand.c
 
 diff --git a/Makefile.in b/Makefile.in
 index 5ebfca2..686fbfb 100644
@@ -45,15 +53,16 @@ index bdb2ea0..c8d450d 100644
  .TP
 diff --git a/src/pathexpand.c b/src/pathexpand.c
 new file mode 100644
-index 0000000..2028733
+index 0000000..07e6955
 --- /dev/null
 +++ b/src/pathexpand.c
-@@ -0,0 +1,132 @@
+@@ -0,0 +1,149 @@
 +#include <limits.h>
 +#include <string.h>
 +#include <stdio.h>
 +
 +#ifdef TEST_PATHEXPAND
++#include <stdlib.h>
 +
 +/* to run tests:
 +  gcc -Wall -o pathexpand -D TEST_PATHEXPAND=1 src/pathexpand.c && ./pathexpand
@@ -64,6 +73,17 @@ index 0000000..2028733
 +
 +#define m_malloc(c) malloc(c)
 +#define m_strdup(c) strdup(c)
++#define TRACE(c) dropbear_trace1 c
++#include <stdarg.h>
++
++inline static void dropbear_trace1(const char* format, ...) {
++        va_list param;
++
++        va_start(param, format);
++        /* vfprintf(stderr, format, param); */
++	/* fprintf(stderr, "\n"); */
++}
++
 +
 +struct session {
 +    struct AuthState {
@@ -124,6 +144,8 @@ index 0000000..2028733
 +    /* unrecognised specifiers are discarded */
 +    expect_expansion("/hi/%q/.ssh", "/hi//.ssh");
 +
++
++    expect_expansion("%d/.ssh/authorized_keys", "/home/dan/.ssh/authorized_keys");
 +    exit(exit_status);
 +}
 +
@@ -155,10 +177,13 @@ index 0000000..2028733
 +    char *out = filename;
 +    char *p = relfilename;
 +    do {
-+	p = strchrnul(start, '%');
-+	strncat(out, start, p - start);
++	p = strchr(start, '%');
 +
-+	if(*p == '\0') break;
++	if(!p) {
++	    strcat(out, start);
++	    break;
++	}
++	strncat(out, start, p - start);
 +
 +	switch(*(p+1)) {
 +	case '\0':
@@ -384,3 +409,6 @@ index c4f83c1..faddfa2 100644
  		}
  	}
  
+-- 
+2.47.0
+
