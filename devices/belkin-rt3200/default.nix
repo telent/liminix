@@ -220,8 +220,9 @@
       commandLine = [ "console=ttyS0,115200" ];
       tftp.loadAddress = lim.parseInt "0x4007ff28";
       imageFormat = "fit";
+      loader.fit.enable = lib.mkDefault true; # override this if you are building tftpboot
     };
-    rootfsType = lib.mkDefault "ubifs";
+    rootfsType = lib.mkDefault "ubifs"; # override this if you are building tftpboot
     filesystem =
       let inherit (pkgs.pseudofile) dir symlink;
            in
