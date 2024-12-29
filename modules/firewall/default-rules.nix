@@ -131,12 +131,12 @@ in {
       "iifname int jump input-ip6-lan"
       "iifname ppp0 jump input-ip6-wan"
       (if allow-incoming
-       then accept "oifname \"int\" iifname \"ppp0\""
-       else "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip6"
+       then accept "iifname \"ppp0\""
+       else "iifname \"ppp0\" jump incoming-allowed-ip6"
       )
       # how does this even make sense in an input chain?
-      (accept "oifname \"int\" iifname \"ppp0\"  ct state established,related")
-      (accept "iifname \"int\" oifname \"ppp0\" ")
+      (accept "iifname \"ppp0\"  ct state established,related")
+      (accept "iifname \"int\" ")
       "log prefix \"DENIED CHAIN=input-ip6 \""
     ];
   };
