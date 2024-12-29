@@ -96,6 +96,7 @@ in {
   minisock = callPackage ./minisock { };
   nellie = callPackage ./nellie { };
   netlink-lua = callPackage ./netlink-lua { };
+  nginx-small = callPackage ./nginx-small { };
   odhcp-script = callPackage ./odhcp-script { };
   odhcp6c = callPackage ./odhcp6c { };
   openwrt = callPackage ./openwrt { };
