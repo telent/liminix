@@ -145,17 +145,8 @@ to :file:`/dev/pmsg0` as well as to the regular log. This is a
 circular buffer, so when it fills up newer messages will overwrite the
 oldest messages.
 
-To check the previous messages after a (planned or forced) reboot,
-you need to mooun the pstore filesystem.
-
-.. code-block:: console
-
-    # mount -t pstore pstore /sys/fs/pstore/
-    # ls -l /sys/fs/pstore/
-    -r--r--r--    1     43071 pmsg-ramoops-0
-    # cat /sys/fs/pstore/pmsg-ramoops-0
-    @40000000000000282c997d29 mydevice klogd <6>[   30.793756] int: port 2(wlan0) entered blocking state
-    [log messages from before the reboot follow]
+Logs found in pstore after a reboot will be moved at startup to
+:file:`/run/log/previous-boot`
 
 
 
