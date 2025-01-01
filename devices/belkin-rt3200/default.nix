@@ -86,16 +86,25 @@
         Name:        liminix
         Character device major/minor: 250:8
         root@OpenWrt:~# ubiupdatevol /dev/ubi0_7 /tmp/rootfs
-        root@OpenWrt:~# fw_setenv orig_boot_production $(fw_printenv boot_production | sed -E 's/.+?=//')
+
+    To make the new system bootable we also need to change some U-Boot variables.
+    ``boot_production`` needs to mount the filesystem and boot the FIT image
+    found there, and :code:`bootcmd` needs to be told _not_ to boot the rescue
+    image if there are records in pstore, because that interferes with
+    ``config.log.persistent``
+
+        root@OpenWrt:~# fw_setenv orig_boot_production $(fw_printenv -n boot_production)
+        root@OpenWrt:~# fw_setenv orig_bootcmd $(fw_printenv -n bootcmd)
         root@OpenWrt:~# fw_setenv boot_production 'led $bootled_pwr on ; ubifsmount ubi0:liminix && ubifsload ''${loadaddr} boot/fit && bootm ''${loadaddr}'
+        root@OpenWrt:~# fw_setenv bootcmd 'run boot_ubi'
 
-
-    For subsequent Liminix reinstalls, you don't need to repeat the
-    "Preparation" step and in fact should seek to avoid it if
-    possible. Updating volumes with :command:`ubiupdatevol` will
-    preserve the erase counters used for write levelling, so is
-    preferred over any kind of "factory" wipe which will reset them.
-     '';
+    For subsequent Liminix reinstalls, just run the
+    :command:`ubiupdatevol` command again. You don't need to repeat
+    the "Preparation" step and in fact should seek to avoid it if
+    possible, as it will reset the erase counters used for write
+    levelling.  Using UBI-aware tools is therefore preferred over any
+    kind of "factory" wipe which will reset them.
+    '';
 
   system = {
     crossSystem = {
