@@ -7,10 +7,12 @@
 let
   inherit (lib) mkIf mkOption types;
   cfg = config.boot.tftp;
-  instructions = pkgs.writeText "env.scr" ''
+  instructions = pkgs.writeText "flash.scr" ''
     setenv serverip ${cfg.serverip}
     setenv ipaddr ${cfg.ipaddr}
     setenv loadaddr ${lib.toHexString cfg.loadAddress}
+    tftpboot $loadaddr result/rootfs
+    ubi write $loadaddr liminix $filesize
 '';
 in {
   options.system.outputs = {
@@ -63,18 +65,20 @@ Now we can make our new root volume
 
     uboot> ubi create liminix -
 
-3) transfer the root filesystem from the build system and write it
-to the new volume. Paste the environment variable settings from
-:file:`result/env.scr` into U-Boot, then run
+3) transfer the root filesystem from the build system and write it to
+the new volume. Paste the contents of :file:`result/flash.scr` one line at a time
+into U-Boot:
 
 .. code-block:: console
 
-    uboot> tftpboot ''${loadaddr} result/rootfs
-    uboot> ubi write ''${loadaddr} liminix $filesize
+    uboot> setenv serverip 10.0.0.1
+    uboot> setenv ipaddr 10.0.0.8
+    uboot> setenv loadaddr 4007FF28
+    uboot> tftpboot $loadaddr result/rootfs
+    uboot> ubi write $loadaddr liminix $filesize
 
 Now we have the root filesystem installed on the device. You
-can even mount it and poke around using ``ubifsmount ubi0:liminix;
-ubifsls  /``
+can even mount it and poke around using :command:`ubifsmount ubi0:liminix; ubifsls  /`
 
 4) optional: before you configure the device to boot into Liminix
 automatically, you can try booting it by hand to see if it works:
@@ -89,20 +93,11 @@ Once you've done this and you're happy with it, reset the device to
 return to U-Boot.
 
 5) Instructions for configuring autoboot are likely to be very
-device-dependent. On the Linksys E8450/Belkin RT3200, the environment
-variable `boot_production` governs what happens on a normal boot, so
-you could do
-
-.. code-block:: console
-
-    uboot> setenv orig_boot_production $boot_production
-    uboot> setenv boot_production 'led $bootled_pwr on ; ubifsmount ubi0:liminix && ubifsload ''${loadaddr} boot/fit && bootm ''${loadaddr}'
-    uboot> saveenv
-    uboot> reset
-
-On other devices, some detective work may be needed. Try running
-`printenv` and look for likely commands, try looking at the existing
-boot process, maybe even try looking for documentation for that device.
+device-dependent and you should consult the Liminix documentation for
+your device.  (If you're bringing up a new device, some detective work
+may be needed. Try running `printenv` and trace through the flow of
+execution from (probably) :command:`$bootcmd` and look for a suitable
+variable to change)
 
 6) Now you can reboot the device into Liminix
 
@@ -120,6 +115,6 @@ boot process, maybe even try looking for documentation for that device.
       mkdir $out
       cd $out
       ln -s ${o.rootfs} rootfs
-      ln -s ${instructions} env.scr
+      ln -s ${instructions} flash.scr
    '';
 }
