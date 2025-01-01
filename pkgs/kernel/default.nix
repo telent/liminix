@@ -45,7 +45,7 @@ stdenv.mkDerivation rec {
 
   dontStrip = true;
   dontPatchELF = true;
-  outputs = ["out" "headers" "modulesupport"] ++ targetNames;
+  outputs = ["out" "headers" "modulesupport" "config"] ++ targetNames;
   phases = [
     "unpackPhase"
     "butcherPkgconfig"
@@ -114,5 +114,6 @@ stdenv.mkDerivation rec {
     mkdir -p $modulesupport
     make modules
     cp -a . $modulesupport
+    cp .config $config
   '';
 }
