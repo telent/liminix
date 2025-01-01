@@ -1,0 +1,8 @@
+/ {
+	reserved-memory {
+		/* make sure address matches upstream  */
+		ramoops@42ff0000 {
+			pmsg-size = <0x10000>;
+		};
+	};
+};

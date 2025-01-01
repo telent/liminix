@@ -113,7 +113,8 @@
   };
 
   module = {pkgs, config, lib, lim, ... }:
-    let firmware = pkgs.stdenv.mkDerivation {
+    let inherit (lib) mkIf;
+        firmware = pkgs.stdenv.mkDerivation {
           name = "wlan-firmware";
           phases = ["installPhase"];
           installPhase = ''
@@ -267,6 +268,9 @@
           includePaths =  [
             "${openwrt.src}/target/linux/mediatek/dts"
             "${config.system.outputs.kernel.modulesupport}/arch/arm64/boot/dts/mediatek/"
+          ];
+          includes = mkIf config.logging.persistent.enable [
+            ./pstore-pmsg.dtsi
           ];
         };
 
