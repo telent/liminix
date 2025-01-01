@@ -99,8 +99,10 @@ in attrset:
       cp -v -fP \$src/bin/* \$src/etc/* \$dest
       ${if attrset ? boot then ''
         (cd \$dest
-         if test -e boot ; then rm boot ; fi
-         ln -sf ${lib.strings.removePrefix "/" attrset.boot.target} ./boot
+         test -d boot || mkdir boot
+         cd boot
+         cp ../${lib.strings.removePrefix "/" attrset.boot.target}/* .
+         sync; sync
         )
       '' else ""}
       EOF
