@@ -116,8 +116,8 @@ TFTP server you're using and so is out of scope for this document.
 
 
 
-Buildiing and installing the image
-==================================
+Building and installing the image
+=================================
 
 Follow the device-specific instructions for "TFTP install": usually,
 the steps are 
