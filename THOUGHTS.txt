@@ -6670,3 +6670,128 @@ Mon Dec 23 18:28:50 GMT 2024
 
 it might be worth moving ubi option decls into the hardware module, if
 they're hardware-dependent
+
+Tue Dec 24 16:14:50 GMT 2024
+
+Where next?
+
+a config for haproxy would be good
+
+> a connection or request arrives on a frontend, then the
+information carried with this request or connection are processed, and
+at this point it is possible to write ACLs-based conditions making use
+of these information to decide what backend will process the request.
+
+http://docs.haproxy.org/3.1/intro.html#3.4.4
+
+listen foo
+	bind :443
+
+frontend foo
+	mode tcp
+
+Thu Dec 26 14:27:26 GMT 2024
+
+What's the plan?
+
+1) build the updater target for rotuer
+2) ssh forward through bordervm to install it
+3) carve the ngix sni proxy into examples/module-sniproxy
+  with a fat warning comment
+3.5) should  we add the examples to ci?
+4) see if it builds
+5) using curl on bordervm, see if it forwards
+5000) swap the real rotuer hardware
+
+
+Sun Dec 29 18:22:42 GMT 2024
+
+To make sniproxy work it needs dns, which means it needs an upstream.
+But if we move the bordervm cable from lan to wan, we won't be able to
+rebuild over ssh unless it's sufficiently unbroken for pppoe to be working
+
+... unless we add a "management" address to the wan interface along with pppoe
+
+to permit wan stuff through the firewall, now that we've fixed the
+firewall :embarrassed:, do
+
+/nix/store/*nftables*/bin/nft insert rule table-ip input-ip4 position 19  iifname "wan" jump incoming-allowed-ip4
+
+What else do we need to try rt3200 as prod rotuer?
+
+- pstore logging
+- log shipping (maybe via wan to bordervm for now)
+- enable sniproxy module
+
+zcat /proc/config.gz  | grep PSTORE
+
+Tue Dec 31 22:45:33 GMT 2024
+
+/nix/store/i1khbsqpyx020xrhvfbdazc1bnmirc72-kernel-aarch64-unknown-linux-musl-modulesupport/vmlinux
+
+
+these 3 derivations will be built:
+  /nix/store/fvxrvyx64cm86cc4na0584qj9xw6s406-kernel-aarch64-unknown-linux-musl.drv
+  /nix/store/ksg93bd8x2z1xpfmj24ixm2srg547mjx-dtb-aarch64-unknown-linux-musl.drv
+  /nix/store/n33ij1npzwjmlsw23sz6yhyrh9hgxwaw-kernel.image-aarch64-unknown-linux-musl.drv
+building '/nix/store/fvxrvyx64cm86cc4na0584qj9xw6s406-kernel-aarch64-unknown-linux-musl.drv'...
+zcat /proc/config.gz  | grep PSTORE
+
+we think tftpboot works (check!)
+build the FIT from the updater target with squashfs added in rotuer.nix
+boot it with tftp by copy-pasting the boot.scr and changing it
+
+setenv serverip 10.0.0.1
+setenv ipaddr 10.0.0.8
+tftpboot 0x4007ff28 r2/rootfs; tftpboot 0x41086f28 r2/image; tftpboot 0x4107ff28 r2/dtb
+ bootm 0x41086f28 - 0x4107ff28
+
+tftpboot works
+tftpboot with outputs.uimage works
+1458ed2cdeaa6bf4c02c6511a6d7369d  /nix/store/4n3jc4n7lsp73yc2ccnmgibc7079rxms-kernel.image-aarch64-unknown-linux-musl
+
+$ grep fit /nix/store/ihi7vski37b9ph4xcyqpabymc5nsngjd-system-configuration-aarch64-unknown-linux-musl/etc/nix-store-paths
+/nix/store/5jphs9mnb8hzhvwfi2z8h6cnaz6qx4y6-boot-fit
+$ md5sum /nix/store/5jphs9mnb8hzhvwfi2z8h6cnaz6qx4y6-boot-fit/fit
+1458ed2cdeaa6bf4c02c6511a6d7369d  /nix/store/5jphs9mnb8hzhvwfi2z8h6cnaz6qx4y6-boot-fit/fit
+
+something is changing /persist/boot from a symlink to a directory and I don't know what
+... plot twist: or is it? maybe it's ubimage that makes it a directory
+
+rt3200 has no pmsg-size according to  dtc -I fs  /proc/device-tree/ -O dts
+
+should be more like
+
+reserved-memory {
+		ramoops@03f00000 {
+			compatible = "ramoops";
+			reg = <0x03f00000 0x10000>;
+			pmsg-size = <0x10000>;
+		};
+	};
+};
+
+Wed Jan  1 14:57:35 GMT 2025
+
+At last I have working persistent logging.
+
+I think we need to do something at boot time to move the persistent logs into
+the regular s6 log thing
+
+      foreground {
+        redirfd -w 1 /run/prior-boot2
+        elglob file /sys/fs/pstore/* cat $file
+      }
+
+Thu Jan  2 14:31:11 GMT 2025
+
+to change to a previous "generation" we could run any of
+"/nix/store/*system-configuration*/bin/install /mnt" from a rescue
+system. It would populate /boot and bin/activate
+
+supposing we are in such a rescue system, how do we find *which*
+system-configuration is the one we want to revert to? The derivation
+should be pure, so if we're going to timestamp anything we have to do
+that in the imperative step i.e. update.sh
+
+perhaps a symlink from /persist/configuration/yyyymmddtmmhhss -> /nix/store/eeee-blah
