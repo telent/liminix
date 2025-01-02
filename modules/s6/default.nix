@@ -17,7 +17,7 @@ let
   logger =
     let pipecmds =
           ["${s6}/bin/s6-log -bpd3 -- ${cfg.script} 1"] ++
-          (lib.optional cfg.persistent.enable
+          (lib.optional (cfg ? persistent && cfg.persistent.enable)
             "/bin/tee /dev/pmsg0") ++
           (lib.optional cfg.shipping.enable
             "${pkgs.logshipper}/bin/logtap ${cfg.shipping.socket} logshipper-socket-event");
@@ -215,9 +215,6 @@ let
 in {
   options = {
     logging = {
-      persistent = {
-        enable = mkEnableOption "store logs across reboots";
-      };
       shipping = {
         enable = mkEnableOption "unix socket for log shipping";
         socket = mkOption {
@@ -269,11 +266,6 @@ in {
     )];
 
   config = {
-    kernel.config = mkIf config.logging.persistent.enable {
-      PSTORE = "y";
-      PSTORE_PMSG = "y";
-      PSTORE_RAM = "y";
-    };
     filesystem = dir {
       etc = dir {
         s6-rc = dir {

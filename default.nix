@@ -33,6 +33,7 @@ let
       ./modules/busybox.nix
       ./modules/hostname.nix
       ./modules/kernel
+      ./modules/logging.nix
       ./modules/klogd.nix
       device.module
       liminix-config
