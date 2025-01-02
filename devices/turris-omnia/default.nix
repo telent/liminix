@@ -173,8 +173,13 @@
         ../../modules/outputs/tftpboot.nix
         ../../modules/outputs/mbrimage.nix
       ];
+    };
+
 
       config = {
+        rootfsType = lib.mkDefault "btrfs"; # override this if you are building tftpboot
+        rootOptions = lib.mkDefault "subvol=@";
+
         services.mtd-name-links = mtd_by_name_links;
         kernel = {
           src = pkgs.pkgsBuildBuild.fetchurl {
@@ -292,6 +297,7 @@
           };
         };
         boot = {
+          loader.extlinux.enable = lib.mkDefault true; # override this if you are building tftpboot
           commandLine = [
             "console=ttyS0,115200"
             "pcie_aspm=off" # ath9k pci incompatible with PCIe ASPM
