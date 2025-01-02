@@ -19,6 +19,7 @@ in
     ./outputs/uimage.nix
     ./outputs/updater
     ./outputs/ubimage.nix
+    ./outputs/mtdimage.nix
   ];
   options = {
     system.outputs = {
