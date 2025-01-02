@@ -188,16 +188,54 @@ the current system closure. Note that Liminix does not have the NixOS
 concept of environments or generations, and there is no way back from
 this except for building the previous configuration again.
 
-
 Caveats
 -------
 
 * it needs there to be enough free space on the device for all the new
-  packages in addition to all the packages already on it - which may be
-  a problem if a lot of things have changed (e.g. a new version of
-  nixpkgs).
+  packages in addition to all the packages already on it - which may
+  be a problem if there is little flash storage or if a lot of things
+  have changed (e.g. a new version of nixpkgs).
 
-* it cannot upgrade the kernel, only userland
+* it may not be able to upgrade the kernel: this is device-dependent.
+  If your device boots from a kernel image on a raw MTD partition or
+  or UBI volume, update.sh is unable to alter the kernel partition.
+  If your device boots from a kernel inside the filesystem (e.g. using
+  bootloader.extlinux or bootloder.fit) then the kernel will be
+  upgraded along with the userland
+
+
+Recovery/downgrades
+-------------------
+
+The :command:`update.sh` script also creates a timestamped symlink on
+the device which points to the system configuration it installs. If
+you install a configuration that doesn't work, you can revert to any
+other installed configuration by
+
+1) booting to some kind of rescue or recovery system (which may be
+   some vendor-provided rescue option, or your own recovery system
+   perhaps based on :file:`examples/recovery.nix`) and mounting
+   your Liminix filesystem on /mnt
+
+2) picking another previously-installed configuration that _did_ work,
+   and switching back to it:
+
+.. code-block:: console
+   
+    # ls  -ld /mnt/*configuration
+    lrwxrwxrwx    1        90 /mnt/20252102T182104.configuration -> nix/store/v1w0h4zw65ah4c2r0k7nyy125qrxhq78-system-configuration-aarch64-unknown-linux-musl
+    lrwxrwxrwx    1        90 /mnt/20251802T181822.configuration -> nix/store/wqjl9s9xljl2wg8257292zghws9ssidk-system-configuration-aarch64-unknown-linux-musl
+    # : 20251802T181822 is the working system, so reinstall it
+    # /mnt/20251802T181822.configuration/bin/install /mnt
+    # umount /mnt
+    # reboot
+    
+This will install the previous configuration's activation binary into
+/bin, and copy its kernel and initramfs into /boot. Note that it
+depends on the previous system not having been garbage-collected.
+
+
+
 
 .. _levitate:  
 

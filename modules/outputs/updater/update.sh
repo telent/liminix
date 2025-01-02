@@ -37,8 +37,8 @@ echo installing from systemConfiguration $toplevel to host $target_host
 
 $ssh_command $target_host uname -a || die "Can't ssh to $target_host"
 min-copy-closure $target_host $toplevel
-set -x
-$ssh_command $target_host $toplevel/bin/install
+ts=$(date +%Y%m%dT%H%M%S)
+$ssh_command $target_host "$toplevel/bin/install && ln -s $(realpath --relative-to / $toplevel) /persist/${ts}.configuration"
 case "$reboot" in
     reboot)
 	$ssh_command $target_host "sync; source /etc/profile; reboot"
