@@ -13,6 +13,7 @@ let
     "tp-archer-ax23"
     "zyxel-nwa50ax"
     "turris-omnia"
+    "belkin-rt3200"
   ];
   vanilla = ./vanilla-configuration.nix;
   for-device = name:
