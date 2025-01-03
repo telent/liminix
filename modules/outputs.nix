@@ -11,16 +11,16 @@ let
 in
 {
   imports = [
-    ./outputs/squashfs.nix
-    ./outputs/btrfs.nix
-    ./outputs/jffs2.nix
-    ./outputs/vmroot.nix
     ./outputs/boot-extlinux.nix
     ./outputs/boot-fit.nix
+    ./outputs/btrfs.nix
+    ./outputs/jffs2.nix
+    # ./outputs/mtdimage.nix
+    ./outputs/squashfs.nix
+    ./outputs/ubimage.nix
     ./outputs/uimage.nix
     ./outputs/updater
-    ./outputs/ubimage.nix
-#    ./outputs/mtdimage.nix
+    ./outputs/vmroot.nix
   ];
   options = {
     system.outputs = {
