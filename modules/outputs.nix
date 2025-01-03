@@ -12,6 +12,7 @@ in
 {
   imports = [
     ./outputs/squashfs.nix
+    ./outputs/btrfs.nix
     ./outputs/jffs2.nix
     ./outputs/vmroot.nix
     ./outputs/boot-extlinux.nix
