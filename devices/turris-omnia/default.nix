@@ -173,8 +173,6 @@
         ../../modules/outputs/tftpboot.nix
         ../../modules/outputs/mbrimage.nix
       ];
-    };
-
 
       config = {
         rootfsType = lib.mkDefault "btrfs"; # override this if you are building tftpboot
