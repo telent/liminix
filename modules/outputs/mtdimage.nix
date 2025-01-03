@@ -60,6 +60,7 @@ in {
   config = {
     kernel = {
       config = {
+        # this needs to be conditional on "not qemu"
         MTD_SPLIT_UIMAGE_FW = "y";
       } // lib.optionalAttrs (pkgs.stdenv.isMips) {
         # https://stackoverflow.com/questions/26466470/can-the-logical-erase-block-size-of-an-mtd-device-be-increased
