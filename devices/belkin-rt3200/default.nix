@@ -122,6 +122,7 @@
             cp ${pkgs.linux-firmware}/lib/firmware/mediatek/{mt7915,mt7615,mt7622}* $out
           '';
         };
+        openwrt = pkgs.openwrt_24_10;
     in {
       imports = [
         ../../modules/arch/aarch64.nix
@@ -131,8 +132,10 @@
       config = {
     kernel = {
       extraPatchPhase = ''
-          ${pkgs.openwrt.applyPatches.mediatek}
+          ${openwrt.applyPatches.mediatek}
       '';
+      src = openwrt.kernelSrc;
+      version = openwrt.kernelVersion;
       config = {
         PCI = "y";
         ARCH_MEDIATEK = "y";
@@ -241,7 +244,6 @@
 
     hardware =
       let
-        openwrt = pkgs.openwrt;
         mac80211 =  pkgs.kmodloader.override {
           targets = ["mt7615e" "mt7915e"];
           inherit (config.system.outputs) kernel;

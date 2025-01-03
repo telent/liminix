@@ -100,6 +100,7 @@ in {
   odhcp-script = callPackage ./odhcp-script { };
   odhcp6c = callPackage ./odhcp6c { };
   openwrt = callPackage ./openwrt { };
+  openwrt_24_10 = callPackage ./openwrt/2410.nix { };
   output-template = callPackage ./output-template { };
   ppp = callPackage ./ppp { };
   pppoe = callPackage ./pppoe { };
