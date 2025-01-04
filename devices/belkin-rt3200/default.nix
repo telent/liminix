@@ -226,7 +226,7 @@
     };
     boot = {
       commandLine = [ "console=ttyS0,115200" ];
-      tftp.loadAddress = lim.parseInt "0x4007ff28";
+      tftp.loadAddress = lim.parseInt "0x48000000";
       imageFormat = "fit";
       loader.fit.enable = lib.mkDefault true; # override this if you are building tftpboot
     };
