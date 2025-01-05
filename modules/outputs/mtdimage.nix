@@ -34,7 +34,8 @@ in {
         This creates an image called :file:`firmware.bin` suitable for
         squashfs or jffs2 systems. It can be flashed from U-Boot (if
         you have a serial console connection), or on some devices from
-        the vendor firmware, or from a Liminix kexecboot system.
+        the vendor firmware, or from Liminix when using
+        :ref:`levitate`
 
         If you are flashing from U-Boot, the file
         :file:`flash.scr` is a sequence of commands

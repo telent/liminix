@@ -22,7 +22,6 @@
    ./outputs/ext4fs.nix
    ./outputs/initramfs.nix
    ./outputs/jffs2.nix
-   ./outputs/kexecboot.nix
    ./outputs/mtdimage.nix
    ./outputs/tftpboot.nix
    ./outputs/ubifs.nix

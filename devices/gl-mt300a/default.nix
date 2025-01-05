@@ -32,10 +32,11 @@
     binary created by :ref:`system-outputs-mtdimage` can be flashed
     using the vendor web UI or the U-Boot emergency "unbrick" routine.
 
-    For flashing from an existing Liminix system (we think) it
-    is necessary to first boot into a :ref:`system-outputs-kexecboot`
-    system, otherwise you'll be overwriting flash partitions while
-    they're in use - and that might not end well.
+    Flashing over an existing Liminix system is not possible while
+    that system is running, otherwise you'll be overwriting flash
+    partitions while they're in use - and that might not end well.
+    Configure the system with :ref:`levitate` if you need to
+    make it upgradable.
 
     Vendor web page: https://www.gl-inet.com/products/gl-mt300a/
 

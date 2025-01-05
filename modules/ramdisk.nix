@@ -7,8 +7,7 @@ in {
       ramdisk = {
         enable = mkEnableOption ''
           reserving part of memory as
-          an MTD-based RAM disk.  Needed for TFTP booting or for
-          kexec-based revertable upgrade
+          an MTD-based RAM disk.  Needed for TFTP booting
         '';
       };
     };
