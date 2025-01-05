@@ -7,12 +7,6 @@
     and is mostly feature-complete in Liminix but as of Dec 2024
     has seen very little actual use.
 
-    .. note:: The factory flash image contains ECC errors that make it
-              incompatible with Liminix: use the `OpenWrt
-              UBI Installer <https://github.com/dangowrt/owrt-ubi-installer>`_ to
-              rewrite the partition layout before you can use
-              Liminix with it
-
     Hardware summary
     ================
 
@@ -38,9 +32,16 @@
     To prepare the device for Liminix you first need to use the
     `OpenWrt UBI Installer
     <https://github.com/dangowrt/owrt-ubi-installer>`_ image to
-    rewrite the flash layout. You can do this in one of two ways:
+    rewrite the flash layout. As of Jan 2025 there are two versions
+    of the installer available: the release version 1.0.2 and the
+    pre-release 1.1.3 and for Liminix you nee the pre-relese.
+    The release version of the installer creates UBI volumes
+    according to an older layout that is not compatible with
+    the Linux 6.6.67 kernel used in Liminix.
+
+    You can run the installer in one of two ways:
     either follow the instructions to do it through the vendor web
-    interface, or you can drop to U-boot and use TFTP
+    interface, or you can drop to U-Boot and use TFTP
 
     .. code-block:: console
 
