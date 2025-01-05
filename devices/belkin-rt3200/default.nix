@@ -146,8 +146,8 @@
         MTK_INFRACFG = "y";
 
         MTK_PMIC_WRAP = "y";
-        NVMEM_MTK_EFUSE="y";
-        # MTK_HSDMA="y";
+        DMADEVICES = "y";
+        MTK_HSDMA="y";
         MTK_SCPSYS="y";
         MTK_SCPSYS_PM_DOMAINS="y";
         # MTK_THERMAL="y";
@@ -193,6 +193,10 @@
         MTD_SPLIT_FIRMWARE= "y";
         MTD_SPLIT_FIT_FW= "y";
 
+        MTD_UBI_NVMEM = "y";
+        NVMEM_MTK_EFUSE = "y";
+        NVMEM_BLOCK = "y";
+        NVMEM_LAYOUT_ADTRAN = "y";
 
         MMC = "y";
         MMC_BLOCK = "y";
@@ -204,6 +208,7 @@
         NET_DSA="y";
         NET_DSA_MT7530="y";
         NET_DSA_TAG_MTK="y";
+        NET_DSA_MT7530_MDIO="y";
 
         SERIAL_8250 = "y";
         SERIAL_8250_CONSOLE = "y";
