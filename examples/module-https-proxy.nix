@@ -21,15 +21,16 @@
 let
   inherit (pkgs.liminix.services)  longrun;
   inherit (pkgs) writeText;
+  nginx_uid = 62;
 in {
   config = {
     users.nginx = {
-      uid = 52; gid= 52;
+      uid = nginx_uid; gid= nginx_uid;
       dir = "/run/";
       shell = "/bin/false";
     };
     groups.nginx = {
-      gid= 52;
+      gid= nginx_uid;
       usernames = ["nginx"];
     };
 
