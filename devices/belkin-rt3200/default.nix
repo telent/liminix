@@ -93,6 +93,8 @@
     image if there are records in pstore, because that interferes with
     ``config.log.persistent``
 
+    .. code-block:: console
+
         root@OpenWrt:~# fw_setenv orig_boot_production $(fw_printenv -n boot_production)
         root@OpenWrt:~# fw_setenv orig_bootcmd $(fw_printenv -n bootcmd)
         root@OpenWrt:~# fw_setenv boot_production 'led $bootled_pwr on ; ubifsmount ubi0:liminix && ubifsload ''${loadaddr} boot/fit && bootm ''${loadaddr}'
