@@ -6795,3 +6795,42 @@ should be pure, so if we're going to timestamp anything we have to do
 that in the imperative step i.e. update.sh
 
 perhaps a symlink from /persist/configuration/yyyymmddtmmhhss -> /nix/store/eeee-blah
+
+
+Thu Jan  2 23:38:59 GMT 2025
+
+Stuff we should tidy up:
+
+1) all devices to set credible default output, rootfs, etc
+2) expunge remaining references to kexecboot
+3) dynamic uid assigment for users
+4) lessen logging noise from firewall
+5) update.sh --fast sends wlan services for a spin
+
+
+
+Fri Jan  3 16:05:10 GMT 2025
+
+* build actual rotuer config and install on rt3200
+* find usb ethernet dongle for laptop
+* plug it in?
+
+Sat Jan  4 15:32:03 GMT 2025
+
+didn't work so well, because the installer version is coupled with the
+dtb and the dtb can't be upgraded without upgrading the kenrel
+
+kernel 6.6.67 builds and boots but seems to have no wired ethernet.
+looking through the openwrt config changes ...
+
++CONFIG_MTD_UBI_NVMEM=y
++CONFIG_NVMEM_BLOCK=y
++CONFIG_NVMEM_LAYOUT_ADTRAN=y
++CONFIG_PHYLIB_LEDS=y
++CONFIG_MTK_REGULATOR_COUPLER=y
++CONFIG_FW_LOADER_SYSFS=y
+
+
+Sun Jan  5 12:58:52 GMT 2025
+
+We are running with rt3200 and everything appears to work :-)
