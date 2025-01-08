@@ -23,7 +23,7 @@
             hash-2 {
                     algo = "sha1";
             };
-	};
+        };
         fdt-1 {
             description = "Flattened Device Tree blob";
             // data = /incbin/("./target.dtb");
@@ -40,8 +40,12 @@
     };
 
     configurations {
-        default = "conf-1";
-        conf-1 {
+        // The OpenWRT One wants this to be 'config-1' specifically. For now it's
+        // easy to just choose that, if there's another device that has a
+        // different restriction then we should probably add 'if not found
+        // select default' logic and/or make this configurable.
+        default = "config-1";
+        config-1 {
             description = "Boot Linux kernel with FDT blob";
             kernel = "kernel";
             fdt = "fdt-1";

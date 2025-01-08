@@ -11,6 +11,7 @@ let
     "qemu-aarch64"
     "qemu-armv7l"
     "tp-archer-ax23"
+    "openwrt-one"
     "zyxel-nwa50ax"
     "turris-omnia"
     "belkin-rt3200"
