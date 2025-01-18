@@ -24,6 +24,7 @@
    ./outputs/jffs2.nix
    ./outputs/mtdimage.nix
    ./outputs/tftpboot.nix
+   ./outputs/tftpbootubi.nix
    ./outputs/ubifs.nix
    ./outputs/ubimage.nix
    ./outputs/vmroot.nix
