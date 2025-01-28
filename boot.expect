@@ -15,6 +15,7 @@ proc waitprompt { } {
 
 proc sendline { line } {
      send "$line; echo \$ready \r"
+     sleep 0.1
 }
 
 log_user 0
@@ -22,7 +23,10 @@ log_file -a -open stderr
 
 set f [open "result/boot.scr"]
 
-send "setenv ready REA\rsetenv ready \${ready}DY\r"
+send "setenv ready REA\r"
+sleep 0.1
+send "setenv ready \${ready}DY\r"
+sleep 0.1
 
 set timeout 300
 expect_before timeout abort
