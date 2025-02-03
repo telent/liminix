@@ -62,8 +62,8 @@ in {
         # https://www.mankier.com/8/nft#Payload_Expressions-Raw_Payload_Expression
         "@nh,192,8 eq 0xff @nh,204,4 le ${toString mcast-scope}")
 
-      (accept "oifname \"int\" iifname \"ppp0\" meta l4proto udp ct state established,related")
-      (accept "iifname \"int\" oifname \"ppp0\" meta l4proto udp")
+      (accept "oifname @lan iifname @wan meta l4proto udp ct state established,related")
+      (accept "iifname @lan oifname @wan meta l4proto udp")
 
       (accept "meta l4proto icmpv6")
       (accept "meta l4proto ah")
@@ -71,31 +71,31 @@ in {
 
       # does this ever get used or does the preceding general udp accept
       # already grab anything that might get here?
-      (accept "oifname \"ppp0\" udp dport 500") # IKE Protocol [RFC5996]. haha zyxel
+      (accept "oifname @wan udp dport 500") # IKE Protocol [RFC5996]. haha zyxel
       (accept "ip6 nexthdr 139") #  Host Identity Protocol
 
       ## FIXME no support yet for recs 27-30 Mobility Header
 
-      (accept "oifname \"int\" iifname \"ppp0\" meta l4proto tcp ct state established,related")
-      (accept "iifname \"int\" oifname \"ppp0\" meta l4proto tcp")
+      (accept "oifname @lan iifname @wan meta l4proto tcp ct state established,related")
+      (accept "iifname @lan oifname @wan meta l4proto tcp")
 
-      (accept "oifname \"int\" iifname \"ppp0\" meta l4proto sctp ct state established,related")
-      (accept "iifname \"int\" oifname \"ppp0\" meta l4proto sctp")
+      (accept "oifname @lan iifname @wan meta l4proto sctp ct state established,related")
+      (accept "iifname @lan oifname @wan meta l4proto sctp")
 
-      (accept "oifname \"int\" iifname \"ppp0\" meta l4proto dccp ct state established,related")
-      (accept "iifname \"int\" oifname \"ppp0\" meta l4proto dccp")
+      (accept "oifname @lan iifname @wan meta l4proto dccp ct state established,related")
+      (accept "iifname @lan oifname @wan meta l4proto dccp")
 
       # we can allow all reasonable inbound, or we can use an explicit
       # allowlist to enumerate the endpoints that are allowed to
       # accept inbound from the WAN
       (if allow-incoming
-       then accept "oifname \"int\" iifname \"ppp0\""
-       else "iifname \"ppp0\" jump incoming-allowed-ip6"
+       then accept "oifname @lan iifname @wan"
+       else "iifname @wan jump incoming-allowed-ip6"
       )
       # allow all outbound and any inbound that's part of a
       # recognised (outbound-initiated) flow
-      (accept "oifname \"int\" iifname \"ppp0\" ct state established,related")
-      (accept "iifname \"int\" oifname \"ppp0\" ")
+      (accept "oifname @lan iifname @wan ct state established,related")
+      (accept "iifname @lan oifname @wan ")
 
       "log prefix \"DENIED CHAIN=forward-ip6 \""
     ];
@@ -128,15 +128,15 @@ in {
     hook = "input";
     rules = [
       (accept "meta l4proto icmpv6")
-      "iifname int jump input-ip6-lan"
-      "iifname ppp0 jump input-ip6-wan"
+      "iifname @lan jump input-ip6-lan"
+      "iifname @wan jump input-ip6-wan"
       (if allow-incoming
-       then accept "iifname \"ppp0\""
-       else "iifname \"ppp0\" jump incoming-allowed-ip6"
+       then accept "iifname @wan"
+       else "iifname @wan jump incoming-allowed-ip6"
       )
       # how does this even make sense in an input chain?
-      (accept "iifname \"ppp0\"  ct state established,related")
-      (accept "iifname \"int\" ")
+      (accept "iifname @wan  ct state established,related")
+      (accept "iifname @lan ")
       "log prefix \"DENIED CHAIN=input-ip6 \""
     ];
   };
@@ -146,7 +146,7 @@ in {
     family = "ip6";
     rules = [
       # this is where you put permitted incoming connections
-      # "oifname \"int\" ip6 daddr 2001:8b0:de3a:40de::e9d tcp dport 22"
+      # "oifname @lan ip6 daddr 2001:8b0:de3a:40de::e9d tcp dport 22"
     ];
   };
 
@@ -157,7 +157,7 @@ in {
     policy = "accept";
     family = "ip";
     rules = [
-      "oifname \"ppp0\" masquerade"
+      "oifname @wan masquerade"
     ];
   };
 
@@ -208,9 +208,9 @@ in {
     rules = [
       "iifname lo accept"
       "icmp type { echo-request, echo-reply } accept"
-      "iifname int jump input-ip4-lan"
-      "iifname ppp0 jump input-ip4-wan"
-      "iifname ppp0 jump incoming-allowed-ip4"
+      "iifname @lan jump input-ip4-lan"
+      "iifname @wan jump input-ip4-wan"
+      "iifname @wan jump incoming-allowed-ip4"
       "ct state established,related accept"
       "log prefix \"DENIED CHAIN=input-ip4 \""
     ];
@@ -222,9 +222,9 @@ in {
     policy = "drop";
     hook = "forward";
     rules = [
-      "iifname \"int\" accept"
+      "iifname @lan accept"
       "ct state established,related accept"
-      "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip4"
+      "oifname @lan iifname @wan jump incoming-allowed-ip4"
       "log prefix \"DENIED CHAIN=forward-ip4 \""
     ];
   };
