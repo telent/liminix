@@ -3,6 +3,13 @@ let
   accept = expr : "${expr} accept";
   mcast-scope = 8;
   allow-incoming = false;
+
+  ifname-set = family : name : ifnames : {
+    kind = "set";
+    inherit family name;
+    type = "ifname";
+    elements = ifnames;
+  };
 in {
   bogons-ip6 = {
     type = "filter";
@@ -241,4 +248,13 @@ in {
     ];
   };
 
+  lan-set-ip = ifname-set "ip" "lan" [ "int" ];
+  wan-set-ip = ifname-set "ip" "wan" [ "ppp0" ];
+  dmz-set-ip = ifname-set "ip" "dmz" [ ];
+  guest-set-ip = ifname-set "ip" "guest" [ ];
+
+  lan-set-ip6 = ifname-set "ip6" "lan" [ "int" ];
+  wan-set-ip6 = ifname-set "ip6" "wan" [ "ppp0" ];
+  dmz-set-ip6 = ifname-set "ip6" "dmz" [ ];
+  guest-set-ip6 = ifname-set "ip6" "guest" [ ];
 }

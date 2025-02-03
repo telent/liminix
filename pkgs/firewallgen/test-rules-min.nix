@@ -121,4 +121,23 @@ let
   };
 in {
   inherit input-ip6 forward-ip6 bogons-ip6 incoming-allowed-ip6;
+  lan-set-ip = {
+    kind = "set";
+    family = "ip";
+    type = "ifname";
+    elements = [
+      "eth0" "eth1"
+    ];
+
+  };
+  # honours timeout flags gc-interval size policy counter auto-merge
+  lan-set-ip6 = {
+    kind = "set";
+    family = "ip6";
+    type = "ifname";
+    elements = [
+      "eth0" "eth1"
+    ];
+
+  };
 }
