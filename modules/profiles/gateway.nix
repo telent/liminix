@@ -48,6 +48,9 @@ in {
     firewall = {
       enable = mkEnableOption "firewall";
       rules = mkOption { type = types.attrsOf types.attrs; };
+      zones = mkOption {
+        type = types.attrsOf (types.listOf  liminix.lib.types.service);
+      };
     };
 
     wan = {
@@ -143,6 +146,7 @@ in {
     services.firewall = mkIf cfg.firewall.enable
       (svc.firewall.build {
         extraRules = cfg.firewall.rules;
+        inherit (cfg.firewall) zones;
       });
 
     services.resolvconf = oneshot rec {

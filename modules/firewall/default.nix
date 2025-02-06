@@ -60,6 +60,16 @@ in
               description = "firewall ruleset";
               default = {};
             };
+            zones = mkOption {
+              type = types.attrsOf (types.listOf  liminix.lib.types.service);
+              default = {};
+              example = lib.literalExpression ''
+                {
+                  lan = with config.hardware.networkInterfaces; [ int ];
+                  wan = [ config.services.ppp0 ];
+                }
+              '';
+            };
             rules = mkOption {
               type = types.attrsOf types.attrs;   # we could usefully tighten this a bit :-)
               default = import ./default-rules.nix;
