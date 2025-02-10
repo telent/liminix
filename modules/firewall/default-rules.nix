@@ -55,8 +55,6 @@ in
       (drop "ip6 daddr ::FFFF:0:0/96")
       (drop "ip6 saddr fe80::/10") # link-local unicast
       (drop "ip6 daddr fe80::/10")
-      (drop "ip6 saddr fc00::/7") # unique-local addresses
-      (drop "ip6 daddr fc00::/7")
       (drop "ip6 saddr 2001:10::/28") # ORCHID [RFC4843].
       (drop "ip6 daddr 2001:10::/28")
 
