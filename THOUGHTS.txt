@@ -6834,3 +6834,189 @@ looking through the openwrt config changes ...
 Sun Jan  5 12:58:52 GMT 2025
 
 We are running with rt3200 and everything appears to work :-)
+
+Sun Jan  5 20:34:18 GMT 2025
+
+what customization do we want from the firewall?
+
+ - what's allowed wan->lan
+ - what's allowed lan->wan
+ - which dropped packets get logged or don't
+
+plus fix whatever it was RoS found
+plus stop hardcoding the interface names
+
+ Q: if pppd _makes_ an interface, how do we know what the name of it
+ is going to be before it's up and passing packets so that we can
+ have the firewall active before it starts
+
+ or could we have ppp service install a "drop everything" firewall
+ before it starts? what if there's more than one upstream interface,
+ they shouldn't wipe each other out
+
+ so can we have a "default deny" firewall in which every allowed flow
+ is qualified by the interface name, and any service that brings up an
+ interface is required to add firewall rules for it according to its
+ role
+
+ or maybe the firewall service could watch for interfaces being added
+ (and removed) and update the ruleset as appropriate for the interface
+ role (lan, wan, dmz, management, guest, ???). but how does it know
+ the role based on the interface name?
+
+Tue Jan 14 19:33:28 GMT 2025
+
+each interface can add its own chain when it comes up, and then we can
+figure out some way to jump to the correct chain (vmaps) based on
+interface name
+
+% nft add map filter mydict { type ipv4_addr : verdict\; }
+% nft add element filter mydict { 192.168.0.10 : drop, 192.168.0.11 : accept }
+% nft add rule filter input ip saddr vmap @mydict
+
+_but_ we might be better off declaring static "zones" (lan, world,
+dmz, guest, etc etc) with a map for each, and then replace the hardcoded
+interface names with a map lookup
+
+% nft add map filter ifzone { type ifname : string ; }
+
+
+zones  { type ifname: ipv4_addr\; }
+ ...  and presumably we also need identical maps for nat and
+ ...  any other chain type where we need to distinguish
+ ...  inside from outside
+% nft add element nat porttoip { 80 : 192.168.1.100, 8888 : 192.168.1.101 }
+
+% nft add rule ip nat postrouting snat to tcp dport map @porttoip
+
+Mon Jan 20 20:32:58 GMT 2025
+
+1) maybe we can add a type="chain" or type="set" attribute to the
+firewallgen input, then we cna have sets in the default firewall rules
+
+2) then we convert the default firewall rules to use sets instead of
+hardcoding ifname
+
+3) then find a nice place to hook "new interface is available" and
+add it to the appropriate zone (separately for ip4 and ip6, gah)
+
+4) and how do we find
+
+# nft add element ip table-ip lan { int }
+# nft add element ip table-ip wan { ppp0 }
+# nft add element ip6 table-ip6 lan { int }
+# nft add element ip6 table-ip6 wan { ppp0 }
+
+Tue Jan 28 21:51:46 GMT 2025
+
+Going back and forth on the firewall stuff, in respect of where to aim
+for with "general" vs "useful". Specifically, if we have hooks
+every time interfaces are added/removed that
+expect some specific sets to (a) exist and (b) have particular
+semantics, there is necessary coupling between those hooks and the
+firewall definition. So, practically speaking, the "a new interface
+appears" rules need to be bundled with the firewall ruleset
+
+Which also means that the firewall needs to know which zone the
+interface is assigned to, which is a problem if it can't tell from the
+name (for example wg0 wg1 wg2 ... could be wan or lan or dmz or
+anything)
+
+So the service that owns the interface needs to communicate "another
+one for the lan zone" to the firewall and it can't do that by adding
+to sets directly unless it knows what the sets are called. Implying we
+need an interface between the interface service that knows "new
+interface ppp7 added in wan zone" and the firewall service that knows
+how to accommodate this. For extra credit this actually should be more
+like pubsub: the interface shouldn't really have to know the firewall
+exists.
+
+outputs?
+
+- what if each interface wrote a "zone" output and the firewall
+subscribed to them? would need the firewall to know which of all the
+available services were interfaces
+
+- a zone service that every interface in the zone depends on. it
+doesn't do much in itself but it means the interface updown scripts
+know a service directory where they can touch lan-zone/eth0 or
+whatever. This could work.  The firewall service definition specifies
+the zone services and uses inotify watcher thingies to update
+interface sets when contents change.
+
+Wed Jan 29 17:19:24 GMT 2025
+
+1) make a zone service defn that can be instantiated for each zone.
+it should create $output/interfaces
+
+2) add a `zone` attribute to interface definitions, causing
+- the zone service to be added to the dependencies
+- the interface "up" script to include writing to the zone/interfaces output
+
+2b) any other service that creates an interface (e.g. ppp) needs to also
+have `zone` and do the same
+
+3) firewallgen to be able to make sets
+
+4) firewall service to watch the zone outputs
+
+Fri Jan 31 17:11:16 GMT 2025
+
+Do we need zone services? I think we could put zones in the outputs of
+the firewall service?
+
+Sun Feb  2 20:59:56 GMT 2025
+
+What's the smallest first step?
+
+ - [done] how can we make firewallgen output sets (or could we
+   make the firewall service tack them on afterwards)
+
+ - make a longrun that watches its own zones output and updates the
+   appropriate sets
+
+The sticking point is that if you give the firewall `rules` instead of
+`extraRules` then the longrun may or may not work depending on (1)
+whether you made the zone sets; (2) whether your rules use
+them. Conclusion: if you supply `rules` then you also have to say
+whether you want the longrun or not. So add a param
+watchForInterfaceUpdates which defaults true
+
+Mon Feb  3 21:12:55 GMT 2025
+
+the thing that updates sets has to know they exist, so the interface watcher
+service must live in the firewall module
+
+the firewall service defn should return the firewall service after
+adding the interface watcher as a dependency of it. Or: the watcher
+should make the sets and then the firewall service could depend on _it_.
+That would mean that the firewall service would fail if it used sets
+that the watcher didn't make, is that good or bad or indifferent?
+
+the interface services have to know about the watcher as well in order
+to write into its outputs, so it can't be hidden inside the module
+
+maybe the watcher service should _be_ the firewall service.
+
+we could add a "notify" param to an interface which would be an output
+reference to (the firewall service / zones / lan ) that the interface would
+write its ifname into when the service is up
+
+Wed Feb  5 00:14:29 GMT 2025
+
+another thought: the firewall service could have params to say
+which interface services are in which zones
+
+we'd have to ensure that the interface services did not end up as
+dependencies of the firewall
+
+then the firewall could
+
+- create the sets
+- watch each interface service for the ifname output and add it to the right zone
+
+Sun Feb  9 21:33:57 GMT 2025
+
+nft update set @lan
+
+echo 'flush set table-ip lan;  add element table-ip lan { eth0,lo }' | nft -f -

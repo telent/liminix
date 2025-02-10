@@ -43,15 +43,33 @@ let
     ${concatStringsSep "\n" rules}
     }
   '';
+
+  doset = { name, type, elements ? [], ... } : ''
+    set ${name}  {
+      type ${type}
+      ${if elements != []
+        then "elements = { ${concatStringsSep ", " elements } }"
+        else ""
+       }
+    }
+  '';
+
+  dochainorset =
+    { kind ? "chain", ... } @ params :
+    {
+      chain = dochain;
+      set = doset;
+    }.${kind} params;
+
   dotable = family : chains : ''
     table ${family} table-${family} {
-    ${concatStringsSep "\n" (map dochain chains)}
+    ${concatStringsSep "\n" (map dochainorset chains)}
     }
   '';
   categorise = chains :
     groupBy
       ({ family, ... } : family)
-      (mapAttrsToList (n : v : v // { name = n; }) chains);
+      (mapAttrsToList (n : v : { name = n; } // v ) chains);
 in writeScript name ''
 #!${nftables}/sbin/nft -f
 
