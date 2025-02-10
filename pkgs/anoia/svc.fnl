@@ -60,6 +60,7 @@
                    (write-value (.. directory "/" filename) new-value)
                    (read-value (.. directory "/" filename))))
      :close #(watcher:close)
+     :fileno #(watcher:fileno)
      : events
      }))
 
