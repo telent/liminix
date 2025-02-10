@@ -69,10 +69,6 @@ in rec {
     firewall = {
       enable = true;
       rules = secrets.firewallRules;
-      zones = {
-        lan = [ config.services.int ];
-        wan = [ config.services.wan  ] ;
-      };
     };
     wireless.networks = {
       # EDIT: if you have more or fewer wireless radios, here is where

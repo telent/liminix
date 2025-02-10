@@ -50,6 +50,10 @@ in {
       rules = mkOption { type = types.attrsOf types.attrs; };
       zones = mkOption {
         type = types.attrsOf (types.listOf  liminix.lib.types.service);
+        default = {
+          lan = [ config.services.int ];
+          wan = [ config.services.wan ];
+        };
       };
     };
 
