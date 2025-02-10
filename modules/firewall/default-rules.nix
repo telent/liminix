@@ -18,10 +18,16 @@ in
       (drop "ip6 saddr 2001:db8::/32") # documentation addresses
       (drop "ip6 daddr 2001:db8::/32")
 
-      # I think this means "check FIB for (saddr, iif) to see if we
-      # could route a packet to that address using that interface",
-      # and if we can't then it was an inapproppriate source address
-      # for packets received _from_ said interface
+      # Reverse path filtering: drop packet if it's not coming from
+      # the same interface that we'd use to send a reply.  Works by
+      # doing a lookup in the FIB to find how we'd route a packet _to_
+      # saddr through iif, and then checking the output interface
+      # returned by the lookup. if oif is 0, that means no route was
+      # found for that address with that interface, so the packet can
+      # be dropped
+      #
+      #  https://wiki.nftables.org/wiki-nftables/index.php/Matching_routing_information#fib
+      #  https://thr3ads.net/netfilter-buglog/2018/01/2843000-Bug-1220-New-Reverse-path-filtering-using-fib-needs-better-documentation
       (drop "fib saddr . iif oif eq 0")
 
       (drop "icmpv6 type router-renumbering")
