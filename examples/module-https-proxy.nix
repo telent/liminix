@@ -19,19 +19,21 @@
 
 { config, pkgs, ... }:
 let
-  inherit (pkgs.liminix.services)  longrun;
+  inherit (pkgs.liminix.services) longrun;
   inherit (pkgs) writeText;
   nginx_uid = 62;
-in {
+in
+{
   config = {
     users.nginx = {
-      uid = nginx_uid; gid= nginx_uid;
+      uid = nginx_uid;
+      gid = nginx_uid;
       dir = "/run/";
       shell = "/bin/false";
     };
     groups.nginx = {
-      gid= nginx_uid;
-      usernames = ["nginx"];
+      gid = nginx_uid;
+      usernames = [ "nginx" ];
     };
 
     services.sniproxy =
@@ -41,7 +43,8 @@ in {
           zlib = null;
           options = [
             "stream"
-            "stream_ssl_module" "stream_ssl_preread_module"
+            "stream_ssl_module"
+            "stream_ssl_preread_module"
             "stream_map_module"
           ];
         };
@@ -71,8 +74,9 @@ in {
                   ssl_preread on;
               }
           }
-      '';
-      in longrun {
+        '';
+      in
+      longrun {
         name = "sniproxy";
         run = ''
           ${nginx}/bin/nginx -c ${conf}

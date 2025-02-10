@@ -1,11 +1,20 @@
 {
-  liminix, lib, json-to-fstree, serviceFns, tangc
+  liminix,
+  lib,
+  json-to-fstree,
+  serviceFns,
+  tangc,
 }:
-{ name, path, interval } :
+{
+  name,
+  path,
+  interval,
+}:
 let
   inherit (liminix.services) longrun;
   inherit (lib) optionalString;
-in longrun {
+in
+longrun {
   inherit name;
   buildInputs = [ json-to-fstree ];
   notification-fd = 10;

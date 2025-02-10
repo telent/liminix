@@ -1,8 +1,8 @@
 {
-  config
-, pkgs
-, lib
-, ...
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 let
   inherit (lib) mkIf;
@@ -25,13 +25,12 @@ in
     '';
   };
 
-  config.system.outputs.updater =
-    runCommand "buildUpdater" { } ''
-      mkdir -p $out/bin $out/etc
-      cp ${o.kernel.config} $out/etc/kconfig
-      substitute ${./update.sh} $out/bin/update.sh \
-         --subst-var-by toplevel ${o.systemConfiguration} \
-         --subst-var-by min_copy_closure ${min-copy-closure}
-      chmod +x  $out/bin/update.sh
-    '';
+  config.system.outputs.updater = runCommand "buildUpdater" { } ''
+    mkdir -p $out/bin $out/etc
+    cp ${o.kernel.config} $out/etc/kconfig
+    substitute ${./update.sh} $out/bin/update.sh \
+       --subst-var-by toplevel ${o.systemConfiguration} \
+       --subst-var-by min_copy_closure ${min-copy-closure}
+    chmod +x  $out/bin/update.sh
+  '';
 }

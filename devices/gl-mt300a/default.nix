@@ -6,7 +6,7 @@
       config = "mipsel-unknown-linux-musl";
       gcc = {
         abi = "32";
-        arch = "mips32";          # maybe mips_24kc-
+        arch = "mips32"; # maybe mips_24kc-
       };
     };
   };
@@ -44,14 +44,22 @@
 
   '';
 
-  module = { pkgs, config, lib, lim, ...}:
+  module =
+    {
+      pkgs,
+      config,
+      lib,
+      lim,
+      ...
+    }:
     let
       inherit (pkgs) openwrt;
       mac80211 = pkgs.kmodloader.override {
-        targets = ["rt2800soc"];
+        targets = [ "rt2800soc" ];
         inherit (config.system.outputs) kernel;
       };
-    in {
+    in
+    {
       imports = [
         ../../modules/arch/mipsel.nix
         ../../modules/outputs/tftpboot.nix
@@ -90,7 +98,8 @@
           let
             inherit (config.system.service.network) link;
             inherit (config.system.service) vlan;
-          in rec {
+          in
+          rec {
             eth = link.build { ifname = "eth0"; };
             # lan and wan ports are both behind a switch on eth0
             lan = vlan.build {
@@ -112,54 +121,56 @@
       boot.tftp = {
         loadAddress = lim.parseInt "0x00A00000";
         appendDTB = true;
-     };
+      };
 
       kernel = {
         extraPatchPhase = ''
           ${openwrt.applyPatches.ramips}
           ${openwrt.applyPatches.rt2x00}
         '';
-        config = {
+        config =
+          {
 
-          RALINK = "y";
-          PCI = "y";
-          SOC_MT7620 = "y";
+            RALINK = "y";
+            PCI = "y";
+            SOC_MT7620 = "y";
 
-          SERIAL_8250_CONSOLE = "y";
-          SERIAL_8250 = "y";
-          SERIAL_CORE_CONSOLE = "y";
-          SERIAL_OF_PLATFORM = "y";
+            SERIAL_8250_CONSOLE = "y";
+            SERIAL_8250 = "y";
+            SERIAL_CORE_CONSOLE = "y";
+            SERIAL_OF_PLATFORM = "y";
 
-          CONSOLE_LOGLEVEL_DEFAULT = "8";
-          CONSOLE_LOGLEVEL_QUIET = "4";
+            CONSOLE_LOGLEVEL_DEFAULT = "8";
+            CONSOLE_LOGLEVEL_QUIET = "4";
 
-          NET = "y";
-          ETHERNET = "y";
-          NET_VENDOR_RALINK = "y";
-          NET_RALINK_MDIO = "y";
-          NET_RALINK_MDIO_MT7620 = "y";
-          NET_RALINK_MT7620 = "y";
-          SWPHY = "y";
+            NET = "y";
+            ETHERNET = "y";
+            NET_VENDOR_RALINK = "y";
+            NET_RALINK_MDIO = "y";
+            NET_RALINK_MDIO_MT7620 = "y";
+            NET_RALINK_MT7620 = "y";
+            SWPHY = "y";
 
-          SPI = "y";
-          MTD_SPI_NOR = "y";
-          SPI_MT7621 = "y"; # } probably don't need both of these
-          SPI_RT2880 = "y"; # }
-          SPI_MASTER= "y";
-          SPI_MEM= "y";
+            SPI = "y";
+            MTD_SPI_NOR = "y";
+            SPI_MT7621 = "y"; # } probably don't need both of these
+            SPI_RT2880 = "y"; # }
+            SPI_MASTER = "y";
+            SPI_MEM = "y";
 
-          MTD = "y";
-          MTD_BLOCK = "y";         # fix undefined ref to register_mtd_blktrans_devs
+            MTD = "y";
+            MTD_BLOCK = "y"; # fix undefined ref to register_mtd_blktrans_devs
 
-          EARLY_PRINTK = "y";
+            EARLY_PRINTK = "y";
 
-          NEW_LEDS = "y";
-          LEDS_CLASS = "y";         # required by rt2x00lib
+            NEW_LEDS = "y";
+            LEDS_CLASS = "y"; # required by rt2x00lib
 
-          PRINTK_TIME = "y";
-        } // lib.optionalAttrs (config.system.service ? vlan) {
-          SWCONFIG = "y";
-        };
+            PRINTK_TIME = "y";
+          }
+          // lib.optionalAttrs (config.system.service ? vlan) {
+            SWCONFIG = "y";
+          };
         conditionalConfig = {
           WLAN = {
             WLAN_VENDOR_RALINK = "y";

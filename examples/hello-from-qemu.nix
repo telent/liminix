@@ -1,8 +1,9 @@
-{ config, pkgs, ... } :
+{ config, pkgs, ... }:
 let
   svc = config.system.service;
 
-in rec {
+in
+rec {
   imports = [
     ../modules/network
     ../modules/dnsmasq
@@ -14,7 +15,9 @@ in rec {
   # configure the internal network (LAN) with an address
   services.int = svc.network.address.build {
     interface = config.hardware.networkInterfaces.lan;
-    family = "inet"; address ="10.3.0.1"; prefixLength = 16;
+    family = "inet";
+    address = "10.3.0.1";
+    prefixLength = 16;
   };
 
   services.sshd = svc.ssh.build { };
@@ -26,8 +29,10 @@ in rec {
   };
 
   services.dns =
-    let interface = services.int;
-    in svc.dnsmasq.build {
+    let
+      interface = services.int;
+    in
+    svc.dnsmasq.build {
       inherit interface;
       ranges = [
         "10.3.0.10,10.3.0.240"

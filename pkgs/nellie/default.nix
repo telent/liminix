@@ -1,7 +1,9 @@
 { lua, stdenv }:
 
-let pname = "nellie";
-in lua.pkgs.buildLuaPackage {
+let
+  pname = "nellie";
+in
+lua.pkgs.buildLuaPackage {
   inherit pname;
   version = "0.1.1-1";
 

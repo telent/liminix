@@ -1,7 +1,8 @@
 { config, lib, ... }:
 let
   inherit (lib) mkIf mkEnableOption; # types concatStringsSep;
-in {
+in
+{
   options = {
     boot = {
       ramdisk = {

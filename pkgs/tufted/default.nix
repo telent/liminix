@@ -4,13 +4,21 @@
   makeWrapper,
 }:
 let
-  lua = lua5_3.withPackages (ps: with ps; [
-    luasocket luaposix fennel
-  ]);
-in stdenv.mkDerivation {
+  lua = lua5_3.withPackages (
+    ps: with ps; [
+      luasocket
+      luaposix
+      fennel
+    ]
+  );
+in
+stdenv.mkDerivation {
   pname = "tufted";
   version = "1";
-  phases =  [ "unpackPhase" "installPhase" ];
+  phases = [
+    "unpackPhase"
+    "installPhase"
+  ];
   buildInputs = [
     lua
   ];

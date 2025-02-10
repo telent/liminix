@@ -1,12 +1,20 @@
 { callPackage, lib }:
 let
-  typeChecked = caller: type: value:
+  typeChecked =
+    caller: type: value:
     let
       inherit (lib) types mergeDefinitions;
-      defs = [{ file = caller; inherit value; }];
+      defs = [
+        {
+          file = caller;
+          inherit value;
+        }
+      ];
       type' = types.submodule { options = type; };
-    in (mergeDefinitions [] type' defs).mergedValue;
-in {
+    in
+    (mergeDefinitions [ ] type' defs).mergedValue;
+in
+{
   liminix = {
     builders = {
       squashfs = callPackage ./liminix-tools/builders/squashfs.nix { };
@@ -14,27 +22,39 @@ in {
       uimage = callPackage ./kernel/uimage.nix { };
       kernel = callPackage ./kernel { };
     };
-    outputRef = service : path :
-      let h = { inherit service path; };
-      in x : h.${x};
-    callService = path : parameters :
-      let pkg = callPackage path {};
-          checkTypes = t : p : typeChecked (builtins.toString path) t p;
-      in {
+    outputRef =
+      service: path:
+      let
+        h = { inherit service path; };
+      in
+      x: h.${x};
+    callService =
+      path: parameters:
+      let
+        pkg = callPackage path { };
+        checkTypes = t: p: typeChecked (builtins.toString path) t p;
+      in
+      {
         inherit parameters;
-        build = { dependencies ? [], ... } @ args :
+        build =
+          {
+            dependencies ? [ ],
+            ...
+          }@args:
           let
-            s = pkg (checkTypes parameters
-              (builtins.removeAttrs args ["dependencies"]));
-          in s.overrideAttrs (o: {
+            s = pkg (checkTypes parameters (builtins.removeAttrs args [ "dependencies" ]));
+          in
+          s.overrideAttrs (o: {
             dependencies = dependencies ++ o.dependencies;
             buildInputs = dependencies ++ o.buildInputs;
           });
       };
     lib = {
       types =
-        let inherit (lib) mkOption types isDerivation;
-        in  rec {
+        let
+          inherit (lib) mkOption types isDerivation;
+        in
+        rec {
           service = types.package // {
             name = "service";
             description = "s6-rc service";
@@ -46,10 +66,11 @@ in {
             description = "parametrisable s6-rc service definition";
             check = x: lib.isAttrs x && x ? parameters && x ? build;
           };
-          replacable = t : types.either
-            t
-            # function might return a service or a path
-            (types.functionTo types.anything);
+          replacable =
+            t:
+            types.either t
+              # function might return a service or a path
+              (types.functionTo types.anything);
         };
       inherit typeChecked;
     };
@@ -120,7 +141,7 @@ in {
   # vendor OS, or even to derisk Liminix updates on that device
   schnapps = callPackage ./schnapps { };
 
-  seedrng = callPackage ./seedrng {};
+  seedrng = callPackage ./seedrng { };
   serviceFns = callPackage ./service-fns { };
   swconfig = callPackage ./swconfig { };
   systemconfig = callPackage ./systemconfig { };

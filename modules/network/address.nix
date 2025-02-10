@@ -1,9 +1,14 @@
 {
-  liminix
-, serviceFns
-, lib
+  liminix,
+  serviceFns,
+  lib,
 }:
-{interface, family, address, prefixLength} :
+{
+  interface,
+  family,
+  address,
+  prefixLength,
+}:
 let
   inherit (liminix.services) oneshot;
   # rather depending on the assumption that nobody will
@@ -20,8 +25,9 @@ let
      echo $dev > ifname
     )
   '';
-in oneshot {
+in
+oneshot {
   inherit name up;
-  down = "true";                # this has been broken for ~ ages
+  down = "true"; # this has been broken for ~ ages
   dependencies = [ interface ];
 }

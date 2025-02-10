@@ -75,17 +75,27 @@ in
           type = types.ints.unsigned;
         };
       };
-      loadAddress = mkOption { type = types.ints.unsigned; default = null; };
+      loadAddress = mkOption {
+        type = types.ints.unsigned;
+        default = null;
+      };
       entryPoint = mkOption { type = types.ints.unsigned; };
-      alignment = mkOption { type = types.nullOr  types.ints.unsigned; default = null; description = "Alignment passed to `mkimage` for FIT"; };
+      alignment = mkOption {
+        type = types.nullOr types.ints.unsigned;
+        default = null;
+        description = "Alignment passed to `mkimage` for FIT";
+      };
       radios = mkOption {
         description = ''
           Kernel modules (from mac80211 package) required for the
           wireless devices on this board
         '';
         type = types.listOf types.str;
-        default = [];
-        example = ["ath9k" "ath10k"];
+        default = [ ];
+        example = [
+          "ath9k"
+          "ath10k"
+        ];
       };
       rootDevice = mkOption {
         description = "Full path to preferred root device";

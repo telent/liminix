@@ -7,7 +7,7 @@ let
     n:
     let
       d = import ../devices/${n}/default.nix;
-      tag = ".. _${lib.strings.replaceStrings [" "] ["-"] n}:";
+      tag = ".. _${lib.strings.replaceStrings [ " " ] [ "-" ] n}:";
       d' = {
         description = ''
           ${n}
@@ -15,7 +15,7 @@ let
         '';
       } // d;
     in
-      "${tag}\n\n${d'.description}"
+    "${tag}\n\n${d'.description}"
   ) devices;
 in
 writeText "hwdoc" ''

@@ -1,12 +1,13 @@
-{ ifwait, liminix } :
+{ ifwait, liminix }:
 {
-  state
-, interface
-, service
+  state,
+  interface,
+  service,
 }:
 let
   inherit (liminix.services) longrun;
-in longrun {
+in
+longrun {
   name = "ifwait.${interface.name}";
   buildInputs = [ service ];
   restart-on-upgrade = true;

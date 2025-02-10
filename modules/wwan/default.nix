@@ -1,12 +1,18 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   inherit (pkgs) liminix;
   inherit (lib) mkOption types;
   huawei-cdc-ncm = pkgs.kmodloader.override {
-    targets = ["huawei_cdc_ncm"];
+    targets = [ "huawei_cdc_ncm" ];
     inherit (config.system.outputs) kernel;
   };
-in {
+in
+{
   imports = [
     ../uevent-rule
     ../mdevd.nix
@@ -25,25 +31,35 @@ in {
       USB_SERIAL_OPTION = "y";
     };
     programs.busybox.applets = [
-      "insmod" "rmmod"
+      "insmod"
+      "rmmod"
     ];
 
     # https://www.0xf8.org/2017/01/flashing-a-huawei-e3372h-4g-lte-stick-from-hilink-to-stick-mode/
     system.service.wwan.huawei-e3372 =
-      let svc = config.system.callService ./huawei-e3372.nix {
-            apn = mkOption { type = types.str; };
-            username = mkOption { type = types.str; };
-            password = mkOption { type = types.str; };
-            authType = mkOption { type = types.enum [ "pap" "chap" ]; };
+      let
+        svc = config.system.callService ./huawei-e3372.nix {
+          apn = mkOption { type = types.str; };
+          username = mkOption { type = types.str; };
+          password = mkOption { type = types.str; };
+          authType = mkOption {
+            type = types.enum [
+              "pap"
+              "chap"
+            ];
           };
-      in
-        svc // {
-          build = args :
-            let args' = args // {
-                  dependencies = (args.dependencies or []) ++
-                                 [huawei-cdc-ncm];
-                };
-            in svc.build args' ;
         };
+      in
+      svc
+      // {
+        build =
+          args:
+          let
+            args' = args // {
+              dependencies = (args.dependencies or [ ]) ++ [ huawei-cdc-ncm ];
+            };
+          in
+          svc.build args';
+      };
   };
 }

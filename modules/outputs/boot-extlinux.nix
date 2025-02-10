@@ -1,21 +1,28 @@
 {
-  config
-, pkgs
-, lib
-, ...
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption mkOption types concatStringsSep;
+  inherit (lib)
+    mkIf
+    mkEnableOption
+    mkOption
+    types
+    concatStringsSep
+    ;
   inherit (pkgs.pseudofile) dir symlink;
   cfg = config.boot.loader.extlinux;
   o = config.system.outputs;
   cmdline = concatStringsSep " " config.boot.commandLine;
   wantsDtb = config.hardware.dts ? src && config.hardware.dts.src != null;
-in {
+in
+{
   options.boot.loader.extlinux.enable = mkEnableOption "extlinux";
 
   config = mkIf cfg.enable {
-    system.outputs.bootfiles = pkgs.runCommand "extlinux" {} ''
+    system.outputs.bootfiles = pkgs.runCommand "extlinux" { } ''
       mkdir $out
       cd $out
       ${if wantsDtb then "cp ${o.dtb} dtb" else "true"}

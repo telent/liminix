@@ -1,6 +1,8 @@
-{ config, pkgs, ...} :
-let inherit (pkgs.liminix.services) oneshot longrun;
-in {
+{ config, pkgs, ... }:
+let
+  inherit (pkgs.liminix.services) oneshot longrun;
+in
+{
   config = {
     services = rec {
       mdevd = longrun {

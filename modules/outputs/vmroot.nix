@@ -1,8 +1,8 @@
 {
-  config
-, pkgs
-, lib
-, ...
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 let
   inherit (lib) mkOption types concatStringsSep;
@@ -49,12 +49,15 @@ in
         let
           inherit (config.system.outputs) rootfs kernel manifest;
           cmdline = builtins.toJSON (concatStringsSep " " config.boot.commandLine);
-          makeBootableImage = pkgs.runCommandCC "objcopy" {}
-            (if pkgs.stdenv.hostPlatform.isAarch
-             then "${pkgs.stdenv.cc.targetPrefix}objcopy -O binary -R .comment -S ${kernel} $out"
-             else "cp ${kernel} $out");
+          makeBootableImage = pkgs.runCommandCC "objcopy" { } (
+            if pkgs.stdenv.hostPlatform.isAarch then
+              "${pkgs.stdenv.cc.targetPrefix}objcopy -O binary -R .comment -S ${kernel} $out"
+            else
+              "cp ${kernel} $out"
+          );
           phram_address = lib.toHexString (config.hardware.ram.startAddress + 256 * 1024 * 1024);
-        in pkgs.runCommand "vmroot" {} ''
+        in
+        pkgs.runCommand "vmroot" { } ''
           mkdir $out
           cd $out
           ln -s ${rootfs} rootfs
@@ -67,7 +70,7 @@ in
           ${pkgs.pkgsBuildBuild.run-liminix-vm}/bin/run-liminix-vm --command-line ${cmdline} --arch ${pkgs.stdenv.hostPlatform.qemuArch} --phram-address 0x${phram_address} \$* ${makeBootableImage} ${config.system.outputs.rootfs}
           EOF
           chmod +x run.sh
-       '';
+        '';
     };
   };
 }

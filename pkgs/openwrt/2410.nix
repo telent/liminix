@@ -1,4 +1,8 @@
-{ fetchFromGitHub, pkgsBuildBuild, lib }:
+{
+  fetchFromGitHub,
+  pkgsBuildBuild,
+  lib,
+}:
 let
   src = fetchFromGitHub {
     name = "openwrt-source";
@@ -27,7 +31,8 @@ let
       ${./make-mtdsplit-jffs2-endian-agnostic.patch} \
       ${./fix-mtk-wed-bm-desc-ptr.patch} 
   '';
-in {
+in
+{
   inherit src;
 
   # The kernel sources typically used with this version of openwrt

@@ -8,30 +8,34 @@
   anoia,
   linotify,
   lualinux,
-  stdenv
+  stdenv,
 }:
-let name = "watch-ssh-keys";
-in stdenv.mkDerivation {
+let
+  name = "watch-ssh-keys";
+in
+stdenv.mkDerivation {
   inherit name;
   src = ./.;
 
-  buildInputs = [lua];
-  nativeBuildInputs = [fennelrepl];
+  buildInputs = [ lua ];
+  nativeBuildInputs = [ fennelrepl ];
 
   buildPhase = ''
     fennelrepl --test ./watch-ssh-keys.fnl
-    cp -p ${writeFennel name {
-      packages = [
-        anoia
-        lualinux
-        linotify
-        fennel
-      ];
-      macros = [
-        anoia.dev
-      ];
-      mainFunction = "run";
-    } ./watch-ssh-keys.fnl } ${name}
+    cp -p ${
+      writeFennel name {
+        packages = [
+          anoia
+          lualinux
+          linotify
+          fennel
+        ];
+        macros = [
+          anoia.dev
+        ];
+        mainFunction = "run";
+      } ./watch-ssh-keys.fnl
+    } ${name}
   '';
 
   installPhase = ''

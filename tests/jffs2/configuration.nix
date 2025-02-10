@@ -1,7 +1,8 @@
-{ config, pkgs, ... } :
+{ config, pkgs, ... }:
 let
   inherit (pkgs.pseudofile) dir;
-in {
+in
+{
   imports = [
     ../../vanilla-configuration.nix
     ../../modules/outputs/squashfs.nix

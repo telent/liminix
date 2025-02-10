@@ -1,9 +1,9 @@
 {
-  ifwait
-, serviceFns
+  ifwait,
+  serviceFns,
 }:
 {
-  ifup = name : ifname : ''
+  ifup = name: ifname: ''
     . ${serviceFns}
     ${ifwait}/bin/ifwait -v ${ifname} present
     ip link set up dev ${ifname}

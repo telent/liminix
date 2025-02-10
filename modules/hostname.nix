@@ -1,8 +1,14 @@
-{ lib, pkgs, config, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   inherit (pkgs.liminix.services) oneshot;
-in {
+in
+{
   options = {
     hostname = mkOption {
       description = ''

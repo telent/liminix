@@ -1,6 +1,6 @@
-{ lib, ... } :
+{ lib, ... }:
 {
-  imports= [
+  imports = [
     ./configuration.nix
     ../../modules/outputs/ext4fs.nix
   ];

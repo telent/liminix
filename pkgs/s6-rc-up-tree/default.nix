@@ -13,11 +13,15 @@ stdenv.mkDerivation {
   # propagatedBuildInputs = [ s6-rc-up-tree ];
   installPhase = ''
     mkdir -p $out/bin
-    cp -p ${writeFennel "s6-rc-up-tree" {
-      packages = [fennel
-                  lualinux ] ;
-      mainFunction = "run";
-    } ./s6-rc-up-tree.fnl } $out/bin/s6-rc-up-tree
+    cp -p ${
+      writeFennel "s6-rc-up-tree" {
+        packages = [
+          fennel
+          lualinux
+        ];
+        mainFunction = "run";
+      } ./s6-rc-up-tree.fnl
+    } $out/bin/s6-rc-up-tree
   '';
   postBuild = ''
     export PATH=./scripts:$PATH

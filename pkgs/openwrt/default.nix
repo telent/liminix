@@ -27,7 +27,8 @@ let
     patches ${src}/target/linux/${family}/patches-5.15/*.patch
     patches ${./make-mtdsplit-jffs2-endian-agnostic.patch}
   '';
-in {
+in
+{
   inherit src;
 
   # The kernel sources typically used with this version of openwrt

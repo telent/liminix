@@ -1,13 +1,20 @@
 {
-  liminix
-, lib
-, zyxel-bootconfig
+  liminix,
+  lib,
+  zyxel-bootconfig,
 }:
-{ ensureActiveImage, primaryMtdPartition, secondaryMtdPartition, bootConfigurationMtdPartition, kernelCommandLineSource }:
+{
+  ensureActiveImage,
+  primaryMtdPartition,
+  secondaryMtdPartition,
+  bootConfigurationMtdPartition,
+  kernelCommandLineSource,
+}:
 let
   inherit (liminix.services) oneshot;
   activeImageIndex = if ensureActiveImage == "primary" then 0 else 1;
-in oneshot {
+in
+oneshot {
   name = "zyxel-boot-configure";
   up = ''
     set -- $(cat /proc/device-tree/chosen/bootargs)

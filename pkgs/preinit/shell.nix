@@ -1,4 +1,4 @@
-with import <nixpkgs> {};
+with import <nixpkgs> { };
 mkShell {
   name = "preinit-env";
   src = ./.;

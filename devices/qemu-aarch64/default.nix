@@ -26,26 +26,32 @@
   # this device is described by the "qemu" device
   installer = "vmroot";
 
-  module = { config, lim, ... }: {
-    imports = [
-      ../../modules/arch/aarch64.nix
-      ../families/qemu.nix
-    ];
-    kernel = {
-      config = {
-        VIRTUALIZATION = "y";
-        PCI_HOST_GENERIC="y";
+  module =
+    { config, lim, ... }:
+    {
+      imports = [
+        ../../modules/arch/aarch64.nix
+        ../families/qemu.nix
+      ];
+      kernel = {
+        config = {
+          VIRTUALIZATION = "y";
+          PCI_HOST_GENERIC = "y";
 
-        SERIAL_AMBA_PL011 = "y";
-        SERIAL_AMBA_PL011_CONSOLE = "y";
+          SERIAL_AMBA_PL011 = "y";
+          SERIAL_AMBA_PL011_CONSOLE = "y";
+        };
       };
+      boot.commandLine = [
+        "console=ttyAMA0,38400"
+      ];
+      hardware =
+        let
+          addr = lim.parseInt "0x40010000";
+        in
+        {
+          loadAddress = addr;
+          entryPoint = addr;
+        };
     };
-    boot.commandLine = [
-      "console=ttyAMA0,38400"
-    ];
-    hardware = let addr = lim.parseInt "0x40010000"; in {
-      loadAddress = addr;
-      entryPoint = addr;
-    };
-  };
 }

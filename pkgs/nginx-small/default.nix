@@ -6,14 +6,14 @@
 # essential for making the package cross-compilable
 
 {
-  stdenv
-, openssl
-, fetchzip
-, fetchpatch
-, pcre
-, zlib
-, lib
-, options ? []
+  stdenv,
+  openssl,
+  fetchzip,
+  fetchpatch,
+  pcre,
+  zlib,
+  lib,
+  options ? [ ],
 }:
 let
   # nginx configure script does not accept a with-foo_module flag for
@@ -81,21 +81,24 @@ let
   withouts = lib.subtractLists options defaultEnabled;
   withs = lib.subtractLists defaultEnabled options;
 
-in stdenv.mkDerivation {
+in
+stdenv.mkDerivation {
   pname = "nginx-small";
-  version  = "";
-  buildInputs = [ openssl pcre zlib ];
+  version = "";
+  buildInputs = [
+    openssl
+    pcre
+    zlib
+  ];
   configureFlags =
     (map (f: "--with-${f}") withs)
     ++ (map (f: "--without-${f}") withouts)
-    ++ lib.optional (pcre == null)
-      "--without-http_rewrite_module"
-    ++ lib.optional (zlib == null)
-      "--without-http_gzip_module";
+    ++ lib.optional (pcre == null) "--without-http_rewrite_module"
+    ++ lib.optional (zlib == null) "--without-http_gzip_module";
 
   env.NIX_CFLAGS_COMPILE = "-Wno-error=cpp"; # musl
 
-  configurePlatforms = [];
+  configurePlatforms = [ ];
   patches = [
     (fetchpatch {
       url = "https://raw.githubusercontent.com/openwrt/packages/c057dfb09c7027287c7862afab965a4cd95293a3/net/nginx/patches/102-sizeof_test_fix.patch";

@@ -53,7 +53,8 @@ let
       RT2800SOC = "m";
       RT2X00 = "m";
     };
-    mt7603e.kconfig = {                     # XXX find a better name for this
+    mt7603e.kconfig = {
+      # XXX find a better name for this
       WLAN_VENDOR_RALINK = "y";
       WLAN_VENDOR_MEDIATEK = "y";
       MT7603E = "y";
@@ -70,32 +71,36 @@ let
       MAC80211_HWSIM = "y";
     };
   };
-  kconfig = (foldl (config: d: (config // configs.${d}.kconfig)) {
-    WLAN = "y";
-    CFG80211 = "m";
-    MAC80211 = "m";
+  kconfig =
+    (foldl (config: d: (config // configs.${d}.kconfig)) {
+      WLAN = "y";
+      CFG80211 = "m";
+      MAC80211 = "m";
 
-    # (nixwrt comment) I am reluctant to have to enable this but
-    # can't transmit on 5GHz bands without it (they are all marked
-    # NO-IR)
-    CFG80211_CERTIFICATION_ONUS = "y";
-    # (nixwrt comment) can't get signed regdb to work rn, it just
-    # gives me "loaded regulatory.db is malformed or signature is
-    # missing/invalid"
-    CFG80211_REQUIRE_SIGNED_REGDB = "n"; # depends on ONUS
+      # (nixwrt comment) I am reluctant to have to enable this but
+      # can't transmit on 5GHz bands without it (they are all marked
+      # NO-IR)
+      CFG80211_CERTIFICATION_ONUS = "y";
+      # (nixwrt comment) can't get signed regdb to work rn, it just
+      # gives me "loaded regulatory.db is malformed or signature is
+      # missing/invalid"
+      CFG80211_REQUIRE_SIGNED_REGDB = "n"; # depends on ONUS
 
-    CFG80211_CRDA_SUPPORT = "n";
+      CFG80211_CRDA_SUPPORT = "n";
 
-    MAC80211_MESH = "y";
-  } drivers) // extraConfig;
+      MAC80211_MESH = "y";
+    } drivers)
+    // extraConfig;
 
-  writeConfig = name : config: writeText name
-        (builtins.concatStringsSep
-          "\n"
-          (lib.mapAttrsToList
-            (name: value: (if value == "n" then "# CPTCFG_${name} is not set" else "CPTCFG_${name}=${value}"))
-            config
-          ));
+  writeConfig =
+    name: config:
+    writeText name (
+      builtins.concatStringsSep "\n" (
+        lib.mapAttrsToList (
+          name: value: (if value == "n" then "# CPTCFG_${name} is not set" else "CPTCFG_${name}=${value}")
+        ) config
+      )
+    );
   kconfigFile = writeConfig "backports_kconfig" kconfig;
   src = kernel-backport;
   CROSS_COMPILE = stdenv.cc.bintools.targetPrefix;
@@ -104,12 +109,19 @@ let
     name = "mac80211";
     inherit src;
 
-    hardeningDisable = ["all"];
-    nativeBuildInputs = [buildPackages.stdenv.cc] ++
-                        (with buildPackages.pkgs;
-                          [bc bison flex pkg-config openssl
-                           which kmod cpio
-                          ]);
+    hardeningDisable = [ "all" ];
+    nativeBuildInputs =
+      [ buildPackages.stdenv.cc ]
+      ++ (with buildPackages.pkgs; [
+        bc
+        bison
+        flex
+        pkg-config
+        openssl
+        which
+        kmod
+        cpio
+      ]);
     inherit CC CROSS_COMPILE;
     ARCH = arch;
     dontStrip = true;
@@ -166,18 +178,27 @@ let
       find . -name \*.ko | cpio --make-directories -p $out/lib/modules/0.0
       depmod -b $out -v 0.0
       touch $out/load.sh
-      for i in ${lib.concatStringsSep " "
-        (map
-          (d: let c = { module = d; } // configs.${d} ;
-              in c.module)
-          drivers)}; do
+      for i in ${
+        lib.concatStringsSep " " (
+          map (
+            d:
+            let
+              c = {
+                module = d;
+              } // configs.${d};
+            in
+            c.module
+          ) drivers
+        )
+      }; do
         modprobe -S 0.0 -d $out --show-depends $i >> $out/load.sh
       done
       tac < $out/load.sh | sed 's/^insmod/rmmod/g' > $out/unload.sh
     '';
   };
-in oneshot {
-    name = "wlan.module";
-    up = "sh ${module}/load.sh";
-    down = "sh ${module}/unload.sh";
-  }
+in
+oneshot {
+  name = "wlan.module";
+  up = "sh ${module}/load.sh";
+  down = "sh ${module}/unload.sh";
+}

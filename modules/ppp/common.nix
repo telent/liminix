@@ -1,20 +1,32 @@
-{ writeAshScript, liminix, svc, lib, serviceFns, output-template }:
+{
+  writeAshScript,
+  liminix,
+  svc,
+  lib,
+  serviceFns,
+  output-template,
+}:
 {
   command,
   name,
-  debug
-, username,
+  debug,
+  username,
   password,
   lcpEcho,
   ppp-options,
-  dependencies ? []
-} :
+  dependencies ? [ ],
+}:
 let
-  inherit (lib) optional optionals escapeShellArgs concatStringsSep;
+  inherit (lib)
+    optional
+    optionals
+    escapeShellArgs
+    concatStringsSep
+    ;
   inherit (liminix.services) longrun;
   inherit (builtins) toJSON toString typeOf;
 
-  ip-up = writeAshScript "ip-up" {} ''
+  ip-up = writeAshScript "ip-up" { } ''
     exec >&5 2>&5
     . ${serviceFns} 
     in_outputs ${name}
@@ -28,7 +40,7 @@ let
     if test -n "''${DNS2}" ;then echo ''${DNS2} > ns2 ; fi
     test -e ipv6-address && echo >/proc/self/fd/10
   '';
-  ip6-up = writeAshScript "ip6-up" {} ''
+  ip6-up = writeAshScript "ip6-up" { } ''
     exec >&5 2>&5
     . ${serviceFns} 
     in_outputs ${name}
@@ -37,35 +49,61 @@ let
     test -e ifname && echo >/proc/self/fd/10
   '';
   literal_or_output =
-    let v = o: ({
-          string = toJSON;
-          int = toJSON;
-          lambda = (o: "output(${toJSON (o "service")}, ${toJSON (o "path")})");
-        }.${typeOf o}) o;
-    in  o: "{{ ${v o} }}";
+    let
+      v =
+        o:
+        (
+          {
+            string = toJSON;
+            int = toJSON;
+            lambda = (o: "output(${toJSON (o "service")}, ${toJSON (o "path")})");
+          }
+          .${typeOf o}
+        )
+          o;
+    in
+    o: "{{ ${v o} }}";
 
   ppp-options' =
-    ["+ipv6" "noauth"]
+    [
+      "+ipv6"
+      "noauth"
+    ]
     ++ optional debug "debug"
-    ++ optionals (username != null) ["name" (literal_or_output username)]
-    ++ optionals (password != null) ["password" (literal_or_output password)]
+    ++ optionals (username != null) [
+      "name"
+      (literal_or_output username)
+    ]
+    ++ optionals (password != null) [
+      "password"
+      (literal_or_output password)
+    ]
     ++ optional lcpEcho.adaptive "lcp-echo-adaptive"
-    ++ optionals (lcpEcho.interval != null)
-      ["lcp-echo-interval" (toString lcpEcho.interval)]
-    ++ optionals (lcpEcho.failure != null)
-      ["lcp-echo-failure" (toString lcpEcho.failure)]
+    ++ optionals (lcpEcho.interval != null) [
+      "lcp-echo-interval"
+      (toString lcpEcho.interval)
+    ]
+    ++ optionals (lcpEcho.failure != null) [
+      "lcp-echo-failure"
+      (toString lcpEcho.failure)
+    ]
     ++ ppp-options
-    ++ ["ip-up-script" ip-up
-        "ipv6-up-script" ip6-up
-        "ipparam" name
-        "nodetach"
-        # usepeerdns requests DNS servers from peer (which is good),
-        # then attempts to write them to /nix/store/xxxx/ppp/resolv.conf
-        # which causes an unsightly but inconsequential error message
-        "usepeerdns"
-        "nodefaultroute"
-        "logfd" "2"
-       ];
+    ++ [
+      "ip-up-script"
+      ip-up
+      "ipv6-up-script"
+      ip6-up
+      "ipparam"
+      name
+      "nodetach"
+      # usepeerdns requests DNS servers from peer (which is good),
+      # then attempts to write them to /nix/store/xxxx/ppp/resolv.conf
+      # which causes an unsightly but inconsequential error message
+      "usepeerdns"
+      "nodefaultroute"
+      "logfd"
+      "2"
+    ];
   service = longrun {
     inherit name;
     run = ''
@@ -77,12 +115,15 @@ let
       ${command}
     '';
     notification-fd = 10;
-    timeout-up = if lcpEcho.failure != null
-                 then (10 + lcpEcho.failure * lcpEcho.interval) * 1000
-                 else 60 * 1000;
+    timeout-up =
+      if lcpEcho.failure != null then (10 + lcpEcho.failure * lcpEcho.interval) * 1000 else 60 * 1000;
     inherit dependencies;
   };
-in svc.secrets.subscriber.build {
-  watch = lib.filter (n: typeOf n=="lambda") [ username password ];
+in
+svc.secrets.subscriber.build {
+  watch = lib.filter (n: typeOf n == "lambda") [
+    username
+    password
+  ];
   inherit service;
 }

@@ -1,15 +1,18 @@
 {
-  pseudofile
-}: let
+  pseudofile,
+}:
+let
   inherit (pseudofile) dir;
   structure = {
     service = dir {
       s6-linux-init-runleveld = dir {
-        notification-fd = { file = "3"; };
+        notification-fd = {
+          file = "3";
+        };
         run = {
           file = ''
-           hello
-           world
+            hello
+            world
           '';
           mode = "0755";
         };
@@ -21,8 +24,8 @@
         };
         run = {
           file = ''
-              s6-linux-init/bin/s6-linux-init-shutdownd -c  "/etc/s6-linux-init/current" -g 3000
-            '';
+            s6-linux-init/bin/s6-linux-init-shutdownd -c  "/etc/s6-linux-init/current" -g 3000
+          '';
           mode = "0755";
         };
 
@@ -32,14 +35,19 @@
           type = "i";
           mode = "0600";
         };
-        notification-fd = { file = "3"; };
+        notification-fd = {
+          file = "3";
+        };
         run = {
           file = ''
-              gdsgdfgsdgf
+            gdsgdfgsdgf
           '';
         };
       };
     };
-    uncaught-logs = (dir {}) // {mode = "2750";};
+    uncaught-logs = (dir { }) // {
+      mode = "2750";
+    };
   };
-in pseudofile.write "pseudo.s6-init" structure
+in
+pseudofile.write "pseudo.s6-init" structure

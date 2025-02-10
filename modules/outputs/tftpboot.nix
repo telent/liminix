@@ -1,15 +1,16 @@
 {
-  config
-, pkgs
-, lib
-, ...
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 let
   inherit (lib) mkOption types concatStringsSep;
   cfg = config.boot.tftp;
   hw = config.hardware;
   arch = pkgs.stdenv.hostPlatform.linuxArch;
-in {
+in
+{
   imports = [ ../ramdisk.nix ];
   options.boot.tftp = {
     freeSpaceBytes = mkOption {
@@ -17,7 +18,10 @@ in {
       default = 0;
     };
     kernelFormat = mkOption {
-      type = types.enum [ "zimage" "uimage" ];
+      type = types.enum [
+        "zimage"
+        "uimage"
+      ];
       default = "uimage";
     };
     compressRoot = mkOption {
@@ -61,14 +65,22 @@ in {
         assert config.rootfsType != "ubifs";
         let
           o = config.system.outputs;
-          image = let choices = {
-            uimage = o.uimage;
-            zimage = o.kernel.zImage;
-          }; in choices.${cfg.kernelFormat};
-          bootCommand = let choices = {
-            uimage = "bootm";
-            zimage = "bootz";
-          }; in choices.${cfg.kernelFormat};
+          image =
+            let
+              choices = {
+                uimage = o.uimage;
+                zimage = o.kernel.zImage;
+              };
+            in
+            choices.${cfg.kernelFormat};
+          bootCommand =
+            let
+              choices = {
+                uimage = "bootm";
+                zimage = "bootz";
+              };
+            in
+            choices.${cfg.kernelFormat};
 
           cmdline = concatStringsSep " " config.boot.commandLine;
           objcopy = "${pkgs.stdenv.cc.bintools.targetPrefix}objcopy";
@@ -77,7 +89,16 @@ in {
             rm -f vmlinux.bin.lzma ; lzma -k -z  vmlinux.bin
           '';
         in
-          pkgs.runCommand "tftpboot" { nativeBuildInputs = with pkgs.pkgsBuildBuild; [ lzma dtc pkgs.stdenv.cc ubootTools ];  } ''
+        pkgs.runCommand "tftpboot"
+          {
+            nativeBuildInputs = with pkgs.pkgsBuildBuild; [
+              lzma
+              dtc
+              pkgs.stdenv.cc
+              ubootTools
+            ];
+          }
+          ''
             mkdir $out
             cd $out
             binsize() { local s=$(stat -L -c %s $1); echo $(($s + 0x1000 &(~0xfff))); }
@@ -97,17 +118,19 @@ in {
             # end of the kernel is free
 
             dtbStart=$(($rootfsStart + $rootfsSize))
-            ${if cfg.compressRoot
-              then ''
-                lzma -z9cv ${o.rootfs} > rootfs.lz
-                rootfsLzStart=$dtbStart
-                rootfsLzSize=$(binsize rootfs.lz)
-                dtbStart=$(($dtbStart + $rootfsLzSize))
-              ''
-              else ''
-                ln -s ${o.rootfs} rootfs
-              ''
-             }
+            ${
+              if cfg.compressRoot then
+                ''
+                  lzma -z9cv ${o.rootfs} > rootfs.lz
+                  rootfsLzStart=$dtbStart
+                  rootfsLzSize=$(binsize rootfs.lz)
+                  dtbStart=$(($dtbStart + $rootfsLzSize))
+                ''
+              else
+                ''
+                  ln -s ${o.rootfs} rootfs
+                ''
+            }
 
             cat ${o.dtb} > dtb
             address_cells=$(fdtget dtb / '#address-cells')
@@ -128,37 +151,40 @@ in {
 
             dtbSize=$(binsize ./dtb )
 
-            ${if cfg.appendDTB then ''
-              imageStart=$dtbStart
-              # re-package image with updated dtb
-              cat ${o.kernel} > vmlinux.elf
-              ${objcopy} --update-section .appended_dtb=dtb vmlinux.elf
-              ${stripAndZip}
-              mkimage -A ${arch} -O linux -T kernel -C lzma -a $(hex ${toString hw.loadAddress}) -e $(hex ${toString hw.entryPoint}) -n '${lib.toUpper arch} Liminix Linux tftpboot' -d vmlinux.bin.lzma image
-              # dtc -I dtb -O dts -o /dev/stdout dtb | grep -A10 chosen ; exit 1
-              tftpcmd="tftpboot $(hex $imageStart) result/image "
-              bootcmd="bootm $(hex $imageStart)"
-            '' else ''
-              imageStart=$(($dtbStart + $dtbSize))
-              tftpcmd="tftpboot $(hex $imageStart) result/image; tftpboot $(hex $dtbStart) result/dtb "
-              ln -s ${image} image
-              bootcmd="${bootCommand} $(hex $imageStart) - $(hex $dtbStart)"
-            ''}
+            ${
+              if cfg.appendDTB then
+                ''
+                  imageStart=$dtbStart
+                  # re-package image with updated dtb
+                  cat ${o.kernel} > vmlinux.elf
+                  ${objcopy} --update-section .appended_dtb=dtb vmlinux.elf
+                  ${stripAndZip}
+                  mkimage -A ${arch} -O linux -T kernel -C lzma -a $(hex ${toString hw.loadAddress}) -e $(hex ${toString hw.entryPoint}) -n '${lib.toUpper arch} Liminix Linux tftpboot' -d vmlinux.bin.lzma image
+                  # dtc -I dtb -O dts -o /dev/stdout dtb | grep -A10 chosen ; exit 1
+                  tftpcmd="tftpboot $(hex $imageStart) result/image "
+                  bootcmd="bootm $(hex $imageStart)"
+                ''
+              else
+                ''
+                  imageStart=$(($dtbStart + $dtbSize))
+                  tftpcmd="tftpboot $(hex $imageStart) result/image; tftpboot $(hex $dtbStart) result/dtb "
+                  ln -s ${image} image
+                  bootcmd="${bootCommand} $(hex $imageStart) - $(hex $dtbStart)"
+                ''
+            }
 
             cat > boot.scr << EOF
             setenv serverip ${cfg.serverip}
             setenv ipaddr ${cfg.ipaddr}
             ${
-              if cfg.compressRoot
-              then "tftpboot $(hex $rootfsLzStart) result/rootfs.lz"
-              else "tftpboot $(hex $rootfsStart) result/rootfs"
+              if cfg.compressRoot then
+                "tftpboot $(hex $rootfsLzStart) result/rootfs.lz"
+              else
+                "tftpboot $(hex $rootfsStart) result/rootfs"
             }; $tftpcmd
-            ${if cfg.compressRoot
-              then "lzmadec $(hex $rootfsLzStart)  $(hex $rootfsStart); "
-              else ""
-             } $bootcmd
+            ${if cfg.compressRoot then "lzmadec $(hex $rootfsLzStart)  $(hex $rootfsStart); " else ""} $bootcmd
             EOF
-         '';
+          '';
 
     };
   };

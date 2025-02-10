@@ -3,12 +3,18 @@
 ## various ways to manage secrets without writing them to the
 ## nix store
 
-{ lib, pkgs, config, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
   inherit (pkgs.liminix.services) longrun;
-in {
+in
+{
   options.system.service.secrets = {
     outboard = mkOption {
       description = "fetch secrets from external vault with https";
@@ -42,7 +48,7 @@ in {
         description = "service name";
         type = types.str;
       };
-      interval =  mkOption {
+      interval = mkOption {
         type = types.int;
         default = 30;
         description = "how often to check the source, in minutes";
@@ -57,7 +63,7 @@ in {
         description = "service name";
         type = types.str;
       };
-      interval =  mkOption {
+      interval = mkOption {
         type = types.int;
         default = 30;
         description = "how often to check the source, in minutes";
@@ -76,9 +82,16 @@ in {
         description = "how do we notify the service to regenerate its config";
         default = "restart-all";
         type = types.enum [
-          "restart" "restart-all"
-          "hup" "int" "quit" "kill" "term"
-          "winch" "usr1" "usr2"
+          "restart"
+          "restart-all"
+          "hup"
+          "int"
+          "quit"
+          "kill"
+          "term"
+          "winch"
+          "usr1"
+          "usr2"
         ];
       };
     };

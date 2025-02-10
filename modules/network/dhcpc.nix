@@ -1,14 +1,14 @@
 {
-  liminix
-, writeAshScript
-, serviceFns
-, lib
-} :
+  liminix,
+  writeAshScript,
+  serviceFns,
+  lib,
+}:
 { interface }:
 let
   inherit (liminix.services) longrun;
   name = "${interface.name}.dhcpc";
-  script = writeAshScript "dhcp-notify"  { } ''
+  script = writeAshScript "dhcp-notify" { } ''
     . ${serviceFns}
     exec 2>&1
     action=$1
@@ -38,7 +38,8 @@ let
         ;;
     esac
   '';
-in longrun {
+in
+longrun {
   inherit name;
   run = "exec /bin/udhcpc -f -i $(output ${interface} ifname) -x hostname:$(cat /proc/sys/kernel/hostname) -s ${script}";
   notification-fd = 10;

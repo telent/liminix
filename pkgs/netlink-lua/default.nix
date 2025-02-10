@@ -1,6 +1,12 @@
-{ lua, fetchFromGitHub, libmnl }:
-let pname = "netlink";
-in lua.pkgs.buildLuaPackage {
+{
+  lua,
+  fetchFromGitHub,
+  libmnl,
+}:
+let
+  pname = "netlink";
+in
+lua.pkgs.buildLuaPackage {
   inherit pname;
   version = "0.1.1-1";
 

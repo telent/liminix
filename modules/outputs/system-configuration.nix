@@ -1,11 +1,16 @@
 {
-  config
-, pkgs
-, lib
-, ...
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 let
-  inherit (lib) mkEnableOption mkOption mkIf types;
+  inherit (lib)
+    mkEnableOption
+    mkOption
+    mkIf
+    types
+    ;
   inherit (pkgs) runCommand;
 in
 {
@@ -22,7 +27,6 @@ in
     };
   };
   config = {
-    system.outputs.systemConfiguration =
-        pkgs.systemconfig config.filesystem.contents;
+    system.outputs.systemConfiguration = pkgs.systemconfig config.filesystem.contents;
   };
 }

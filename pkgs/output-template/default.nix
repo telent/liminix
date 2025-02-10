@@ -7,25 +7,29 @@
   anoia,
   linotify,
   lualinux,
-  stdenv
+  stdenv,
 }:
-let name = "output-template";
-in stdenv.mkDerivation {
+let
+  name = "output-template";
+in
+stdenv.mkDerivation {
   inherit name;
   src = ./.;
 
-  buildInputs = [lua];
+  buildInputs = [ lua ];
   doCheck = true;
 
   buildPhase = ''
-    cp -p ${writeFennel name {
-      packages = [
-        anoia
-        lualinux
-        linotify
-      ] ;
-      mainFunction = "run";
-    } ./output-template.fnl } ${name}
+    cp -p ${
+      writeFennel name {
+        packages = [
+          anoia
+          lualinux
+          linotify
+        ];
+        mainFunction = "run";
+      } ./output-template.fnl
+    } ${name}
   '';
   checkPhase = "make check";
   installPhase = ''

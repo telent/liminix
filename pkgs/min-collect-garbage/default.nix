@@ -1,6 +1,7 @@
 {
-  stdenv
-}: stdenv.mkDerivation {
+  stdenv,
+}:
+stdenv.mkDerivation {
   name = "min-collect-garbage";
   buildInputs = [ ];
   src = ./.;

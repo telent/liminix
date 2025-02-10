@@ -3,9 +3,10 @@
   pkgs,
   lib,
   ...
-}: let
+}:
+let
   inherit (pkgs) liminix;
-  inherit (lib) mkOption types ;
+  inherit (lib) mkOption types;
 
   inherit (pkgs.liminix.services) oneshot target;
   inherit (pkgs.pseudofile) dir symlink;
@@ -22,19 +23,22 @@
         wpa_pairwise = "TKIP CCMP"; # auth for wpa (may not need this?)
         rsn_pairwise = "CCMP"; # auth for wpa2
       };
-    in lib.mapAttrs'
-      (name : value :
-        let
-          attrs = defaults // { ssid = name; } // value;
-        in lib.nameValuePair
-          "hostap-${name}"
-          (svc.hostapd.build {
-            interface = attrs.interface;
-            params = lib.filterAttrs (k: v: k != "interface") attrs;
-          }))
-      cfg.wireless.networks;
+    in
+    lib.mapAttrs' (
+      name: value:
+      let
+        attrs = defaults // { ssid = name; } // value;
+      in
+      lib.nameValuePair "hostap-${name}" (
+        svc.hostapd.build {
+          interface = attrs.interface;
+          params = lib.filterAttrs (k: v: k != "interface") attrs;
+        }
+      )
+    ) cfg.wireless.networks;
 
-in {
+in
+{
   imports = [
     ../wlan.nix
     ../network
@@ -46,7 +50,7 @@ in {
   options.profile.wap = {
     interfaces = mkOption {
       type = types.listOf liminix.lib.types.interface;
-      default = [];
+      default = [ ];
     };
     wireless = mkOption {
       type = types.attrsOf types.anything;
@@ -71,7 +75,7 @@ in {
     services.defaultroute4 = svc.network.route.build {
       via = "$(output ${config.services.dhcpc} router)";
       target = "default";
-      dependencies = [config.services.dhcpc];
+      dependencies = [ config.services.dhcpc ];
     };
 
     services.resolvconf = oneshot rec {

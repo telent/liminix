@@ -7,17 +7,26 @@
   s6-rc,
 }:
 let
-  hpr = name: arg: writeScript name ''
-    #!${execline}/bin/execlineb -S0
-    ${s6-linux-init}/bin/s6-linux-init-hpr ${arg} \$@
-  '';
+  hpr =
+    name: arg:
+    writeScript name ''
+      #!${execline}/bin/execlineb -S0
+      ${s6-linux-init}/bin/s6-linux-init-hpr ${arg} \$@
+    '';
   init = writeScript "init" ''
     #!${execline}/bin/execlineb -S0
-    ${s6-linux-init}/bin/s6-linux-init -c /etc/s6-linux-init/current -m 0022 -p ${lib.makeBinPath [execline s6-linux-init s6-rc]}:/usr/bin:/bin -d /dev -- "\$@"
+    ${s6-linux-init}/bin/s6-linux-init -c /etc/s6-linux-init/current -m 0022 -p ${
+      lib.makeBinPath [
+        execline
+        s6-linux-init
+        s6-rc
+      ]
+    }:/usr/bin:/bin -d /dev -- "\$@"
   '';
-in stdenvNoCC.mkDerivation {
+in
+stdenvNoCC.mkDerivation {
   name = "s6-init-bin";
-  phases = ["installPhase"];
+  phases = [ "installPhase" ];
   installPhase = ''
     bin=$out/bin
     mkdir -p $bin

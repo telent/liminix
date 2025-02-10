@@ -1,4 +1,4 @@
-{ config, pkgs, ... } :
+{ config, pkgs, ... }:
 {
   config = {
     programs.busybox = {
@@ -14,6 +14,6 @@
         FEATURE_FANCY_ECHO = "y";
       };
     };
-    defaultProfile.packages = [ pkgs.schnapps ] ;
+    defaultProfile.packages = [ pkgs.schnapps ];
   };
 }

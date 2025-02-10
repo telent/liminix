@@ -7,28 +7,32 @@
   anoia,
   linotify,
   lualinux,
-  stdenv
+  stdenv,
 }:
-let name = "watch-outputs";
-in stdenv.mkDerivation {
+let
+  name = "watch-outputs";
+in
+stdenv.mkDerivation {
   inherit name;
   src = ./.;
 
-  buildInputs = [lua];
-#  doCheck = true;
+  buildInputs = [ lua ];
+  #  doCheck = true;
 
   buildPhase = ''
-    cp -p ${writeFennel name {
-      packages = [
-        anoia
-        lualinux
-        linotify
-        fennel
-      ] ;
-      mainFunction = "run";
-    } ./watch-outputs.fnl } ${name}
+    cp -p ${
+      writeFennel name {
+        packages = [
+          anoia
+          lualinux
+          linotify
+          fennel
+        ];
+        mainFunction = "run";
+      } ./watch-outputs.fnl
+    } ${name}
   '';
-#  checkPhase = "make check";
+  #  checkPhase = "make check";
   installPhase = ''
     install -D ${name} $out/bin/${name}
   '';

@@ -17,7 +17,8 @@ let
     "belkin-rt3200"
   ];
   vanilla = ./vanilla-configuration.nix;
-  for-device = name:
+  for-device =
+    name:
     (import liminix {
       inherit borderVmConf;
       device = import (liminix + "/devices/${name}");
@@ -71,12 +72,13 @@ let
             echo "file source-dist \"$out/share/doc/liminix\"" \
                 > $out/nix-support/hydra-build-products
           '';
-      };
+        };
     };
-in jobs //
-   {
-     all = pkgs.mkShell {
-       name = "all tests";
-       contents = pkgs.lib.collect pkgs.lib.isDerivation jobs;
-     };
-   }
+in
+jobs
+// {
+  all = pkgs.mkShell {
+    name = "all tests";
+    contents = pkgs.lib.collect pkgs.lib.isDerivation jobs;
+  };
+}

@@ -1,8 +1,8 @@
 {
-  config
-, pkgs
-, lib
-, ...
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 let
   inherit (lib) mkIf;
@@ -21,17 +21,20 @@ in
       rootfs =
         let
           inherit (pkgs.pkgsBuildBuild) runCommand e2fsprogs;
-        in runCommand "mkfs.btrfs" {
-          depsBuildBuild = [ e2fsprogs ];
-        } ''
-          tree=${o.bootablerootdir}
-          size=$(du -s --apparent-size --block-size 1024 $tree |cut -f1)
-          # add 25% for filesystem overhead
-          size=$(( 5 * $size / 4))
-          dd if=/dev/zero of=$out bs=1024 count=$size
-          echo "not implemented" ; exit 1
-          # mke2fs -t ext4 -j -d $tree $out
-        '';
+        in
+        runCommand "mkfs.btrfs"
+          {
+            depsBuildBuild = [ e2fsprogs ];
+          }
+          ''
+            tree=${o.bootablerootdir}
+            size=$(du -s --apparent-size --block-size 1024 $tree |cut -f1)
+            # add 25% for filesystem overhead
+            size=$(( 5 * $size / 4))
+            dd if=/dev/zero of=$out bs=1024 count=$size
+            echo "not implemented" ; exit 1
+            # mke2fs -t ext4 -j -d $tree $out
+          '';
     };
   };
 }

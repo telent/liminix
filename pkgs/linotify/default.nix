@@ -1,6 +1,8 @@
 { lua, fetchFromGitHub }:
-let pname = "linotify";
-in lua.pkgs.buildLuaPackage {
+let
+  pname = "linotify";
+in
+lua.pkgs.buildLuaPackage {
   inherit pname;
   version = "0.5";
 

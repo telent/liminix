@@ -19,25 +19,28 @@
         VIRTIO_NET = "y";
       };
       conditionalConfig = {
-        WLAN= {
+        WLAN = {
           MAC80211_HWSIM = "m";
         };
       };
     };
     hardware =
       let
-        mac80211 =  pkgs.kmodloader.override {
+        mac80211 = pkgs.kmodloader.override {
           inherit (config.system.outputs) kernel;
-          targets = ["mac80211_hwsim"];
+          targets = [ "mac80211_hwsim" ];
         };
-      in {
+      in
+      {
         defaultOutput = "vmroot";
         rootDevice = "/dev/mtdblock0";
         dts.src = pkgs.lib.mkDefault null;
         flash.eraseBlockSize = 65536;
         networkInterfaces =
-          let inherit (config.system.service.network) link;
-          in {
+          let
+            inherit (config.system.service.network) link;
+          in
+          {
             wan = link.build {
               devpath = "/devices/pci0000:00/0000:00:13.0/virtio0";
               ifname = "wan";

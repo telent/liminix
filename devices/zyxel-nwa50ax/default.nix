@@ -4,7 +4,7 @@
       config = "mipsel-unknown-linux-musl";
       gcc = {
         abi = "32";
-        arch = "mips32";          # mips32r2?
+        arch = "mips32"; # mips32r2?
       };
     };
   };
@@ -101,7 +101,14 @@
 
   '';
 
-  module = { pkgs, config, lib, lim, ...}:
+  module =
+    {
+      pkgs,
+      config,
+      lib,
+      lim,
+      ...
+    }:
     let
       inherit (pkgs.pseudofile) dir symlink;
       inherit (pkgs) openwrt;
@@ -123,7 +130,8 @@
         url = "https://github.com/openwrt/mt76/raw/1b88dd07f153b202e57fe29734806744ed006b0e/firmware/mt7915_rom_patch.bin";
         hash = "sha256-ifriAjWzFACrxVWCANZpUaEZgB/0pdbhnTVQytx6ddg=";
       };
-    in {
+    in
+    {
       imports = [
         # We include it to ensure the bridge functionality
         # is available on the target kernel.
@@ -201,7 +209,8 @@
         networkInterfaces =
           let
             inherit (config.system.service.network) link;
-          in {
+          in
+          {
             eth = link.build { ifname = "eth0"; };
             lan = link.build { ifname = "lan"; };
             wlan0 = link.build {
@@ -253,107 +262,110 @@
         extraPatchPhase = ''
           ${openwrt.applyPatches.ramips}
         '';
-        config = {
+        config =
+          {
 
-          RALINK = "y";
-          PCI = "y";
-          PHY_MT7621_PCI = "y";
-          PCIE_MT7621 = "y";
-          SOC_MT7621 = "y";
-          CLK_MT7621 = "y";
-          CLOCKSOURCE_WATCHDOG = "y";
+            RALINK = "y";
+            PCI = "y";
+            PHY_MT7621_PCI = "y";
+            PCIE_MT7621 = "y";
+            SOC_MT7621 = "y";
+            CLK_MT7621 = "y";
+            CLOCKSOURCE_WATCHDOG = "y";
 
-          SERIAL_8250_CONSOLE = "y";
-          SERIAL_8250 = "y";
-          SERIAL_CORE_CONSOLE = "y";
-          SERIAL_OF_PLATFORM = "y";
-          SERIAL_8250_NR_UARTS = "3";
-          SERIAL_8250_RUNTIME_UARTS = "3";
-          SERIAL_MCTRL_GPIO = "y";
+            SERIAL_8250_CONSOLE = "y";
+            SERIAL_8250 = "y";
+            SERIAL_CORE_CONSOLE = "y";
+            SERIAL_OF_PLATFORM = "y";
+            SERIAL_8250_NR_UARTS = "3";
+            SERIAL_8250_RUNTIME_UARTS = "3";
+            SERIAL_MCTRL_GPIO = "y";
 
-          CONSOLE_LOGLEVEL_DEFAULT = "8";
-          CONSOLE_LOGLEVEL_QUIET = "4";
+            CONSOLE_LOGLEVEL_DEFAULT = "8";
+            CONSOLE_LOGLEVEL_QUIET = "4";
 
-          # MTD_UBI_BEB_LIMIT = "20";
-          # MTD_UBI_WL_THRESHOLD = "4096";
+            # MTD_UBI_BEB_LIMIT = "20";
+            # MTD_UBI_WL_THRESHOLD = "4096";
 
-          MTD = "y";
-          MTD_BLOCK = "y";          # fix undefined ref to register_mtd_blktrans_dev
-          MTD_RAW_NAND = "y";
-          MTD_NAND_MT7621 = "y";
-          MTD_NAND_MTK_BMT = "y";      # Bad-block Management Table
-          MTD_NAND_ECC_SW_HAMMING= "y";
-          MTD_SPI_NAND= "y";
-          MTD_OF_PARTS = "y";
-          MTD_NAND_CORE= "y";
-          MTD_SPLIT_FIRMWARE= "y";
-          MTD_SPLIT_FIT_FW= "y";
+            MTD = "y";
+            MTD_BLOCK = "y"; # fix undefined ref to register_mtd_blktrans_dev
+            MTD_RAW_NAND = "y";
+            MTD_NAND_MT7621 = "y";
+            MTD_NAND_MTK_BMT = "y"; # Bad-block Management Table
+            MTD_NAND_ECC_SW_HAMMING = "y";
+            MTD_SPI_NAND = "y";
+            MTD_OF_PARTS = "y";
+            MTD_NAND_CORE = "y";
+            MTD_SPLIT_FIRMWARE = "y";
+            MTD_SPLIT_FIT_FW = "y";
 
-          PINCTRL = "y";
-          PINCTRL_MT7621 = "y";
+            PINCTRL = "y";
+            PINCTRL_MT7621 = "y";
 
-          I2C = "y";
-          I2C_MT7621 = "y";
+            I2C = "y";
+            I2C_MT7621 = "y";
 
-          SPI = "y";
-          MTD_SPI_NOR = "y";
-          SPI_MT7621 = "y";
-          SPI_MASTER = "y";
-          SPI_MEM = "y";
+            SPI = "y";
+            MTD_SPI_NOR = "y";
+            SPI_MT7621 = "y";
+            SPI_MASTER = "y";
+            SPI_MEM = "y";
 
-          REGULATOR = "y";
-          REGULATOR_FIXED_VOLTAGE = "y";
-          RESET_CONTROLLER = "y";
-          POWER_RESET = "y";
-          POWER_RESET_GPIO = "y";
-          POWER_SUPPLY = "y";
-          LED_TRIGGER_PHY = "y";
+            REGULATOR = "y";
+            REGULATOR_FIXED_VOLTAGE = "y";
+            RESET_CONTROLLER = "y";
+            POWER_RESET = "y";
+            POWER_RESET_GPIO = "y";
+            POWER_SUPPLY = "y";
+            LED_TRIGGER_PHY = "y";
 
-          PCI_DISABLE_COMMON_QUIRKS = "y";
-          PCI_DOMAINS = "y";
-          PCI_DOMAINS_GENERIC = "y";
-          PCI_DRIVERS_GENERIC = "y";
-          PCS_MTK_LYNXI = "y";
+            PCI_DISABLE_COMMON_QUIRKS = "y";
+            PCI_DOMAINS = "y";
+            PCI_DOMAINS_GENERIC = "y";
+            PCI_DRIVERS_GENERIC = "y";
+            PCS_MTK_LYNXI = "y";
 
-          SOC_BUS = "y";
+            SOC_BUS = "y";
 
-          NET = "y";
-          ETHERNET = "y";
-          WLAN = "y";
+            NET = "y";
+            ETHERNET = "y";
+            WLAN = "y";
 
-          PHYLIB = "y";
-          AT803X_PHY = "y";
-          FIXED_PHY = "y";
-          GENERIC_PHY = "y";
-          NET_DSA = "y";
-          NET_DSA_MT7530 = "y";
-          NET_DSA_MT7530_MDIO = "y";
-          NET_DSA_TAG_MTK = "y";
-          NET_MEDIATEK_SOC = "y";
-          NET_SWITCHDEV = "y";
-          NET_VENDOR_MEDIATEK = "y";
+            PHYLIB = "y";
+            AT803X_PHY = "y";
+            FIXED_PHY = "y";
+            GENERIC_PHY = "y";
+            NET_DSA = "y";
+            NET_DSA_MT7530 = "y";
+            NET_DSA_MT7530_MDIO = "y";
+            NET_DSA_TAG_MTK = "y";
+            NET_MEDIATEK_SOC = "y";
+            NET_SWITCHDEV = "y";
+            NET_VENDOR_MEDIATEK = "y";
 
-          SWPHY = "y";
+            SWPHY = "y";
 
-          GPIOLIB = "y";
-          GPIO_MT7621 = "y";
-          OF_GPIO = "y";
+            GPIOLIB = "y";
+            GPIO_MT7621 = "y";
+            OF_GPIO = "y";
 
-          EARLY_PRINTK = "y";
+            EARLY_PRINTK = "y";
 
-          NEW_LEDS = "y";
-          LEDS_TRIGGERS = "y";
-          LEDS_CLASS = "y";         # required by rt2x00lib
-          LEDS_CLASS_MULTICOLOR = "y";
-          LEDS_BRIGHTNESS_HW_CHANGED = "y";
+            NEW_LEDS = "y";
+            LEDS_TRIGGERS = "y";
+            LEDS_CLASS = "y"; # required by rt2x00lib
+            LEDS_CLASS_MULTICOLOR = "y";
+            LEDS_BRIGHTNESS_HW_CHANGED = "y";
 
-          PRINTK_TIME = "y";
-        } // lib.optionalAttrs (config.system.service ? vlan) {
-          SWCONFIG = "y";
-        } // lib.optionalAttrs (config.system.service ? watchdog) {
-          RALINK_WDT = "y";  # watchdog
-          MT7621_WDT = "y";  # or it might be this one
-        };
+            PRINTK_TIME = "y";
+          }
+          // lib.optionalAttrs (config.system.service ? vlan) {
+            SWCONFIG = "y";
+          }
+          // lib.optionalAttrs (config.system.service ? watchdog) {
+            RALINK_WDT = "y"; # watchdog
+            MT7621_WDT = "y"; # or it might be this one
+          };
       };
     };
 }

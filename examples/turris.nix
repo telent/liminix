@@ -1,8 +1,14 @@
-{ config, pkgs, lim, ... } :
+{
+  config,
+  pkgs,
+  lim,
+  ...
+}:
 let
   svc = config.system.service;
 
-in rec {
+in
+rec {
   imports = [
     ../modules/network
     ../modules/ssh
@@ -29,12 +35,14 @@ in rec {
   hostname = "omnia";
 
   services.hostap =
-    let secrets = {
-          ssid = "not-the-internet";
-          channel = 4;
-          wpa_passphrase = "diamond dogs";
-        };
-    in svc.hostapd.build {
+    let
+      secrets = {
+        ssid = "not-the-internet";
+        channel = 4;
+        wpa_passphrase = "diamond dogs";
+      };
+    in
+    svc.hostapd.build {
       interface = config.hardware.networkInterfaces.wlan;
       params = {
         country_code = "GB";
@@ -51,12 +59,14 @@ in rec {
     };
 
   services.hostap5 =
-    let secrets = {
-          ssid = "not-the-internet";
-          channel = 36;
-          wpa_passphrase = "diamond dogs";
-        };
-    in svc.hostapd.build {
+    let
+      secrets = {
+        ssid = "not-the-internet";
+        channel = 36;
+        wpa_passphrase = "diamond dogs";
+      };
+    in
+    svc.hostapd.build {
       interface = config.hardware.networkInterfaces.wlan5;
       params = {
         country_code = "GB";
@@ -103,6 +113,7 @@ in rec {
   };
 
   defaultProfile.packages = with pkgs; [
-    figlet pciutils
+    figlet
+    pciutils
   ];
 }

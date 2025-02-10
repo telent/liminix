@@ -1,14 +1,15 @@
 {
-  config
-, pkgs
-, lib
-, ...
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 let
   inherit (lib) mkOption types;
   o = config.system.outputs;
   cfg = config.tplink-safeloader;
-in {
+in
+{
   options.tplink-safeloader = {
     board = mkOption {
       type = types.str;
@@ -53,9 +54,10 @@ in {
   config = {
     system.outputs = rec {
       tplink-safeloader =
-        pkgs.runCommand "tplink" { nativeBuildInputs = with pkgs.pkgsBuildBuild; [ firmware-utils ];  } ''
-        tplink-safeloader -B "${cfg.board}" -k "${o.uimage}" -r "${o.rootfs}" -o $out
-        '';
+        pkgs.runCommand "tplink" { nativeBuildInputs = with pkgs.pkgsBuildBuild; [ firmware-utils ]; }
+          ''
+            tplink-safeloader -B "${cfg.board}" -k "${o.uimage}" -r "${o.rootfs}" -o $out
+          '';
     };
   };
 }

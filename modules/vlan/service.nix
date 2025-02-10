@@ -1,11 +1,16 @@
 {
-  liminix
-, lib
+  liminix,
+  lib,
 }:
-{ ifname, primary, vid } :
+{
+  ifname,
+  primary,
+  vid,
+}:
 let
   inherit (liminix.services) oneshot;
-in oneshot rec {
+in
+oneshot rec {
   name = "${ifname}.link";
   up = ''
     ip link add link $(output ${primary} ifname) name ${ifname} type vlan id ${vid}

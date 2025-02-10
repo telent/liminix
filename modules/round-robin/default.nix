@@ -3,13 +3,18 @@
 ## Given a list of services, run each in turn until it exits, then
 ## runs the next.
 
-
-{ lib, pkgs, config, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
   inherit (pkgs.liminix.services) longrun;
-in {
+in
+{
   options = {
     system.service.round-robin = mkOption {
       description = "run services one at a time and failover to next";
@@ -18,9 +23,9 @@ in {
   };
   config.system.service.round-robin = config.system.callService ./service.nix {
     services = mkOption {
-      type = types.listOf  liminix.lib.types.service;
+      type = types.listOf liminix.lib.types.service;
     };
-    name =  mkOption {
+    name = mkOption {
       type = types.str;
     };
   };

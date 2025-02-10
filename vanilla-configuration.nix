@@ -2,7 +2,8 @@
 let
   inherit (pkgs.liminix.services) target;
   svc = config.system.service;
-in rec {
+in
+rec {
   imports = [
     ./modules/wlan.nix
     ./modules/network
@@ -11,8 +12,10 @@ in rec {
   ];
 
   services.dhcpv4 =
-    let iface = svc.network.link.build { ifname = "eth1"; };
-    in svc.network.dhcp.client.build { interface = iface; };
+    let
+      iface = svc.network.link.build { ifname = "eth1"; };
+    in
+    svc.network.dhcp.client.build { interface = iface; };
 
   services.defaultroute4 = svc.network.route.build {
     via = "$(output ${services.dhcpv4} ip)";
@@ -23,7 +26,9 @@ in rec {
   services.packet_forwarding = svc.network.forward.build { };
 
   services.ntp = config.system.service.ntp.build {
-    pools = { "pool.ntp.org" = ["iburst"] ; };
+    pools = {
+      "pool.ntp.org" = [ "iburst" ];
+    };
   };
 
   boot.tftp = {

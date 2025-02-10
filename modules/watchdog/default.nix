@@ -4,14 +4,19 @@
 ## feed it by checking the health of specified critical services.
 ## If the watchdog feeder stops, the device will reboot.
 
-{ lib, pkgs, config, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
 in
 {
   options = {
-    system.service.watchdog =  mkOption {
+    system.service.watchdog = mkOption {
       type = liminix.lib.types.serviceDefn;
     };
   };

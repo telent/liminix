@@ -1,15 +1,20 @@
 ## Base options
 ## ============
 
-
-{ lib, pkgs, config, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   inherit (pkgs.pseudofile) dir symlink;
 
   type_service = pkgs.liminix.lib.types.service;
 
-in {
+in
+{
   options = {
     defaultProfile = {
       packages = mkOption {
@@ -109,8 +114,13 @@ in {
     };
   };
   config = {
-    defaultProfile.packages = with pkgs;
-      [ s6 s6-init-bin execline s6-linux-init s6-rc ];
+    defaultProfile.packages = with pkgs; [
+      s6
+      s6-init-bin
+      execline
+      s6-linux-init
+      s6-rc
+    ];
 
     boot.commandLine = [
       "panic=10 oops=panic init=/bin/init loglevel=8"
@@ -119,69 +129,98 @@ in {
       "fw_devlink=off"
     ] ++ lib.optional (config.rootOptions != null) "rootflags=${config.rootOptions}";
 
-    system.callService = path : parameters :
+    system.callService =
+      path: parameters:
       let
-        typeChecked = caller: type: value:
+        typeChecked =
+          caller: type: value:
           let
             inherit (lib) types mergeDefinitions;
-            defs = [{ file = caller; inherit value; }];
+            defs = [
+              {
+                file = caller;
+                inherit value;
+              }
+            ];
             type' = types.submodule { options = type; };
-          in (mergeDefinitions [] type' defs).mergedValue;
-        cp = lib.callPackageWith(pkgs // { svc = config.system.service; });
-        pkg = cp path {};
-        checkTypes = t : p : typeChecked (builtins.toString path) t p;
-      in {
+          in
+          (mergeDefinitions [ ] type' defs).mergedValue;
+        cp = lib.callPackageWith (pkgs // { svc = config.system.service; });
+        pkg = cp path { };
+        checkTypes = t: p: typeChecked (builtins.toString path) t p;
+      in
+      {
         inherit parameters;
-        build = { dependencies ? [], ... } @ args :
+        build =
+          {
+            dependencies ? [ ],
+            ...
+          }@args:
           let
-            s = pkg (checkTypes parameters
-              (builtins.removeAttrs args ["dependencies"]));
-          in s.overrideAttrs (o: {
+            s = pkg (checkTypes parameters (builtins.removeAttrs args [ "dependencies" ]));
+          in
+          s.overrideAttrs (o: {
             dependencies = dependencies ++ o.dependencies;
             buildInputs = dependencies ++ o.buildInputs;
           });
       };
 
     users.root = {
-      uid = 0; gid= 0; gecos = "Root of all evaluation";
+      uid = 0;
+      gid = 0;
+      gecos = "Root of all evaluation";
       dir = "/home/root/";
       passwd = lib.mkDefault "";
       shell = "/bin/sh";
     };
     groups = {
       root = {
-        gid = 0; usernames = ["root"];
+        gid = 0;
+        usernames = [ "root" ];
       };
       system = {
-        gid = 1; usernames = ["root"];
+        gid = 1;
+        usernames = [ "root" ];
       };
     };
 
     filesystem = dir {
       dev =
-        let node = type: major: minor: mode : { inherit type major minor mode; };
-        in dir {
-          null =    node "c" "1" "3" "0666";
-          zero =    node "c" "1" "5" "0666";
-          tty =     node "c" "5" "0" "0666";
+        let
+          node = type: major: minor: mode: {
+            inherit
+              type
+              major
+              minor
+              mode
+              ;
+          };
+        in
+        dir {
+          null = node "c" "1" "3" "0666";
+          zero = node "c" "1" "5" "0666";
+          tty = node "c" "5" "0" "0666";
           console = node "c" "5" "1" "0600";
-          pts =     dir {};
+          pts = dir { };
         };
-      etc = let
-        profile = symlink
-          (pkgs.writeScript ".profile" ''
-           PATH=${lib.makeBinPath config.defaultProfile.packages}:/bin
-            export PATH
-            '');
-      in dir {
-        inherit profile;
-        ashrc = profile;
-      };
+      etc =
+        let
+          profile = symlink (
+            pkgs.writeScript ".profile" ''
+              PATH=${lib.makeBinPath config.defaultProfile.packages}:/bin
+               export PATH
+            ''
+          );
+        in
+        dir {
+          inherit profile;
+          ashrc = profile;
+        };
 
-      proc = dir {};
-      run = dir {};
-      sys = dir {};
-      tmp = dir {};
+      proc = dir { };
+      run = dir { };
+      sys = dir { };
+      tmp = dir { };
     };
   };
 }

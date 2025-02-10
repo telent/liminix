@@ -1,11 +1,16 @@
 {
-  config
-, pkgs
-, lib
-, ...
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 let
-  inherit (lib) mkEnableOption mkOption mkIf types;
+  inherit (lib)
+    mkEnableOption
+    mkOption
+    mkIf
+    types
+    ;
   inherit (pkgs) runCommand;
 in
 {
@@ -29,13 +34,15 @@ in
     kernel.config = {
       BLK_DEV_INITRD = "y";
       INITRAMFS_SOURCE = builtins.toJSON "${config.system.outputs.initramfs}";
-#      INITRAMFS_COMPRESSION_LZO = "y";
+      #      INITRAMFS_COMPRESSION_LZO = "y";
     };
 
     system.outputs = {
       initramfs =
-        let inherit (pkgs.pkgsBuildBuild) gen_init_cpio;
-        in runCommand "initramfs.cpio" {} ''
+        let
+          inherit (pkgs.pkgsBuildBuild) gen_init_cpio;
+        in
+        runCommand "initramfs.cpio" { } ''
           cat << SPECIALS | ${gen_init_cpio}/bin/gen_init_cpio /dev/stdin > $out
           dir /proc 0755 0 0
           dir /dev 0755 0 0

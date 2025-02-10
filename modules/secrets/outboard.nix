@@ -1,11 +1,21 @@
 {
-  liminix, lib, json-to-fstree, serviceFns
+  liminix,
+  lib,
+  json-to-fstree,
+  serviceFns,
 }:
-{ name, url, interval, username, password  } :
+{
+  name,
+  url,
+  interval,
+  username,
+  password,
+}:
 let
   inherit (liminix.services) oneshot longrun;
   inherit (lib) optionalString;
-in longrun {
+in
+longrun {
   inherit name;
   buildInputs = [ json-to-fstree ];
   run = ''

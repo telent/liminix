@@ -1,7 +1,8 @@
-{ config, pkgs, ... } :
+{ config, pkgs, ... }:
 let
   inherit (pkgs.pseudofile) dir;
-in {
+in
+{
   imports = [
     ../../modules/outputs/ext4fs.nix
   ];

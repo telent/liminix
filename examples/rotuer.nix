@@ -4,7 +4,13 @@
 # devices: mostly you will need to attend to the number of wlan and lan
 # interfaces
 
-{ config, pkgs, lib, modulesPath, ... } :
+{
+  config,
+  pkgs,
+  lib,
+  modulesPath,
+  ...
+}:
 let
   secrets = {
     domainName = "fake.liminix.org";
@@ -17,7 +23,8 @@ let
     wmm_enabled = 1;
   };
 
-in rec {
+in
+rec {
   boot = {
     tftp = {
       freeSpaceBytes = 3 * 1024 * 1024;
@@ -33,22 +40,26 @@ in rec {
 
   profile.gateway = {
     lan = {
-      interfaces =  with config.hardware.networkInterfaces;
-        [
-          # EDIT: these are the interfaces exposed by the gl.inet gl-ar750:
-          # if your device has more or differently named lan interfaces,
-          # specify them here
-          wlan wlan5
-          lan
-        ];
+      interfaces = with config.hardware.networkInterfaces; [
+        # EDIT: these are the interfaces exposed by the gl.inet gl-ar750:
+        # if your device has more or differently named lan interfaces,
+        # specify them here
+        wlan
+        wlan5
+        lan
+      ];
       inherit (secrets.lan) prefix;
       address = {
-        family = "inet"; address ="${secrets.lan.prefix}.1"; prefixLength = 24;
+        family = "inet";
+        address = "${secrets.lan.prefix}.1";
+        prefixLength = 24;
       };
       dhcp = {
         start = 10;
         end = 240;
-        hosts = { } // lib.optionalAttrs (builtins.pathExists ./static-leases.nix) (import ./static-leases.nix);
+        hosts =
+          { }
+          // lib.optionalAttrs (builtins.pathExists ./static-leases.nix) (import ./static-leases.nix);
         localDomain = "lan";
       };
     };
@@ -95,8 +106,13 @@ in rec {
   };
 
   services.ntp = svc.ntp.build {
-    pools = { "pool.ntp.org" = ["iburst"]; };
-    makestep = { threshold = 1.0; limit = 3; };
+    pools = {
+      "pool.ntp.org" = [ "iburst" ];
+    };
+    makestep = {
+      threshold = 1.0;
+      limit = 3;
+    };
   };
 
   services.sshd = svc.ssh.build { };
@@ -113,7 +129,8 @@ in rec {
 
   programs.busybox = {
     applets = [
-      "fdisk" "sfdisk"
+      "fdisk"
+      "sfdisk"
     ];
     options = {
       FEATURE_FANCY_TAIL = "y";

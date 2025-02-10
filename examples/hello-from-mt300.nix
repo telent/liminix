@@ -1,8 +1,9 @@
-{ config, pkgs, ... } :
+{ config, pkgs, ... }:
 let
   svc = config.system.service;
 
-in rec {
+in
+rec {
   imports = [
     ../modules/network
     ../modules/ssh

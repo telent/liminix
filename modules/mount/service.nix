@@ -1,15 +1,19 @@
 {
-  liminix
-, lib
-, svc
+  liminix,
+  lib,
+  svc,
 }:
-{ partlabel, mountpoint, options, fstype }:
+{
+  partlabel,
+  mountpoint,
+  options,
+  fstype,
+}:
 let
   inherit (liminix.services) oneshot;
   device = "/dev/disk/by-partlabel/${partlabel}";
   name = "mount.${lib.strings.sanitizeDerivationName (lib.escapeURL mountpoint)}";
-  options_string =
-    if options == [] then "" else "-o ${lib.concatStringsSep "," options}";
+  options_string = if options == [ ] then "" else "-o ${lib.concatStringsSep "," options}";
   controller = svc.uevent-rule.build {
     serviceName = name;
     symlink = device;
@@ -18,7 +22,8 @@ let
       devtype = "partition";
     };
   };
-in oneshot {
+in
+oneshot {
   inherit name;
   timeout-up = 3600;
   up = "mount -t ${fstype} ${options_string} ${device} ${mountpoint}";

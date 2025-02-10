@@ -45,11 +45,12 @@ let
       #   hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
       # })#
       ./gentree-writable-outputs.patch
-#      ./update-usb-sg-backport-patch.patch
-#      ./backport_kfree_sensitive.patch
+      #      ./update-usb-sg-backport-patch.patch
+      #      ./backport_kfree_sensitive.patch
     ];
   };
-in stdenv.mkDerivation rec {
+in
+stdenv.mkDerivation rec {
   inherit donorTree;
   KERNEL_VERSION = builtins.substring 0 11 donorTree.rev;
   BACKPORTS_VERSION = backports.version;
@@ -59,10 +60,15 @@ in stdenv.mkDerivation rec {
   # and I don't have the patience to patch it out. There is no other
   # reason we need either of them as build inputs.
   depsBuildBuild = [ coccinelle ];
-  nativeBuildInputs = [ which git python2 ];
+  nativeBuildInputs = [
+    which
+    git
+    python2
+  ];
 
   phases = [
-    "backportFromFuture" "installPhase"
+    "backportFromFuture"
+    "installPhase"
   ];
 
   backportFromFuture = ''

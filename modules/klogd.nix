@@ -1,7 +1,13 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   inherit (pkgs.liminix.services) longrun;
-in {
+in
+{
   config.services.klogd = longrun {
     name = "klogd";
     run = ''

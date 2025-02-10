@@ -1,13 +1,14 @@
 {
-  liminix
-, odhcp6c
-, odhcp-script
+  liminix,
+  odhcp6c,
+  odhcp-script,
 }:
-{ interface } :
+{ interface }:
 let
   inherit (liminix.services) longrun;
   name = "dhcp6c.${interface.name}";
-in longrun {
+in
+longrun {
   inherit name;
   notification-fd = 10;
   run = ''

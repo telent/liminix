@@ -1,6 +1,6 @@
 let
-  drop = expr : "${expr} drop";
-  accept = expr : "${expr} accept";
+  drop = expr: "${expr} drop";
+  accept = expr: "${expr} accept";
   mcast-scope = 8;
   allow-incoming = false;
   bogons-ip6 = {
@@ -41,7 +41,7 @@ let
       "jump bogons-ip6"
       (drop "ip6 saddr ::1/128") # loopback address [RFC4291]
       (drop "ip6 daddr ::1/128")
-      (drop "ip6 saddr ::FFFF:0:0/96")# IPv4-mapped addresses
+      (drop "ip6 saddr ::FFFF:0:0/96") # IPv4-mapped addresses
       (drop "ip6 daddr ::FFFF:0:0/96")
       (drop "ip6 saddr fe80::/10") # link-local unicast
       (drop "ip6 daddr fe80::/10")
@@ -57,7 +57,8 @@ let
       (drop
         # dest addr first byte 0xff, low nibble of second byte <= scope
         # https://www.mankier.com/8/nft#Payload_Expressions-Raw_Payload_Expression
-        "@nh,192,8 eq 0xff @nh,204,4 le ${toString mcast-scope}")
+        "@nh,192,8 eq 0xff @nh,204,4 le ${toString mcast-scope}"
+      )
 
       (accept "oifname \"int\" iifname \"ppp0\" meta l4proto udp ct state established,related")
       (accept "iifname \"int\" oifname \"ppp0\" meta l4proto udp")
@@ -85,9 +86,11 @@ let
       # we can allow all reasonable inbound, or we can use an explicit
       # allowlist to enumerate the endpoints that are allowed to
       # accept inbound from the WAN
-      (if allow-incoming
-       then accept "oifname \"int\" iifname \"ppp0\""
-       else "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip6"
+      (
+        if allow-incoming then
+          accept "oifname \"int\" iifname \"ppp0\""
+        else
+          "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip6"
       )
       # allow all outbound and any inbound that's part of a
       # recognised (outbound-initiated) flow
@@ -103,9 +106,11 @@ let
     rules = [
       "jump bogons-ip6"
       (accept "meta l4proto icmpv6")
-      (if allow-incoming
-       then accept "oifname \"int\" iifname \"ppp0\""
-       else "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip6"
+      (
+        if allow-incoming then
+          accept "oifname \"int\" iifname \"ppp0\""
+        else
+          "oifname \"int\" iifname \"ppp0\" jump incoming-allowed-ip6"
       )
       (accept "oifname \"int\" iifname \"ppp0\"  ct state established,related")
       (accept "iifname \"int\" oifname \"ppp0\" ")
@@ -119,14 +124,21 @@ let
       "oifname \"int\" ip6 daddr 2001:8b0:de3a:40de::e9d tcp dport 22"
     ];
   };
-in {
-  inherit input-ip6 forward-ip6 bogons-ip6 incoming-allowed-ip6;
+in
+{
+  inherit
+    input-ip6
+    forward-ip6
+    bogons-ip6
+    incoming-allowed-ip6
+    ;
   lan-set-ip = {
     kind = "set";
     family = "ip";
     type = "ifname";
     elements = [
-      "eth0" "eth1"
+      "eth0"
+      "eth1"
     ];
 
   };
@@ -136,7 +148,8 @@ in {
     family = "ip6";
     type = "ifname";
     elements = [
-      "eth0" "eth1"
+      "eth0"
+      "eth1"
     ];
 
   };

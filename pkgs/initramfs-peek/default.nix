@@ -19,7 +19,8 @@ let
     ${busybox}/bin/sh
   '';
   refs = writeReferencesToFile busybox;
-in runCommand "initramfs.cpio" { } ''
+in
+runCommand "initramfs.cpio" { } ''
   cat << SPECIALS | ${gen_init_cpio}/bin/gen_init_cpio /dev/stdin > out
   dir /proc 0755 0 0
   dir /sys 0755 0 0

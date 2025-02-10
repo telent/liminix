@@ -13,9 +13,17 @@ stdenv.mkDerivation {
   propagatedBuildInputs = [ s6-rc-up-tree ];
   installPhase = ''
     mkdir -p $out/bin
-    cp -p ${writeFennel "s6-rc-round-robin" {
-      packages = [fennel anoia linotify lualinux s6-rc-up-tree] ;
-      mainFunction = "run";
-    } ./robin.fnl} $out/bin/s6-rc-round-robin
+    cp -p ${
+      writeFennel "s6-rc-round-robin" {
+        packages = [
+          fennel
+          anoia
+          linotify
+          lualinux
+          s6-rc-up-tree
+        ];
+        mainFunction = "run";
+      } ./robin.fnl
+    } $out/bin/s6-rc-round-robin
   '';
 }

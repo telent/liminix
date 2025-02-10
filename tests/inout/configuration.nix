@@ -1,10 +1,16 @@
-{ config, pkgs, modulesPath, ... } :
+{
+  config,
+  pkgs,
+  modulesPath,
+  ...
+}:
 let
   inherit (pkgs.pseudofile) dir;
 
   svc = config.system.service;
 
-in rec {
+in
+rec {
   imports = [
     "${modulesPath}/dhcp6c"
     "${modulesPath}/dnsmasq"
@@ -16,7 +22,7 @@ in rec {
     "${modulesPath}/mdevd.nix"
   ];
 
-  filesystem = dir { srv = dir {}; };
+  filesystem = dir { srv = dir { }; };
 
   kernel = {
     config = {

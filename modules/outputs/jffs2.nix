@@ -1,8 +1,8 @@
 {
-  config
-, pkgs
-, lib
-, ...
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 let
   inherit (lib) mkIf;
@@ -27,14 +27,16 @@ in
       rootfs =
         let
           inherit (pkgs.pkgsBuildBuild) runCommand mtdutils;
-          endian = if pkgs.stdenv.isBigEndian
-                   then "--big-endian" else "--little-endian";
-        in runCommand "make-jffs2" {
-          depsBuildBuild = [ mtdutils ];
-        } ''
-          tree=${o.bootablerootdir}
-          (cd $tree && mkfs.jffs2 --compression-mode=size ${endian} -e ${toString config.hardware.flash.eraseBlockSize} --enable-compressor=lzo --pad --root . --output $out --squash --faketime )
-        '';
+          endian = if pkgs.stdenv.isBigEndian then "--big-endian" else "--little-endian";
+        in
+        runCommand "make-jffs2"
+          {
+            depsBuildBuild = [ mtdutils ];
+          }
+          ''
+            tree=${o.bootablerootdir}
+            (cd $tree && mkfs.jffs2 --compression-mode=size ${endian} -e ${toString config.hardware.flash.eraseBlockSize} --enable-compressor=lzo --pad --root . --output $out --squash --faketime )
+          '';
     };
   };
 }

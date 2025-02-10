@@ -1,9 +1,16 @@
-{ liminix, certifix-client, svc, lib, writeText, serviceFns }:
+{
+  liminix,
+  certifix-client,
+  svc,
+  lib,
+  writeText,
+  serviceFns,
+}:
 {
   caCertificate,
   secret,
   subject,
-  serviceUrl
+  serviceUrl,
 }:
 let
   inherit (builtins) filter isString split;
@@ -11,7 +18,8 @@ let
   name = "certifix-${lib.strings.sanitizeDerivationName subject}";
   caCertFile = writeText "ca.crt" caCertificate;
   secretFile = writeText "secret" secret;
-in oneshot {
+in
+oneshot {
   inherit name;
   up = ''
     (in_outputs ${name}

@@ -4,7 +4,7 @@
       config = "mips-unknown-linux-musl";
       gcc = {
         abi = "32";
-        arch = "24kc";          # maybe mips_24kc-
+        arch = "24kc"; # maybe mips_24kc-
       };
     };
   };
@@ -53,7 +53,14 @@
 
   '';
 
-  module = {pkgs, config, lim, lib, ... }:
+  module =
+    {
+      pkgs,
+      config,
+      lim,
+      lib,
+      ...
+    }:
     let
       inherit (lib) mkIf;
       openwrt = pkgs.openwrt;
@@ -65,7 +72,7 @@
       };
       firmware = pkgs.stdenv.mkDerivation {
         name = "wlan-firmware";
-        phases = ["installPhase"];
+        phases = [ "installPhase" ];
         installPhase = ''
           mkdir -p $out/ath10k/QCA9887/hw1.0/
           blobdir=${firmwareBlobs}/QCA9887/hw1.0
@@ -74,7 +81,10 @@
         '';
       };
       mac80211 = pkgs.kmodloader.override {
-        targets = ["ath9k" "ath10k_pci"];
+        targets = [
+          "ath9k"
+          "ath10k_pci"
+        ];
         inherit (config.system.outputs) kernel;
         dependencies = [ ath10k_cal_data ];
       };
@@ -82,7 +92,8 @@
         let
           offset = lim.parseInt "0x5000";
           size = lim.parseInt "0x844";
-        in pkgs.liminix.services.oneshot rec  {
+        in
+        pkgs.liminix.services.oneshot rec {
           name = "ath10k_cal_data";
           up = ''
             part=$(basename $(dirname $(grep -l art /sys/class/mtd/*/name)))
@@ -91,10 +102,11 @@
             (in_outputs ${name}
              dd if=/dev/$part of=data iflag=skip_bytes,fullblock bs=${toString size} skip=${toString offset} count=1
             )
-        '';
-      };
+          '';
+        };
       inherit (pkgs.pseudofile) dir symlink;
-    in {
+    in
+    {
       imports = [
         ../../modules/network
         ../../modules/arch/mipseb.nix
@@ -118,7 +130,7 @@
         rootDevice = "/dev/mtdblock5";
         dts = {
           src = "${openwrt.src}/target/linux/ath79/dts/qca9531_glinet_gl-ar750.dts";
-          includePaths =  [
+          includePaths = [
             "${openwrt.src}/target/linux/ath79/dts"
           ];
           includes = mkIf config.logging.persistent.enable [
@@ -127,8 +139,10 @@
         };
 
         networkInterfaces =
-          let inherit (config.system.service.network) link;
-          in {
+          let
+            inherit (config.system.service.network) link;
+          in
+          {
             lan = link.build {
               ifname = "lan";
               devpath = "/devices/platform/ahb/1a000000.eth";
@@ -143,7 +157,10 @@
             };
             wlan5 = link.build {
               ifname = "wlan1";
-              dependencies = [ ath10k_cal_data mac80211  ];
+              dependencies = [
+                ath10k_cal_data
+                mac80211
+              ];
             };
           };
       };
@@ -193,31 +210,31 @@
           NET = "y";
           ETHERNET = "y";
           NET_VENDOR_ATHEROS = "y";
-          AG71XX = "y";             # ethernet (qca,qca9530-eth)
-          MFD_SYSCON = "y";         # ethernet (compatible "syscon")
-          AR8216_PHY = "y";         # eth1 is behind a switch
+          AG71XX = "y"; # ethernet (qca,qca9530-eth)
+          MFD_SYSCON = "y"; # ethernet (compatible "syscon")
+          AR8216_PHY = "y"; # eth1 is behind a switch
 
           MTD_SPI_NOR = "y";
 
-          SPI_ATH79 = "y";      # these are copied from OpenWrt.
-          SPI_MASTER= "y";      # At least one of them is necessary
-          SPI_MEM= "y";
-          SPI_AR934X= "y";
-          SPI_BITBANG= "y";
-          SPI_GPIO= "y";
+          SPI_ATH79 = "y"; # these are copied from OpenWrt.
+          SPI_MASTER = "y"; # At least one of them is necessary
+          SPI_MEM = "y";
+          SPI_AR934X = "y";
+          SPI_BITBANG = "y";
+          SPI_GPIO = "y";
 
           GPIO_ATH79 = "y";
           GPIOLIB = "y";
-          EXPERT="y";
+          EXPERT = "y";
           GPIO_SYSFS = "y"; # required by patches-5.15/0004-phy-add-ath79-usb-phys.patch
           OF_GPIO = "y";
           SYSFS = "y";
           SPI = "y";
           MTD = "y";
-          MTD_BLOCK = "y";          # fix undefined ref to register_mtd_blktrans_devs
+          MTD_BLOCK = "y"; # fix undefined ref to register_mtd_blktrans_devs
 
           WATCHDOG = "y";
-          ATH79_WDT = "y";  # watchdog timer
+          ATH79_WDT = "y"; # watchdog timer
 
           EARLY_PRINTK = "y";
 

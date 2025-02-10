@@ -1,12 +1,18 @@
 # this is unlikely to be the final form or location of this code, it's
 # an interim module which wraps the uevent-watch command
 
-{ lib, pkgs, config, ... }:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
+in
 #  inherit (pkgs.liminix.services) bundle;
-in {
+{
   options = {
     system.service.uevent-rule = mkOption {
       description = "a service which starts other services based on device state (sysfs)";
@@ -25,7 +31,7 @@ in {
           devtype = "usb_device";
           attrs.idVendor = "8086";
         };
-        default = {};
+        default = { };
       };
       symlink = mkOption {
         description = "create symlink targeted on devpath";

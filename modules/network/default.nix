@@ -4,13 +4,18 @@
 ## Basic network services for creating hardware ethernet devices
 ## and adding addresses
 
-
-{ lib, pkgs, config, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
   inherit (pkgs.liminix.services) bundle;
-in {
+in
+{
   options = {
     system.service.network = {
       link = mkOption {
@@ -42,17 +47,18 @@ in {
       lo =
         let
           net = config.system.service.network;
-          iface = net.link.build { ifname = "lo";};
-        in bundle {
+          iface = net.link.build { ifname = "lo"; };
+        in
+        bundle {
           name = "loopback";
           contents = [
-            ( net.address.build {
+            (net.address.build {
               interface = iface;
               family = "inet";
-              address ="127.0.0.1";
+              address = "127.0.0.1";
               prefixLength = 8;
             })
-            ( net.address.build {
+            (net.address.build {
               interface = iface;
               family = "inet6";
               address = "::1";
@@ -82,7 +88,8 @@ in {
             Path to the sysfs node of the device. If you provide this
             and the ifname option, the device will be renamed to the
             name given by ifname.
-          ''; };
+          '';
+        };
         # other "ip link add" options could go here as well
         mtu = mkOption {
           type = types.nullOr types.int;
@@ -94,7 +101,10 @@ in {
           type = liminix.lib.types.service;
         };
         family = mkOption {
-          type = types.enum [ "inet" "inet6" ];
+          type = types.enum [
+            "inet"
+            "inet6"
+          ];
         };
         address = mkOption {
           type = types.str;

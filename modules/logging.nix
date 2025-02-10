@@ -1,7 +1,13 @@
 { config, lib, ... }:
 let
-  inherit (lib) mkIf mkEnableOption mkOption types;
-in {
+  inherit (lib)
+    mkIf
+    mkEnableOption
+    mkOption
+    types
+    ;
+in
+{
   options = {
     logging = {
       persistent = {
@@ -9,11 +15,11 @@ in {
       };
     };
   };
-   config = {
-     kernel.config = mkIf config.logging.persistent.enable {
-       PSTORE = "y";
-       PSTORE_PMSG = "y";
-       PSTORE_RAM = "y";
-     };
-   };
+  config = {
+    kernel.config = mkIf config.logging.persistent.enable {
+      PSTORE = "y";
+      PSTORE_PMSG = "y";
+      PSTORE_RAM = "y";
+    };
+  };
 }

@@ -7,15 +7,21 @@ let
     rev = "1d4c962aad9cbe01c05df741b91e8b39c356362c";
     hash = "sha256-+Ys4sERG+TI8nRzG38UP+KqbH0efspaX0j4IHCt56RI=";
   };
-in lua.pkgs.buildLuaPackage {
+in
+lua.pkgs.buildLuaPackage {
   inherit pname;
-  version = "0.1";              # :shrug:
+  version = "0.1"; # :shrug:
 
   inherit src;
   postPatch = ''
     sed -i -e '/strip/d' Makefile
   '';
-  makeFlags = [ "LUADIR=." "CC:=$(CC)" "STRIP=true"  "lualinux.so"  ];
+  makeFlags = [
+    "LUADIR=."
+    "CC:=$(CC)"
+    "STRIP=true"
+    "lualinux.so"
+  ];
 
   installPhase = ''
     mkdir -p "$out/lib/lua/${lua.luaversion}"

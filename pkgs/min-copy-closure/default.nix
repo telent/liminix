@@ -7,7 +7,11 @@
 stdenv.mkDerivation {
   name = "min-copy-closure";
   buildInputs = [ ];
-  propagatedBuildInputs = [ cpio openssh nix ];
+  propagatedBuildInputs = [
+    cpio
+    openssh
+    nix
+  ];
   src = ./.;
   installPhase = ''
     mkdir -p $out/bin

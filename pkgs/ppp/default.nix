@@ -3,8 +3,9 @@
   stdenv,
   autoreconfHook,
   substituteAll,
-}: stdenv.mkDerivation {
-  pname  = "ppp";
+}:
+stdenv.mkDerivation {
+  pname = "ppp";
   version = "2.5.0";
   nativeBuildInputs = [ autoreconfHook ];
 

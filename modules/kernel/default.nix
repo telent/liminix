@@ -3,26 +3,36 @@
 ##
 ##
 
-{ lib, pkgs, config, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
-  inherit (lib) mkOption types ;
+  inherit (lib) mkOption types;
   inherit (pkgs) liminix openwrt;
 
-  mergeConditionals = conf : conditions :
+  mergeConditionals =
+    conf: conditions:
     # for each key in conditions, if it is present in conf
     # then merge the associated value into conf
-    lib.foldlAttrs
-      (acc: name: value:
-        if (conf ? ${name}) && (conf.${name} != "n")
-        then acc // value
-        else acc)
-      conf
-      conditions;
-in {
+    lib.foldlAttrs (
+      acc: name: value:
+      if (conf ? ${name}) && (conf.${name} != "n") then acc // value else acc
+    ) conf conditions;
+in
+{
   options = {
     kernel = {
-      src = mkOption { type = types.path; default = openwrt.kernelSrc; } ;
-      version = mkOption { type = types.str; default = openwrt.kernelVersion;} ;
+      src = mkOption {
+        type = types.path;
+        default = openwrt.kernelSrc;
+      };
+      version = mkOption {
+        type = types.str;
+        default = openwrt.kernelVersion;
+      };
       modular = mkOption {
         type = types.bool;
         default = true;
@@ -54,7 +64,7 @@ in {
           some other option is present.
         '';
         type = types.attrsOf (types.attrsOf types.nonEmptyStr);
-        default = {};
+        default = { };
         example = {
           USB = {
             USB_XHCI_MVEBU = "y";
@@ -70,10 +80,9 @@ in {
   config = {
     system.outputs.kernel =
       let
-        mergedConfig = mergeConditionals
-          config.kernel.config
-          config.kernel.conditionalConfig;
-      in liminix.builders.kernel.override {
+        mergedConfig = mergeConditionals config.kernel.config config.kernel.conditionalConfig;
+      in
+      liminix.builders.kernel.override {
         config = mergedConfig;
         inherit (config.kernel) version src extraPatchPhase;
         targets = config.kernel.makeTargets;
@@ -81,7 +90,7 @@ in {
 
     kernel = rec {
       modular = true; # disabling this is not yet supported
-      makeTargets = ["vmlinux"];
+      makeTargets = [ "vmlinux" ];
       config = {
         IKCONFIG = "y";
         IKCONFIG_PROC = "y";
@@ -96,10 +105,10 @@ in {
         UNIX = "y";
         INET = "y";
         IPV6 = "y";
-        PACKET = "y";           # for ppp, tcpdump ...
-        SYSVIPC= "y";
+        PACKET = "y"; # for ppp, tcpdump ...
+        SYSVIPC = "y";
 
-        NETDEVICES = "y";       # even PPP needs this
+        NETDEVICES = "y"; # even PPP needs this
 
         # disabling this option causes the kernel to use an "empty"
         # initramfs instead: it has a /dev/console node and not much

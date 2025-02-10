@@ -7,14 +7,15 @@
   writeAshScript,
   writeText,
   xl2tpd,
-  callPackage
-} :
-{ lns,
+  callPackage,
+}:
+{
+  lns,
   ppp-options,
   lcpEcho,
   username,
   password,
-  debug
+  debug,
 }:
 let
   name = "${lns}.l2tp";
@@ -31,8 +32,16 @@ let
     max redials = 2 # this gives 1 actual retry, as xl2tpd can't count
   '';
   control = "/run/${name}/control";
-in common {
-  inherit name debug username password lcpEcho ppp-options;
+in
+common {
+  inherit
+    name
+    debug
+    username
+    password
+    lcpEcho
+    ppp-options
+    ;
   command = ''
     touch ${control}
     exec ${xl2tpd}/bin/xl2tpd -D -p /run/${name}/${name}.pid -c ${conf} -C ${control} 

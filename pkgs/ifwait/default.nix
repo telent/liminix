@@ -8,7 +8,10 @@ runCommand "ifwait" { } ''
   mkdir -p $out/bin
   cp -p ${
     writeFennel "ifwait" {
-      packages = [ anoia netlink-lua ];
+      packages = [
+        anoia
+        netlink-lua
+      ];
     } ./ifwait.fnl
   } $out/bin/ifwait
 ''

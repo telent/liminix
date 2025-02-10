@@ -1,27 +1,39 @@
-{ config, pkgs, lib, lim,  ... }:
+{
+  config,
+  pkgs,
+  lib,
+  lim,
+  ...
+}:
 let
   inherit (pkgs)
     execline
     s6
     s6-init-bin
     s6-linux-init
-    stdenvNoCC;
+    stdenvNoCC
+    ;
   inherit (lib.lists) unique concatMap;
   inherit (lib) concatStrings;
   inherit (builtins) map;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs.liminix.services) oneshot bundle longrun;
-  inherit (lib) mkIf mkEnableOption mkOption types;
+  inherit (lib)
+    mkIf
+    mkEnableOption
+    mkOption
+    types
+    ;
   cfg = config.logging;
 
   logger =
-    let pipecmds =
-          ["${s6}/bin/s6-log -bpd3 -- ${cfg.script} 1"] ++
-          (lib.optional (cfg ? persistent && cfg.persistent.enable)
-            "/bin/tee /dev/pmsg0") ++
-          (lib.optional cfg.shipping.enable
-            "${pkgs.logshipper}/bin/logtap ${cfg.shipping.socket} logshipper-socket-event");
-    in ''
+    let
+      pipecmds =
+        [ "${s6}/bin/s6-log -bpd3 -- ${cfg.script} 1" ]
+        ++ (lib.optional (cfg ? persistent && cfg.persistent.enable) "/bin/tee /dev/pmsg0")
+        ++ (lib.optional cfg.shipping.enable "${pkgs.logshipper}/bin/logtap ${cfg.shipping.socket} logshipper-socket-event");
+    in
+    ''
       #!${execline}/bin/execlineb -P
       ${execline}/bin/redirfd -w 1 /dev/null
       ${execline}/bin/redirfd -rnb 0 fifo
@@ -40,14 +52,12 @@ let
       # services and all services that have a controlled service as
       # dependency
 
-      isControlled = s : s ? controller && s.controller != null;
-      deps = s : s.dependencies ++
-                 lib.optional (isControlled s) s.controller;
-      flatDeps = s : [s] ++ concatMap flatDeps (deps s);
+      isControlled = s: s ? controller && s.controller != null;
+      deps = s: s.dependencies ++ lib.optional (isControlled s) s.controller;
+      flatDeps = s: [ s ] ++ concatMap flatDeps (deps s);
       allServices = unique (concatMap flatDeps (builtins.attrValues config.services));
-      isDependentOnControlled = s :
-        isControlled s ||
-        (lib.lists.any isDependentOnControlled s.dependencies);
+      isDependentOnControlled =
+        s: isControlled s || (lib.lists.any isDependentOnControlled s.dependencies);
 
       # all controlled services depend on this oneshot, which
       # makes a list of them so we can identify them at runtime
@@ -62,42 +72,45 @@ let
         down = "rm -r /run/services/controlled";
       };
 
-      defaultStart =
-        builtins.filter
-          (s: !(isDependentOnControlled s)) allServices;
+      defaultStart = builtins.filter (s: !(isDependentOnControlled s)) allServices;
       defaultDefaultTarget = bundle {
         name = "default";
-        contents = defaultStart ++ [controlled];
+        contents = defaultStart ++ [ controlled ];
       };
       servicesAttrs = {
         default = defaultDefaultTarget;
       } // config.services;
     in
-      pkgs.s6-rc-database.override {
-        services = builtins.attrValues servicesAttrs;
-      };
+    pkgs.s6-rc-database.override {
+      services = builtins.attrValues servicesAttrs;
+    };
   s6-init-scripts = stdenvNoCC.mkDerivation {
     name = "s6-scripts";
     src = ./scripts;
-    phases = ["unpackPhase" "installPhase" ];
-    buildInputs = [];
+    phases = [
+      "unpackPhase"
+      "installPhase"
+    ];
+    buildInputs = [ ];
     installPhase = ''
       mkdir $out
       cp -r $src $out/scripts
       chmod -R +w $out
     '';
   };
-  service = dir  {
+  service = dir {
     s6-linux-init-runleveld = dir {
-      notification-fd = { file = "3"; };
+      notification-fd = {
+        file = "3";
+      };
       run = {
         file = ''
-              #!${execline}/bin/execlineb -P
-              ${execline}/bin/fdmove -c 2 1
-              ${execline}/bin/fdmove 1 3
-              ${s6}/bin/s6-ipcserver -1 -a 0700 -c 1 -- s
-              ${s6}/bin/s6-sudod -dt30000 -- "/etc/s6-linux-init/current"/scripts/runlevel
-            '';
+          #!${execline}/bin/execlineb -P
+          ${execline}/bin/fdmove -c 2 1
+          ${execline}/bin/fdmove 1 3
+          ${s6}/bin/s6-ipcserver -1 -a 0700 -c 1 -- s
+          ${s6}/bin/s6-sudod -dt30000 -- "/etc/s6-linux-init/current"/scripts/runlevel
+        '';
         mode = "0755";
       };
     };
@@ -108,12 +121,12 @@ let
       };
       run = {
         file = ''
-              #!${execline}/bin/execlineb -P
-              importas PATH PATH
-              export PATH ${s6}/bin:''${PATH}
-              foreground { echo path is  ''${PATH} }
-              ${s6-linux-init}/bin/s6-linux-init-shutdownd -c  "/etc/s6-linux-init/current" -g 3000
-            '';
+          #!${execline}/bin/execlineb -P
+          importas PATH PATH
+          export PATH ${s6}/bin:''${PATH}
+          foreground { echo path is  ''${PATH} }
+          ${s6-linux-init}/bin/s6-linux-init-shutdownd -c  "/etc/s6-linux-init/current" -g 3000
+        '';
         mode = "0755";
       };
     };
@@ -122,8 +135,13 @@ let
         type = "i";
         mode = "0600";
       };
-      notification-fd = { file = "3"; };
-      run = { file = logger; mode = "0755"; };
+      notification-fd = {
+        file = "3";
+      };
+      run = {
+        file = logger;
+        mode = "0755";
+      };
     };
     getty = dir {
       run = {
@@ -166,7 +184,8 @@ let
           ${s6-linux-init}/bin/s6-linux-init-shutdown -a #{action} -- now
         '';
         empty = "#!${execline}/bin/execlineb -P\n";
-      in dir {
+      in
+      dir {
         crash = {
           file = quit "s6-svscan crashed. Rebooting.";
           mode = "0755";
@@ -212,13 +231,15 @@ let
 
       };
   };
-in {
+in
+{
   options = {
     logging = {
       shipping = {
         enable = mkEnableOption "unix socket for log shipping";
         socket = mkOption {
-          description = "socket pathname"; type = types.path;
+          description = "socket pathname";
+          type = types.path;
           default = "/run/.log-shipping.sock";
         };
         service = mkOption {
@@ -239,31 +260,46 @@ in {
     };
   };
   imports = [
-    ( {config, pkgs, lib, ...}:
+    (
+      {
+        config,
+        pkgs,
+        lib,
+        ...
+      }:
       let
         cfg = config.logging;
-        pipeline = shipper: bundle {
-          name = "log-shipping-pipe";
-          contents = let
-            eat = longrun {
-              name = "log-shipping-pipe-eat";
-              run = ''
-                fdmove -c 12 1 \
-                ${pkgs.s6}/bin/s6-ipcserver ${cfg.shipping.socket} \
-                fdmove -c 1 12 \
-                cat
-              '';
-              producer-for = spew.name;
-            };
-            spew = shipper.override {
-              consumer-for ="log-shipping-pipe-eat";
-            };
-          in [ eat spew ];
-        };
-      in mkIf cfg.shipping.enable {
+        pipeline =
+          shipper:
+          bundle {
+            name = "log-shipping-pipe";
+            contents =
+              let
+                eat = longrun {
+                  name = "log-shipping-pipe-eat";
+                  run = ''
+                    fdmove -c 12 1 \
+                    ${pkgs.s6}/bin/s6-ipcserver ${cfg.shipping.socket} \
+                    fdmove -c 1 12 \
+                    cat
+                  '';
+                  producer-for = spew.name;
+                };
+                spew = shipper.override {
+                  consumer-for = "log-shipping-pipe-eat";
+                };
+              in
+              [
+                eat
+                spew
+              ];
+          };
+      in
+      mkIf cfg.shipping.enable {
         services.${cfg.shipping.service.name} = pipeline cfg.shipping.service;
       }
-    )];
+    )
+  ];
 
   config = {
     filesystem = dir {
@@ -274,9 +310,11 @@ in {
         s6-linux-init = dir {
           current = dir {
             scripts = symlink "${s6-init-scripts}/scripts";
-            env = dir {};
+            env = dir { };
             run-image = dir {
-              uncaught-logs = (dir {}) // {mode = "2750";};
+              uncaught-logs = (dir { }) // {
+                mode = "2750";
+              };
               inherit service;
             };
           };

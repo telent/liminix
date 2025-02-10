@@ -1,8 +1,9 @@
-{ stdenv
-, fetchFromGitHub
-, cmake
-, zlib
-, openssl
+{
+  stdenv,
+  fetchFromGitHub,
+  cmake,
+  zlib,
+  openssl,
 }:
 
 stdenv.mkDerivation {

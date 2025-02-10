@@ -4,7 +4,12 @@
 ## Provides a service to create an nftables ruleset based on
 ## configuration supplied to it.
 
-{ lib, pkgs, config, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
@@ -54,37 +59,44 @@ in
   };
   config = {
     system.service.firewall =
-      let svc = config.system.callService ./service.nix  {
-            extraRules = mkOption {
-              type = types.attrsOf types.attrs;
-              description = "firewall ruleset";
-              default = {};
-            };
-            zones = mkOption {
-              type = types.attrsOf (types.listOf  liminix.lib.types.service);
-              default = {};
-              example = lib.literalExpression ''
-                {
-                  lan = with config.hardware.networkInterfaces; [ int ];
-                  wan = [ config.services.ppp0 ];
-                }
-              '';
-            };
-            rules = mkOption {
-              type = types.attrsOf types.attrs;   # we could usefully tighten this a bit :-)
-              default = import ./default-rules.nix;
-              description = "firewall ruleset";
-            };
+      let
+        svc = config.system.callService ./service.nix {
+          extraRules = mkOption {
+            type = types.attrsOf types.attrs;
+            description = "firewall ruleset";
+            default = { };
           };
-      in svc // {
-        build = args :
-          let args' = args // {
-                dependencies = (args.dependencies or []) ++ [kmodules];
-              };
-          in svc.build args' ;
+          zones = mkOption {
+            type = types.attrsOf (types.listOf liminix.lib.types.service);
+            default = { };
+            example = lib.literalExpression ''
+              {
+                lan = with config.hardware.networkInterfaces; [ int ];
+                wan = [ config.services.ppp0 ];
+              }
+            '';
+          };
+          rules = mkOption {
+            type = types.attrsOf types.attrs; # we could usefully tighten this a bit :-)
+            default = import ./default-rules.nix;
+            description = "firewall ruleset";
+          };
+        };
+      in
+      svc
+      // {
+        build =
+          args:
+          let
+            args' = args // {
+              dependencies = (args.dependencies or [ ]) ++ [ kmodules ];
+            };
+          in
+          svc.build args';
       };
     programs.busybox.applets = [
-      "insmod" "rmmod"
+      "insmod"
+      "rmmod"
     ];
     kernel.config = {
       NETFILTER = "y";
@@ -94,7 +106,7 @@ in
 
       NETLINK_DIAG = "y";
 
-      IP6_NF_IPTABLES=  "m";
+      IP6_NF_IPTABLES = "m";
       IP_NF_IPTABLES = "m";
       IP_NF_NAT = "m";
       IP_NF_TARGET_MASQUERADE = "m";

@@ -11,11 +11,17 @@
 ## If you have more than one wireless network interface (e.g.
 ## wlan0, wlan1) you can run an instance of hostapd on each of them.
 
-{ lib, pkgs, config, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
-in {
+in
+{
   imports = [ ../secrets ];
   options = {
     system.service.hostapd = mkOption {

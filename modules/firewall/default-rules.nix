@@ -1,9 +1,10 @@
 let
-  drop = expr : "${expr} drop";
-  accept = expr : "${expr} accept";
+  drop = expr: "${expr} drop";
+  accept = expr: "${expr} accept";
   mcast-scope = 8;
   allow-incoming = false;
-in {
+in
+{
   bogons-ip6 = {
     type = "filter";
     family = "ip6";
@@ -44,7 +45,7 @@ in {
     rules = [
       (drop "ip6 saddr ::1/128") # loopback address [RFC4291]
       (drop "ip6 daddr ::1/128")
-      (drop "ip6 saddr ::FFFF:0:0/96")# IPv4-mapped addresses
+      (drop "ip6 saddr ::FFFF:0:0/96") # IPv4-mapped addresses
       (drop "ip6 daddr ::FFFF:0:0/96")
       (drop "ip6 saddr fe80::/10") # link-local unicast
       (drop "ip6 daddr fe80::/10")
@@ -60,7 +61,8 @@ in {
       (drop
         # dest addr first byte 0xff, low nibble of second byte <= scope
         # https://www.mankier.com/8/nft#Payload_Expressions-Raw_Payload_Expression
-        "@nh,192,8 eq 0xff @nh,204,4 le ${toString mcast-scope}")
+        "@nh,192,8 eq 0xff @nh,204,4 le ${toString mcast-scope}"
+      )
 
       (accept "oifname @lan iifname @wan meta l4proto udp ct state established,related")
       (accept "iifname @lan oifname @wan meta l4proto udp")
@@ -72,7 +74,7 @@ in {
       # does this ever get used or does the preceding general udp accept
       # already grab anything that might get here?
       (accept "oifname @wan udp dport 500") # IKE Protocol [RFC5996]. haha zyxel
-      (accept "ip6 nexthdr 139") #  Host Identity Protocol
+      (accept "ip6 nexthdr 139") # Host Identity Protocol
 
       ## FIXME no support yet for recs 27-30 Mobility Header
 
@@ -88,9 +90,11 @@ in {
       # we can allow all reasonable inbound, or we can use an explicit
       # allowlist to enumerate the endpoints that are allowed to
       # accept inbound from the WAN
-      (if allow-incoming
-       then accept "oifname @lan iifname @wan"
-       else "iifname @wan jump incoming-allowed-ip6"
+      (
+        if allow-incoming then
+          accept "oifname @lan iifname @wan"
+        else
+          "iifname @wan jump incoming-allowed-ip6"
       )
       # allow all outbound and any inbound that's part of a
       # recognised (outbound-initiated) flow
@@ -130,10 +134,7 @@ in {
       (accept "meta l4proto icmpv6")
       "iifname @lan jump input-ip6-lan"
       "iifname @wan jump input-ip6-wan"
-      (if allow-incoming
-       then accept "iifname @wan"
-       else "iifname @wan jump incoming-allowed-ip6"
-      )
+      (if allow-incoming then accept "iifname @wan" else "iifname @wan jump incoming-allowed-ip6")
       # how does this even make sense in an input chain?
       (accept "iifname @wan  ct state established,related")
       (accept "iifname @lan ")
@@ -185,9 +186,9 @@ in {
     family = "ip";
 
     rules = [
-      (accept "udp dport 67")   # dhcp
-      (accept "udp dport 53")   # dns
-      (accept "tcp dport 22")   # ssh
+      (accept "udp dport 67") # dhcp
+      (accept "udp dport 53") # dns
+      (accept "tcp dport 22") # ssh
     ];
   };
 

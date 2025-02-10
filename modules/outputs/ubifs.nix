@@ -1,8 +1,8 @@
 {
-  config
-, pkgs
-, lib
-, ...
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 let
   inherit (lib) mkIf mkOption types;
@@ -15,7 +15,7 @@ in
 
   config = mkIf (config.rootfsType == "ubifs") {
     kernel.config = {
-      MTD_UBI="y";
+      MTD_UBI = "y";
       UBIFS_FS = "y";
       UBIFS_FS_SECURITY = "n";
     };
@@ -25,13 +25,16 @@ in
         let
           inherit (pkgs.pkgsBuildBuild) runCommand mtdutils;
           cfg = config.hardware.ubi;
-        in runCommand "mkfs.ubifs" {
-          depsBuildBuild = [ mtdutils ];
-        } ''
-          mkdir tmp
-          tree=${o.bootablerootdir}
-          mkfs.ubifs -x favor_lzo -c ${cfg.maxLEBcount} -m ${cfg.minIOSize} -e ${cfg.logicalEraseBlockSize}  -y -r $tree --output $out  --squash-uids -o $out
-        '';
+        in
+        runCommand "mkfs.ubifs"
+          {
+            depsBuildBuild = [ mtdutils ];
+          }
+          ''
+            mkdir tmp
+            tree=${o.bootablerootdir}
+            mkfs.ubifs -x favor_lzo -c ${cfg.maxLEBcount} -m ${cfg.minIOSize} -e ${cfg.logicalEraseBlockSize}  -y -r $tree --output $out  --squash-uids -o $out
+          '';
     };
   };
 }

@@ -3,18 +3,26 @@
 ##
 ## Provide SSH service using Dropbear
 
-{ lib, pkgs, config, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
   inherit (pkgs.pseudofile) dir file;
-  mkBoolOption = description : mkOption {
-    type = types.bool;
-    inherit description;
-    default = true;
-  };
+  mkBoolOption =
+    description:
+    mkOption {
+      type = types.bool;
+      inherit description;
+      default = true;
+    };
 
-in {
+in
+{
   options = {
     system.service.ssh = mkOption {
       type = liminix.lib.types.serviceDefn;
@@ -47,15 +55,16 @@ in {
       allowLocalPortForward = mkBoolOption "Enable local port forwarding";
       allowRemotePortForward = mkBoolOption "Enable remote port forwarding";
       allowRemoteConnectionToForwardedPorts = mkOption {
-        type = types.bool; default = false;
+        type = types.bool;
+        default = false;
         description = "Allow remote hosts to connect to local forwarded ports (by default they are bound to loopback)";
       };
       authorizedKeys = mkOption {
         type = types.nullOr (liminix.lib.types.replacable (types.attrsOf (types.listOf types.nonEmptyStr)));
         example = {
-          root = ["ssh-rsa AAAAB3N...aZaZ"];
-          alice = ["ssh-rsa AAAAB3N...qS4r"];
-          bob = [];
+          root = [ "ssh-rsa AAAAB3N...aZaZ" ];
+          alice = [ "ssh-rsa AAAAB3N...qS4r" ];
+          bob = [ ];
         };
         default = null;
         description = "Authorized SSH public keys for each username. If this optin is provided it overrides any keys found in /home/{username}/.ssh";

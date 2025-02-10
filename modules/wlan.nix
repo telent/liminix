@@ -1,4 +1,9 @@
-{ lib, pkgs, config, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs) stdenv wireless-regdb;
@@ -10,7 +15,8 @@ let
       cp ${wireless-regdb}/lib/firmware/regulatory.db $out/
     '';
   };
-in {
+in
+{
   config = {
     filesystem = dir {
       lib = dir {
@@ -20,7 +26,8 @@ in {
       };
     };
     programs.busybox.applets = [
-      "insmod" "rmmod"
+      "insmod"
+      "rmmod"
     ];
     kernel = rec {
       config = {

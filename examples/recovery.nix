@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... } :
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   inherit (pkgs) serviceFns;
   svc = config.system.service;
@@ -9,7 +14,8 @@ let
     cd ${pkgs.util-linux-small}/bin
     cp fdisk sfdisk mkswap $out/bin
   '';
-in rec {
+in
+rec {
   imports = [
     ../modules/network
     ../modules/ssh
@@ -67,19 +73,23 @@ in rec {
     '';
   };
 
-  services.growfs = let name = "growfs"; in oneshot {
-    inherit name;
-    up = ''
-      device=$(grep /persist /proc/1/mountinfo | cut -f9 -d' ')
-      ${pkgs.e2fsprogs}/bin/resize2fs $device
-    '';
-  };
+  services.growfs =
+    let
+      name = "growfs";
+    in
+    oneshot {
+      inherit name;
+      up = ''
+        device=$(grep /persist /proc/1/mountinfo | cut -f9 -d' ')
+        ${pkgs.e2fsprogs}/bin/resize2fs $device
+      '';
+    };
 
   filesystem = dir {
     etc = dir {
       "resolv.conf" = symlink "${services.resolvconf}/.outputs/resolv.conf";
     };
-    mnt = dir {};
+    mnt = dir { };
   };
   rootfsType = "ext4";
 
@@ -92,20 +102,20 @@ in rec {
     # create this hashed password string
     passwd = "$6$y7WZ5hM6l5nriLmo$5AJlmzQZ6WA.7uBC7S8L4o19ESR28Dg25v64/vDvvCN01Ms9QoHeGByj8lGlJ4/b.dbwR9Hq2KXurSnLigt1W1";
 
-
     openssh.authorizedKeys.keys =
-      let fromBuild =
-            (builtins.readFile
-              ((builtins.toPath (builtins.getEnv "HOME")) + "/.ssh/authorized_keys")
-            );
-      in lib.splitString "\n" fromBuild;
+      let
+        fromBuild = (
+          builtins.readFile ((builtins.toPath (builtins.getEnv "HOME")) + "/.ssh/authorized_keys")
+        );
+      in
+      lib.splitString "\n" fromBuild;
   };
 
   defaultProfile.packages = with pkgs; [
     e2fsprogs # ext4
     btrfs-progs
     mtdutils # mtd, jffs2, ubifs
-    dtc      # you never know when you might need device tree stuff
+    dtc # you never know when you might need device tree stuff
     some-util-linux
     libubootenv # fw_{set,print}env
     pciutils

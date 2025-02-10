@@ -10,7 +10,12 @@
 ## and require using VLAN in order to send different traffic to
 ## different ports (e.g. LAN vs WAN)
 
-{ lib, pkgs, config, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;

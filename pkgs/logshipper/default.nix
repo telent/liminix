@@ -1,5 +1,5 @@
 {
-  stdenv
+  stdenv,
 }:
 stdenv.mkDerivation {
   name = "logshipper";

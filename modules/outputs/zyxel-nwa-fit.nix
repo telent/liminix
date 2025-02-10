@@ -1,25 +1,26 @@
 {
-  config
-, pkgs
-, lib
-, ...
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 let
   inherit (lib) mkIf mkOption types;
   models = "6b e1 6f e1 ff ff ff ff ff ff";
-in {
+in
+{
   options.system.outputs = {
     zyxel-nwa-fit = mkOption {
       type = types.package;
       description = ''
-zyxel-nwa-fit
-*************
+        zyxel-nwa-fit
+        *************
 
-This output provides a FIT image for Zyxel NWA series
-containing a kernel image and an UBIFS rootfs.
+        This output provides a FIT image for Zyxel NWA series
+        containing a kernel image and an UBIFS rootfs.
 
-It can usually be used as a factory image to install Liminix
-on a system with pre-existing firmware and OS.
+        It can usually be used as a factory image to install Liminix
+        on a system with pre-existing firmware and OS.
       '';
     };
   };
@@ -34,38 +35,43 @@ on a system with pre-existing firmware and OS.
       let
         o = config.system.outputs;
         # 8129kb padding.
-        paddedKernel = pkgs.runCommand "padded-kernel" {} ''
+        paddedKernel = pkgs.runCommand "padded-kernel" { } ''
           cp --no-preserve=mode ${o.uimage} $out
           dd if=/dev/zero of=$out bs=1 count=1 seek=8388607
         '';
-        firmwareImage = pkgs.runCommand "firmware-image" {} ''
+        firmwareImage = pkgs.runCommand "firmware-image" { } ''
           cat ${paddedKernel} ${o.ubivolume} > $out
         '';
         dts = pkgs.writeText "image.its" ''
-        /dts-v1/;
+          /dts-v1/;
 
-        / {
-          description = "Zyxel FIT (Flattened Image Tree)";
-          compat-models = [${models}];
-          #address-cells = <1>;
+          / {
+            description = "Zyxel FIT (Flattened Image Tree)";
+            compat-models = [${models}];
+            #address-cells = <1>;
 
-          images {
-            firmware {
-              data = /incbin/("${firmwareImage}");
-              type = "firmware";
-              compression = "none";
-              hash@1 {
-                algo = "sha1";
+            images {
+              firmware {
+                data = /incbin/("${firmwareImage}");
+                type = "firmware";
+                compression = "none";
+                hash@1 {
+                  algo = "sha1";
+                };
               };
             };
           };
-        };
-      '';
+        '';
       in
-      pkgs.runCommand "zyxel-nwa-fit-${config.boot.imageType}" {
-        nativeBuildInputs = [ pkgs.pkgsBuildBuild.ubootTools pkgs.pkgsBuildBuild.dtc ];
-      } ''
-        mkimage -f ${dts} $out
-      '';
+      pkgs.runCommand "zyxel-nwa-fit-${config.boot.imageType}"
+        {
+          nativeBuildInputs = [
+            pkgs.pkgsBuildBuild.ubootTools
+            pkgs.pkgsBuildBuild.dtc
+          ];
+        }
+        ''
+          mkimage -f ${dts} $out
+        '';
   };
 }

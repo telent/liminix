@@ -5,7 +5,7 @@
 {
   system = {
     crossSystem = {
-      config =  "armv7l-unknown-linux-musleabihf";
+      config = "armv7l-unknown-linux-musleabihf";
     };
   };
 
@@ -24,30 +24,36 @@
   '';
   installer = "vmroot";
 
-  module = { config, lim, ... }: {
-    imports = [
-      ../../modules/arch/arm.nix
-      ../families/qemu.nix
-    ];
-    kernel = {
-      config = {
-        PCI_HOST_GENERIC = "y";
-        ARCH_VIRT = "y";
+  module =
+    { config, lim, ... }:
+    {
+      imports = [
+        ../../modules/arch/arm.nix
+        ../families/qemu.nix
+      ];
+      kernel = {
+        config = {
+          PCI_HOST_GENERIC = "y";
+          ARCH_VIRT = "y";
 
-        VFP = "y";
-        NEON = "y";
-        AEABI = "y";
+          VFP = "y";
+          NEON = "y";
+          AEABI = "y";
 
-        SERIAL_AMBA_PL011 = "y";
-        SERIAL_AMBA_PL011_CONSOLE = "y";
+          SERIAL_AMBA_PL011 = "y";
+          SERIAL_AMBA_PL011_CONSOLE = "y";
+        };
       };
+      boot.commandLine = [
+        "console=ttyAMA0"
+      ];
+      hardware =
+        let
+          addr = lim.parseInt "0x40008000";
+        in
+        {
+          loadAddress = addr;
+          entryPoint = addr;
+        };
     };
-    boot.commandLine = [
-      "console=ttyAMA0"
-    ];
-    hardware = let addr = lim.parseInt "0x40008000"; in {
-      loadAddress = addr;
-      entryPoint = addr;
-    };
-  };
 }

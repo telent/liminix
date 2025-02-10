@@ -1,17 +1,18 @@
 {
-  config
-, pkgs
-, lib
-, ...
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 let
   inherit (lib) mkOption types concatStringsSep;
   inherit (config.boot) tftp;
-in {
+in
+{
   options.system.outputs = {
     firmware = mkOption {
       type = types.package;
-      internal = true;          # component of mtdimage
+      internal = true; # component of mtdimage
       description = ''
         Binary image (combining kernel, FDT, rootfs, initramfs
         if needed, etc) for the target device.
@@ -19,7 +20,7 @@ in {
     };
     flash-scr = mkOption {
       type = types.package;
-      internal = true;          # component of mtdimage
+      internal = true; # component of mtdimage
       description = ''
         Copy-pastable U-Boot commands to TFTP download the
         image and write it to flash
@@ -60,13 +61,15 @@ in {
 
   config = {
     kernel = {
-      config = {
-        # this needs to be conditional on "not qemu"
-        MTD_SPLIT_UIMAGE_FW = "y";
-      } // lib.optionalAttrs (pkgs.stdenv.isMips) {
-        # https://stackoverflow.com/questions/26466470/can-the-logical-erase-block-size-of-an-mtd-device-be-increased
-        MTD_SPI_NOR_USE_4K_SECTORS = "n";
-      };
+      config =
+        {
+          # this needs to be conditional on "not qemu"
+          MTD_SPLIT_UIMAGE_FW = "y";
+        }
+        // lib.optionalAttrs (pkgs.stdenv.isMips) {
+          # https://stackoverflow.com/questions/26466470/can-the-logical-erase-block-size-of-an-mtd-device-be-increased
+          MTD_SPI_NOR_USE_4K_SECTORS = "n";
+        };
     };
 
     programs.busybox.applets = [
@@ -78,14 +81,17 @@ in {
         let
           o = config.system.outputs;
           bs = toString config.hardware.flash.eraseBlockSize;
-        in pkgs.runCommand "firmware" {} ''
+        in
+        pkgs.runCommand "firmware" { } ''
           dd if=${o.uimage} of=$out bs=${bs} conv=sync
           dd if=${o.rootfs} of=$out bs=${bs} conv=sync,nocreat,notrunc oflag=append
         '';
       mtdimage =
-        let o = config.system.outputs; in
+        let
+          o = config.system.outputs;
+        in
         # could use trivial-builders.linkFarmFromDrvs here?
-        pkgs.runCommand "mtdimage" {} ''
+        pkgs.runCommand "mtdimage" { } ''
           mkdir $out
           cd $out
           ln -s ${o.firmware} firmware.bin
@@ -96,24 +102,24 @@ in {
           ln -s ${o.uimage} uimage
           ln -s ${o.dtb} dtb
           ln -s ${o.flash-scr} flash.scr
-       '';
+        '';
 
       flash-scr =
         let
           inherit (pkgs.lib.trivial) toHexString;
           inherit (config.hardware) flash;
         in
-          pkgs.buildPackages.runCommand "" {} ''
-            imageSize=$(stat -L -c %s ${config.system.outputs.firmware})
-            cat > $out << EOF
-            setenv serverip ${tftp.serverip}
-            setenv ipaddr ${tftp.ipaddr}
-            tftp 0x${toHexString tftp.loadAddress} result/firmware.bin
-            erase 0x${toHexString flash.address} +0x${toHexString flash.size}
-            cp.b 0x${toHexString tftp.loadAddress} 0x${toHexString flash.address} \''${filesize}
-            echo command line was ${builtins.toJSON (concatStringsSep " " config.boot.commandLine)}
-            EOF
-          '';
+        pkgs.buildPackages.runCommand "" { } ''
+          imageSize=$(stat -L -c %s ${config.system.outputs.firmware})
+          cat > $out << EOF
+          setenv serverip ${tftp.serverip}
+          setenv ipaddr ${tftp.ipaddr}
+          tftp 0x${toHexString tftp.loadAddress} result/firmware.bin
+          erase 0x${toHexString flash.address} +0x${toHexString flash.size}
+          cp.b 0x${toHexString tftp.loadAddress} 0x${toHexString flash.address} \''${filesize}
+          echo command line was ${builtins.toJSON (concatStringsSep " " config.boot.commandLine)}
+          EOF
+        '';
     };
   };
 }

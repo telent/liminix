@@ -9,7 +9,12 @@
 ##  addresses of network interfaces that you want to assign those
 ##  prefixes to
 
-{ lib, pkgs, config, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;

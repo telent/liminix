@@ -97,7 +97,7 @@ in
     system.outputs = rec {
       dtb = liminix.builders.dtb {
         inherit (config.boot) commandLine;
-        dts = [config.hardware.dts.src] ++ config.hardware.dts.includes;
+        dts = [ config.hardware.dts.src ] ++ config.hardware.dts.includes;
         includes = config.hardware.dts.includePaths ++ [
           "${o.kernel.headers}/include"
         ];
@@ -105,7 +105,8 @@ in
       rootdir =
         let
           inherit (pkgs.pkgsBuildBuild) runCommand;
-        in runCommand "mktree" { } ''
+        in
+        runCommand "mktree" { } ''
           mkdir -p $out/nix/store/ $out/secrets $out/boot
           cp ${o.systemConfiguration}/bin/activate $out/activate
           ln -s ${pkgs.s6-init-bin}/bin/init $out/init
@@ -115,14 +116,18 @@ in
           done
         '';
       bootablerootdir =
-        let inherit (pkgs.pkgsBuildBuild) runCommand;
-        in runCommand "add-slash-boot" { } ''
+        let
+          inherit (pkgs.pkgsBuildBuild) runCommand;
+        in
+        runCommand "add-slash-boot" { } ''
           cp -a ${o.rootdir} $out
-          ${if o.bootfiles != null
-            then "(cd $out && chmod -R +w . && rmdir boot && cp -a ${o.bootfiles} boot)"
-            else ""
-           }
-         '';
+          ${
+            if o.bootfiles != null then
+              "(cd $out && chmod -R +w . && rmdir boot && cp -a ${o.bootfiles} boot)"
+            else
+              ""
+          }
+        '';
       manifest = writeText "manifest.json" (builtins.toJSON config.filesystem.contents);
     };
   };

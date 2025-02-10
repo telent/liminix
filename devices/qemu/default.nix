@@ -7,7 +7,7 @@
       config = "mips-unknown-linux-musl";
       gcc = {
         abi = "32";
-        arch = "mips32";          # maybe mips_24kc-
+        arch = "mips32"; # maybe mips_24kc-
       };
     };
   };
@@ -36,41 +36,50 @@
     in the Development manual.
 
   '';
-  module = { config, lib, lim, ... }: {
-    imports = [
-      ../../modules/arch/mipseb.nix
-      ../families/qemu.nix
-    ];
-    kernel = {
-      config = {
-        MIPS_MALTA= "y";
-        CPU_MIPS32_R2= "y";
+  module =
+    {
+      config,
+      lib,
+      lim,
+      ...
+    }:
+    {
+      imports = [
+        ../../modules/arch/mipseb.nix
+        ../families/qemu.nix
+      ];
+      kernel = {
+        config = {
+          MIPS_MALTA = "y";
+          CPU_MIPS32_R2 = "y";
 
-        POWER_RESET = "y";
-        POWER_RESET_SYSCON = "y";
+          POWER_RESET = "y";
+          POWER_RESET_SYSCON = "y";
 
-        SERIAL_8250= "y";
-        SERIAL_8250_CONSOLE= "y";
-      };
-    };
-    hardware =
-      # from arch/mips/mti-malta/Platform:load-$(CONFIG_MIPS_MALTA)  += 0xffffffff80100000
-      let addr = lim.parseInt "0x80100000";
-      in {
-        loadAddress = addr;
-        entryPoint = addr;
-
-        # Unlike the arm qemu targets, we need a static dts when
-        # running u-boot-using tests, qemu dumpdtb command doesn't
-        # work for this board. I am not at all sure this dts is
-        # *correct* but it does at least boot
-        dts = lib.mkForce {
-          src = "${config.system.outputs.kernel.modulesupport}/arch/mips/boot/dts/mti/malta.dts";
-          includePaths =  [
-            "${config.system.outputs.kernel.modulesupport}/arch/mips/boot/dts/"
-          ];
+          SERIAL_8250 = "y";
+          SERIAL_8250_CONSOLE = "y";
         };
-
       };
-  };
+      hardware =
+        # from arch/mips/mti-malta/Platform:load-$(CONFIG_MIPS_MALTA)  += 0xffffffff80100000
+        let
+          addr = lim.parseInt "0x80100000";
+        in
+        {
+          loadAddress = addr;
+          entryPoint = addr;
+
+          # Unlike the arm qemu targets, we need a static dts when
+          # running u-boot-using tests, qemu dumpdtb command doesn't
+          # work for this board. I am not at all sure this dts is
+          # *correct* but it does at least boot
+          dts = lib.mkForce {
+            src = "${config.system.outputs.kernel.modulesupport}/arch/mips/boot/dts/mti/malta.dts";
+            includePaths = [
+              "${config.system.outputs.kernel.modulesupport}/arch/mips/boot/dts/"
+            ];
+          };
+
+        };
+    };
 }

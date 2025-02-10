@@ -1,11 +1,12 @@
-{ config, pkgs, ... } :
+{ config, pkgs, ... }:
 let
   # EDIT: you can pick your preferred RFC1918 address space
   # for NATted connections, if you don't like this one.
   ipv4LocalNet = "10.8.0";
   svc = config.system.service;
 
-in rec {
+in
+rec {
   imports = [
     ../../modules/bridge
     ../../modules/dhcp6c
@@ -22,13 +23,14 @@ in rec {
 
   services.int = svc.network.address.build {
     interface = svc.bridge.primary.build { ifname = "int"; };
-    family = "inet"; address = "${ipv4LocalNet}.1"; prefixLength = 16;
+    family = "inet";
+    address = "${ipv4LocalNet}.1";
+    prefixLength = 16;
   };
 
-  services.bridge =  svc.bridge.members.build {
+  services.bridge = svc.bridge.members.build {
     primary = services.int;
-    members = with config.hardware.networkInterfaces;
-      [ lan ];
+    members = with config.hardware.networkInterfaces; [ lan ];
   };
 
   services.sshd = svc.ssh.build { };
@@ -46,7 +48,7 @@ in rec {
 
   defaultProfile.packages = with pkgs; [
     min-collect-garbage
-#    strace
+    #    strace
     #    ethtool
     tcpdump
   ];

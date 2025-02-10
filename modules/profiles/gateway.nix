@@ -1,8 +1,18 @@
-{ config, pkgs, lib, ... } :
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   svc = config.system.service;
   cfg = config.profile.gateway;
-  inherit (lib) mkOption mkEnableOption mkIf types;
+  inherit (lib)
+    mkOption
+    mkEnableOption
+    mkIf
+    types
+    ;
   inherit (pkgs) liminix serviceFns;
   inherit (liminix.services) bundle oneshot;
   hostaps =
@@ -14,24 +24,27 @@ let
         wpa_pairwise = "TKIP CCMP"; # auth for wpa (may not need this?)
         rsn_pairwise = "CCMP"; # auth for wpa2
       };
-    in lib.mapAttrs'
-      (name : value :
-        let
-          attrs = defaults // { ssid = name; } // value;
-        in lib.nameValuePair
-          "hostap-${name}"
-          (svc.hostapd.build {
-            interface = attrs.interface;
-            params = lib.filterAttrs (k: v: k != "interface") attrs;
-          }))
-      cfg.wireless.networks;
-in {
+    in
+    lib.mapAttrs' (
+      name: value:
+      let
+        attrs = defaults // { ssid = name; } // value;
+      in
+      lib.nameValuePair "hostap-${name}" (
+        svc.hostapd.build {
+          interface = attrs.interface;
+          params = lib.filterAttrs (k: v: k != "interface") attrs;
+        }
+      )
+    ) cfg.wireless.networks;
+in
+{
 
   options.profile.gateway = {
     lan = {
       interfaces = mkOption {
         type = types.listOf liminix.lib.types.interface;
-        default = [];
+        default = [ ];
       };
       address = mkOption {
         type = types.attrs;
@@ -49,7 +62,7 @@ in {
       enable = mkEnableOption "firewall";
       rules = mkOption { type = types.attrsOf types.attrs; };
       zones = mkOption {
-        type = types.attrsOf (types.listOf  liminix.lib.types.service);
+        type = types.attrsOf (types.listOf liminix.lib.types.service);
         default = {
           lan = [ config.services.int ];
           wan = [ config.services.wan ];
@@ -82,11 +95,14 @@ in {
   ];
 
   config = {
-    services.int = svc.network.address.build ({
-      interface = svc.bridge.primary.build { ifname = "int"; };
-    } // cfg.lan.address);
+    services.int = svc.network.address.build (
+      {
+        interface = svc.bridge.primary.build { ifname = "int"; };
+      }
+      // cfg.lan.address
+    );
 
-    services.bridge =  svc.bridge.members.build {
+    services.bridge = svc.bridge.members.build {
       primary = config.services.int;
       members = cfg.lan.interfaces;
     };
@@ -113,12 +129,15 @@ in {
             })
           ];
         };
-      in mkIf cfg.wan.dhcp6.enable bundl;
+      in
+      mkIf cfg.wan.dhcp6.enable bundl;
 
     services.dns =
-      let interface = config.services.int;
-          dcfg = cfg.lan.dhcp;
-      in svc.dnsmasq.build {
+      let
+        interface = config.services.int;
+        dcfg = cfg.lan.dhcp;
+      in
+      svc.dnsmasq.build {
         resolvconf = config.services.resolvconf;
         inherit interface;
         ranges = [
@@ -147,11 +166,12 @@ in {
       interface = config.services.wan;
     };
 
-    services.firewall = mkIf cfg.firewall.enable
-      (svc.firewall.build {
+    services.firewall = mkIf cfg.firewall.enable (
+      svc.firewall.build {
         extraRules = cfg.firewall.rules;
         inherit (cfg.firewall) zones;
-      });
+      }
+    );
 
     services.resolvconf = oneshot rec {
       dependencies = [ config.services.wan ];
@@ -166,11 +186,13 @@ in {
     };
 
     filesystem =
-      let inherit (pkgs.pseudofile) dir symlink;
-      in dir {
+      let
+        inherit (pkgs.pseudofile) dir symlink;
+      in
+      dir {
         etc = dir {
           "resolv.conf" = symlink "${config.services.resolvconf}/.outputs/resolv.conf";
         };
       };
   };
- }
+}

@@ -1,19 +1,25 @@
-{ config, pkgs, lib, ... } :
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   inherit (pkgs) dropbear;
   inherit (pkgs.liminix.services) longrun;
-in {
+in
+{
   imports = [
     ../../vanilla-configuration.nix
     ../../modules/outputs/jffs2.nix
   ];
-  config =  {
+  config = {
     services.sshd = longrun {
       name = "sshd";
       run = ''
-      mkdir -p /run/dropbear
-      ${dropbear}/bin/dropbear -E -P /run/dropbear.pid -R -F
-    '';
+        mkdir -p /run/dropbear
+        ${dropbear}/bin/dropbear -E -P /run/dropbear.pid -R -F
+      '';
     };
 
     users.root = {

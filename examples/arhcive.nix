@@ -9,13 +9,15 @@
   pkgs,
   lib,
   ...
-}: let
+}:
+let
   secrets = import ./extneder-secrets.nix;
   inherit (pkgs.liminix.services) oneshot longrun target;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs) writeText serviceFns;
   svc = config.system.service;
-in rec {
+in
+rec {
   boot = {
     tftp = {
       serverip = "10.0.0.1";
@@ -34,10 +36,11 @@ in rec {
   ];
   hostname = "arhcive";
 
-
   services.dhcpc =
-    let iface = config.hardware.networkInterfaces.lan;
-    in svc.network.dhcp.client.build {
+    let
+      iface = config.hardware.networkInterfaces.lan;
+    in
+    svc.network.dhcp.client.build {
       interface = iface;
       dependencies = [ config.services.hostname ];
     };
@@ -45,7 +48,10 @@ in rec {
   services.sshd = svc.ssh.build { };
 
   services.watchdog = svc.watchdog.build {
-    watched = with config.services ; [ sshd dhcpc ];
+    watched = with config.services; [
+      sshd
+      dhcpc
+    ];
   };
 
   services.resolvconf = oneshot rec {
@@ -63,17 +69,20 @@ in rec {
     etc = dir {
       "resolv.conf" = symlink "${services.resolvconf}/.outputs/resolv.conf";
     };
-    srv = dir {};
+    srv = dir { };
   };
 
   services.defaultroute4 = svc.network.route.build {
     via = "$(output ${services.dhcpc} router)";
     target = "default";
-    dependencies = [services.dhcpc];
+    dependencies = [ services.dhcpc ];
   };
 
-  programs.busybox  = {
-    applets = ["lsusb" "tar"];
+  programs.busybox = {
+    applets = [
+      "lsusb"
+      "tar"
+    ];
     options = {
       FEATURE_LS_TIMESTAMPS = "y";
       FEATURE_LS_SORTFILES = "y";
@@ -108,7 +117,8 @@ in rec {
           gid = backup
           secrets file = ${secrets_file}/.outputs/secrets
       '';
-    in longrun {
+    in
+    longrun {
       name = "rsync";
       run = ''
         ${pkgs.rsyncSmall}/bin/rsync --no-detach --daemon  --config=${configFile}

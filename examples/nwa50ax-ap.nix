@@ -1,4 +1,4 @@
-{ config, pkgs, ... } :
+{ config, pkgs, ... }:
 let
   inherit (pkgs.liminix.services) target;
   svc = config.system.service;
@@ -43,13 +43,16 @@ let
     he_oper_centr_freq_seg0_idx = 42;
     require_vht = 1;
   };
-  mkWifiSta = params: interface: secrets: svc.hostapd.build {
-    inherit interface;
+  mkWifiSta =
+    params: interface: secrets:
+    svc.hostapd.build {
+      inherit interface;
       params = params // {
         inherit (secrets) ssid wpa_passphrase;
       };
-  };
-in rec {
+    };
+in
+rec {
   imports = [
     ../modules/wlan.nix
     ../modules/network
@@ -87,8 +90,10 @@ in rec {
   };
 
   services.dhcpv4 =
-    let iface = services.int;
-    in svc.network.dhcp.client.build { interface = iface; };
+    let
+      iface = services.int;
+    in
+    svc.network.dhcp.client.build { interface = iface; };
 
   services.defaultroute4 = svc.network.route.build {
     via = "$(output ${services.dhcpv4} address)";
@@ -102,7 +107,9 @@ in rec {
   };
 
   services.ntp = config.system.service.ntp.build {
-    pools = { "pool.ntp.org" = ["iburst"] ; };
+    pools = {
+      "pool.ntp.org" = [ "iburst" ];
+    };
   };
 
   boot.tftp = {
@@ -113,7 +120,14 @@ in rec {
   # wlan0 is the 2.4GHz interface.
   services.hostap-1 = mkWifiSta baseParams config.hardware.networkInterfaces.wlan0 secrets-1;
   # wlan1 is the 5GHz interface, e.g. AX capable.
-  services.hostap-2 = mkWifiSta (baseParams // modernParams) config.hardware.networkInterfaces.wlan1 secrets-2;
+  services.hostap-2 = mkWifiSta (
+    baseParams // modernParams
+  ) config.hardware.networkInterfaces.wlan1 secrets-2;
 
-  defaultProfile.packages = with pkgs; [ zyxel-bootconfig iw min-collect-garbage mtdutils ];
+  defaultProfile.packages = with pkgs; [
+    zyxel-bootconfig
+    iw
+    min-collect-garbage
+    mtdutils
+  ];
 }

@@ -6,12 +6,18 @@
 ## optionally also provide time service to its peers. The
 ## implementation used in Liminix is Chrony
 
-{ lib, pkgs, config, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
   serverOpts = types.listOf types.str;
-in {
+in
+{
   options = {
     system.service.ntp = mkOption {
       type = liminix.lib.types.serviceDefn;
@@ -23,23 +29,36 @@ in {
         type = types.str;
         default = "ntp";
       };
-      servers = mkOption { type = types.attrsOf serverOpts; default = {}; };
-      pools = mkOption { type = types.attrsOf serverOpts; default = {}; };
-      peers = mkOption { type = types.attrsOf serverOpts; default = {}; };
+      servers = mkOption {
+        type = types.attrsOf serverOpts;
+        default = { };
+      };
+      pools = mkOption {
+        type = types.attrsOf serverOpts;
+        default = { };
+      };
+      peers = mkOption {
+        type = types.attrsOf serverOpts;
+        default = { };
+      };
       makestep = mkOption {
         default = null;
-        type = types.nullOr
-          (types.submodule {
+        type = types.nullOr (
+          types.submodule {
             options = {
-              threshold = mkOption { type = types.number; default = null;};
+              threshold = mkOption {
+                type = types.number;
+                default = null;
+              };
               limit = mkOption { type = types.number; };
             };
-          });
+          }
+        );
       };
       allow = mkOption {
         description = "subnets from which NTP clients are allowed to access the server";
         type = types.listOf types.str;
-        default = [];
+        default = [ ];
       };
       bindaddress = mkOption {
         type = types.nullOr types.str;
@@ -60,7 +79,9 @@ in {
       };
     };
     users.ntp = {
-      uid = 52; gid= 52; gecos = "Unprivileged NTP user";
+      uid = 52;
+      gid = 52;
+      gecos = "Unprivileged NTP user";
       dir = "/run/ntp";
       shell = "/bin/false";
     };

@@ -1,8 +1,21 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   cfg = config.bordervm;
-  inherit (lib) mkOption mkEnableOption mdDoc types optional optionals;
-in {
+  inherit (lib)
+    mkOption
+    mkEnableOption
+    mdDoc
+    types
+    optional
+    optionals
+    ;
+in
+{
   options.bordervm = {
     keys = mkOption {
       type = types.listOf types.str;
@@ -107,13 +120,14 @@ in {
           from = "host";
           host.port = 7654;
           #        guest.address = "10.0.2.15";
-          guest.port =7654;
+          guest.port = 7654;
         }
         {
           host.port = 2222;
           guest.address = "10.0.2.15";
           guest.port = 22;
-        }];
+        }
+      ];
       qemu = {
         networkingOptions = [ ];
         options =
@@ -139,28 +153,41 @@ in {
 
     services.tang = {
       enable = true;
-      ipAddressAllow = [ "10.0.0.0/24" "0.0.0.0/0" ];
+      ipAddressAllow = [
+        "10.0.0.0/24"
+        "0.0.0.0/0"
+      ];
     };
 
     environment.systemPackages =
-      let wireshark-nogui = pkgs.wireshark.override { withQt = false ; };
-          in with pkgs; [
-            tcpdump
-            wireshark-nogui
-            socat
-            tufted
-            iptables
-            usbutils
-            busybox
-            clevis
-          ];
+      let
+        wireshark-nogui = pkgs.wireshark.override { withQt = false; };
+      in
+      with pkgs;
+      [
+        tcpdump
+        wireshark-nogui
+        socat
+        tufted
+        iptables
+        usbutils
+        busybox
+        clevis
+      ];
     security.sudo.wheelNeedsPassword = false;
     networking = {
       hostName = "border";
-      firewall = { enable = false; };
+      firewall = {
+        enable = false;
+      };
       interfaces.eth1 = {
         useDHCP = false;
-        ipv4.addresses = [ { address = "10.0.0.1"; prefixLength = 24;}];
+        ipv4.addresses = [
+          {
+            address = "10.0.0.1";
+            prefixLength = 24;
+          }
+        ];
       };
       nat = {
         enable = true;

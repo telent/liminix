@@ -13,18 +13,24 @@
 ## conjunction with a DHCP uplink, or other more creative forms of
 ## network connection
 
-
-{ lib, pkgs, config, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
   mkStringOption =
-    description: mkOption {
+    description:
+    mkOption {
       type = types.nullOr types.str;
       default = null;
       inherit description;
     };
-in {
+in
+{
   imports = [ ../secrets ];
   options = {
     system.service.pppoe = mkOption {
@@ -61,7 +67,7 @@ in {
           default = 3;
           description = "send an LCP echo-request frame to the peer every n seconds";
         };
-        failure =  mkOption {
+        failure = mkOption {
           type = types.nullOr types.int;
           default = 3;
           description = "terminate connection if n LCP echo-requests are sent without receiving a valid LCP echo-reply";
@@ -75,7 +81,7 @@ in {
       ppp-options = mkOption {
         type = types.listOf types.str;
         description = "options supplied on ppp command line";
-        default = [];
+        default = [ ];
       };
     };
     system.service.l2tp = config.system.callService ./l2tp.nix {
@@ -104,7 +110,7 @@ in {
           default = 3;
           description = "send an LCP echo-request frame to the peer every n seconds";
         };
-        failure =  mkOption {
+        failure = mkOption {
           type = types.nullOr types.int;
           default = 3;
           description = "terminate connection if n LCP echo-requests are sent without receiving a valid LCP echo-reply";
@@ -117,7 +123,7 @@ in {
       };
       ppp-options = mkOption {
         type = types.listOf types.str;
-        default = [];
+        default = [ ];
         description = "options supplied on ppp command line";
       };
     };

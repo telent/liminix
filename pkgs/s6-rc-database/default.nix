@@ -8,10 +8,12 @@
   writeText,
   services ? [ ],
 }:
-let closure-info = closureInfo { rootPaths = services; };
-in stdenvNoCC.mkDerivation  {
+let
+  closure-info = closureInfo { rootPaths = services; };
+in
+stdenvNoCC.mkDerivation {
   name = "s6-rc-database";
-  nativeBuildInputs = [buildPackages.s6-rc];
+  nativeBuildInputs = [ buildPackages.s6-rc ];
   builder = writeText "find-s6-services" ''
     source $stdenv/setup
     mkdir -p $out

@@ -14,7 +14,8 @@ let
   ipv4LocalNet = "10.8.0";
   svc = config.system.service;
 
-in rec {
+in
+rec {
   boot = {
     tftp = {
       freeSpaceBytes = 3 * 1024 * 1024;
@@ -99,8 +100,10 @@ in rec {
   };
 
   services.dns =
-    let interface = services.int;
-    in svc.dnsmasq.build {
+    let
+      interface = services.int;
+    in
+    svc.dnsmasq.build {
       resolvconf = services.resolvconf;
       inherit interface;
       ranges = [
@@ -124,12 +127,16 @@ in rec {
   services.wan = svc.pppoe.build {
     interface = config.hardware.networkInterfaces.wan;
     ppp-options = [
-      "debug" "+ipv6" "noauth"
+      "debug"
+      "+ipv6"
+      "noauth"
       # EDIT: change the strings "chap-username"
       # and "chap-secret" to match the username/password
       # provided by your ISP for PPP logins
-      "name" "chap-username"
-      "password" "chap-secret"
+      "name"
+      "chap-username"
+      "password"
+      "chap-secret"
     ];
   };
 
@@ -146,8 +153,10 @@ in rec {
   };
 
   filesystem =
-    let inherit (pkgs.pseudofile) dir symlink;
-    in dir {
+    let
+      inherit (pkgs.pseudofile) dir symlink;
+    in
+    dir {
       etc = dir {
         "resolv.conf" = symlink "${services.resolvconf}/.outputs/resolv.conf";
       };
@@ -176,10 +185,12 @@ in rec {
   # LAN interfaces respectively.
 
   services.dhcp6c =
-    let client = svc.dhcp6c.client.build {
-          interface = services.wan;
-        };
-    in bundle {
+    let
+      client = svc.dhcp6c.client.build {
+        interface = services.wan;
+      };
+    in
+    bundle {
       name = "dhcp6c";
       contents = [
         (svc.dhcp6c.prefix.build {

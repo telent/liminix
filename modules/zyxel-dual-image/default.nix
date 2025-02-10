@@ -10,7 +10,12 @@
 ## failure on the primary partition. The exact details are specifics to your device.
 ## See the Zyxel NWA50AX for an example.
 ## TODO: generalize this module.
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
@@ -22,23 +27,31 @@ in
 
   config.boot.zyxel-dual-image = config.system.callService ./service.nix {
     ensureActiveImage = mkOption {
-      type = types.enum [ "primary" "secondary" ];
+      type = types.enum [
+        "primary"
+        "secondary"
+      ];
       default = "primary";
-      description = ''At boot, ensure that the active image is the one specified.
+      description = ''
+        At boot, ensure that the active image is the one specified.
 
-        If you are already on a broken image, you need to manually boot
-        into the right image via `atgo <image index>` in U-Boot.
+                If you are already on a broken image, you need to manually boot
+                into the right image via `atgo <image index>` in U-Boot.
       '';
     };
 
     kernelCommandLineSource = mkOption {
-      type = types.enum [ "/proc/cmdline" "/proc/device-tree/chosen/bootargs" ];
+      type = types.enum [
+        "/proc/cmdline"
+        "/proc/device-tree/chosen/bootargs"
+      ];
       default = "/proc/device-tree/chosen/bootargs";
-      description = ''Kernel command line arguments source file.
-        On MIPS, Liminix embeds the kernel command line in /proc/device-tree/chosen/bootargs-override.
+      description = ''
+        Kernel command line arguments source file.
+                On MIPS, Liminix embeds the kernel command line in /proc/device-tree/chosen/bootargs-override.
 
-        In this instance, it does not get concatenated with `/proc/cmdline`.
-        Therefore you may prefer to source it from another place, like `/proc/device-tree/chosen/bootargs`.
+                In this instance, it does not get concatenated with `/proc/cmdline`.
+                Therefore you may prefer to source it from another place, like `/proc/device-tree/chosen/bootargs`.
       '';
     };
 

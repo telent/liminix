@@ -6,7 +6,8 @@
   pkgs,
   lib,
   ...
-}: let
+}:
+let
   secrets = import ./extneder-secrets.nix;
   rsecrets = import ./rotuer-secrets.nix;
 
@@ -27,7 +28,10 @@
   # to start l2tp unless the expected lns address is one of the
   # addresses returned. I think this satisfies "do check the DNS"
 
-  lns = { hostname = "l2tp.aaisp.net.uk"; address = "194.4.172.12"; };
+  lns = {
+    hostname = "l2tp.aaisp.net.uk";
+    address = "194.4.172.12";
+  };
 
   inherit (pkgs.liminix.services) oneshot longrun target;
   inherit (pkgs.liminix) outputRef;
@@ -39,7 +43,8 @@
     inherit (rsecrets) wpa_passphrase;
     wmm_enabled = 1;
   };
-in rec {
+in
+rec {
   boot = {
     tftp = {
       serverip = "10.0.0.1";
@@ -62,7 +67,9 @@ in rec {
 
   services.wan-address-for-secrets = svc.network.address.build {
     interface = config.hardware.networkInterfaces.wan;
-    family = "inet"; address ="10.0.0.10"; prefixLength = 24;
+    family = "inet";
+    address = "10.0.0.10";
+    prefixLength = 24;
   };
 
   services.secrets = svc.secrets.outboard.build {
@@ -83,22 +90,26 @@ in rec {
 
   profile.gateway = {
     lan = {
-      interfaces =  with config.hardware.networkInterfaces;
-        [
-          # EDIT: these are the interfaces exposed by the gl.inet gl-ar750:
-          # if your device has more or differently named lan interfaces,
-          # specify them here
-          wlan wlan5
-          lan
-        ];
+      interfaces = with config.hardware.networkInterfaces; [
+        # EDIT: these are the interfaces exposed by the gl.inet gl-ar750:
+        # if your device has more or differently named lan interfaces,
+        # specify them here
+        wlan
+        wlan5
+        lan
+      ];
       inherit (rsecrets.lan) prefix;
       address = {
-        family = "inet"; address ="${rsecrets.lan.prefix}.1"; prefixLength = 24;
+        family = "inet";
+        address = "${rsecrets.lan.prefix}.1";
+        prefixLength = 24;
       };
       dhcp = {
         start = 10;
         end = 240;
-        hosts = { } // lib.optionalAttrs (builtins.pathExists ./static-leases.nix) (import ./static-leases.nix);
+        hosts =
+          { }
+          // lib.optionalAttrs (builtins.pathExists ./static-leases.nix) (import ./static-leases.nix);
         localDomain = "lan";
       };
     };
@@ -107,7 +118,8 @@ in rec {
         secret = outputRef config.services.secrets;
         username = secret "ppp/username";
         password = secret "ppp/password";
-      in {
+      in
+      {
         interface =
           let
             pppoe = svc.pppoe.build {
@@ -126,21 +138,29 @@ in rec {
                 route = svc.network.route.build {
                   via = "$(output ${services.bootstrap-dhcpc} router)";
                   target = lns.address;
-                  dependencies = [services.bootstrap-dhcpc check-address];
+                  dependencies = [
+                    services.bootstrap-dhcpc
+                    check-address
+                  ];
                 };
-                l2tpd= svc.l2tp.build {
+                l2tpd = svc.l2tp.build {
                   lns = lns.address;
                   inherit username password;
-                  dependencies = [config.services.lns-address route check-address];
+                  dependencies = [
+                    config.services.lns-address
+                    route
+                    check-address
+                  ];
                 };
               in
-                svc.health-check.build {
-                  service = l2tpd;
-                  threshold = 3;
-                  interval = 2;
-                  healthCheck = pkgs.writeAshScript "ping-check" {} "ping 1.1.1.1";
-                };
-          in svc.round-robin.build {
+              svc.health-check.build {
+                service = l2tpd;
+                threshold = 3;
+                interval = 2;
+                healthCheck = pkgs.writeAshScript "ping-check" { } "ping 1.1.1.1";
+              };
+          in
+          svc.round-robin.build {
             name = "wan";
             services = [
               pppoe
@@ -151,27 +171,33 @@ in rec {
       };
 
     wireless.networks = {
-      "${rsecrets.ssid}" = {
-        interface = config.hardware.networkInterfaces.wlan;
-        hw_mode = "g";
-        channel = "6";
-        ieee80211n = 1;
-      } // wirelessConfig // {
-        wpa_passphrase = outputRef config.services.secrets "wpa_passphrase";
-      };
+      "${rsecrets.ssid}" =
+        {
+          interface = config.hardware.networkInterfaces.wlan;
+          hw_mode = "g";
+          channel = "6";
+          ieee80211n = 1;
+        }
+        // wirelessConfig
+        // {
+          wpa_passphrase = outputRef config.services.secrets "wpa_passphrase";
+        };
 
-      "${rsecrets.ssid}5" = rec {
-        interface = config.hardware.networkInterfaces.wlan5;
-        hw_mode = "a";
-        channel = 36;
-        ht_capab = "[HT40+]";
-        vht_oper_chwidth = 1;
-        vht_oper_centr_freq_seg0_idx = channel + 6;
-        ieee80211n = 1;
-        ieee80211ac = 1;
-      } // wirelessConfig // {
-        wpa_passphrase = outputRef config.services.secrets "wpa_passphrase";
-      };
+      "${rsecrets.ssid}5" =
+        rec {
+          interface = config.hardware.networkInterfaces.wlan5;
+          hw_mode = "a";
+          channel = 36;
+          ht_capab = "[HT40+]";
+          vht_oper_chwidth = 1;
+          vht_oper_centr_freq_seg0_idx = channel + 6;
+          ieee80211n = 1;
+          ieee80211ac = 1;
+        }
+        // wirelessConfig
+        // {
+          wpa_passphrase = outputRef config.services.secrets "wpa_passphrase";
+        };
     };
   };
 
@@ -184,23 +210,28 @@ in rec {
     authorizedKeys = outputRef config.services.secrets "ssh/authorizedKeys";
   };
 
-  services.lns-address = let
-    ns = "$(output_word ${services.bootstrap-dhcpc} dns 1)";
-    route-to-bootstrap-nameserver = svc.network.route.build {
-      via = "$(output ${services.bootstrap-dhcpc} router)";
-      target = ns;
-      dependencies = [services.bootstrap-dhcpc];
+  services.lns-address =
+    let
+      ns = "$(output_word ${services.bootstrap-dhcpc} dns 1)";
+      route-to-bootstrap-nameserver = svc.network.route.build {
+        via = "$(output ${services.bootstrap-dhcpc} router)";
+        target = ns;
+        dependencies = [ services.bootstrap-dhcpc ];
+      };
+    in
+    oneshot rec {
+      name = "resolve-l2tp-server";
+      dependencies = [
+        services.bootstrap-dhcpc
+        route-to-bootstrap-nameserver
+      ];
+      up = ''
+        (in_outputs ${name}
+         DNSCACHEIP="${ns}" ${pkgs.s6-dns}/bin/s6-dnsip4 ${lns.hostname} \
+          > addresses
+        )
+      '';
     };
-  in oneshot rec {
-    name = "resolve-l2tp-server";
-    dependencies = [ services.bootstrap-dhcpc route-to-bootstrap-nameserver ];
-    up = ''
-      (in_outputs ${name}
-       DNSCACHEIP="${ns}" ${pkgs.s6-dns}/bin/s6-dnsip4 ${lns.hostname} \
-        > addresses
-      )
-    '';
-  };
 
   users.root = rsecrets.root;
 

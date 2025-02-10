@@ -1,11 +1,12 @@
 {
-  liminix
-, lib
+  liminix,
+  lib,
 }:
-{ ifname } :
+{ ifname }:
 let
   inherit (liminix.services) oneshot;
-in oneshot rec {
+in
+oneshot rec {
   name = "${ifname}.link";
   up = ''
     ip link add name ${ifname} type bridge

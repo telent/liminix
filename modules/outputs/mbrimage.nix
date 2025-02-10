@@ -1,14 +1,15 @@
 {
-  config
-, pkgs
-, lib
-, ...
+  config,
+  pkgs,
+  lib,
+  ...
 }:
 let
   inherit (lib) mkOption types;
   o = config.system.outputs;
   phram_address = lib.toHexString (config.hardware.ram.startAddress + 256 * 1024 * 1024);
-in {
+in
+{
   options.system.outputs = {
     mbrimage = mkOption {
       type = types.package;
@@ -20,7 +21,7 @@ in {
         the contents of ``outputs.rootfs`` as its only partition.
       '';
     };
-    vmdisk = mkOption {  type = types.package; };
+    vmdisk = mkOption { type = types.package; };
   };
 
   config = {
@@ -28,15 +29,18 @@ in {
       mbrimage =
         let
           o = config.system.outputs;
-        in pkgs.runCommand "mbrimage" {
-          depsBuildBuild = [ pkgs.pkgsBuildBuild.util-linux ];
-        } ''
-          # leave 4 sectors at start for partition table
-          # and alignment to 2048 bytes (does that help?)
-          dd if=${o.rootfs} of=$out bs=512 seek=4 conv=sync
-          echo '4,-,L,*' | sfdisk $out
-        '';
-      vmdisk = pkgs.runCommand "vmdisk" {} ''
+        in
+        pkgs.runCommand "mbrimage"
+          {
+            depsBuildBuild = [ pkgs.pkgsBuildBuild.util-linux ];
+          }
+          ''
+            # leave 4 sectors at start for partition table
+            # and alignment to 2048 bytes (does that help?)
+            dd if=${o.rootfs} of=$out bs=512 seek=4 conv=sync
+            echo '4,-,L,*' | sfdisk $out
+          '';
+      vmdisk = pkgs.runCommand "vmdisk" { } ''
         mkdir $out
         cd $out
         ln -s ${o.mbrimage} ./mbrimage

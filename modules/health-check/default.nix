@@ -6,13 +6,18 @@
 ## have other behaviours by e.g. combining this service with a round-robin
 ## for failover)
 
-
-{ lib, pkgs, config, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
+in
 #  inherit (pkgs.liminix.services) longrun;
-in {
+{
   options = {
     system.service.health-check = mkOption {
       description = "run a service while periodically checking it is healthy";
@@ -23,13 +28,13 @@ in {
     service = mkOption {
       type = liminix.lib.types.service;
     };
-    interval =  mkOption {
+    interval = mkOption {
       description = "interval between checks, in seconds";
       type = types.int;
       default = 10;
       example = 10;
     };
-    threshold =  mkOption {
+    threshold = mkOption {
       description = "number of consecutive failures required for the service to be kicked";
       type = types.int;
       example = 3;
@@ -39,5 +44,5 @@ in {
       type = types.path;
     };
   };
-  config.programs.busybox.applets = ["expr"];
+  config.programs.busybox.applets = [ "expr" ];
 }

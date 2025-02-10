@@ -7,14 +7,26 @@
   lualinux,
   cpio,
 }:
-let pname =  "anoia";
-in stdenv.mkDerivation {
+let
+  pname = "anoia";
+in
+stdenv.mkDerivation {
   inherit pname;
   version = "0.1";
   src = ./.;
-  nativeBuildInputs = [ fennel cpio bc ];
-  buildInputs = with lua.pkgs; [ linotify lualinux ];
-  outputs = [ "out" "dev" ];
+  nativeBuildInputs = [
+    fennel
+    cpio
+    bc
+  ];
+  buildInputs = with lua.pkgs; [
+    linotify
+    lualinux
+  ];
+  outputs = [
+    "out"
+    "dev"
+  ];
 
   doCheck = true;
 

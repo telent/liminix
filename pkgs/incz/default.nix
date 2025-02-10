@@ -7,29 +7,33 @@
   lua,
   anoia,
   lualinux,
-  stdenv
+  stdenv,
 }:
-let name = "incz";
-in stdenv.mkDerivation {
+let
+  name = "incz";
+in
+stdenv.mkDerivation {
   inherit name;
   src = ./.;
 
-  buildInputs = [lua];
-  nativeBuildInputs = [fennelrepl];
+  buildInputs = [ lua ];
+  nativeBuildInputs = [ fennelrepl ];
 
   buildPhase = ''
     fennelrepl --test ./incz.fnl
-    cp -p ${writeFennel name {
-      packages = [
-        anoia
-        lualinux
-        fennel
-      ];
-      macros = [
-        anoia.dev
-      ];
-      mainFunction = "run";
-    } ./incz.fnl } ${name}
+    cp -p ${
+      writeFennel name {
+        packages = [
+          anoia
+          lualinux
+          fennel
+        ];
+        macros = [
+          anoia.dev
+        ];
+        mainFunction = "run";
+      } ./incz.fnl
+    } ${name}
   '';
 
   installPhase = ''

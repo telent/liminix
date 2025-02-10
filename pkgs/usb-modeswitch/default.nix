@@ -9,7 +9,8 @@
 let
   pname = "usb-modeswitch";
   version = "2.6.0";
-in stdenv.mkDerivation {
+in
+stdenv.mkDerivation {
   inherit pname version;
 
   src = fetchurl {
