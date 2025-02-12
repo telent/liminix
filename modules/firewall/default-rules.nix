@@ -200,9 +200,7 @@ in
     type = "filter";
     family = "ip";
 
-    rules = [
-      (accept "udp sport 53")
-    ];
+    rules = [];
   };
 
   input-ip4 = {
