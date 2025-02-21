@@ -7020,3 +7020,45 @@ Sun Feb  9 21:33:57 GMT 2025
 nft update set @lan
 
 echo 'flush set table-ip lan;  add element table-ip lan { eth0,lo }' | nft -f -
+
+Tue Feb 11 18:30:09 GMT 2025
+
+outstanding for 1.0:
+
+1) security audit fedback
+
+a) ask ROS if I can ship their report, with a response doc
+ showing the commits that address each finding/non-finding
+b) firewall rules: icmp rate limit, DNS, doc for icmpv6 packet dropping
+c) look over env var inputs and parse them properly instead of
+  string glommeration
+
+2) docs:
+ - for each device, add "finishedness" status and link to build status
+ - generally read them over and spruce up
+ - porting guide
+
+3) some kconfig magic to generate minimal kconfig files so that
+device modules don't end up as copy-pastes of the openwrt defconfig
+
+
+---
+
+apparently 5% of available bandwidth is a reasonable rate limit for
+icmp
+
+% nft add rule filter input limit rate over 10 mbytes/second drop
+
+but nftables has no way to get interface bandwidth and indeed nor does
+the device generally: the 1000Mb/s ethernet interface might be
+connected to a 70Mb/s pppoe upstream and how would it know?  So the
+site operator needs to say somewhere what the upstream bandwidth is.
+
+Sun Feb 16 22:16:29 GMT 2025
+
+we probably didn't need to write that service, we could have used the
+thing that makes templated config files _and_ if we somehow contrive
+to write the interface bandwidth as an interface output we could get
+that the same way
+
+if only I could remember how it worked :-)
