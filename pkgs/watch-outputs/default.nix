@@ -2,6 +2,7 @@
   fetchurl,
   writeFennel,
   fennel,
+  fennelrepl,
   runCommand,
   lua,
   anoia,
@@ -17,6 +18,7 @@ stdenv.mkDerivation {
   src = ./.;
 
   buildInputs = [ lua ];
+  nativeBuildInputs = [ fennelrepl ] ;
   #  doCheck = true;
 
   buildPhase = ''
@@ -31,6 +33,7 @@ stdenv.mkDerivation {
         mainFunction = "run";
       } ./watch-outputs.fnl
     } ${name}
+    make check
   '';
   #  checkPhase = "make check";
   installPhase = ''

@@ -1,3 +1,3 @@
 check:
-	./output-template  '{{' '}}' < example.ini > output
+	fennelrepl ./test.fnl  '{{' '}}' < example.ini > output
 	diff -u output example.ini.expected
