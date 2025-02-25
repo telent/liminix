@@ -15,12 +15,20 @@ rec {
     ../../modules/ppp
     ../../modules/dnsmasq
     ../../modules/network
+    ../../modules/firewall
   ];
 
   services.pppoe = svc.pppoe.build {
     interface = config.hardware.networkInterfaces.wan;
     username = "db123@a.1";
     password = "NotReallyTheSecret";
+  };
+
+  services.firewall = svc.firewall.build {
+    zones = {
+      wan = [ services.pppoe ];
+      lan = [ services.lan4 ];
+    };
   };
 
   services.defaultroute4 = svc.network.route.build {
@@ -39,5 +47,5 @@ rec {
     domain = "fake.liminix.org";
   };
 
-  defaultProfile.packages = [ pkgs.hello ];
+  defaultProfile.packages = with pkgs; [ nftables hello ];
 }

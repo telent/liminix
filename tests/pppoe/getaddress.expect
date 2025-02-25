@@ -1,18 +1,35 @@
 set timeout 60
 
 spawn socat unix-connect:vm/console -
+expect "s6-linux-init"
 send "\r\n"
 expect "#"
+send "PS1=\$(echo 'I1JFQURZIyA=' | base64 -d); stty -echo\n"
+expect "#READY#"
 set FINISHED 0
 set EXIT "1" 
 while { $FINISHED < 10 } {
-  send "ip address show dev ppp0 | grep ppp0\r\n"
+  send "ip address show dev ppp0 | grep ppp0\n"
   expect {
     "192.168.100.1" { set FINISHED 20; set EXIT 0; }
-    "can't find device" { send_user "waiting ..." ; send "\r\n"; sleep 3 }
-    "DOWN" { send_user "waiting ..." ; send "\r\n"; sleep 3 }
+    "can't find device" { send_user "waiting ..." ; sleep 3 }
+    "DOWN" { send_user "waiting ..." ; sleep 3 }
   }
   set FINISHED [ expr $FINISHED + 1 ]
 }
+send "nft list set ip table-ip wan || touch /non/existent\n"
+expect {
+  "ppp0" { puts "ppp0 found " }
+  "{ }" { puts "missing ifname"; exit 1 }
+  "No such file or directory" { exit 1 }
+}  
+expect "#READY#"
 
+send "nft list set ip table-ip lan || touch /non/existent\n"
+expect {
+  "lan" { puts "lan found" }
+  "{ }" { puts "missing ifname"; exit 1 }
+  "No such file or directory" { exit 1 }
+}  
+expect "#READY#"
 exit $EXIT
