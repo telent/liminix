@@ -19,7 +19,6 @@ stdenv.mkDerivation {
 
   buildInputs = [ lua ];
   nativeBuildInputs = [ fennelrepl ] ;
-  #  doCheck = true;
 
   buildPhase = ''
     cp -p ${
@@ -35,7 +34,7 @@ stdenv.mkDerivation {
     } ${name}
     make check
   '';
-  #  checkPhase = "make check";
+
   installPhase = ''
     install -D ${name} $out/bin/${name}
   '';
