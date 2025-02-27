@@ -7062,3 +7062,50 @@ to write the interface bandwidth as an interface output we could get
 that the same way
 
 if only I could remember how it worked :-)
+
+----
+
+* watch-output watches only _one_ service and is called with a list of
+outputs inside that service, so not exactly what we need. we can
+extend it easily enough to watch multiple services using poll() if we
+can figure out the syntax we want. Luckily all the places that call it
+go through modules/secrets/subscriber.nix so it's easy enough to change
+existing uses
+
+we could do
+watch-outputs -r foo /nix/store/blah/.outputs/ifname   /nix/store/eee/.outputs/ifname  ...
+
+or
+watch-outputs -r foo /nix/store/blah:ifname   /nix/store/eee:ifname  /nix/store/eee:bandwidth
+
+or
+
+watch-outputs -r foo /nix/store/blah:ifname   /nix/store/eee:ifname:bandwidth
+
+which I quite like insofar as it's shorter but has no other real merit
+
+then we need to decide how to represent an output reference in a firewall rule.
+Since each rule is basically text already, might just put the handlebars straight in
+
+let qq = builtins.toJSON ;
+in "icmp6 limit rate over {{ tonumber(output(${qq (intf "service")}, ${qq (intf "bandwidth")})) / 20 }} bytes/second drop"
+
+probably we should do a separate rule for each interface in the wan zone
+
+Sun Feb 23 00:34:34 GMT 2025
+
+looks like we have no tests for anything involving watched services or subscribers,
+or if we do I can't see what
+
+Thu Feb 27 20:47:03 GMT 2025
+
+- use output-template to write firewall rule file
+- wrap firewall in svc.secrets.subscriber.build (c.f. e745991) with zones as
+   watched services
+- put the handlebars in the firewall config
+
+we have uncommitted changes to watch-outputs that I'm relunctant to
+commit until I have some way to see if they're working. the pppoe test
+will check both firewall zones so _should_ start to fail with the
+current watch-outputs (because only one service) and then pass when we
+put the new one in
