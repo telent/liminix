@@ -61,7 +61,7 @@ let
     ''
       set ${name}  {
         type ${type}
-        ${if elements != [ ] then "elements = { ${concatStringsSep ", " elements} }" else ""}
+        ${if elements != [ ] then "elements = { ${concatStringsSep ", " (builtins.trace elements elements)} }" else ""}
       }
     '';
 

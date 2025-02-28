@@ -21,6 +21,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [ fennelrepl ] ;
 
   buildPhase = ''
+    fennelrepl --test ./watch-outputs.fnl
     cp -p ${
       writeFennel name {
         packages = [
@@ -29,6 +30,7 @@ stdenv.mkDerivation {
           linotify
           fennel
         ];
+        macros = [ anoia.dev ];
         mainFunction = "run";
       } ./watch-outputs.fnl
     } ${name}

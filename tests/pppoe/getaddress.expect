@@ -17,6 +17,7 @@ while { $FINISHED < 10 } {
   }
   set FINISHED [ expr $FINISHED + 1 ]
 }
+expect "#READY#"
 send "nft list set ip table-ip wan || touch /non/existent\n"
 expect {
   "ppp0" { puts "ppp0 found " }

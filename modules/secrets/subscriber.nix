@@ -13,12 +13,11 @@
 }:
 let
   inherit (liminix.services) oneshot longrun;
-  inherit (builtins) length head toString;
-  inherit (lib) unique optional optionals;
+  inherit (builtins) map length head toString;
+  inherit (lib) unique optional optionals concatStringsSep;
   inherit (service) name;
 
   watched-services = unique (map (f: f "service") watch);
-  paths = unique (map (f: f "path") watch);
 
   restart-flag =
     {
@@ -35,17 +34,11 @@ let
     }
     .${action};
 
-  watched-service =
-    if length watched-services == 0 then
-      null
-    else if length watched-services == 1 then
-      head watched-services
-    else
-      throw "cannot subscribe to more than one source service for secrets";
-
   watcher =
     let
       name' = "restart-${name}";
+      refs = concatStringsSep " "
+        (map (s: "${s "service"}:${s "path"}") watch);
     in
     longrun {
       name = name';
@@ -55,16 +48,16 @@ let
         if test -e $dir/notification-fd; then flag="-U"; else flag="-u"; fi
         ${s6}/bin/s6-svwait $flag /run/service/${name} || exit
         PATH=${s6-rc}/bin:${s6}/bin:$PATH
-        ${watch-outputs}/bin/watch-outputs ${restart-flag} ${name} ${watched-service.name} ${lib.concatStringsSep " " paths}
+        ${watch-outputs}/bin/watch-outputs ${restart-flag} ${name} ${refs}
       '';
     };
 in
 service.overrideAttrs (o: {
-  buildInputs = (lim.orEmpty o.buildInputs) ++ optional (watched-service != null) watcher;
+  buildInputs = (lim.orEmpty o.buildInputs) ++ optional (watch != []) watcher;
   dependencies =
     (lim.orEmpty o.dependencies)
-    ++ optionals (watched-service != null) [
-      watcher
-      watched-service
-    ];
+    # ++ optionals
+    #   (watch != [])
+      #   ([ watcher ] ++ watched-services);
+      ;
 })
