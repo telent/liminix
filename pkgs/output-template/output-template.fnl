@@ -28,7 +28,7 @@
                (fn [service-path path default]
                  (let [s (assert (svc.open (.. service-path "/.outputs")))]
                    (or (s:output path) default)))
-               :lua_quote #(string.format "%q" %1)
+               :lua_quote #(string.format "%q" $1)
                :json_quote (fn [x] (.. "\"" (json-escape x) "\""))
                }]
     (string.gsub text delim
