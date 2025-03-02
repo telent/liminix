@@ -7109,3 +7109,90 @@ commit until I have some way to see if they're working. the pppoe test
 will check both firewall zones so _should_ start to fail with the
 current watch-outputs (because only one service) and then pass when we
 put the new one in
+
+Fri Feb 28 01:00:03 GMT 2025
+
+Well, it works at least well enough to pass the test. There is an awful hack
+though, because nftables doesn't accept "elements = { }" as valid syntax
+for a set with no elements, so we post-process the file to wipe those lines
+
+I wonder if we could instead create the set empty and then use the "other"
+nftables format to generate commands that add the elements. If it's
+all in the same file (or included files) it will continue to be atomic
+
+Other options
+
+- is the nftables json format any better? we will have to rebuild it
+  with json support, may be bugger
+- write lua bindings to libnftables
+
+Fri Feb 28 23:31:06 GMT 2025
+
+adding json would add 76 + 88k to the image, but I think it would also
+mean we have to rewrite all the default rules in json format
+
+
+
+with json
+[dan@loaclhost:~/src/liminix]$ du  result/
+20      result/share/doc/nftables/examples
+24      result/share/doc/nftables
+28      result/share/doc
+12      result/share/man/man3
+16      result/share/man/man5
+44      result/share/man/man8
+76      result/share/man
+60      result/share/nftables
+168     result/share
+36      result/etc/nftables/osf
+40      result/etc/nftables
+44      result/etc
+76      result/bin
+8       result/include/nftables
+12      result/include
+8       result/lib/pkgconfig
+1172    result/lib
+1476    result/
+
+[dan@loaclhost:~/src/liminix]$ du /nix/store/l0zsvldsskiv52b4c9b21ziq5z1qr7vn-jansson-mips-unknown-linux-musl-2.14/
+84      /nix/store/l0zsvldsskiv52b4c9b21ziq5z1qr7vn-jansson-mips-unknown-linux-musl-2.14/lib
+88      /nix/store/l0zsvldsskiv52b4c9b21ziq5z1qr7vn-jansson-mips-unknown-linux-musl-2.14/
+
+without:
+[dan@loaclhost:~/src/liminix]$ du  result/
+20      result/share/doc/nftables/examples
+24      result/share/doc/nftables
+28      result/share/doc
+12      result/share/man/man3
+16      result/share/man/man5
+44      result/share/man/man8
+76      result/share/man
+60      result/share/nftables
+168     result/share
+36      result/etc/nftables/osf
+40      result/etc/nftables
+44      result/etc
+76      result/bin
+8       result/include/nftables
+12      result/include
+8       result/lib/pkgconfig
+1096    result/lib
+1400    result/
+
+
+Sat Mar  1 23:43:17 GMT 2025
+
+I don't think json is going to help because either we'd have to do
+
+ elements = map (f: "{{ lookup(f, \"ifname\") }}") zones.${zone}
+
+and there would  be null elements in the places for the interfaces that don't exist
+yet, or we'd have to write actual json syntax at runtime, at which point why don't
+we write the trad nftables syntax instead?
+
+let's write a firewall .nftables file consisting of the zone set
+elements plus an "include" directive for the rest of the firewall. NOTE THAT
+we may still need to template the rest of the firewall if we want to have
+other variables (rate limits) in it, because the rules for that need to be
+inserted ahead of the rules for accepting icmp, and there's no way to
+do that without
