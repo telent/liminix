@@ -24,6 +24,8 @@
   (let [delim (.. opening "(.-)" closing)
         myenv {
                : string
+               : table
+               : ipairs
                :output
                (fn [service-path path default]
                  (let [s (assert (svc.open (.. service-path "/.outputs")))]
