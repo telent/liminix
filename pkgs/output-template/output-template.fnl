@@ -41,4 +41,12 @@
         out (substitute (: (io.input) :read "*a") opening closing)]
     (io.write out)))
 
+(import-macros { : define-tests : expect : expect= } :anoia.assert)
+(define-tests
+  (fn slurp [name]
+    (with-open [f (assert (io.open name))] (f:read "*a")))
+  (expect=
+   (pick-values 1 (substitute (slurp "example.ini")  "{{" "}}"))
+   (slurp "example.ini.expected")))
+
 { : run }

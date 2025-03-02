@@ -2,6 +2,7 @@
   fetchurl,
   writeFennel,
   fennel,
+  fennelrepl,
   runCommand,
   lua,
   anoia,
@@ -17,9 +18,9 @@ stdenv.mkDerivation {
   src = ./.;
 
   buildInputs = [ lua ];
-  doCheck = true;
-
+  nativeBuildInputs = [ fennelrepl ] ;
   buildPhase = ''
+    fennelrepl --test ./output-template.fnl
     cp -p ${
       writeFennel name {
         packages = [
@@ -27,11 +28,11 @@ stdenv.mkDerivation {
           lualinux
           linotify
         ];
+        macros = [ anoia.dev ];
         mainFunction = "run";
       } ./output-template.fnl
     } ${name}
   '';
-  checkPhase = "make check";
   installPhase = ''
     install -D ${name} $out/bin/${name}
   '';
