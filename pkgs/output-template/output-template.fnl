@@ -45,6 +45,10 @@
 
 (import-macros { : define-tests : expect : expect= } :anoia.assert)
 (define-tests
+  (expect= (pick-values 1 (substitute "var={{ 2 + 3 }}" "{{" "}}")) "var=5")
+  (expect= (pick-values 1 (substitute "{{ json_quote(\"o'reilly\") }}" "{{" "}}"))
+           "\"o'reilly\"")
+
   (fn slurp [name]
     (with-open [f (assert (io.open name))] (f:read "*a")))
   (expect=
