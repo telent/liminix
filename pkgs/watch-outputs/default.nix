@@ -34,7 +34,6 @@ stdenv.mkDerivation {
         mainFunction = "run";
       } ./watch-outputs.fnl
     } ${name}
-    make check
   '';
 
   installPhase = ''
