@@ -10,6 +10,7 @@ let
     splitString
     hasInfix
     substring
+    optionalString
     ;
   inherit (lib.lists) groupBy;
   inherit (lib.attrsets) mapAttrsToList;
@@ -56,12 +57,14 @@ let
       name,
       type,
       elements ? [ ],
+      extraText ? null,
       ...
     }:
     ''
       set ${name}  {
         type ${type}
         ${if elements != [ ] then "elements = { ${concatStringsSep ", " (builtins.trace elements elements)} }" else ""}
+        ${optionalString (extraText != null) extraText}
       }
     '';
 
