@@ -58,7 +58,7 @@
   (case action
     :restart (system (%% "s6-svc -r /run/service/%s" service))
     :restart-all (system (%% "s6-rc -b -d %q; s6-rc-up-tree %q" service service))
-    [:signal n] (system (%% "s6-svc -s %d /run/service/%s" n service))))
+    [:signal n] (system (%% "s6-svc -s %q /run/service/%s" n service))))
 
 (local POLLIN  0x0001)
 (local POLLHUP 0x0010)

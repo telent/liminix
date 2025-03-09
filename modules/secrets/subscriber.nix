@@ -28,9 +28,9 @@ let
       "quit" = "-s 3";
       "kill" = "-s 9";
       "term" = "-s 15";
-      "winch" = "-s 28";
-      "usr1" = "-s 10";
-      "usr2" = "-s 12";
+      "winch" = "-s 20";
+      "usr1" = "-s usr1";
+      "usr2" = "-s usr2";
     }
     .${action};
 
