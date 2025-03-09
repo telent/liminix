@@ -49,14 +49,6 @@ let
          (mapAttrs' (n: _: mkSet "ip6" n) zones);
   allRules = lib.recursiveUpdate extraRules (lib.recursiveUpdate sets rules);
   script = firewallgen "firewall1.nft" allRules;
-  ifwatch = writeFennel "ifwatch" {
-    packages = [
-      anoia
-      lualinux
-      linotify
-    ];
-    mainFunction = "run";
-  } ./ifwatch.fnl;
   watchArg = z: intfs: map (i: "${z}:${i}/.outputs") intfs;
   name = "firewall";
   service = longrun {
