@@ -21,7 +21,7 @@ let
   inherit (lib.attrsets) mapAttrs' nameValuePair mapAttrsToList;
   inherit (lib.strings) concatStringsSep;
   inherit (lib.lists) flatten;
-  inherit (builtins) concatLists attrValues;
+  inherit (builtins) concatLists toJSON attrValues;
   inherit (liminix) outputRef;
   mkSet =
     family: name:
@@ -29,11 +29,25 @@ let
       kind = "set";
       inherit name family;
       type = "ifname";
-      elements = map (s: "{{ output(${builtins.toJSON s}, \"ifname\", \"\") }}") zones.${name};
-    };
+      extraText = ''
+      {{;
+         local services = { ${concatStringsSep ", " (map toJSON zones.${name})} }
+         local ifnames = {}
+         for _, v in ipairs(services) do
+           local o = output(v, "ifname")
+           if o then table.insert(ifnames, o) end
+         end
+         if (#ifnames > 0) then
+           return "elements = { " .. table.concat(ifnames, ", ") .. " }\n"
+         else
+           return ""
+         end
+      }}
+      '';
+  };
   sets = (mapAttrs' (n: _: mkSet "ip" n) zones) //
          (mapAttrs' (n: _: mkSet "ip6" n) zones);
-  allRules = lib.recursiveUpdate extraRules (lib.recursiveUpdate (builtins.trace sets sets) rules);
+  allRules = lib.recursiveUpdate extraRules (lib.recursiveUpdate sets rules);
   script = firewallgen "firewall1.nft" allRules;
   ifwatch = writeFennel "ifwatch" {
     packages = [
@@ -48,19 +62,25 @@ let
   service = longrun {
     inherit name;
     run = ''
-      mkdir -p /run/${name}; in_outputs ${name}
-      # exec > /dev/console 2>&1
-      echo RESTARTING FIREWALL >/dev/console
       PATH=${nftables}/bin:${lua}/bin:$PATH
-      ${output-template}/bin/output-template '{{' '}}' < ${script} | lua -e 'for x in io.lines() do if not string.match(x, "elements = {%s+}") then print(x) end; end'   > /run/${name}/fw.nft
-      # cat /run/${name}/fw.nft > /dev/console
-      nft -f /run/${name}/fw.nft
-      while sleep 86400 ; do : ; done
+      reload() {
+         echo reloading firewall
+         ${output-template}/bin/output-template '{{' '}}' < ${script}  > /run/${name}/fw.nft;
+         nft -f /run/${name}/fw.nft ;
+      }
+      trap reload SIGUSR1
+      mkdir -p /run/${name}; in_outputs ${name}
+      reload
+      while :; do
+        # signals sent to ash won't interrupt sleep, but will interrupt wait
+        sleep 86400 & wait
+      done
     '';
     finish = "${nftables}/bin/nft flush ruleset";
   };
 in
 svc.secrets.subscriber.build {
+  action = "usr1";
   watch =
     concatLists
       (mapAttrsToList (_zone : services : map (s: outputRef s "ifname") services) zones);
