@@ -56,8 +56,5 @@ service.overrideAttrs (o: {
   buildInputs = (lim.orEmpty o.buildInputs) ++ optional (watch != []) watcher;
   dependencies =
     (lim.orEmpty o.dependencies)
-    # ++ optionals
-    #   (watch != [])
-      #   ([ watcher ] ++ watched-services);
-      ;
+    ++ optional (watch != []) watcher;
 })

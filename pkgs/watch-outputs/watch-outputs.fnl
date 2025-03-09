@@ -71,7 +71,7 @@
 
 (fn open-services [output-references]
   (collect [s p (pairs output-references)]
-    (values (assert (svc.open (.. s "/.outputs"))) p)))
+    (values (svc.open (.. s "/.outputs")) p)))
 
 (fn run []
   (let [trees {}
@@ -89,7 +89,6 @@
         (each [service paths (pairs services)]
           (let [new-tree (service:output ".")]
             (when (changed? paths (. trees service) new-tree)
-              (print "watched path event:"  action controlled-service)
               (do-action action controlled-service))))))))
 
 
