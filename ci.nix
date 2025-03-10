@@ -56,7 +56,12 @@ let
             fennel
             luaPackages.lyaml
           ];
-          src = ./.;
+
+          src = pkgs.lib.sources.sourceFilesBySuffices
+            (pkgs.lib.cleanSource ./. ) [
+              ".nix" ".rst" "Makefile" ".svg" ".fnl" ".py"
+            ];
+
           buildPhase = ''
             cat ${json} | fennel --correlate doc/parse-options.fnl > doc/modules-generated.inc.rst
             cat ${json} | fennel --correlate doc/parse-options-outputs.fnl     > doc/outputs-generated.inc.rst
