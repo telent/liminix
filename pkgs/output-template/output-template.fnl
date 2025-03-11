@@ -28,7 +28,7 @@
                : ipairs
                :output
                (fn [service-path path default]
-                 (let [s (assert (svc.open (.. service-path "/.outputs")))]
+                 (let [s (assert (svc.open service-path))]
                    (or (s:output path) default)))
                :lua_quote #(string.format "%q" $1)
                :json_quote (fn [x] (.. "\"" (json-escape x) "\""))

@@ -1,5 +1,5 @@
 (local inotify (require :inotify))
-(local { : file-exists? : dirname } (require :anoia))
+(local { : file-exists? : dirname : append-path } (require :anoia))
 (local { : file-type : dir : mktree &as fs } (require :anoia.fs))
 
 (fn read-line [name]
@@ -25,7 +25,7 @@
     (with-open [f (assert (io.open pathname :w) (.. "can't open " pathname))]
       (f:write value))
     "table" (each [k v (pairs value)]
-              (write-value (.. pathname "/" k) v))))
+              (write-value (append-path pathname k) v))))
 
 (fn read-value [pathname]
   (case (file-type pathname)
@@ -33,7 +33,7 @@
     :directory
     (collect [f (fs.dir pathname)]
       (when (not (or (= f ".") (= f "..")))
-        (values f (read-value ( .. pathname "/" f)))))
+        (values f (read-value (append-path pathname f)))))
     :file
     (read-line pathname)
     :link
@@ -50,15 +50,17 @@
 
 (fn open [directory]
   (let [watcher (watch-fsevents directory)
-        has-file? (fn [filename] (file-exists? (.. directory "/" filename)))]
+        has-file? #(file-exists? (append-path directory $1))
+        outputs-dir (append-path directory ".outputs")]
     {
      :wait #(watcher:read)
      :ready? (fn [self]
-               (and (has-file? "state") (not (has-file? ".lock"))))
+               (and (has-file? ".outputs/state")
+                    (not (has-file? ".outputs/.lock"))))
      :output (fn [_ filename new-value]
                (if new-value
-                   (write-value (.. directory "/" filename) new-value)
-                   (read-value (.. directory "/" filename))))
+                   (write-value (append-path outputs-dir filename) new-value)
+                   (read-value (append-path outputs-dir filename))))
      :close #(watcher:close)
      :fileno #(watcher:fileno)
      : events

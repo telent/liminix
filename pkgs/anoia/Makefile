@@ -1,4 +1,5 @@
 servicedir:=$(shell mktemp -d)
+outputdir:=$(servicedir)/.outputs
 
 default: fs.lua init.lua nl.lua svc.lua process.lua net/constants.lua
 
@@ -9,12 +10,13 @@ check:
 	fennel ./run-tests.fnl $(CHECK)
 	fennel test.fnl
 	fennel test-svc.fnl $(servicedir)
-	test -f $(servicedir)/fish
-	test "`cat $(servicedir)/fish`" = "food"
-	test -d $(servicedir)/nested/path
-	test "`cat $(servicedir)/nested/path/name`" = "value"
-	test "`cat $(servicedir)/nested/path/complex/attribute`" = "val"
-	test "`cat $(servicedir)/nested/path/complex/other`" = "42"
+	find $(outputdir) -ls
+	test -f $(outputdir)/fish
+	test "`cat $(outputdir)/fish`" = "food"
+	test -d $(outputdir)/nested/path
+	test "`cat $(outputdir)/nested/path/name`" = "value"
+	test "`cat $(outputdir)/nested/path/complex/attribute`" = "val"
+	test "`cat $(outputdir)/nested/path/complex/other`" = "42"
 
 
 net/constants.lua: net/constants.c

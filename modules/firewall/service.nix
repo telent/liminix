@@ -49,7 +49,7 @@ let
          (mapAttrs' (n: _: mkSet "ip6" n) zones);
   allRules = lib.recursiveUpdate extraRules (lib.recursiveUpdate sets rules);
   script = firewallgen "firewall1.nft" allRules;
-  watchArg = z: intfs: map (i: "${z}:${i}/.outputs") intfs;
+  watchArg = z: intfs: map (i: "${z}:${i}") intfs;
   name = "firewall";
   service = longrun {
     inherit name;

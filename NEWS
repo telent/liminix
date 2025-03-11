@@ -157,3 +157,15 @@ https://www.liminix.org/doc/admin.html#updating-an-installed-system
 
 outputs.zimage is now outputs.kernel.zImage. This is unlikely to
 affect many people at all but I mention it anyway.
+
+2024-03-11
+
+The fennel function (svc.open ...) now expects to be given the store
+directory of a service derivation, not a direct path to the .outputs
+directory. Thus
+
+(svc.open "/nix/store/eeeeeeeeeeeeee-hellod")
+not
+(svc.open "/nix/store/eeeeeeeeeeeeee-hellod/.outputs")
+
+This simplifies most extant uses of it

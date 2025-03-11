@@ -71,7 +71,7 @@
 
 (fn open-services [output-references]
   (collect [s p (pairs output-references)]
-    (values (svc.open (.. s "/.outputs")) p)))
+    (values (svc.open s) p)))
 
 (fn run []
   (let [trees {}

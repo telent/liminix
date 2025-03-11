@@ -50,8 +50,7 @@
 
 (fn run []
   (let [{: out-path : watched-service : path } (parse-args arg)
-        dir (.. watched-service "/.outputs")
-        service (assert (svc.open dir))]
+        service (assert (svc.open watched-service))]
     (accumulate [tree {}
                  v (service:events)]
       (write-changes out-path tree (or (service:output path) {})))))
