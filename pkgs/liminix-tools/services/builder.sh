@@ -1,5 +1,15 @@
 source $stdenv/setup
 mkdir -p $out/${name}
+
+writepath(){
+    mkdir -p $(dirname $1)
+    echo $2 > $1
+}
+if test -n "$propertiesText"; then
+    mkdir $out/.properties
+    ( cd $out/.properties; eval "$propertiesText" )
+fi
+
 echo $serviceType > $out/${name}/type
 mkdir -p $out/${name}/dependencies.d
 echo $buildInputs > $out/buildInputs
