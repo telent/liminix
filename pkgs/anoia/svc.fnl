@@ -51,16 +51,21 @@
 (fn open [directory]
   (let [watcher (watch-fsevents directory)
         has-file? #(file-exists? (append-path directory $1))
-        outputs-dir (append-path directory ".outputs")]
+        outputs-dir (append-path directory ".outputs")
+        properties-dir (append-path directory ".properties")]
     {
      :wait #(watcher:read)
      :ready? (fn [self]
                (and (has-file? ".outputs/state")
                     (not (has-file? ".outputs/.lock"))))
-     :output (fn [_ filename new-value]
+     :property (fn [_ filename]
+                 (read-value (append-path properties-dir filename)))
+     :output (fn [filename new-value]
                (if new-value
                    (write-value (append-path outputs-dir filename) new-value)
-                   (read-value (append-path outputs-dir filename))))
+                   (or
+                    (read-value (append-path outputs-dir filename))
+                    (read-value (append-path properties-dir filename)))))
      :close #(watcher:close)
      :fileno #(watcher:fileno)
      : events
