@@ -13,8 +13,8 @@ let
     optionalString
     ;
   inherit (lib.lists) groupBy;
-  inherit (lib.attrsets) mapAttrsToList;
-  inherit (builtins) map head tail;
+  inherit (lib.attrsets) attrsToList mapAttrsToList;
+  inherit (builtins) elemAt map head tail toString;
 
   indentLines =
     offset: lines:
@@ -68,6 +68,25 @@ let
       }
     '';
 
+  domap =
+    {
+      name,
+      type,
+      elements ? [ ],
+      extraText ? null,
+      ...
+    }:
+      let
+        colonize = v:
+          let  ty = elemAt (attrsToList v) 0; in "${ty.name}: ${ty.value}";
+      in ''
+        map ${name}  {
+          type ${colonize type}
+          ${if elements != [ ] then "elements = { ${concatStringsSep ", " (mapAttrsToList (k: v : "${k}: ${toString v}") elements)} }" else ""}
+          ${optionalString (extraText != null) extraText}
+        }
+      '';
+
   dochainorset =
     {
       kind ? "chain",
@@ -76,6 +95,7 @@ let
     {
       chain = dochain;
       set = doset;
+      map = domap;
     }
     .${kind}
       params;

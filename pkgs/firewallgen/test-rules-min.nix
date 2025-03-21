@@ -151,6 +151,18 @@ in
       "eth0"
       "eth1"
     ];
-
   };
+
+  map-intf-limits-ip6 = {
+    name = "intf-limits";
+    kind = "map";
+    family = "ip6";
+    type = { ifname = "bytes"; };
+    elements = {
+      # XXX keys need to be generated from interface outputs
+      ppp0 = builtins.floor (70*1000*1000 * 0.05); # 5% of 70MB fttp connection
+      lan = builtins.floor (1000*1000*1000 * 0.05); # GB ethernet
+    };
+  };
+
 }
