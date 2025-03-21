@@ -7196,3 +7196,164 @@ we may still need to template the rest of the firewall if we want to have
 other variables (rate limits) in it, because the rules for that need to be
 inserted ahead of the rules for accepting icmp, and there's no way to
 do that without
+
+Sun Mar  9 21:46:30 GMT 2025
+
+OK, we have updating firewall zones that are good neough to pass the test
+(and may even work ...).  We need
+
+* to write a rule with a rate limit for incoming icmp6 for each interface,
+capping it to 5% of the interface bandwidth
+
+* some place to say what the bandwidth is, which I am thinking we could do with
+a passthru attribute of some kind on services
+
+{
+  run = "mdcnvdfngkj";
+  name = "dtret";
+  properties.bandwidthKbps = 80000;
+}
+
+and insert logic in the up/run commands to copy the properties to
+outputs.  Or we could use `data` or `env` directories, which means
+that the properties would be there even while the service is down, if
+that's a concern, but would need a different way to look them up. And
+also, would we allow them to change? What if there's some kind of interface
+where we _can_ interrogate the bandwidth at runtime?
+
+Mon Mar 10 21:00:17 GMT 2025
+
+The idea that occured to me at lunchtime is "what if we made the
+(svc:output ) method fall back to properties if no output was present".
+To do this, we'd have to
+
+(1) arrange for /nix/store/eeee-service/.properties to exist
+
+ - add properties attribute to service functions
+ - write them to .properties in liminix-tools/services/builder.sh
+ - make sure they get passed through whne provided to all the service
+    builder functions
+
+[done] (2) pass the store directory to svc.open instead of  ..../.outputs
+
+(3) make service:output look in both places
+
+(4) write the damn firewall rule
+
+Mon Mar 17 21:13:36 GMT 2025
+
+Argh why is it never simple?
+
+We need to write a rate-limiting firewall rule for each interface to
+restrict icmp on that interface. This is not easy to reconcile with
+putting them in default-rules because how do we generate multiple
+array elements by config file templating?
+
+There are two things in my mind now:
+
+1) could we have some better way of manipulating the firewall rules
+such that the rules from different modules are composable
+
+this is complicated somewhat by ordering: if every rule in a chain is
+"drop" or "accept" then it's easy to add another, but if the same
+chain does first one then the other, doing the other and then the one
+will not work
+
+today we do e.g.
+
+input-ip6
+-> reject-bogons
+-> accept non-bogus-icmp
+-> process per-zone allowlist
+-> allow established,related on wan
+-> allow all on lan (so why did we need an allowlist?)
+
+could we express this in a less sequential form? the
+specification of what's allowed
+
+
+input-ip6 for wan: is input-ip6 with the wan allowlist
+input-ip6 for lan: is input-ip6 with the lan allowlist
+
+
+input-ip6 for ppp0: is input-ip6 with the wan allowlist with a rate
+limit for icmp
+
+ssh module wishes to modify the allowlist for lan/wan/both so that
+it includes port 22
+
+am wondering if we could do default deny and _all_ the rules
+(except for bogons) are allows
+
+maybe we have the concept of "subtraction": a rule can be an allow
+preceded by some number of drops which (at least by convention; this is
+probably hard to enforce) are "carve outs" of the packets that are
+being allowed.
+
+... it's hard to express the forward-ipv6 in these terms, though.
+we end up with "some drops and then multiple accepts"
+
+we have
+(and (not (or drop1 drop2 ...)) (or accept1 accept2 ...))
+
+and to add ssh we need to break into the second clause instead of
+composing at the top level
+
+(and (not (or drop1 drop2 ...))
+     (or accept1 accept2 accept-ssh...))
+
+
+then the icmp bogons composite rule is "drop weird icmp and then
+allow what's left"
+
+(side note: maybe we could use a map to do interface name -> bandwidth
+for rate limiting)
+
+
+
+
+a composite rule might be a bunch of denies and then an allow
+for anything the
+
+2) some kinda syntax for referencing outputs (or properties) that's not
+just string interpolation
+
+
+----
+
+I think we could address the immediate problem by writing a rule for
+rate-limiting that looks up the rate in a map, and some maps (with
+extraText) that get the rates from service properties? And that would
+suffice for addressing the RoS audit, at least
+
+Tue Mar 18 18:48:22 GMT 2025
+
+Unless the interface exists, we do not (at least, may not) know its
+name because that's an output. So the fact that it has a permanent
+property is not per se terribly useful
+
+limit rate 50000 bytes / minute accept
+
+
+nft add rule ip nat postrouting snat to ip saddr map { 192.168.1.0/24 : 10.0.0.1, 192.168.2.0/24 : 10.0.0.2 }
+
+nft add rule table-ip input-ip4 ip daddr 2.2.2.3/32 limit rate iifname map { "eth0": 10, "ppp0": 20 } kbytes/second   accept
+
+nft add map 'table-ip intf-limits  { typeof 5000000 ;  elements = { lan: 50000000, ppp0: 3500000 } ; }'
+
+OK, we can't do rate lookup in a map because the nftables grammar only
+supports a numeric literal for limit_rate_bytes. so we're back to writing
+a collection of rules, one for each interface with an ifname output,
+that sets the limit for that interface
+
+* we could do this all in one element of a rules list, with newlines
+between each actual rule
+
+* we could add extraText to the ruleset syntax - but does it go at the
+start of the rules or the end or somewhere in the middle? this is
+almost worse
+
+* we could pick up where we left off on march 17 and redesign the
+  firewall module
+
+gonna be option 1 isn't it?
