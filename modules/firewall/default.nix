@@ -37,6 +37,7 @@ let
       "nft_fib"
       "nft_fib_ipv4"
       "nft_fib_ipv6"
+      "nft_limit"
       "nft_log"
       "nft_masq"
       "nft_nat"
@@ -114,6 +115,7 @@ in
       NFT_CT = "m";
       NFT_FIB_IPV4 = "m";
       NFT_FIB_IPV6 = "m";
+      NFT_LIMIT = "m";
       NFT_LOG = "m";
       NFT_MASQ = "m";
       NFT_NAT = "m";
