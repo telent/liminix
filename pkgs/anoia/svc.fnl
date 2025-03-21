@@ -60,7 +60,7 @@
                     (not (has-file? ".outputs/.lock"))))
      :property (fn [_ filename]
                  (read-value (append-path properties-dir filename)))
-     :output (fn [filename new-value]
+     :output (fn [_ filename new-value]
                (if new-value
                    (write-value (append-path outputs-dir filename) new-value)
                    (or
