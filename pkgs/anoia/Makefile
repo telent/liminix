@@ -9,6 +9,7 @@ check:
 	ln -s . anoia
 	fennel ./run-tests.fnl $(CHECK)
 	fennel test.fnl
+	mkdir -p $(outputdir)
 	fennel test-svc.fnl $(servicedir)
 	find $(outputdir) -ls
 	test -f $(outputdir)/fish

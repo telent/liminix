@@ -25,8 +25,27 @@
 (fn basename [path]
   (string.match path ".*/([^/]-)$"))
 
+
 (fn dirname [path]
-  (string.match path "(.*)/[^/]-$"))
+  (let [stripped (string.match path "(.-)/*$")]
+    (pick-values
+     1
+     (if (not path) "."
+         (= path "") "."
+         (not stripped) "."
+         (= stripped "") "/"
+         (string.match stripped ".+/.-") (stripped:gsub "(.*)(/.*)" "%1")
+         (string.match stripped "/") "/"
+         "."))))
+
+(define-tests
+  ;; these are examples from dirname(3)
+  (expect= (dirname "/usr/lib") "/usr")
+  (expect= (dirname "/usr/") "/")
+  (expect= (dirname "usr") ".")
+  (expect= (dirname "/") "/")
+  (expect= (dirname ".") ".")
+  (expect= (dirname "..") "."))
 
 (fn append-path [dirname filename]
   (let [base (or (string.match dirname "(.*)/$") dirname)
