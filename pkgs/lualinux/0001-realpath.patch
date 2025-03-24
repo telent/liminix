@@ -1,0 +1,36 @@
+diff --git a/lualinux.c b/lualinux.c
+index f3d1a4d..9c5dc9c 100644
+--- a/lualinux.c
++++ b/lualinux.c
+@@ -387,6 +387,18 @@ static int ll_readlink(lua_State *L) {
+ 	RET_STRN(buf, n);
+ }
+ 
++static int ll_realpath(lua_State *L) {
++	const char *pname = luaL_checkstring(L, 1);
++	char * resolved = realpath(pname, NULL); /* mallocs */
++	if (resolved == 0) {
++	    RET_ERRNO;
++	} else {
++	    lua_pushstring(L, resolved);
++	    free(resolved);
++	    return 1;
++	}
++}
++
+ static int ll_lstat3(lua_State *L) {
+ 	// lua api: lstat3(path [,statflag:int])
+ 	// if statflag=1: do stat(). default: do lstat
+@@ -924,6 +936,7 @@ static const struct luaL_Reg lualinuxlib[] = {
+ 	{"readdir", ll_readdir},
+ 	{"closedir", ll_closedir},
+ 	{"readlink", ll_readlink},
++	{"realpath", ll_realpath},
+ 	{"lstat3", ll_lstat3},
+ 	{"lstat", ll_lstat},
+ 	{"utime", ll_utime},
+@@ -969,4 +982,3 @@ int luaopen_lualinux (lua_State *L) {
+ 	lua_settable (L, -3);
+ 	return 1;
+ }
+-

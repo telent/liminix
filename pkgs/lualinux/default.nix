@@ -13,6 +13,11 @@ lua.pkgs.buildLuaPackage {
   version = "0.1"; # :shrug:
 
   inherit src;
+
+  patches = [
+    ./0001-realpath.patch
+  ];
+
   postPatch = ''
     sed -i -e '/strip/d' Makefile
   '';
