@@ -115,6 +115,7 @@ let
       ${command}
     '';
     notification-fd = 10;
+#    properties.bandwidth = 3 * 1000 * 1000;
     timeout-up =
       if lcpEcho.failure != null then (10 + lcpEcho.failure * lcpEcho.interval) * 1000 else 60 * 1000;
     inherit dependencies;

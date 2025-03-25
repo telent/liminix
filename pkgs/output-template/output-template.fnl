@@ -25,7 +25,10 @@
         myenv {
                : string
                : table
+               : math
                : ipairs
+               : tonumber
+
                :output
                (fn [service-path path default]
                  (let [s (assert (svc.open service-path))]

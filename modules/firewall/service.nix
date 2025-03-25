@@ -44,10 +44,37 @@ let
          end
       }}
       '';
-  };
+    };
+
+  rateHook =
+    let rules =
+          map
+            (x: ''
+               {{;
+                local s = "${x}";
+                local n = output(s, "ifname");
+                local bw = output(s, "bandwidth");
+                if n and bw then
+                  return "meta l4proto icmpv6 iifname ".. n .. " limit rate over " .. (math.floor (tonumber(bw) / 20)) .. " bytes/second drop"
+                else
+                  return "# " .. (n or "not n") .. " " .. (bw or "not bw")
+                end
+               }}
+             '')
+            (concatLists (builtins.attrValues zones));
+    in {
+      type = "filter"; family = "ip6";
+      hook = "input"; priority = "-1"; policy = "accept";
+      inherit rules;
+    };
+
   sets = (mapAttrs' (n: _: mkSet "ip" n) zones) //
          (mapAttrs' (n: _: mkSet "ip6" n) zones);
-  allRules = lib.recursiveUpdate extraRules (lib.recursiveUpdate sets rules);
+  allRules =
+    { icmp6-ratehook = rateHook; } //
+    (lib.recursiveUpdate
+      extraRules
+      (lib.recursiveUpdate sets rules));
   script = firewallgen "firewall1.nft" allRules;
   watchArg = z: intfs: map (i: "${z}:${i}") intfs;
   name = "firewall";
