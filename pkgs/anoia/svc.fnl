@@ -102,6 +102,7 @@
      :wait #(watcher:wait)
      :close #(watcher:close)
      :fileno #(watcher:fileno)
+     : directory
      : events
      }))
 
