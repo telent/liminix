@@ -38,7 +38,6 @@
              "/nix/store/s2" [["out1"] ["out2" "ifname"]]}}
            ))
 
-
 (fn changed? [paths old-tree new-tree]
   (accumulate [changed? false
                _ path (ipairs paths)]
@@ -51,8 +50,6 @@
   (expect (not (changed? [["mtu"]] {:ifname "true"} {:ifname "false"})))
   (expect (not (changed? [["mtu"]] {:ifname "true"} {:ifname "false"})))
   )
-
-
 
 (fn do-action [action service]
   (case action
@@ -80,16 +77,19 @@
          : controlled-service
          : action
          : watched-service
-         : paths } (parse-args arg)]
+         : paths } (parse-args arg)
+        services (open-services output-references)]
     (while true
-      (let [services (open-services output-references)
-            trees (collect [s _ (pairs services)]
-                    (values s (s:output ".")))]
-        (wait-for-change services)
-        (each [service paths (pairs services)]
-          (let [new-tree (service:output ".")]
-            (when (changed? paths (. trees service) new-tree)
-              (do-action action controlled-service))))))))
+      (when
+          (accumulate [changed false
+                       service paths (pairs services)]
+            (let [new-tree (service:output ".")]
+              (if (changed? paths (or (. trees service) {}) new-tree)
+                  (do (tset trees service new-tree) true)
+                  changed)))
+        (do-action action controlled-service))
+      (wait-for-change services))))
+
 
 
 
