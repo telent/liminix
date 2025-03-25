@@ -7357,3 +7357,24 @@ almost worse
   firewall module
 
 gonna be option 1 isn't it?
+
+Tue Mar 25 00:13:31 GMT 2025
+
+the logic for watch-outputs is not correct
+
+(1) when we first read outputs, how do we know if the controlled
+service is up to date wrt those outputs? we should perform the action
+for the first time after reading initial state and before waiting
+
+(2) it isn't writing the new outputs back into trees, so will refresh
+continually after the fisrt change
+
+set tree to empty for each service
+loop:
+for each service
+  read new tree
+  if different
+    do action
+    set tree = new tree
+wait for changes
+next iteration
