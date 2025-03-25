@@ -1,22 +1,56 @@
 (local inotify (require :inotify))
 (local { : file-exists? : dirname : append-path } (require :anoia))
 (local { : file-type : dir : mktree &as fs } (require :anoia.fs))
+(local { : readlink } (require :lualinux))
 
 (fn read-line [name]
   (with-open [f (assert (io.open name :r) (.. "can't open file " name))]
     (f:read "*l")))
 
+
+;; If the directory is missing, we cannot add a inotify watch
+;; for it.  We need a watch that opens the parent if the pathname is missing,
+;; and it needs to be the resolved path not the syntactic parent.
+
+;; If the directory is not missing, then having a watch on the
+;; parent may result in extra wakeups but should only affect
+;; efficiency not correctness
+
+;; Each time the directory may have been added we need to update
+;; watches. If it's been removed, the watch will be removed
+;; automatically. inotify_add_watch when it already exists will modify
+;; instead of making a new one, so we can treat it as idempotent
+
+
+(fn resolve-link [pathname]
+  (if (= (file-type pathname) :link)
+      (readlink pathname)
+      pathname))
+
 (fn watch-fsevents [directory-name]
-  (let [handle (inotify.init)]
-    (handle:addwatch directory-name
-                     inotify.IN_CREATE
-                     inotify.IN_MOVE
-                     inotify.IN_DELETE
-                     inotify.IN_DELETE_SELF
-                     inotify.IN_MOVED_FROM
-                     inotify.IN_MOVED_TO
-                     inotify.IN_CLOSE_WRITE)
-    handle))
+  (let [handle (inotify.init)
+        parent-name (dirname (resolve-link directory-name))
+        refresh (fn []
+                  (handle:addwatch directory-name
+                                   inotify.IN_CREATE
+                                   inotify.IN_MOVE
+                                   inotify.IN_DELETE
+                                   inotify.IN_DELETE_SELF
+                                   inotify.IN_MOVED_FROM
+                                   inotify.IN_MOVED_TO
+                                   inotify.IN_CLOSE_WRITE)
+                  (handle:addwatch parent-name
+                                   inotify.IN_CREATE
+                                   inotify.IN_DELETE))]
+    ;; if you are using poll() to check for events on this
+    ;; watcher and on other events at the same time, be sure
+    ;; to call fileno each time around the loop instead
+    ;; of only once
+    {
+     :fileno #(do (refresh) (handle:fileno))
+     :wait #(do (refresh) (handle:read))
+     :close #(handle:close)
+     }))
 
 (fn write-value [pathname value]
   (mktree (dirname pathname))
@@ -49,12 +83,11 @@
       (self:wait))))
 
 (fn open [directory]
-  (let [watcher (watch-fsevents directory)
+  (let [outputs-dir (append-path directory ".outputs")
         has-file? #(file-exists? (append-path directory $1))
-        outputs-dir (append-path directory ".outputs")
+        watcher (watch-fsevents outputs-dir)
         properties-dir (append-path directory ".properties")]
     {
-     :wait #(watcher:read)
      :ready? (fn [self]
                (and (has-file? ".outputs/state")
                     (not (has-file? ".outputs/.lock"))))
@@ -66,6 +99,7 @@
                    (or
                     (read-value (append-path outputs-dir filename))
                     (read-value (append-path properties-dir filename)))))
+     :wait #(watcher:wait)
      :close #(watcher:close)
      :fileno #(watcher:fileno)
      : events
