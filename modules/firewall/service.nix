@@ -50,7 +50,7 @@ let
                 local n = output(s, "ifname");
                 local bw = output(s, "bandwidth");
                 if n and bw then
-                  return "meta l4proto icmpv6 iifname ".. n .. " limit rate over " .. (math.floor (tonumber(bw) / 20)) .. " bytes/second drop"
+                  return "meta l4proto icmpv6 iifname ".. n .. " limit rate over " .. (math.floor (tonumber(bw) / 8 / 20)) .. " bytes/second drop"
                 else
                   return "# " .. (n or "not n") .. " " .. (bw or "not bw")
                 end
