@@ -3,13 +3,9 @@
   lib,
   firewallgen,
   nftables,
-  writeFennel,
-  anoia,
   svc,
   lua,
   output-template,
-  lualinux,
-  linotify,
 }:
 {
   rules,
@@ -20,7 +16,6 @@ let
   inherit (liminix.services) longrun;
   inherit (lib.attrsets) mapAttrs' nameValuePair mapAttrsToList;
   inherit (lib.strings) concatStringsSep;
-  inherit (lib.lists) flatten;
   inherit (builtins) concatLists toJSON attrValues;
   inherit (liminix) outputRef;
   mkSet =
@@ -76,7 +71,6 @@ let
       extraRules
       (lib.recursiveUpdate sets rules));
   script = firewallgen "firewall1.nft" allRules;
-  watchArg = z: intfs: map (i: "${z}:${i}") intfs;
   name = "firewall";
   service = longrun {
     inherit name;
