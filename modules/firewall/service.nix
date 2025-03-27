@@ -41,7 +41,7 @@ let
       '';
     };
 
-  rateHook =
+  rateHook6 =
     let rules =
           map
             (x: ''
@@ -63,10 +63,35 @@ let
       inherit rules;
     };
 
+  rateHook4 =
+    let rules =
+          map
+            (x: ''
+               {{;
+                local s = "${x}";
+                local n = output(s, "ifname");
+                local bw = output(s, "bandwidth");
+                if n and bw then
+                  return "icmp iifname ".. n .. " limit rate over " .. (math.floor (tonumber(bw) / 8 / 20)) .. " bytes/second drop"
+                else
+                  return "# " .. (n or "not n") .. " " .. (bw or "not bw")
+                end
+               }}
+             '')
+            (concatLists (builtins.attrValues zones));
+    in {
+      type = "filter"; family = "ip";
+      hook = "input"; priority = "-1"; policy = "accept";
+      inherit rules;
+    };
+
   sets = (mapAttrs' (n: _: mkSet "ip" n) zones) //
          (mapAttrs' (n: _: mkSet "ip6" n) zones);
   allRules =
-    { icmp6-ratehook = rateHook; } //
+    {
+      icmp6-ratehook = rateHook6;
+      icmp4-ratehook = rateHook4;
+    } //
     (lib.recursiveUpdate
       extraRules
       (lib.recursiveUpdate sets rules));
