@@ -13,6 +13,7 @@
   lns,
   ppp-options,
   lcpEcho,
+  bandwidth,
   username,
   password,
   debug,
@@ -40,6 +41,7 @@ common {
     username
     password
     lcpEcho
+    bandwidth
     ppp-options
     ;
   command = ''

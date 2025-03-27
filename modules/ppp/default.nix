@@ -56,6 +56,11 @@ in
         default = null;
         description = "password";
       };
+      bandwidth = mkOption {
+        type = types.nullOr (types.int);
+        default = null;
+        description = "approximate bandwidth in bytes/second. Used to calculate rate limits for ICMP";
+      };
       lcpEcho = {
         adaptive = mkOption {
           description = "send LCP echo-request frames only if no traffic was received from the peer since the last echo-request was sent";

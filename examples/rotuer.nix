@@ -71,6 +71,7 @@ rec {
         interface = config.hardware.networkInterfaces.wan;
         username = secrets.l2tp.name;
         password = secrets.l2tp.password;
+        bandwidth = 70 * 1000 * 1000;
       };
       # once the wan has ipv4 connnectivity, should we run dhcp6
       # client to potentially get an address range ("prefix
