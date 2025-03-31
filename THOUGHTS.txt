@@ -7378,3 +7378,72 @@ for each service
     set tree = new tree
 wait for changes
 next iteration
+
+Fri Mar 28 23:25:49 GMT 2025
+
+the ppp connection doesn't come back after a&a reset the lns, this has
+happened twice now. Possibly-relevant log entries:
+
+
+2025-03-27 01:10:20.189135502 rotuer dhcp6c.prefix.dhcp6c.wan.link.pppoe.int.link.a.192.168.8.1 Executed "ip address change 2001:8b0:de3a:40de::1/64 dev int valid_lft 5682 preferred_lft 5682", exit code true
+2025-03-27 01:10:20.189182063 rotuer dhcp6c.addr.dhcp6c.wan.link.pppoe.wan.link.pppoe Executed "ip address change 2001:8b0:1111:1111:0:ffff:d9a9:14de/128 dev ppp0 valid_lft 5682 preferred_lft 2082", exit code true
+
+# am assuming these are just normal updates from remote dhcp6
+
+2025-03-27 01:11:19.179528428 rotuer wan.link.pppoe rcvd [LCP TermReq id=0x0]
+2025-03-27 01:11:19.179542189 rotuer wan.link.pppoe LCP terminated by peer
+2025-03-27 01:11:19.179545869 rotuer wan.link.pppoe Connect time 54273.0 minutes.
+2025-03-27 01:11:19.179550109 rotuer wan.link.pppoe Sent 3022278191 bytes, received 2202783935 bytes.
+2025-03-27 01:11:19.183056872 rotuer wan.link.pppoe sent [LCP TermAck id=0x0]
+# ppp died
+2025-03-27 01:11:19.183071352 rotuer dhcp6c.wan.link.pppoe odhcp6c[615]: carrier => 0 event on
+2025-03-27 01:11:19.183076072 rotuer dhcp6c.wan.link.pppoe odhcp6c[615]: Failed to send RS (Network unreachable)
+2025-03-27 01:11:19.183081592 rotuer dhcp6c.wan.link.pppoe odhcp6c[615]: Starting RELEASE transaction (timeout 4294967295s, max rc 5)
+2025-03-27 01:11:19.183086312 rotuer dhcp6c.wan.link.pppoe odhcp6c[615]: Send RELEASE message (elapsed 0ms, rc 0)
+2025-03-27 01:11:19.183091992 rotuer dhcp6c.wan.link.pppoe odhcp6c[615]: Failed to send RELEASE message to ff02::1:2 (Network unreachable)
+2025-03-27 01:11:19.183096392 rotuer dhcp6c.wan.link.pppoe odhcp6c[615]: (re)starting transaction on ppp0
+
+# dhcp6c noticed no ppp so tried to release address. it can't because
+#  ppp is down. how did it know it was time to say byebye?
+
+2025-03-27 01:11:19.198178337 rotuer int.link.a.192.168.8.1.dnsmasq dnsmasq-dhcp[631]: router advertisement on 2001:8b0:de3a:40de::, old prefix for int
+2025-03-27 01:11:19.199068668 rotuer dhcp6c.prefix.dhcp6c.wan.link.pppoe.int.link.a.192.168.8.1 Executed "ip address del 2001:8b0:de3a:40de::1/64 dev int", exit code true
+# our prefix delegation is no longer ours
+
+2025-03-27 01:11:19.199381632 rotuer dhcp6c.addr.dhcp6c.wan.link.pppoe.wan.link.pppoe ip: RTNETLINK answers: Address not available
+2025-03-27 01:11:19.199401552 rotuer dhcp6c.addr.dhcp6c.wan.link.pppoe.wan.link.pppoe /nix/store/anz85qjb2qw084f5xhpx4qndp260xr9i-lua-tty-aarch64-unknown-linux-musl/bin/lua: ...ch64-unknown-linux-musl-0.1/share/lua/5.3/anoia/init.lua:93: Error executing "ip address del 2001:8b0:1111:1111:0:ffff:d9a9:14de/128 dev ppp0" (exit)
+
+this is the ip6 address that ppp negotiated.  is this command failing because
+it was removed already?
+
+[....]
+2025-03-27 01:11:25.545493523 rotuer wan.link.pppoe Script /nix/store/9n2314z07z1g9dd3sqr0kndinjv0vma3-ip6-up started (pid 10346)
+2025-03-27 01:11:25.551376155 rotuer wan.link.pppoe Script /nix/store/9n2314z07z1g9dd3sqr0kndinjv0vma3-ip6-up finished (pid 10346), status = 0x0
+2025-03-27 01:11:25.552949055 rotuer wan.link.pppoe sh: write error: Broken pipe
+2025-03-27 01:11:25.553494501 rotuer wan.link.pppoe Script /nix/store/jkvnjhiqjahydmns33z5lni1hf9sl3x8-ip-up finished (pid 10345), status = 0x1
+2025-03-27 01:11:26.596566491 rotuer wlan0.link.hostapd wlan0: STA-OPMODE-SMPS-MODE-CHANGED 96:75:33:6c:6b:86 static
+2025-03-27 01:11:26.656620107 rotuer wlan0.link.hostapd wlan0: STA-OPMODE-SMPS-MODE-CHANGED 96:75:33:6c:6b:86 off
+2025-03-27 01:11:27.189590642 rotuer dhcp6c.wan.link.pppoe odhcp6c[615]: Failed to send RS (Network unreachable)
+
+it's supposed to send only one notification (each up-script only sends
+if an output the other has created is there).
+
+~~maybe we're not wiping the outputs when it terminates?~~ checked, we are.
+
+
+2025-03-27 01:11:27.279458704 rotuer int.link.a.192.168.8.1.dnsmasq dnsmasq-dhcp[631]: no address range available for DHCPv6 request via int
+2025-03-27 01:11:27.557594914 rotuer dhcp6c.wan.link.pppoe odhcp6c[615]: Failed to send SOLICIT message to ff02::1:2 (Network unreachable)
+2025-03-27 01:11:31.193583256 rotuer dhcp6c.wan.link.pppoe odhcp6c[615]: Failed to send RS (Network unreachable)
+
+Hypothesis
+
+1) when the remote end bounces ppp, s6 restarts the ppp process
+but this doesn't cause dependent services to notice, so odhcpc,
+which is bound to the interface, doesn't see that we now have a
+new interface but with the same name as the old one
+
+and/or
+
+2) there is a race between acquire-*.fnl starting and the
+prefix/address outptus being updated so that we miss the first
+value change.
