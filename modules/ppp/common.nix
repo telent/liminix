@@ -36,6 +36,7 @@ let
     echo $3 > speed
     echo $4 > address
     echo $5 > peer-address
+    cat /sys/class/net/$1/ifindex > ifindex
     set +o nounset
     if test -n "''${DNS1}" ;then echo ''${DNS1} > ns1 ; fi
     if test -n "''${DNS2}" ;then echo ''${DNS2} > ns2 ; fi
