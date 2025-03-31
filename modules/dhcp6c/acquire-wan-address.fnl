@@ -25,6 +25,7 @@
 (fn run []
   (let [[state-directory wan-device] arg
         dir (svc.open state-directory)]
+    (update-addresses wan-device [] (or (dir:output "address") []) system)
     (accumulate [addresses []
                  v (dir:events)]
       (update-addresses wan-device addresses (or (v:output "address") []) system))))

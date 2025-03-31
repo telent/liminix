@@ -25,6 +25,7 @@
 (fn run []
   (let [[state-directory lan-device] arg
         dir (svc.open state-directory)]
+    (update-prefixes lan-device [] (or (dir:output "prefix") []) system)
     (accumulate [addresses []
                  v (dir:events)]
       (update-prefixes lan-device addresses (or (v:output "prefix") []) system))))
