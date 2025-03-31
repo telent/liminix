@@ -10,7 +10,7 @@ let
 in
 longrun {
   inherit name;
-  run = "${script} $SERVICE_OUTPUTS/${client.name} $(output ${interface} ifname)";
+  run = "${script} ${client} $(output ${interface} ifname)";
   dependencies = [
     client
     interface
