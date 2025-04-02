@@ -7456,22 +7456,74 @@ what to do with the web site?
 but we probably don't want the blog entries to be in the liminix git
 repo because workflow
 
-* if we do that, the -> html conversion in the manual needs to have
+* if we do that, the ->html conversion in the manual needs to have
   better nav
 
 links we want on the homepage
 
 "I am new to Liminix and want to find if it's for me"
- - introduction/tutorial
- - hardware list
+ - introduction/tutorial (how do i use it)
+ - hardware list (is my device supported)
+   - which includes how to install the system
 
-"I am setting my device up and need some reference stuff"
+"I am ready to run, and need a reference for stuff"
+[this is a merge of the existing config and admin sections]
+ - what is a module, what is a service
+ - how to do secrets
  - list of service and module options
+ - using a running system: services and logs
+   (move controlled services stuff up a level, its not runtime)
+ - updating/changing the configuration
+   writable fs: use outputs.updater
+   readonly fs: use levitate
 
 "I want to stay in touch/find out what's new"
  - blog
  - mailing lists
+ - irc
+ - CoC
 
 "I want to contribute"
+Developer manual, plus
  - mailing lists
  - git repo
+   - how to send patches
+ - also transplant "module implementation" here
+ - porting
+   - how to bring up
+   - what we look for in a new device patch (kconfig style
+
+
+perhaps we can get rid of generic "installation" in the manual
+and have each method transcluded into the hardware device descriptions
+
+
+
+see also:
+1) "Continuous updates" is misleading as it gives the impression
+downstreams would be restarted if an upstream restarts. Not true.
+We should describe secrets subscriber here
+
+
+-----
+
+leaving us with these titles remaining
+
+* tutorial
+* hardware
+* reference (could just call it "manual")
+* development
+* blog
+
+and these which get moved
+
+* configuration/admin -> tutorial
+* Module options -> sublevel in Reference
+* outputs -> transcluded in hardware
+  (might also add as an appendix, so that porters can see all in one place)
+
+
+source for all of these except blog and landing page is the doc/ folder
+
+landing page will have some big rectangles that essentially duplicate
+the menu items
