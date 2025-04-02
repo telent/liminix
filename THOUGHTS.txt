@@ -7445,5 +7445,33 @@ new interface but with the same name as the old one
 and/or
 
 2) there is a race between acquire-*.fnl starting and the
-prefix/address outptus being updated so that we miss the first
+prefix/address outputs being updated so that we miss the first
 value change.
+
+Tue Apr  1 21:29:03 BST 2025
+
+what to do with the web site?
+
+* we could add the "community" and "development" pages to the manual,
+but we probably don't want the blog entries to be in the liminix git
+repo because workflow
+
+* if we do that, the -> html conversion in the manual needs to have
+  better nav
+
+links we want on the homepage
+
+"I am new to Liminix and want to find if it's for me"
+ - introduction/tutorial
+ - hardware list
+
+"I am setting my device up and need some reference stuff"
+ - list of service and module options
+
+"I want to stay in touch/find out what's new"
+ - blog
+ - mailing lists
+
+"I want to contribute"
+ - mailing lists
+ - git repo
