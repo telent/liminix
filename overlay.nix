@@ -302,7 +302,6 @@ extraPkgs
       });
       overrides =
         {
-          nixosTestRunner = true;
           hostCpuTargets = map (f: "${f}-softmmu") [
             "arm"
             "aarch64"
@@ -320,6 +319,10 @@ extraPkgs
         }
         // lib.optionalAttrs (lib.versionOlder lib.version "24.10") {
           texinfo = null;
+          nixosTestRunner = true;
+        }
+        // lib.optionalAttrs (lib.versionAtLeast lib.version "25.04") {
+          minimal = true;
         };
     in
     q.override overrides;
