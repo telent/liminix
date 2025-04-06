@@ -1,24 +1,26 @@
-# Minimal makefile for Sphinx documentation
-#
+DOCS=\
+	admin \
+	configuration \
+	development \
+	index \
+	installation \
+	intro \
+	modules \
+	outputs \
+	reference \
+	tutorial
 
-# You can set these variables from the command line, and also
-# from the environment for the first two.
-SPHINXOPTS    ?=
-SPHINXBUILD   ?= sphinx-build
-SOURCEDIR     = .
-BUILDDIR      = _build
-
-# Put it first so that "make" without argument is like "make help".
-help:
-	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 hardware.rst: hardware.nix
 	@rm -f hardware.rst || true
 	@cp $$(nix-build hardware.nix) hardware.rst
 
-.PHONY: help Makefile
+%.html : %.adoc
+	asciidoctor -a stylesheet=asciidoc.css $<
 
-# Catch-all target: route all unknown targets to Sphinx using the new
-# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-html: Makefile
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+html: Makefile $(patsubst %,%.html,$(DOCS))
+
+install:
+	mkdir -p $(prefix)/doc
+	cp -a posts/* news.html index.html liminix.css $(prefix)
+	cp $(patsubst %,%.html,$(DOCS)) $(prefix)/doc
