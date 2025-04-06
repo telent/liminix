@@ -1,0 +1,10 @@
+== Liminix
+
+intro tutorial installation configuration admin development modules
+hardware outputs
+
+=== Indices and tables
+
+* `+genindex+`
+* `+modindex+`
+* `+search+`

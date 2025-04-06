@@ -1,0 +1,322 @@
+== Tutorial
+
+Liminix is very configurable, which can make it initially quite daunting
+- especially if you're learning Nix or Linux or networking concepts at
+the same time. In this section we build some "worked example" Liminix
+images to introduce the concepts. If you follow the examples exactly,
+they should work. If you change things as you go along, they may work
+differently or not at all, but the experience should be educational
+either way.
+
+=== Requirements
+
+You will need a reasonably powerful computer running Nix. Target devices
+for Liminix are unlikely to have the CPU power and disk space to be able
+to build it in situ, so the build process is based around
+"cross-compilation" from another computer. The build machine can be any
+reasonably powerful desktop/laptop/server PC running NixOS. Standalone
+Nixpkgs installations on other Linux distributions - or on MacOS, or
+even in a Docker container - also ought to work but are untested.
+
+=== Running in Qemu
+
+You can try out Liminix without even having a router to play with. Clone
+the Liminix git repository and change into its directory
+
+[source,console]
+----
+git clone https://gti.telent.net/dan/liminix
+cd liminix
+----
+
+Now build Liminix
+
+[source,console]
+----
+nix-build -I liminix-config=./examples/hello-from-qemu.nix \
+ --arg device "import ./devices/qemu" -A outputs.default
+----
+
+In this command `+liminix-config+` points to the desired software
+configuration (e.g. services, users, filesystem, secrets) and `+device+`
+describes the hardware (or emulated hardware) to run it on.
+`+outputs.default+` tells Liminix that we want the default image output
+for flashing to the device: for the Qemu "hardware" it's an alias for
+`+outputs.vmbuild+`, which creates a directory containing a root
+filesystem image and a kernel.
+
+[TIP]
+====
+The first time you run this it may take several hours, because it builds
+all of the dependencies including a full MIPS gcc and library toolchain.
+Once those intermediate build products are in the nix store, subsequent
+builds will be much faster - practically instant, if nothing has
+changed.
+====
+
+Now you can try it:
+
+[source,console]
+----
+./result/run.sh
+----
+
+This starts the Qemu emulator with a bunch of useful options, to run the
+Liminix configuration you just built. It connects the emulated device's
+serial console and the
+https://www.qemu.org/docs/master/system/monitor.html[QEMU monitor] to
+stdin/stdout.
+
+You should now see Linux boot messages and after a few seconds be
+presented with a root shell prompt. You can run commands to look at the
+filesystem, see what processes are running, view log messages (in
+:file:/run/log/current), etc. To kill the emulator, press ^P (Control P)
+then c to enter the "QEMU Monitor", then type `+quit+` at the `+(qemu)+`
+prompt.
+
+To see that it's running network services we need to connect to its
+emulated network. Start the machine again, if you had stopped it, and
+open up a second terminal on your build machine. We're going to run
+another virtual machine attached to the virtual network, which will
+request an IP address from our Liminix system and give you a shell you
+can run ssh from.
+
+We use https://www.system-rescue.org/[System Rescue] in tty mode (no
+graphical output) for this example, but if you have some other favourite
+Linux Live CD ISO - or, for that matter, any other OS image that QEMU
+can boot - adjust the command to suit.
+
+Download the System Rescue ISO:
+
+[source,console]
+----
+curl https://fastly-cdn.system-rescue.org/releases/10.01/systemrescue-10.01-amd64.iso -O
+----
+
+and run it
+
+[source,console]
+----
+nix-shell -p qemu --run " \
+qemu-system-x86_64 \
+-echr 16 \
+-m 1024 \
+-cdrom systemrescue-10.01-amd64.iso \
+-netdev socket,mcast=230.0.0.1:1235,localaddr=127.0.0.1,id=lan \
+-device virtio-net,disable-legacy=on,disable-modern=off,netdev=lan,mac=ba:ad:3d:ea:21:01 \
+-display none -serial mon:stdio"
+----
+
+System Rescue displays a boot menu at which you should select the
+"serial console" option, then after a few moments it boots to a root
+prompt. You can now try things out:
+
+* run `+ip a+` and see that it's been allocated an IP address in the
+range 10.3.0.0/16.
+* run `+ping 10.3.0.1+` to see that the Liminix VM responds
+* run `+ssh root@10.3.0.1+` to try logging into it.
+
+Congratulations! You have installed your first Liminix system - albeit
+it has no practical use and it's not even real. The next step is to try
+running it on hardware.
+
+=== Installing on hardware
+
+For the next example, we're going to install onto an actual hardware
+device. These steps have been tested using a GL.iNet GL-MT300A, which
+has been chosen for the purpose because it's cheap and easy to unbrick
+if necessary.
+
+[WARNING]
+====
+There is always a risk of rendering your device unbootable by flashing
+it with an image that doesn't work. The GL-MT300A has a builtin
+"debrick" procedure in the boot monitor and is also comparatively simple
+to attach serial cables to (soldering not required), so it is lower-risk
+than some devices. Using some other Liminix-supported MIPS hardware
+device also _ought_ to work here, but you accept the slightly greater
+bricking risk if it doesn't.
+====
+
+See `+hardware+` for device support status.
+
+You may want to read and inwardly digest the Develoment Manual section
+`+serial+` when you start working with Liminix on real hardware. You
+won't _need_ serial access for this example, assuming it works, but it
+allows you to see the boot monitor and kernel messages, and to login
+directly to the device if for some reason it doesn't bring its network
+up.
+
+Now we can build Liminix. Although we could use the same example
+configuration as we did for Qemu, you might not want to plug a DHCP
+server into your working LAN because it will compete with the real DHCP
+service. So we're going to use a different configuration with a DHCP
+client: this is `+examples/hello-from-mt300.nix+`
+
+It's instructive to compare the two configurations:
+
+[source,console]
+----
+diff -u examples/hello-from-qemu.nix examples/hello-from-mt300.nix
+----
+
+You'll see a new `+boot.tftp+` stanza which you can ignore,
+`+services.dns+` has been removed, and the static IP address allocation
+has been replaced by a `+dhcp.client+` service.
+
+[source,console]
+----
+nix-build -I liminix-config=./examples/hello-from-mt300.nix \
+ --arg device "import ./devices/gl-mt300a" -A outputs.default
+----
+
+[TIP]
+====
+The first time you run this it may take several hours. Again? Yes, even
+if you ran the previous example. Qemu is set up as a big-endian system
+whereas the MediaTek SoC on this device is little-endian - so it
+requires building all of the dependencies including an entirely
+different MIPS gcc and library toolchain to the other one.
+====
+
+This time in `+result/+` you will see a bunch of files. Most of them you
+can ignore for the moment, but `+result/firmware.bin+` is the firmware
+image you can flash.
+
+==== Flashing
+
+Again, there are a number of different ways you could do this: using
+TFTP with a serial cable, through the stock firmware's web UI, or using
+the https://docs.gl-inet.com/router/en/3/tutorials/debrick/[vendor's
+"debrick" process]. The last of these options has a lot to recommend it
+for a first attempt:
+
+* it works no matter what firmware is currently installed
+* it doesn't require plugging a router into the same network as your
+build system and potentially messing up your actual upstream
+* no need to open the device and add cables
+
+You can read detailed instructions on the vendor site, but the short
+version is:
+
+[arabic]
+. turn the device off
+. connect it by ethernet cable to a computer
+. configure the computer to have static ip address 192.168.1.10
+. while holding down the Reset button, turn the device on
+. after about five seconds you can release the Reset button
+. visit http://192.168.1.1/ using a web browser on the connected
+computer
+. click on "Browse" and choose `+result/firmware.bin+`
+. click on "Update firmware"
+. wait a minute or so while it updates.
+
+There's no feedback from the web interface when the flashing is
+finished, but what should happen is that the router reboots and starts
+running Liminix. Now you need to figure out what address it got from
+DHCP - e.g. by checking the DHCP server logs, or maybe by pinging
+`+hello.lan+` or something. Once you've found it on the network you can
+ping it and ssh to it just like you did the Qemu example, but this time
+for real.
+
+[WARNING]
+====
+Do not leave the default root password in place on any device exposed to
+the internet! Although it has no writable storage and no default route,
+a motivated attacker with some imagination could probably still do
+something awful using it.
+====
+
+Congratulations Part II! You have installed your first Liminix system on
+actual hardware - albeit that it _still_ has no practical use.
+
+Exercise for the reader: change the default password by editing
+`+examples/hello-from-mt300.nix+`, and then create and upload a new
+image that has it set to something less hopeless.
+
+=== Routing
+
+The third example `+examples/demo.nix+` is a fully-functional home "WiFi
+router" - although you will have to edit it a bit before it will
+actually work for you. Copy `+examples/demo.nix+` to `+my-router.nix+`
+(or other name of your choice) and open it in your favourite text
+editor. Everywhere that the text `+EDIT+` appears is either a place you
+probably want to change or a place you almost certainly need to change.
+
+There's a lot going on in this configuration:
+
+* it provides a wireless access point using the `+hostapd+` service: in
+this stanza you can change the ssid, the channel, the passphrase etc.
+* the wireless lan and wired lan are bridged together with the
+`+bridge+` service, so that your wired and wireless clients appear to be
+on the same network.
+
+[TIP]
+====
+If you were using a hardware device that provides both 2.4GHz and 5GHz
+wifi, you'd probably find that it has two wireless devices (often called
+wlan0 and wlan1). In Liminix we handle this by running two `+hostapd+`
+services, and adding both of them to the network bridge along with the
+wired lan. (You can see an example in `+examples/rotuer.nix+`)
+====
+
+* we use the combination DNS and DHCP daemon provided by the `+dnsmasq+`
+service, which you can configure
+* the upstream network is "PPP over Ethernet", provided by the `+pppoe+`
+service. Assuming that your ISP uses this standard, they will have
+provided you with a PPP username and password (sometimes this will be
+listed as "PAP" or "CHAP") which you can edit into the configuration
+* this example supports the
+newfootnote:[https://datatracker.ietf.org/doc/html/rfc1883[RFC1883
+Internet Protocol&#44; Version 6] was published in 1995, so only "new"
+when Bill Clinton was US President] Internet Protocol v6 as well as
+traditional IPv4. Configuring IPv6 seems to vary from one ISP to the
+next: this example expects them to be providing IP address allocation
+and "prefix delegation" using DHCP6.
+
+Build it using the same method as the previous example
+
+[source,console]
+----
+nix-build -I liminix-config=./my-router.nix \
+ --arg device "import ./devices/gl-mt300a" -A outputs.default
+----
+
+and then you can flash it to the device.
+
+==== Bonus: in-place updates
+
+This configuration uses a writable filesystem (see the line
+`+rootfsType = "jffs2"+`), which means that once you've flashed it for
+the first time, you can make further updates over SSH onto the running
+router. To try this, make a small change (I'd suggest changing the
+hostname) and then run
+
+[source,console]
+----
+nix-build  -I liminix-config=./my-router.nix \
+  --arg device "import ./devices/gl-ar750" \
+  -A outputs.systemConfiguration && \
+result/install.sh root@address-of-the-device 
+----
+
+(This requires the device to be network-accessible from your build
+machine, which for a test/demo system might involve a second network
+device in your build system - USB ethernet adapters are cheap - or a bit
+of messing around unplugging cables.)
+
+For more information about in-place-updates, see the manual section
+`+Rebuilding the system+`.
+
+=== Final thoughts
+
+* These are demonstration configs for pedagogical purposes. If you'd
+like to see some more realistic uses of Liminix,
+`+examples/rotuer,arhcive,extneder.nix+` are based on some actual real
+hosts in my home network.
+* The technique used here for flashing was chosen mostly because it
+doesn't need much infrastructure/tooling, but it is a bit of a faff
+(requires physical access, vendor specific). There are slicker ways to
+do it that need a bit more setup - we'll talk about that later as well.
+
+*Footnotes*
