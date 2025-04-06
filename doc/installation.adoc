@@ -25,7 +25,7 @@ deploy onto, sometimes due to differences in the uses these devices are
 put to.
 
 For a more full description of how to configure Liminix, see
-`+configuration+`. Assuming for the moment that you want a typical home
+<<_configuration>>. Assuming for the moment that you want a typical home
 wireless gateway/router, the best way to get started is to copy
 `+examples/rotuer.nix+` and edit it for your requirements.
 
