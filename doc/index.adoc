@@ -1,10 +1,19 @@
-== Liminix
+= Liminix
+Daniel Barlow
+:toc: left
 
-intro tutorial installation configuration admin development modules
-hardware outputs
+include::intro.adoc[]
 
-=== Indices and tables
+include::tutorial.adoc[]
 
-* `+genindex+`
-* `+modindex+`
-* `+search+`
+include::installation.adoc[]
+
+include::configuration.adoc[]
+
+include::admin.adoc[]
+
+include::development.adoc[]
+
+include::modules.adoc[]
+
+include::hardware.adoc[]
