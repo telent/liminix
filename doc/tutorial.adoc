@@ -136,12 +136,12 @@ to attach serial cables to (soldering not required), so it is lower-risk
 than some devices. Using some other Liminix-supported MIPS hardware
 device also _ought_ to work here, but you accept the slightly greater
 bricking risk if it doesn't.
-====
 
 See <<_supported_hardware>> for device support status.
+====
 
-You may want to read and inwardly digest the section about <<serial>>
-connections when you start working with Liminix on real hardware. You
+You may want to read and inwardly digest the section on <<serial>>
+when you start working with Liminix on real hardware. You
 won't _need_ serial access for this example, assuming it works, but it
 allows you to see the boot monitor and kernel messages, and to login
 directly to the device if for some reason it doesn't bring its network

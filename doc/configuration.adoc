@@ -1,7 +1,7 @@
 == Configuration
 
-There are many things you can specify in a configuration, but these are
-the ones you most commonly need to change:
+There are many things you can specify in a configuration, but most
+commonly you need to change:
 
 * which services (processes) to run
 * what packages to install

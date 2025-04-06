@@ -55,7 +55,7 @@ early boot, the risk of "bricking" is substantially reduced and you have
 options for recovering if you misstep or flash a bad image.
 
 [[serial]]
-==== U-Boot and serial shenanigans
+==== Serial connections
 
 Every device that we have so far encountered in Liminix uses
 https://docs.u-boot.org/en/latest/[U-Boot&#44; the "Universal Boot
@@ -97,7 +97,9 @@ When you turn the router on you should be greeted with some messages
 from U-Boot, followed by the instruction to hit some key to stop
 autoboot. Do this and you will get to the prompt. If you didn't see
 anything, the strong likelihood is that TX and RX are the wrong way
-around. If you see garbage, try a different speed.
+around, or your computer is expecting flow control which the 3 wire
+connection does not provide. . If you see garbage, try a different
+speed.
 
 Interesting commands to try first in U-Boot are `+help+` and
 `+printenv+`.
