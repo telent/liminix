@@ -1,4 +1,4 @@
-== Installation
+= Installation
 
 Hardware devices vary wildly in their affordances for installing new
 operating systems, so it should be no surprise that the Liminix
@@ -6,7 +6,23 @@ installation procedure is hardware-dependent. This section contains
 generic instructions, but please refer to the documentation for your
 device to find whether and how well they apply.
 
-=== Building a firmware image
+Most of the supported devices fall into one of two broad categories:
+
+* devices we install by preparing a raw flash image and copying it
+  directly onto (some part of) the flash. This is analogous to (though
+  not quite the same as) using
+  https://www.man7.org/linux/man-pages/man1/dd.1.html:dd(1) on a
+  "grown up" computer to copy a raw disk image. Devices in this
+  category are usually smaller, older, and/or less powerful.
+
+* devices where the vendor provides a "higher level" storage
+  abstraction, such as http://linux-mtd.infradead.org/doc/ubi.html:UBI
+  over raw flash, or a consumer flash such as MMC, or another storage
+  technology entirely. Installation on these devices is less uniform
+  because it depends on exactly what kind of storage abstraction.
+  
+
+== Building a firmware image
 
 Liminix uses the Nix language to provide congruent configuration
 management. This means that to change anything about the way in which a
@@ -38,32 +54,27 @@ $ nix-build -I liminix-config=./configuration.nix \
  --arg device "import ./devices/gl-mt300a" -A outputs.default
 ----
 
-Usually (not always, _please check the documentation for your device_)
-this will leave you with a file `+result/firmware.bin+` which you now
-need to flash to the device.
+For raw flash devices, this will leave you with a file
+`+result/firmware.bin+` which you now need to write to the flash.
+For other devices, _please check the device documentation_
 
-=== Flashing from the boot monitor (TFTP install)
+== Flashing from the boot monitor (TFTP install)
 
-If you are prepared to open the device and have a TTL serial adaptor of
-some kind to connect it to, you can probably use U-Boot and a TFTP
-server to download and flash the image.
+You will need
 
-This is quite hardware-specific and may even involve soldering - see the
-documention for your device. However, it is in some ways the most
-"reliable" option: if you can see what's happening (or not happening) in
-early boot, the risk of "bricking" is substantially reduced and you have
-options for recovering if you misstep or flash a bad image.
+* to open the device and attach a TTL serial adaptor of some kind 
+* a TFTP server on the network that the device is plugged into
+(or can be plugged into for installation)
+
+Installing via serial connection is quite hardware-specific and
+depending on the device may even involve soldering. However, it is in
+some ways the most "reliable" option: if you can see what's happening
+(or not happening) in early boot, the risk of "bricking" is
+substantially reduced and you have options for recovering if you
+misstep or flash a bad image.
 
 [[serial]]
-==== Serial connections
-
-Every device that we have so far encountered in Liminix uses
-https://docs.u-boot.org/en/latest/[U-Boot&#44; the "Universal Boot
-Loader"] so it's worth knowing a bit about it. "Universal" is in this
-context a bit of a misnomer, though: encountering _mainline_ U-Boot is
-very rare and often you'll find it is a fork from some version last
-updated in 2008. Upgrading U-Boot is more or less complicated depending
-on the device and is outside scope for Liminix.
+=== Serial connections
 
 To speak to U-Boot on your device you'll usually need a serial
 connection to it. This typically involves opening the box, locating the
@@ -98,15 +109,20 @@ from U-Boot, followed by the instruction to hit some key to stop
 autoboot. Do this and you will get to the prompt. If you didn't see
 anything, the strong likelihood is that TX and RX are the wrong way
 around, or your computer is expecting flow control which the 3 wire
-connection does not provide. . If you see garbage, try a different
+connection does not provide. If you see garbage, try a different
 speed.
 
 Interesting commands to try first in U-Boot are `+help+` and
 `+printenv+`.
 
+=== TFTP
+
 You will also need to configure a TFTP server on a network that's
 accessible to the device: how you do that will vary according to which
 TFTP server you're using and so is out of scope for this document.
+
+HINT: <<tufted>>, a rudimentary TFTP server, is supplied with Liminix
+for development purposes. It may or may not fit your needs here.
 
 ==== Building and installing the image
 
@@ -114,37 +130,31 @@ Follow the device-specific instructions for "TFTP install": usually, the
 steps are
 
 * build the [.title-ref]#outputs.mtdimage# output
-* copy `+result/firmware.bin+` to your TFTP server
-* copy/paste the commands in `+result/flash.scr+` one at a time into the
+* copy `+result/firmware.bin+` to wherever your TFTP server serves files
+from
+* execute the commands listed in `+result/flash.scr+` at the
 U-Boot command line
 * reset the device
 
 You should now see messages from U-Boot, then from the Linux kernel and
 eventually a shell prompt.
 
-[NOTE]
-====
-Before you reboot, check which networks the device is plugged into, and
+NOTE: Before you reboot, check which networks the device is plugged into, and
 disconnect as necessary. If you've just installed a DHCP server or
-anything similar that responds to broadcasts, you may not want it to do
+anything else that responds to broadcasts, you may not want it to do
 that on the network that you temporarily connected it to for installing
 it.
-====
 
-=== Flashing from OpenWrt
+== Flashing from OpenWrt
 
-[CAUTION]
-====
-Untested! A previous version of these instructions (without the -e flag)
-led to bricking the device when flashing a jffs2 image. If you are
-reading this message, nobody has yet reported on whether the new
-instructions are any better.
-====
+CAUTION: Untested! A previous version of these instructions (without
+the -e flag) led to soft-bricking the device when flashing a JFFS2
+image. The current version _should_ work better but if you are reading this
+message then nobody has yet confirmed it
 
 If your device is running OpenWrt then it probably has the `+mtd+`
-command installed. Build the [.title-ref]#outputs.mtdimage# output (as
-you would for a TFTP install) and then transfer `+result/firmware.bin+`
-onto the device using e.g. `+scp+`. Now flash as follows:
+command installed. Transfer `+result/firmware.bin+` onto the running
+device using e.g. `+scp+`. Now flash as follows:
 
 [source,console]
 ----
@@ -160,46 +170,13 @@ manual] which may also contain (hardware-dependent) instructions on how
 to flash an image using the vendor firmware - perhaps even from a web
 interface.
 
-=== Flashing from Liminix
+== Flashing from Liminix
 
-If the device is already running Liminix and has been configured with
-`+levitate+`, you can use that to safely flash your new image. Refer to
-`+levitate+` for an explanation.
+If the device is already running Liminix then in general you cannot safely
+copy a new image over the top of the running system while it is running.
 
-If the device is running Liminix but doesn't have `+levitate+` your
-options are more limited. You may attempt to use `+flashcp+` but it
-doesn't always work: as it copies the new image over the top of the
-active root filesystem, surprise may ensue. Consider instead using a
-serial connection: you may need one anyway after trying flashcp if it
-corrupts the image.
+If the running system was configured with <<levitate>> you can use
+that to safely flash your new image.  Otherwise you may attempt to use
+`+flashcp+` directly, but bust out the serial leads in preparation for
+it going horribly wrong.
 
-==== flashcp (not generally recommended)
-
-Connect to the device and locate the "firmware" partition, which you can
-do with a combination of `+dmesg+` output and the contents of
-`+/proc/mtd+`
-
-[source,console]
-----
-<5>[    0.469841] Creating 4 MTD partitions on "spi0.0":
-<5>[    0.474837] 0x000000000000-0x000000040000 : "u-boot"
-<5>[    0.480796] 0x000000040000-0x000000050000 : "u-boot-env"
-<5>[    0.487056] 0x000000050000-0x000000060000 : "art"
-<5>[    0.492753] 0x000000060000-0x000001000000 : "firmware"
-
-# cat /proc/mtd
-dev:    size   erasesize  name
-mtd0: 00040000 00001000 "u-boot"
-mtd1: 00010000 00001000 "u-boot-env"
-mtd2: 00010000 00001000 "art"
-mtd3: 00fa0000 00001000 "firmware"
-mtd4: 002a0000 00001000 "kernel"
-mtd5: 00d00000 00001000 "rootfs"
-----
-
-Copy `+result/firmware.bin+` to the device and now run (in this example)
-
-[source,console]
-----
-flashcp -v firmware.bin /dev/mtd3
-----

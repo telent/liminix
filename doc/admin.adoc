@@ -220,7 +220,6 @@ This will install the previous configuration's activation binary into
 /bin, and copy its kernel and initramfs into /boot. Note that it depends
 on the previous system not having been garbage-collected.
 
-[[levitate]]
 ==== Adding packages
 
 If you simply wish to add a package without any change to services, you
@@ -238,8 +237,9 @@ nix-shell -p min-copy-closure root@the-device result/
 Note that this only copies the package and its dependencies to the
 device: it doesn't update any profile to add it to `+$PATH+`
 
-[[rebuilding the system]]
-=== Reinstalling on a running system
+[reftext="Levitate"]
+[[levitate]]
+=== Levitate: Reinstalling on a running system
 
 Liminix is initially installed from a monolithic `+firmware.bin+` - and
 unless you're running a writable filesystem, the only way to update it

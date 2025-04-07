@@ -184,6 +184,7 @@ documentation has a
 https://openwrt.org/docs/techref/hardware/port.serial[good explanation]
 of what you may expect to find on the device.
 
+[[tufted]]
 `tufted` is a rudimentary TFTP server which runs from the command
 line, has an allowlist for client connections, and follows symlinks,
 so you can have your device download images direct from the
