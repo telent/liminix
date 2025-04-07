@@ -224,8 +224,11 @@ to copy-paste the whole of `+boot.scr+` into a terminal emulator and
 have it work just like that. You may need to paste each line one at a
 time, or even retype it.
 
+==== Running from RAM
+
 For a faster edit-compile-test cycle, you can build a TFTP-bootable
-image instead of flashing. In your device configuration add
+image which boots directly from RAM (using phram) instead of needing
+to be flashed first. In your device configuration add
 
 [source,nix]
 ----
