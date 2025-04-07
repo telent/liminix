@@ -8,6 +8,8 @@ include::tutorial.adoc[]
 
 include::installation.adoc[]
 
+= For Administrators
+
 include::configuration.adoc[]
 
 include::admin.adoc[]
