@@ -237,8 +237,7 @@ imports = [
 ];
 ----
 
-and then build `+outputs.tftpboot+`. This creates a file in `+result/+`
-called `+boot.scr+`, which you can copy and paste into U-Boot to
+and then build `+outputs.tftpboot+`. This creates a file `+result/boot.scr+`, which you can copy and paste into U-Boot to
 transfer the kernel and filesystem over TFTP and boot the kernel from
 RAM.
 
