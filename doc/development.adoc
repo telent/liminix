@@ -1,24 +1,113 @@
-== Development
+= Development
 
-As a developer working on Liminix, or implementing a service or module,
-you probably want to test your changes more conveniently than by
-building and flashing a new image every time. This section documents
-various affordances for iteration and experiments.
 
+== Contributions
+
+Patches welcome!
+
+* if you have an obvious bug fix, new package, documentation
+  improvement or other uncontroversial small patch, send it straight
+  in.
+
+* if you have a large new feature or design change in mind, please
+  please _get in touch_ to talk about it before you commit time to
+  implementing it. Perhaps it isn't what we were expecting, most
+  likely we will have ideas or advice on what it should do or how it
+  should be done.
+
+Liminix development is not tied to Github or any other particular
+forge. How to send changes:
+
+1. Push your Liminix repo with your changes to a git repository
+somewhere on the Internet that I can clone from. It can be on Codeberg
+or Gitlab or Sourcehut or Forgejo or Gitea or Github or a bare repo in
+your own personal web space or any kind of hosting you like.
+
+2. Email devel@liminix.org with the URL of the repo and the branch
+name.
+
+If that's not an option, I’m also happy for you to send your changes
+direct to the list itself, as an incremental git bundle or using git
+format-patch. We'll work it out somehow.
+
+The main branch of Liminix is hosted at
+<https://gti.telent.net/dan/liminix>, with a mirror at
+<https://github.com/telent/liminix>. You can clone from either of
+those repos.
+
+=== Code of Conduct
+
+Liminix is dedicated to providing a harassment-free experience for everyone. We do not tolerate harassment of participants in any form.
+
+The Liminix
+https://gti.telent.net/dan/liminix/src/commit/7bcf6b15c3fdddafeda13f65b3cd4a422dc52cd3/CODE-OF-CONDUCT.md[Code
+of Conduct] applies to all Liminix spaces, including the IRC channel,
+mailing lists, and any other forums both online and off. Anyone who
+violates this code of conduct may be sanctioned or expelled from these
+spaces at the discretion of the project leadership.
+
+=== Nix language style
+
+This section describes some Nix language style points that we attempt to
+adhere to in this repo. Some are more aspirational than actual.
+
+* indentation and style is according to `nixfmt-rfc-style`
+* favour `+callPackage+` over raw `+import+` for calling derivations or
+any function that may generate one - any code that might need `+pkgs+`
+or parts of it.
+* prefer `+let inherit (quark) up down strange charm+` over
+`+with quark+`, in any context where the scope is more than a single
+expression or there is more than one reference to `+up+`, `+down+` etc.
+`+with pkgs; [ foo bar baz]+` is OK,
+`+with lib; stdenv.mkDerivation { ... }+` is usually not.
+* `+<liminix>+` is defined only when running tests, so don't refer to it
+in "application" code
+* the parameters to a derivation are sorted alphabetically, except for
+`+lib+`, `+stdenv+` and maybe other non-package "special cases"
+* where a `+let+` form defines multiple names, put a newline after the
+token `+let+`, and indent each name two characters
+* to decide whether some code should be a package or a module? Packages
+are self-contained - they live in `+/nix/store/eeeeeee-name+` and don't
+directly change system behaviour by their presence or absense. modules
+can add to `+/etc+` or `+/bin+` or other global state, create services,
+all that side-effecty stuff. Generally it should be a package unless it
+can't be.
+
+=== Copyright
+
+The Nix code in Liminix is MIT-licenced (same as Nixpkgs), but the code
+it combines from other places (e.g. Linux, OpenWrt) may have a variety
+of licences. Copyright assignment is not expected:
+just like when submitting to the Linux kernel you retain the copyright
+on the code you contribute.
+
+== Development tools
+
+In this section we describe some tools to make the edit/build/run
+development cycle less painful than flashing a new image on a hardware
+device every time.
+
+// FIXME if this is still true we should fix it
 In general, packages and tools that run on the "build" machine are
 available in the `+buildEnv+` derivation and can most easily be added to
 your environment by running `+nix-shell+`.
 
 === Emulated devices
 
-Liminix has a `+qemu+` device, which generates images suitable for
-running on your build machine using the free http://www.qemu.org[QEMU
-machine emulator]. This is useful for developing userland without
-needing to keep flashing or messing with U-Boot: it also enables testing
-against emulated network peers using
+Liminix has a number of emulated device descriptions which generate
+images suitable for running on your build machine using the free
+http://www.qemu.org[QEMU machine emulator]. They are
+
+* `qemu`(MIPS)
+* `qemu-armv7l`(32 bit ARM)
+* `qemu-aarch64` (64 bit ARM)
+
+This is useful for developing userland without needing to keep
+flashing or messing with U-Boot: it also enables testing against
+emulated network peers using
 https://wiki.qemu.org/Documentation/Networking#Socket[QEMU socket
 networking], which may be preferable to letting Liminix loose on your
-actual LAN. To build it,
+actual LAN. To build,
 
 [source,console]
 ----
@@ -26,10 +115,12 @@ nix-build -I liminix-config=path/to/your/configuration.nix --arg device "import 
 ----
 
 This creates a `+result/+` directory containing a `+vmlinux+` and a
-`+rootfs+`, and also a shell script `+run.sh+` which invokes QEMU to run
+`+rootfs+`, and a shell script `+run.sh+` which invokes QEMU to run
 that kernel with that filesystem. It connects the Liminix serial console
 and the https://www.qemu.org/docs/master/system/monitor.html[QEMU
-monitor] to stdin/stdout. Use ^P (not ^A) to switch to the monitor.
+monitor] to stdin/stdout. Use `^P` (not `^A`) to switch to the monitor.
+
+// FIXME should add a `connect.sh` script instead of requiring nix-shell here
 
 If you run with `+--background /path/to/some/directory+` as the first
 parameter, it will fork into the background and open Unix sockets in
@@ -50,10 +141,10 @@ have them wired up to each other in the right way:
 * multicast 230.0.0.1:1236 : world (the internet)
 
 Any VM started by a `+run.sh+` script is connected to "lan" and
-"access", and the emulated border network gateway (see below) runs PPPoE
-and is connected to "access" and "world".
+"access". The emulated upstream (see below) runs PPPoE and is
+connected to "access" and "world".
 
-===== Border Network Gateway
+==== Upstream connection
 
 In pkgs/routeros there is a derivation to install and configure
 https://mikrotik.com/software[Mikrotik RouterOS] as a PPPoE access
@@ -85,7 +176,7 @@ time with configurations for RP-PPPoE and/or Accel PPP.#
 
 ==== TFTP
 
-[[tftp server]]
+[[tftpserver]]
 How you get your image onto hardware will vary according to the device,
 but is likely to involve taking it apart to add wires to serial console
 pads/headers, then using U-Boot to fetch images over TFTP. The OpenWrt
@@ -93,10 +184,10 @@ documentation has a
 https://openwrt.org/docs/techref/hardware/port.serial[good explanation]
 of what you may expect to find on the device.
 
-There is a rudimentary TFTP server bundled with the system which runs
-from the command line, has an allowlist for client connections, and
-follows symlinks, so you can have your device download images direct
-from the `+./result+` directory without exposing `+/nix/store/+` to the
+`tufted` is a rudimentary TFTP server which runs from the command
+line, has an allowlist for client connections, and follows symlinks,
+so you can have your device download images direct from the
+`+./result+` directory without exposing `+/nix/store/+` to the
 internet or mucking about copying files to `+/tftproot+`. If the
 permitted device is to be given the IP address 192.168.8.251 you might
 do something like this:
@@ -125,15 +216,12 @@ this is applicable). You should find it has created
 download the image and write it to flash after erasing the appropriate
 flash partition.
 
-[NOTE]
-====
-TTL serial connections typically have no form of flow control and so
+NOTE: TTL serial connections typically have no form of flow control and so
 don't always like having massive chunks of text pasted into them - and
 U-Boot may drop characters while it's busy. So don't necessarily expect
 to copy-paste the whole of `+boot.scr+` into a terminal emulator and
 have it work just like that. You may need to paste each line one at a
 time, or even retype it.
-====
 
 For a faster edit-compile-test cycle, you can build a TFTP-bootable
 image instead of flashing. In your device configuration add
@@ -166,10 +254,11 @@ internet so you can borrow the cable/fibre/DSL.
 can dedicate to Liminix
 * an L2TP service such as https://www.aa.net.uk/broadband/l2tp-service/
 
-You need to "hide" the Ethernet device from the host - for PCI this
-means configuring it for VFIO passthru; for USB you need to unload the
-module(s) it uses. I have this segment in configuration.nix which you
-may be able to adapt:
+You need to "hide" the Ethernet device from the host so that QEMU has
+exclusive use of it. For PCI this means configuring it for VFIO
+passthru; for USB you need to unload the module(s) it uses. I have
+this segment in my build machine's `configuration.nix` which you may
+be able to adapt:
 
 [source,nix]
 ----
@@ -196,7 +285,7 @@ Then you can execute `+run-border-vm+` in a `+buildEnv+` shell, which
 starts up QEMU using the NixOS configuration in
 `+bordervm-configuration.nix+`.
 
-In this VM
+Inside the VM
 
 * your Liminix checkout is mounted under `+/home/liminix/liminix+`
 * TFTP is listening on the ethernet device and serving
@@ -212,14 +301,11 @@ To configure bordervm, you need a file called `+bordervm.conf.nix+`
 which you can create by copying and appropriately editing
 `+bordervm.conf-example.nix+`
 
-[NOTE]
-====
-If you make changes to the bordervm configuration after executing
+NOTE: If you make changes to the bordervm configuration after executing
 `+run-border-vm+`, you need to remove the `+border.qcow2+` disk image
 file otherwise the changes won't get picked up.
-====
 
-=== Running tests
+== Running tests
 
 You can run all of the tests by evaluating `+ci.nix+`, which is the
 input I use in Hydra.
@@ -230,9 +316,15 @@ nix-build -I liminix=`pwd`  ci.nix -A pppoe # run one job
 nix-build -I liminix=`pwd`  ci.nix -A all # run all jobs
 ----
 
-=== Troubleshooting
+== Porting to new hardware
 
-==== Diagnosing unexpectedly large images
+// FIXME add this
+
+TBD
+
+== Troubleshooting
+
+=== Diagnosing unexpectedly large images
 
 Sometimes you can add a package and it causes the image size to balloon
 because it has dependencies on other things you didn't know about. Build
@@ -246,66 +338,3 @@ nix-build -I liminix-config=path/to/your/configuration.nix \
   -o manifest
 nix-store -q --tree manifest
 ----
-
-=== Contributing
-
-Contributions are welcome, though in these early days there may be a bit
-of back and forth involved before patches are merged: Please get in
-touch somehow [.title-ref]#before# you invest a lot of time into a code
-contribution I haven't asked for. Just so I know it's expected and
-you're not wasting time doing something I won't accept or have already
-started on.
-
-==== Nix language style
-
-This section describes some Nix language style points that we attempt to
-adhere to in this repo.
-
-* favour `+callPackage+` over raw `+import+` for calling derivations or
-any function that may generate one - any code that might need `+pkgs+`
-or parts of it.
-* prefer `+let inherit (quark) up down strange charm+` over
-`+with quark+`, in any context where the scope is more than a single
-expression or there is more than one reference to `+up+`, `+down+` etc.
-`+with pkgs; [ foo bar baz]+` is OK,
-`+with lib; stdenv.mkDerivation { ... }+` is usually not.
-* `+<liminix>+` is defined only when running tests, so don't refer to it
-in "application" code
-* the parameters to a derivation are sorted alphabetically, except for
-`+lib+`, `+stdenv+` and maybe other non-package "special cases"
-* indentation is whatever emacs nix-mode says it is.
-* where a `+let+` form defines multiple names, put a newline after the
-token `+let+`, and indent each name two characters
-* to decide whether some code should be a package or a module? Packages
-are self-contained - they live in `+/nix/store/eeeeeee-name+` and don't
-directly change system behaviour by their presence or absense. modules
-can add to `+/etc+` or `+/bin+` or other global state, create services,
-all that side-effecty stuff. Generally it should be a package unless it
-can't be.
-
-==== Copyright
-
-The Nix code in Liminix is MIT-licenced (same as Nixpkgs), but the code
-it combines from other places (e.g. Linux, OpenWrt) may have a variety
-of licences. I have no intention of asking for copyright assignment:
-just like when submitting to the Linux kernel you retain the copyright
-on the code you contribute.
-
-==== Code of Conduct
-
-Please govern yourself in Liminix project venues according to the
-https://gti.telent.net/dan/liminix/src/commit/7bcf6b15c3fdddafeda13f65b3cd4a422dc52cd3/CODE-OF-CONDUCT.md[Code
-of Conduct]
-
-==== Where to send patches
-
-Liminix' primary repo is https://gti.telent.net/dan/liminix but you
-can't send code there directly because it doesn't have open
-registrations.
-
-* There's a https://github.com/telent/liminix[mirror on Github] for
-convenience and visibility: you can open PRs against that
-* or, you can send me your patch by email using
-https://git-send-email.io/[git send-email]
-* or in the future, some day, we will have federated Gitea using
-ActivityPub.
