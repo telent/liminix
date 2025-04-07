@@ -7522,8 +7522,117 @@ and these which get moved
 * outputs -> transcluded in hardware
   (might also add as an appendix, so that porters can see all in one place)
 
+maybe also footer link for
+- CoC
+- privacy policy
+- ?
 
 source for all of these except blog and landing page is the doc/ folder
 
 landing page will have some big rectangles that essentially duplicate
 the menu items
+
+----
+
+to get there from here:
+
+1) we need to know the heading titles for a ToC to use as drop-down
+menus in the template, so will have to pass twice over the documents.
+Note that the same template is used for each doc so we can't expect the
+titles of the other docs to be provided by pandoc as variables
+
+(but maybe we could pass them in on the command line so as not to
+rewrite template.json?)
+
+note that we also need to use the template with the blog files,
+although for those we also need title and date frontmatter
+
+if the blog sources the template at build time to make pages, it's
+always going to be out of sync with the manual.
+
+would javascript be acceptable?
+
+should we just monorepo the two things together? we could run jekyll as
+part of the doc target, or even pandoc the markdown directly
+
+apparently myhtic.telent.net is running an rsync server?
+
+1) it needs doc/ removing from its path
+   path = "/var/www/blogs/www.liminix.org/_site/doc";
+   in hosts/myhtic.nix
+   (and moving to rmeote)
+
+2) make install should add doc to the path, for the manual,
+  and not for the blog entries which should be in yyyy/mm/dd folders
+
+Sun Apr  6 17:48:33 BST 2025
+
+This is all getting quite involved and I'm not convinced it's the
+simplest way forward
+
+- convert the manual to asciidoctor and make it have a sidebar
+  - use --embedded flag to splice in header/footer
+
+- the landing page can have big display-sized links to different
+manual sections and to the blog
+
+- get rid of the blog content that's not actually posts, merge it into
+  the manual
+
+- the blog also needs the header/footer spliced in
+
+site nav has three options: "home", "news", "manual"
+- unless we want to put the manual deeplinks from the homepage in
+ there as well
+- if we do that, need to indicate somehow that they're part of the
+ manual, not distinct from it
+
+do we need to move urls around? maybe not so much
+
+what to do about the "hardware" page?
+
+ - do we really expect the reader to scroll through every device
+ that's not theirs?
+ - there's going to be a lot of repeated text for similar devices
+ - "generic" instructions might go in the body of the manual with
+   devices as an appendix. However, you have to read the relevant
+   appendix section to make sense of the generic instructions anyway.
+   If only we had hypertext
+
+
+Mon Apr  7 23:49:40 BST 2025
+
+DOC TODO
+
+* we still have serial connection guff in both installation and
+  development sections
+
+* need to explain the mailing lists and IRC somewhere
+
+* markup the devices section as an appendix. maybe convert the
+embedded rst to adoc
+
+* remove pages that are not posts from jekyll blog
+
+* landing page
+
+* add rsyncy thing to rmeote
+
+* docs for outputs? maybe appendix ii
+
+* "Continuous updates" is misleading as it gives the impression
+downstreams would be restarted if an upstream restarts. Not true.
+We should describe secrets subscriber here
+
+* write doc for porting to new hw
+ - how to bring up
+ - what we look for in a new device patch (kconfig style etc)
+
+* move "module implementation" from admin to dev (maybe?)
+
+* CI: move from website to Development
+
+* some basic css to make it not the same as (I assume) every single
+  other asciidoc site
+
+* move info on the Community page to Introduction
