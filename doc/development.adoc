@@ -1,8 +1,9 @@
 = For Developers
 
-== Contributions
+== Contributing
 
-Patches welcome!
+Patches welcome! Also bug reports, documentation improvements,
+experience reports/case studies etc etc all equally as welcome.
 
 * if you have an obvious bug fix, new package, documentation
   improvement or other uncontroversial small patch, send it straight
@@ -10,9 +11,9 @@ Patches welcome!
 
 * if you have a large new feature or design change in mind, please
   please _get in touch_ to talk about it before you commit time to
-  implementing it. Perhaps it isn't what we were expecting, most
-  likely we will have ideas or advice on what it should do or how it
-  should be done.
+  implementing it. Perhaps it isn't what we were expecting, almost
+  certainly we will have ideas or advice on what it should do or how
+  it should be done.
 
 Liminix development is not tied to Github or any other particular
 forge. How to send changes:
@@ -23,16 +24,20 @@ or Gitlab or Sourcehut or Forgejo or Gitea or Github or a bare repo in
 your own personal web space or any kind of hosting you like.
 
 2. Email devel@liminix.org with the URL of the repo and the branch
-name.
+name. And/or put it on the IRC channel if you prefer, as long as you
+make sure someone who can merge it has seen your message.
 
 If that's not an option, I’m also happy for you to send your changes
 direct to the list itself, as an incremental git bundle or using git
 format-patch. We'll work it out somehow.
 
-The main branch of Liminix is hosted at
-<https://gti.telent.net/dan/liminix>, with a mirror at
-<https://github.com/telent/liminix>. You can clone from either of
-those repos.
+The main development repo for Liminix is hosted at
+<https://gti.telent.net/dan/liminix>, with a read-only mirror at
+<https://github.com/telent/liminix>. If you're happy to use Github
+then you can fork from the latter to make your changes, but please use
+the mailing list one of the approved routes to tell me about your changes because I
+don't regularly check PRs.
+
 
 === Code of Conduct
 
