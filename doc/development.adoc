@@ -77,6 +77,24 @@ of licences. Copyright assignment is not expected:
 just like when submitting to the Linux kernel you retain the copyright
 on the code you contribute.
 
+=== Automated builds
+
+Automated builds are run on each push to the main branch. This tests
+that (among other things)
+
+* every device image builds
+* the build for the “qemu” target is executed with a fake network upstream to test
+  * PPPoE and DHCP service
+  * hostap (wireless gateway)
+
+You can view the build output at https://build.liminix.org . The tests
+are defined in ci.nix.
+
+Unfortunately there's no (easy) way I can make _my_ CI infrastructure
+run _your_ code, other than merging it. But see <<_running_tests>>
+for how to exercise the same code locally on your machine.
+
+
 == Development tools
 
 In this section we describe some tools to make the edit/build/run
