@@ -1,5 +1,6 @@
 = Liminix
 Daniel Barlow
+:doctype: book
 :toc: left
 
 include::intro.adoc[]
@@ -19,5 +20,19 @@ include::development.adoc[]
 include::modules.adoc[]
 
 include::code-of-conduct.adoc[]
+
+[appendix]
+= Supported hardware
+
+=== Recommended devices
+
+For development, the supported GL.iNet devices are all good choices if
+you can find them, as they have a builtin "debrick" procedure in the
+boot monitor and are also comparatively simple to attach serial cables
+to (soldering not required), so are lower-risk than some other devices.
+
+For a more powerful device, something with an ath10k wireless would be
+the safe bet, or the Linksys E8450 which seems popular in the OpenWrt
+community.
 
 include::hardware.adoc[]
