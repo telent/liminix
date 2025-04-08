@@ -1,124 +1,287 @@
 = For Developers
 
-== Contributing
+In any Nix-based system the line between "configuration"
+and "development" is less of a line and more of a continuum.
+This section covers some topics further towards the latter end.
 
-Patches welcome! Also bug reports, documentation improvements,
-experience reports/case studies etc etc all equally as welcome.
+== Writing modules and services
 
-* if you have an obvious bug fix, new package, documentation
-  improvement or other uncontroversial small patch, send it straight
-  in.
+It helps here to know NixOS! Liminix uses the NixOS module
+infrastructure code, meaning that everything that has been written for
+NixOS about the syntax, the type system, and the rules for combining
+configuration values from different sources is just as applicable
+here.
 
-* if you have a large new feature or design change in mind, please
-  please _get in touch_ to talk about it before you commit time to
-  implementing it. Perhaps it isn't what we were expecting, almost
-  certainly we will have ideas or advice on what it should do or how
-  it should be done.
+=== Services
 
-Liminix development is not tied to Github or any other particular
-forge. How to send changes:
+For the most part, for common use cases, we hope that Liminix modules
+provide service templates for all the services you will need, and you
+will only have to pass the right parameters to `+build+`.
 
-1. Push your Liminix repo with your changes to a git repository
-somewhere on the Internet that I can clone from. It can be on Codeberg
-or Gitlab or Sourcehut or Forgejo or Gitea or Github or a bare repo in
-your own personal web space or any kind of hosting you like.
+But if you're reading this then our hopes are in vain.  To create a
+custom service of your own devising, use the [.title-ref]#oneshot# or
+[.title-ref]#longrun# functions:
 
-2. Email devel@liminix.org with the URL of the repo and the branch
-name. And/or put it on the IRC channel if you prefer, as long as you
-make sure someone who can merge it has seen your message.
+* a "longrun" service is the "normal" service concept: it has a `+run+`
+action which describes the process to start, and it watches that process
+to restart it if it exits. The process should not attempt to daemonize
+or "background" itself, otherwise s6-rc will think it died. Whatever it
+prints to standard output/standard error will be logged.
 
-If that's not an option, I’m also happy for you to send your changes
-direct to the list itself, as an incremental git bundle or using git
-format-patch. We'll work it out somehow.
+[source,nix]
+----
+config.services.cowsayd = pkgs.liminix.services.longrun {
+  name = "cowsayd";
+  run = "${pkgs.cowsayd}/bin/cowsayd --port 3001 --breed hereford";
+  # don't start this until the lan interface is ready
+  dependencies = [ config.services.lan ];
+}
+----
 
-The main development repo for Liminix is hosted at
-<https://gti.telent.net/dan/liminix>, with a read-only mirror at
-<https://github.com/telent/liminix>. If you're happy to use Github
-then you can fork from the latter to make your changes, but please use
-the mailing list one of the approved routes to tell me about your changes because I
-don't regularly check PRs.
+* a "oneshot" service doesn't have a process attached. It consists of
+`+up+` and `+down+` actions which are bits of shell script that are run
+at the appropriate points in the service lifecycle
 
-Remember that the <<_code_of_conduct>> applies to all Liminix spaces,
-and anyone who violates it may be sanctioned or expelled from these
-spaces at the discretion of the project leadership.
+[source,nix]
+----
+config.services.greenled = pkgs.liminix.services.oneshot {
+  name = "greenled";
+  up = ''
+    echo 17 > /sys/class/gpio/export
+    echo out > /sys/class/gpio/gpio17/direction
+    echo 0   > /sys/class/gpio/gpio17/value
+  '';
+  down = ''
+    echo 0   > /sys/class/gpio/gpio17/value
+  '';
+}
+----
 
-=== Nix language style
+Services may have dependencies: as you see above in the `+cowsayd+`
+example, it depends on some service called `+config.services.lan+`,
+meaning that it won't be started until that other service is up.
 
-This section describes some Nix language style points that we attempt to
-adhere to in this repo. Some are more aspirational than actual.
+===== Service outputs
 
-* indentation and style is according to `nixfmt-rfc-style`
-* favour `+callPackage+` over raw `+import+` for calling derivations or
-any function that may generate one - any code that might need `+pkgs+`
-or parts of it.
-* prefer `+let inherit (quark) up down strange charm+` over
-`+with quark+`, in any context where the scope is more than a single
-expression or there is more than one reference to `+up+`, `+down+` etc.
-`+with pkgs; [ foo bar baz]+` is OK,
-`+with lib; stdenv.mkDerivation { ... }+` is usually not.
-* `+<liminix>+` is defined only when running tests, so don't refer to it
-in "application" code
-* the parameters to a derivation are sorted alphabetically, except for
-`+lib+`, `+stdenv+` and maybe other non-package "special cases"
-* where a `+let+` form defines multiple names, put a newline after the
-token `+let+`, and indent each name two characters
-* to decide whether some code should be a package or a module? Packages
-are self-contained - they live in `+/nix/store/eeeeeee-name+` and don't
-directly change system behaviour by their presence or absense. modules
-can add to `+/etc+` or `+/bin+` or other global state, create services,
-all that side-effecty stuff. Generally it should be a package unless it
-can't be.
+Outputs are a mechanism by which a service can provide data which may be
+required by other services. For example:
 
-=== Copyright
+* the DHCP client service can expect to receive nameserver address
+information as one of the fields in the response from the DHCP server:
+we provide that as an output which a dependent service for a stub name
+resolver can use to configure its upstream servers.
+* a service that creates a new network interface (e.g. ppp) will provide
+the name of the interface (`+ppp0+`, or `+ppp1+` or `+ppp7+`) as an
+output so that a dependent service can reference it to set up a route,
+or to configure firewall rules.
 
-The Nix code in Liminix is MIT-licenced (same as Nixpkgs), but the code
-it combines from other places (e.g. Linux, OpenWrt) may have a variety
-of licences. Copyright assignment is not expected:
-just like when submitting to the Linux kernel you retain the copyright
-on the code you contribute.
+A service `+myservice+` should write its outputs as files in
+`+/run/services/outputs/myservice+`: you can look around this directory
+on a running Liminix system to see how it's used currently. Usually we
+use the `+in_outputs+` shell function in the `+up+` or `+run+`
+attributes of the service:
 
-=== Automated builds
+[source,shell]
+----
+(in_outputs ${name}
+ for i in lease mask ip router siaddr dns serverid subnet opt53 interface ; do
+   (printenv $i || true) > $i
+ done)
+----
 
-Automated builds are run on each push to the main branch. This tests
-that (among other things)
+The outputs are just files, so technically you can read them using
+anything that can read a file. Liminix has two "preferred" mechanisms,
+though:
 
-* every device image builds
-* the build for the “qemu” target is executed with a fake network upstream to test
-  * PPPoE and DHCP service
-  * hostap (wireless gateway)
+===== One-off lookups
 
-You can view the build output at https://build.liminix.org . The tests
-are defined in ci.nix.
+In any context that ends up being evaluated by the shell, use `+output+`
+to print the value of an output
 
-Unfortunately there's no (easy) way I can make _my_ CI infrastructure
-run _your_ code, other than merging it. But see <<_running_tests>>
-for how to exercise the same code locally on your machine.
+[source,nix]
+----
+services.defaultroute4 = svc.network.route.build {
+  via = "$(output ${services.wan} address)";
+  target = "default";
+  dependencies = [ services.wan ];
+};
+----
+
+===== Continuous updates
+
+The downside of using shell functions in downstream service startup
+scripts is that they only run when the service starts up: if a service
+output _changes_, the downstream service would have to be restarted to
+notice the change. Sometimes this is OK but other times the downstream
+has no other need to restart, if it can only get its new data.
+
+For this case, there is the `+anoia.svc+` Fennel library, which allows
+you to write a simple loop which is iterated over whenever a service's
+outputs change. This code is from
+`+modules/dhcp6c/acquire-wan-address.fnl+`
+
+[source,fennel]
+----
+(fn update-addresses [wan-device addresses new-addresses exec]
+  ;; run some appropriate "ip address [add|remove]" commands
+  )
+
+(fn run []
+  (let [[state-directory wan-device] arg
+        dir (svc.open state-directory)]
+    (accumulate [addresses []
+                 v (dir:events)]
+      (update-addresses wan-device addresses
+			(or (v:output "address") []) system))))
+----
+
+The `+output+` method seen here accepts a filename (relative to the
+service's output directory), or a directory name. It returns the first
+line of that file, or for directories it returns a table (Lua's
+key/value datastructure, similar to a hash/dictionary) of the outputs in
+that directory.
+
+===== Design considerations for outputs
+
+For preference, outputs should be short and simple, and not require
+downstream services to do complicated parsing in order to use them.
+Shell commands in Liminix are run using the Busybox shell which doesn't
+have the niceties evel of an advanced shell like Bash, let alone those of a
+real programming language.
+
+Note also that the Lua `+svc+` library only reads the first line of each
+output.
 
 
-== Development tools
+=== Modules
 
-In this section we describe some tools to make the edit/build/run
-development cycle less painful than flashing a new image on a hardware
-device every time.
+Modules in Liminix conventionally live in
+`+modules/somename/default.nix+`. If you want or need to write your own,
+you may wish to refer to the examples there in conjunction with reading
+this section.
 
-// FIXME if this is still true we should fix it
-In general, packages and tools that run on the "build" machine are
-available in the `+buildEnv+` derivation and can most easily be added to
-your environment by running `+nix-shell+`.
+A module is a function that accepts `+{lib, pkgs, config, ... }+` and
+returns an attrset with keys `+imports, options, config+`.
+
+* `+imports+` is a list of paths to the other modules required by this
+one
+* `+options+` is a nested set of option declarations
+* `+config+` is a nested set of option definitions
+
+The NixOS manual section
+https://nixos.org/manual/nixos/stable/#sec-writing-modules[Writing NixOS
+Modules] is a quite comprehensive reference to writing NixOS modules,
+which is also mostly applicable to Liminix except that it doesn't cover
+service templates.
+
+
+==== Service templates
+
+Although you can define services "ad hoc" using `longrun` or `oneshot`
+<<_writing_services,as above>>, this approach has limitations if
+you're writing code intended for wider use. Services in the
+modules bundled with Liminix are implemented following a pattern we
+call "service templates": functions that accept a _type-checked_
+attrset and return an appropriately configured service that can be
+assigned by the caller to a key in ``config.services``.
+
+To expose a service template in a module, it needs the following:
+
+* an option declaration for `+system.service.myservicename+` with the
+type of `+liminix.lib.types.serviceDefn+`
+
+[source,nix]
+----
+options = {
+  system.service.cowsay = mkOption {
+    type = liminix.lib.types.serviceDefn;
+  };
+};
+----
+
+* an option definition for the same key, which specifies where to import
+the service template from (often `+./service.nix+`) and the types of its
+parameters.
+
+[source,nix]
+----
+config.system.service.cowsay = config.system.callService ./service.nix {
+  address = mkOption {
+    type = types.str;
+    default = "0.0.0.0";
+    description = "Listen on specified address";
+    example = "127.0.0.1";
+  };
+  port = mkOption {
+    type = types.port;
+    default = 22;
+    description = "Listen on specified TCP port";
+  };
+  breed = mkOption {
+    type = types.str;
+    default = "British Friesian"
+    description = "Breed of the cow";
+  };
+};
+----
+
+Then you need to provide the service template itself, probably in
+`+./service.nix+`:
+
+[source,nix]
+----
+{
+  # any nixpkgs package can be named here
+  liminix
+, cowsayd
+, serviceFns
+, lib
+}:
+# these are the parameters declared in the callService invocation
+{ address, port, breed} :
+let
+  inherit (liminix.services) longrun;
+  inherit (lib.strings) escapeShellArg;
+in longrun {
+  name = "cowsayd";
+  run = "${cowsayd}/bin/cowsayd --address ${address} --port ${builtins.toString port} --breed ${escapeShellArg breed}";
+}
+----
+
+TIP: Not relevant to module-based services specifically, but a common gotcha
+when specifiying services is forgetting to transform "rich" parameter
+values into text when composing a command for the shell to execute. Note
+here that the port number, an integer, is stringified with `+toString+`,
+and the name of the breed, which may contain spaces, is escaped with
+`+escapeShellArg+`
+
+=== Types
+
+All of the NixOS module types are available in Liminix. These
+Liminix-specific types also exist in `+pkgs.liminix.lib.types+`:
+
+* `+service+`: an s6-rc service
+* `+interface+`: an s6-rc service which specifies a network interface
+* `+serviceDefn+`: a service "template" definition
+
+In the future it is likely that we will extend this to include other
+useful types in the networking domain: for example; IP address, network
+prefix or netmask, protocol family and others as we find them.
+
 
 === Emulated devices
 
-Liminix has a number of emulated device descriptions which generate
-images suitable for running on your build machine using the free
+Unless your changes depend on particular hardware devices, you may
+want to test your new/changed module with one of the emulated
+"devices" which runn on your build machine using the free
 http://www.qemu.org[QEMU machine emulator]. They are
 
 * `qemu`(MIPS)
 * `qemu-armv7l`(32 bit ARM)
 * `qemu-aarch64` (64 bit ARM)
 
-This is useful for developing userland without needing to keep
-flashing or messing with U-Boot: it also enables testing against
-emulated network peers using
+This means you don't need to keep flashing or messing with U-Boot: it
+also enables testing against emulated network peers using
 https://wiki.qemu.org/Documentation/Networking#Socket[QEMU socket
 networking], which may be preferable to letting Liminix loose on your
 actual LAN. To build,
@@ -143,7 +306,7 @@ connect-vm+` to connect to either of these sockets, and ^O to
 disconnect.
 
 [[qemu-networking]]
-==== Networking
+===== Networking
 
 VMs can network with each other using QEMU socket networking. We observe
 these conventions, so that we can run multiple emulated instances and
@@ -158,7 +321,7 @@ Any VM started by a `+run.sh+` script is connected to "lan" and
 "access". The emulated upstream (see below) runs PPPoE and is
 connected to "access" and "world".
 
-==== Upstream connection
+===== Upstream connection
 
 In pkgs/routeros there is a derivation to install and configure
 https://mikrotik.com/software[Mikrotik RouterOS] as a PPPoE access
@@ -186,9 +349,11 @@ own responsibility if you use this to ensure you're compliant with the
 terms of Mikrotik's licencing. It may be supplemented or replaced in
 time with configurations for RP-PPPoE and/or Accel PPP.#
 
-=== Hardware devices
+== Hardware hacking/porting to new device
 
-==== TFTP
+Coming soon
+
+=== TFTP
 
 [[tftpserver]]
 How you get your image onto hardware will vary according to the device,
@@ -238,7 +403,7 @@ to copy-paste the whole of `+boot.scr+` into a terminal emulator and
 have it work just like that. You may need to paste each line one at a
 time, or even retype it.
 
-==== Running from RAM
+=== Running from RAM
 
 For a faster edit-compile-test cycle, you can build a TFTP-bootable
 image which boots directly from RAM (using phram) instead of needing
@@ -256,7 +421,7 @@ transfer the kernel and filesystem over TFTP and boot the kernel from
 RAM.
 
 [[bng]]
-==== Networking
+=== Networking
 
 You probably don't want to be testing a device that might serve DHCP,
 DNS and routing protocols on the same LAN as you (or your colleagues,
@@ -322,6 +487,99 @@ NOTE: If you make changes to the bordervm configuration after executing
 `+run-border-vm+`, you need to remove the `+border.qcow2+` disk image
 file otherwise the changes won't get picked up.
 
+== Contributing
+
+Patches welcome! Also bug reports, documentation improvements,
+experience reports/case studies etc etc all equally as welcome.
+
+* if you have an obvious bug fix, new package, documentation
+  improvement or other uncontroversial small patch, send it straight
+  in.
+
+* if you have a large new feature or design change in mind, please
+  please _get in touch_ to talk about it before you commit time to
+  implementing it. Perhaps it isn't what we were expecting, almost
+  certainly we will have ideas or advice on what it should do or how
+  it should be done.
+
+Liminix development is not tied to Github or any other particular
+forge. How to send changes:
+
+1. Push your Liminix repo with your changes to a git repository
+somewhere on the Internet that I can clone from. It can be on Codeberg
+or Gitlab or Sourcehut or Forgejo or Gitea or Github or a bare repo in
+your own personal web space or any kind of hosting you like.
+
+2. Email devel@liminix.org with the URL of the repo and the branch
+name, and we will take a look.
+
+If that's not an option, I’m also happy for you to send your changes
+direct to the list itself, as an incremental git bundle or using git
+format-patch. We'll work it out somehow.
+
+The main development repo for Liminix is hosted at
+<https://gti.telent.net/dan/liminix>, with a read-only mirror at
+<https://github.com/telent/liminix>. If you're happy to use Github
+then you can fork from the latter to make your changes, but please use
+the mailing list one of the approved routes to tell me about your changes because I don't regularly go there to check PRs.
+
+Remember that the <<_code_of_conduct>> applies to all Liminix spaces,
+and anyone who violates it may be sanctioned or expelled from these
+spaces at the discretion of the project leadership.
+
+=== Nix language style
+
+This section describes some Nix language style points that we attempt to
+adhere to in this repo. Some are more aspirational than actual.
+
+* indentation and style is according to `nixfmt-rfc-style`
+* favour `+callPackage+` over raw `+import+` for calling derivations or
+any function that may generate one - any code that might need `+pkgs+`
+or parts of it.
+* prefer `+let inherit (quark) up down strange charm+` over
+`+with quark+`, in any context where the scope is more than a single
+expression or there is more than one reference to `+up+`, `+down+` etc.
+`+with pkgs; [ foo bar baz]+` is OK,
+`+with lib; stdenv.mkDerivation { ... }+` is usually not.
+* `+<liminix>+` is defined only when running tests, so don't refer to it
+in "application" code
+* the parameters to a derivation are sorted alphabetically, except for
+`+lib+`, `+stdenv+` and maybe other non-package "special cases"
+* where a `+let+` form defines multiple names, put a newline after the
+token `+let+`, and indent each name two characters
+* to decide whether some code should be a package or a module? Packages
+are self-contained - they live in `+/nix/store/eeeeeee-name+` and don't
+directly change system behaviour by their presence or absense. modules
+can add to `+/etc+` or `+/bin+` or other global state, create services,
+all that side-effecty stuff. Generally it should be a package unless it
+can't be.
+
+=== Copyright
+
+The Nix code in Liminix is MIT-licenced (same as Nixpkgs), but the code
+it combines from other places (e.g. Linux, OpenWrt) may have a variety
+of licences. Copyright assignment is not expected:
+just like when submitting to the Linux kernel you retain the copyright
+on the code you contribute.
+
+=== Automated builds
+
+Automated builds are run on each push to the main branch. This tests
+that (among other things)
+
+* every device image builds
+* the build for the “qemu” target is executed with a fake network upstream to test
+  * PPPoE and DHCP service
+  * hostap (wireless gateway)
+
+You can view the build output at https://build.liminix.org . The tests
+are defined in ci.nix.
+
+Unfortunately there's no (easy) way I can make _my_ CI infrastructure
+run _your_ code, other than merging it. But see <<_running_tests>>
+for how to exercise the same code locally on your machine.
+
+
 == Running tests
 
 You can run all of the tests by evaluating `+ci.nix+`, which is the
@@ -332,12 +590,6 @@ input I use in Hydra.
 nix-build -I liminix=`pwd`  ci.nix -A pppoe # run one job
 nix-build -I liminix=`pwd`  ci.nix -A all # run all jobs
 ----
-
-== Porting to new hardware
-
-// FIXME add this
-
-TBD
 
 == Troubleshooting
 
