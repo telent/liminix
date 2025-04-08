@@ -1,39 +1,40 @@
 = Introduction
 
-Liminix is a Nix-based collection of software tailored for domestic wifi
-router or IoT device devices, of the kind that OpenWrt or DD-WRT or
-Gargoyle or Tomato run on.
+== What is Liminix?
 
-This is not NixOS-on-your-router: it's aimed at devices that are
-underpowered for the full NixOS experience. It uses busybox tools, musl
-instead of GNU libc, and s6-rc instead of systemd.
+Liminix is a Nix-based collection of software tailored for domestic
+wifi router or IoT devices, of the kind that OpenWrt or DD-WRT
+or Gargoyle or Tomato run on. It's not NixOS on your router: we target
+devices that are underpowered for the full NixOS experience. It uses
+busybox tools, musl instead of GNU libc, and s6-rc instead of systemd.
 
 The Liminix name comes from Liminis, in Latin the genitive declension of
 "limen", or "of the threshold". Your router stands at the threshold of
 your (online) home and everything you send to/receive from the outside
 word goes across it.
 
-== Find out more
+== Where to find out more
 
 === The Manual
 
-You are reading it now, and it is available from wherever place you
+You are reading it now, and it is available from wherever you
 are reading it :-) but its canonical location is
 https://www.liminix.org/doc/
 
 === Source code
 
-Liminix source code is hosted at https://gti.telent.net/dan/liminix,
-with a mirror at https://github.com/telent/liminix. You can clone from
-either of those repos.  For more on this, see <<_contributing>>.
+Liminix source code is held in git, and hosted at
+https://gti.telent.net/dan/liminix, with a mirror at
+https://github.com/telent/liminix. You can clone from either of those
+repos.  For more on this, see <<_contributing>>.
 
 === IRC
 
-There is an IRC channel #liminix registered on the OFTC network, which
+There is an IRC channel https://webchat.oftc.net/?nick=&channels=#liminix[#liminix] registered on the https://www.oftc.net/[OFTC] network, which
 is a good place to ask if you want a quick answer about how to use
 Liminix or are looking at a new port. Be mindful that other
 participants may be in different timezones than your own, so do not
-expect an immediate answer.  
+expect an immediate answer.
 
 === Mailing lists
 
