@@ -351,7 +351,35 @@ time with configurations for RP-PPPoE and/or Accel PPP.#
 
 == Hardware hacking/porting to new device
 
-Coming soon
+The steps to port to a new hardware device are largely undocumented at
+present (although this hasn't stopped people from figuring it out
+already). As an outline I would recommend
+
+* choose hardware that OpenWrt already supports, otherwise you will
+probably spend a lot of time writing kernel code.  The OpenWrt kernel
+supports many network interfaces and other hardware for a lot of
+hardware boards that might only just about be able to boot Linux on a
+serial port if you stick to mainline Linux
+
+* work out how to get a serial console on it. You are unlikely to get
+  working networking on your first go at boulding a kernel
+
+* find the most similar device in Liminiux and copy
+  `devices/existing-similar-device` to `devices/cool-new-device` as a
+  starting point
+
+* use the kernel configuration (`/proc/config.gz`) from OpenWrt as a
+ reference for the kernel config you'll need to specify
+ in `devices/cool-new-device/default.nix`
+
+* break it down into achieveable goals. Your first goal should be
+  something that can TFTP boot the kernel as far as a running
+  userland. Networking is harder, Wifi often much harder - it
+  sometimes also depends on having working flash _even if_ you're TFTP
+  booting because the driver expects to load wifi firmware or
+  calibration data from the flash
+
+* ask on IRC!
 
 === TFTP
 
