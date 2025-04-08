@@ -5,15 +5,15 @@ DOCS=\
 	index \
 	installation \
 	intro \
-	modules \
-	outputs \
 	hardware \
+	module-options-generated.inc \
+	outputs-generated.inc \
 	tutorial
 
+%.adoc: %.rst
+	pandoc -f rst -t asciidoc $< | sed -E  -e 's/^(=*) /=\1 /g' > $@
+
 hardware.adoc: hardware.nix
-	pandoc -f rst -t asciidoc -o $@ hardware.rst
-	# sections in an appendix need to start at ===
-	sed -E -i.bak -e 's/^(=*) /=\1 /g' hardware.adoc
 
 html: Makefile  $(patsubst %,%.adoc,$(DOCS))
 	asciidoctor  -D _build -d book index.adoc
