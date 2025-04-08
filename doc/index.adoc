@@ -18,4 +18,6 @@ include::development.adoc[]
 
 include::modules.adoc[]
 
+include::code-of-conduct.adoc[]
+
 include::hardware.adoc[]

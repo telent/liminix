@@ -38,16 +38,8 @@ then you can fork from the latter to make your changes, but please use
 the mailing list one of the approved routes to tell me about your changes because I
 don't regularly check PRs.
 
-
-=== Code of Conduct
-
-Liminix is dedicated to providing a harassment-free experience for everyone. We do not tolerate harassment of participants in any form.
-
-The Liminix
-https://gti.telent.net/dan/liminix/src/commit/7bcf6b15c3fdddafeda13f65b3cd4a422dc52cd3/CODE-OF-CONDUCT.md[Code
-of Conduct] applies to all Liminix spaces, including the IRC channel,
-mailing lists, and any other forums both online and off. Anyone who
-violates this code of conduct may be sanctioned or expelled from these
+Remember that the <<_code_of_conduct>> applies to all Liminix spaces,
+and anyone who violates it may be sanctioned or expelled from these
 spaces at the discretion of the project leadership.
 
 === Nix language style

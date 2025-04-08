@@ -1,4 +1,4 @@
-== Introduction
+= Introduction
 
 Liminix is a Nix-based collection of software tailored for domestic wifi
 router or IoT device devices, of the kind that OpenWrt or DD-WRT or
@@ -12,3 +12,50 @@ The Liminix name comes from Liminis, in Latin the genitive declension of
 "limen", or "of the threshold". Your router stands at the threshold of
 your (online) home and everything you send to/receive from the outside
 word goes across it.
+
+== Find out more
+
+=== The Manual
+
+You are reading it now, and it is available from wherever place you
+are reading it :-) but its canonical location is
+https://www.liminix.org/doc/
+
+=== Source code
+
+Liminix source code is hosted at https://gti.telent.net/dan/liminix,
+with a mirror at https://github.com/telent/liminix. You can clone from
+either of those repos.  For more on this, see <<_contributing>>.
+
+=== IRC
+
+There is an IRC channel #liminix registered on the OFTC network, which
+is a good place to ask if you want a quick answer about how to use
+Liminix or are looking at a new port. Be mindful that other
+participants may be in different timezones than your own, so do not
+expect an immediate answer.  
+
+=== Mailing lists
+
+Three Liminix mailing lists are available: all are quite low volume.
+To subscribe to any of these lists, send an email to
+listname+subscribe@liminix.org. You can write anything you want in the
+subject and message body: only the destination address is important.
+
+
+* https://lists.liminix.org/announce/maillist.html[`announce@liminix.org`] for infrequent announcements from Liminix maintainers
+* https://lists.liminix.org/devel/maillist.html[`devel@liminix.org`] for development-related discussion, patches, suggestions etc
+* https://lists.liminix.org/users/maillist.html[`users@liminix.org`] for help requests and general discussion
+
+The mailing lists are managed with Mlmmj and archived with MHonArc.
+
+=== Standards of behaviour
+
+Liminix is dedicated to providing a harassment-free experience for
+everyone. We do not tolerate harassment of participants in any form.
+
+The Liminix <<_code_of_conduct>> applies to all Liminix spaces, including
+the IRC channel, mailing lists, and any other forums, both online and
+off. Anyone who violates the code of conduct may be sanctioned or
+expelled from these spaces at the discretion of the project
+leadership.
