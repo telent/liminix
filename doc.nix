@@ -45,9 +45,9 @@ stdenv.mkDerivation {
     make -C doc html
   '';
   installPhase = ''
-    mkdir -p $out/nix-support $out/share/
+    mkdir -p $out/nix-support
     cd doc
-    make install prefix=$out/share
+    make install prefix=$out
     ln -s ${json} $out/options.json
     echo "file source-dist \"$out/share/doc/liminix\"" \
         > $out/nix-support/hydra-build-products
