@@ -7604,35 +7604,36 @@ Mon Apr  7 23:49:40 BST 2025
 
 DOC TODO
 
+[done] * need to explain the mailing lists and IRC somewhere
+
+[done] * markup the devices section as an appendix.
+
+[done] * docs for outputs? maybe appendix ii
+
+[done] * move "module implementation" from admin to dev (maybe?)
+
+[done] * CI: move from website to Development
+
+[done] * move info on the Community page to Introduction
+
+[halfarsed done] * write doc for porting to new hw
+ - how to bring up
+ - what we look for in a new device patch (kconfig style etc)
+
+[done] * add rsyncy thing to rmeote
+
 * we still have serial connection guff in both installation and
   development sections
 
-* need to explain the mailing lists and IRC somewhere
-
-* markup the devices section as an appendix. maybe convert the
-embedded rst to adoc
+* convert all the embedded rst to adoc
 
 * remove pages that are not posts from jekyll blog
 
 * landing page
 
-* add rsyncy thing to rmeote
-
-* docs for outputs? maybe appendix ii
-
 * "Continuous updates" is misleading as it gives the impression
 downstreams would be restarted if an upstream restarts. Not true.
 We should describe secrets subscriber here
 
-* write doc for porting to new hw
- - how to bring up
- - what we look for in a new device patch (kconfig style etc)
-
-* move "module implementation" from admin to dev (maybe?)
-
-* CI: move from website to Development
-
 * some basic css to make it not the same as (I assume) every single
   other asciidoc site
-
-* move info on the Community page to Introduction
