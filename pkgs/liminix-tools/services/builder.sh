@@ -3,7 +3,7 @@ mkdir -p $out/${name}
 
 writepath(){
     mkdir -p $(dirname $1)
-    echo $2 > $1
+    if test -n "$2" ; then ( echo $2 > $1 ) ;fi
 }
 if test -n "$propertiesText"; then
     mkdir $out/.properties
