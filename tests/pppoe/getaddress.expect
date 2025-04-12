@@ -24,7 +24,7 @@ expect "#READY#"
 set timeout 30
 send "nft list set ip table-ip lan || touch /non/existent\n"
 expect {
-  "lan" { puts "lan found" }
+  "{ \"lan\" }" { puts "lan found" }
   "{ }" { puts "missing ifname"; exit 1 }
   "No such file or directory" { exit 1 }
 }  
@@ -36,7 +36,7 @@ expect "#READY#"
 # appears and you just have to make this sleep longer. Ew, yes
 send "sleep 10; nft list set ip table-ip wan || touch /non/existent\n"
 expect {
-  "ppp0" { puts "ppp0 found " }
+  "{ \"ppp0\" }" { puts "ppp0 found " }
   "{ }" { puts "missing ifname"; exit 1 }
   "No such file or directory" { exit 1 }
   timeout { exit 1 }
