@@ -28,6 +28,7 @@
                : math
                : ipairs
                : tonumber
+               : type
 
                :output
                (fn [service-path path default]
