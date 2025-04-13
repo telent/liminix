@@ -132,6 +132,16 @@ in
         description = "options supplied on ppp command line";
       };
     };
+
+    # rp-pppoe attempts to drop privs by switching to user "nobody"
+    users.nobody = {
+      uid = 65534;
+      gid = 65534;
+      gecos = "Captain Nemo";
+      dir = "/run/";
+      shell = "/bin/false";
+    };
+
     kernel = {
       config = {
         PPP = "y";
