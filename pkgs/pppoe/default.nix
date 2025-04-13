@@ -6,13 +6,15 @@
 }:
 stdenv.mkDerivation rec {
   pname = "rp-pppoe";
-  version = "3.15";
+  version = "4.0-plus";
 
   src = fetchFromGitHub {
     owner = "dfskoll";
     repo = "rp-pppoe";
-    rev = "7cfd8c0405d14cf1c8d799d41d8207fd707979c1";
-    hash = "sha256-MFdCwNj8c52blxEuXH5ltT2yYDmKMH5MLUgtddZV25E=";
+    rev = "3c0f6c02279881d723743023634b19b77a7d9f82";
+    hash = "sha256-RUUbP5j2I2DERQ7RE8xj4Xt1FoQOanMRoMiB1H6Wrdw=";
+    # rev = "7cfd8c0405d14cf1c8d799d41d8207fd707979c1";
+    # hash = "sha256-MFdCwNj8c52blxEuXH5ltT2yYDmKMH5MLUgtddZV25E=";
   };
 
   buildInputs = [ ppp ];
