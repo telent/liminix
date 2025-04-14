@@ -79,19 +79,25 @@
      "-serial" (.. "unix:" sock ",server,nowait")
      "-monitor" (.. "unix:" monitor ",server,nowait")]))
 
+(local netrom (pad-file "/dev/null" 16384))
+
 (fn access-net [override]
   [
    "-netdev"  (.. (or override
                       "socket,mcast=230.0.0.1:1234,localaddr=127.0.0.1")
                   ",id=access")
-   "-device" "virtio-net,disable-legacy=on,disable-modern=off,netdev=access,mac=ba:ad:1d:ea:21:02"
+   "-device"
+   (.. "virtio-net,disable-legacy=on,romfile=" netrom ",disable-modern=off,netdev=access,mac=ba:ad:1d:ea:21:02")
+   ;; (.. "virtio-net,disable-legacy=on,disable-modern=off,netdev=access,mac=ba:ad:1d:ea:21:02")
    ])
 
 (fn local-net [override]
   [
    "-netdev" (.. (or override "socket,mcast=230.0.0.1:1235,localaddr=127.0.0.1")
                  ",id=lan")
-   "-device" "virtio-net,disable-legacy=on,disable-modern=off,netdev=lan,mac=ba:ad:1d:ea:21:01"
+   "-device"
+   (.. "virtio-net,disable-legacy=on,romfile=" netrom ",disable-modern=off,netdev=lan,mac=ba:ad:1d:ea:21:01")
+   ;; (.. "virtio-net,disable-legacy=on,disable-modern=off,netdev=lan,mac=ba:ad:1d:ea:21:01")
    ])
 
 
