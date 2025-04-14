@@ -132,7 +132,7 @@
                               options.u-boot options.disk-image))
            (appendm (access-net options.wan))
            (appendm (local-net options.lan))
-           (appendm ["-display" "none"])))
+           (appendm ["-display" "none" "-vga" "none"])))
 
 (each [n a (ipairs exec-args)]
   (print (.. (if (> n  1) "     " "") (string.format "%q" a))))

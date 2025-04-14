@@ -42,11 +42,11 @@
           in
           {
             wan = link.build {
-              devpath = "/devices/pci0000:00/0000:00:13.0/virtio0";
+              devpath = "/devices/pci0000:00/0000:00:12.0/virtio0";
               ifname = "wan";
             };
             lan = link.build {
-              devpath = "/devices/pci0000:00/0000:00:14.0/virtio1";
+              devpath = "/devices/pci0000:00/0000:00:13.0/virtio1";
               ifname = "lan";
             };
 
