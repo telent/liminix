@@ -72,6 +72,8 @@ extraPkgs
       chrony' = prev.chrony.overrideAttrs (o: {
         configureFlags = [
           "--chronyvardir=$(out)/var/lib/chrony"
+          "--sbindir=$(out)/bin"
+          "--chronyrundir=/run/chrony"
           "--disable-readline"
           "--disable-editline"
         ];
@@ -81,6 +83,7 @@ extraPkgs
       gnutls = null;
       libedit = null;
       libseccomp = null;
+      libcap = null;
       # should texinfo be in nativeBuildInputs instead of
       # buildInputs?
       texinfo = null;
