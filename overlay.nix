@@ -304,6 +304,7 @@ extraPkgs
             hash = "sha256-jOsGka7xLkJznb9M90v5TsJraXXTAj84lcphcSxjYLU=";
           })
         ];
+        buildInputs = o.buildInputs ++ [ final.libslirp ];
       });
       overrides =
         {
