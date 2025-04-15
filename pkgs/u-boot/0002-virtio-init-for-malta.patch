@@ -2,6 +2,18 @@ diff --git a/board/imgtec/malta/malta.c b/board/imgtec/malta/malta.c
 index 9853a0ba82..d95e332d6d 100644
 --- a/board/imgtec/malta/malta.c
 +++ b/board/imgtec/malta/malta.c
+@@ -23,6 +23,11 @@
+ 
+ #include "superio.h"
+ 
++#if IS_ENABLED(CONFIG_VIRTIO)
++#include <virtio_types.h>
++#include <virtio.h>
++#endif
++
+ DECLARE_GLOBAL_DATA_PTR;
+ 
+ #define MALTA_GT_PATH   "/pci0@1be00000"
 @@ -169,7 +169,9 @@ int board_early_init_f(void)
  int misc_init_r(void)
  {
