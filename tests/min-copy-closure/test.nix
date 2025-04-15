@@ -6,6 +6,7 @@ let
     }
   );
   rogue = lmx.pkgs.rogue;
+  myPkg = lmx.pkgs.rsyncSmall;
   img = lmx.outputs.vmroot;
   pkgs = import <nixpkgs> { overlays = [ (import ../../overlay.nix) ]; };
 in
@@ -15,7 +16,7 @@ pkgs.runCommand "check"
       expect
       socat
       min-copy-closure
-      rogue
+      myPkg
     ];
   }
   ''
@@ -28,9 +29,9 @@ pkgs.runCommand "check"
     echo ready to go
     export SSH_COMMAND="ssh -o StrictHostKeyChecking=no -p 2022 -i ${./id}"
     $SSH_COMMAND root@localhost echo ready
-    IN_NIX_BUILD=true min-copy-closure --quiet root@localhost ${rogue}
-    $SSH_COMMAND root@localhost ls -ld ${rogue}
-    IN_NIX_BUILD=true min-copy-closure --root /run root@localhost ${rogue}
-    $SSH_COMMAND root@localhost ls -ld /run/${rogue}
+    IN_NIX_BUILD=true min-copy-closure --quiet root@localhost ${myPkg}
+    $SSH_COMMAND root@localhost ls -ld ${myPkg}
+    IN_NIX_BUILD=true min-copy-closure --root /run root@localhost ${myPkg}
+    $SSH_COMMAND root@localhost ls -ld /run/${myPkg}
     ) 2>&1 | tee $out
   ''
