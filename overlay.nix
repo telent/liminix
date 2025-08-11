@@ -239,8 +239,10 @@ extraPkgs
     ];
   });
 
-  libadwaita = prev.libadwaita.overrideAttrs(o: {
-    XDG_RUNTIME_DIR = "/homeless-shelter";
+  libadwaita =  prev.libadwaita.overrideAttrs(o: {
+    # tests fail with a message
+    # Gdk-DEBUG: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
+    doCheck = false;
   });
 
   lua = crossOnly prev.lua5_3 (_: luaHost);
