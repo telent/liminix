@@ -239,6 +239,10 @@ extraPkgs
     ];
   });
 
+  libadwaita = prev.libadwaita.overrideAttrs(o: {
+    XDG_RUNTIME_DIR = "/homeless-shelter";
+  });
+
   lua = crossOnly prev.lua5_3 (_: luaHost);
 
   luaossl' = luaHost.pkgs.luaossl.overrideAttrs (o: {
