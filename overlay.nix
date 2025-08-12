@@ -258,6 +258,13 @@ extraPkgs
 
   mtdutils =
     (prev.mtdutils.overrideAttrs (o: {
+
+      src =  final.fetchgit {
+        url = "git://git.infradead.org/mtd-utils.git";
+        rev  = "77981a2888c711268b0e7f32af6af159c2288e23";
+        hash = "sha256-pHunlPOuvCRyyk9qAiR3Kn3cqS/nZHIxsv6m4nsAcbk=";
+      };
+
       patches = (if o ? patches then o.patches else [ ]) ++ [
         ./pkgs/mtdutils/0001-mkfs.jffs2-add-graft-option.patch
       ];
