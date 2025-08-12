@@ -53,6 +53,9 @@ let
   };
 in
 {
+  # we use the secrets subscriber to restart when interfaces change
+  imports = [ ../secrets ];
+
   options = {
     system.service.firewall = mkOption {
       type = liminix.lib.types.serviceDefn;
