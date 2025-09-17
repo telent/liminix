@@ -31,13 +31,17 @@
       TODO: add instructions on how to boot directly from TFTP to memory
       and how to install from TFTP to flash without going through OpenWrt.
 
-      The instructions below assume you can boot and SSH into OpenWrt:
+      The instructions below assume you can boot and SSH into OpenWrt,
+      for example by attaching a USB serial console to the front port,
+      selecting 'boot from recovery' in the U-Boot menu, and connecting
+      to root@192.168.1.1 via the 1G ethernet port.
 
       Boot into OpenWrt and create a 'liminix' UBI partition:
 
         root@OpenWrt:~# ubimkvol /dev/ubi0 --name=liminix --maxavsize
 
-    Remember the 'Volume ID' that was created for this new partition
+    Remember the 'Volume ID' that was created for this new partition, or
+    find the one labeled 'liminix' using 'ubinfo -d 0 -n 5' etc.
 
     Build the UBI image and write it to this new partition:
 
