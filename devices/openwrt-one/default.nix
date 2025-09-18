@@ -1,73 +1,84 @@
 {
   description = ''
-    OpenWrt One
-    ***********
 
-    Hardware summary
-    ================
+== OpenWrt One
 
-    - MediaTek MT7981B (1300MHz)
-    - 256MB NAND Flash
-    - 1024MB RAM
-    - WLan hardware: Mediatek MT7976C
+=== Hardware summary
 
-    Status
-    ======
+* MediaTek MT7981B (1300MHz)
+* 256MB NAND Flash
+* 1024MB RAM
+* WLan hardware: Mediatek MT7976C
 
-    - Only tested over TFTP so far.
-    - WiFi (2.4G and 5G) works.
-    - 2.5G ethernet port works.
+=== Status
 
-    Limitations
-    ===========
+* Only tested over TFTP so far.
+* WiFi (2.4G and 5G) works.
+* 2.5G ethernet port works.
 
-    - adding `he_bss_color="128"` causes `Invalid argument` for hostap
-    - nvme support untested
-    - I don't think the front LEDs work yet
+=== Limitations
 
-    Installation
-    ============
+* adding `he_bss_color="128"` causes `Invalid argument` for hostap
+* nvme support untested
+* I don't think the front LEDs work yet
 
-      TODO: add instructions on how to boot directly from TFTP to memory
-      and how to install from TFTP to flash without going through OpenWrt.
+=== Installation
 
-      The instructions below assume you can boot and SSH into OpenWrt,
-      for example by attaching a USB serial console to the front port,
-      selecting 'boot from recovery' in the U-Boot menu, and connecting
-      to root@192.168.1.1 via the 1G ethernet port.
+TODO: add instructions on how to boot directly from TFTP to memory and
+how to install from TFTP to flash without going through OpenWrt.
 
-      Boot into OpenWrt and create a 'liminix' UBI partition:
+The instructions below assume you can boot and SSH into OpenWrt, for
+example by attaching a USB serial console to the front port, selecting
+'boot from recovery' in the U-Boot menu, and connecting to
+root@192.168.1.1 via the 1G ethernet port.
 
-        root@OpenWrt:~# ubimkvol /dev/ubi0 --name=liminix --maxavsize
+Boot into OpenWrt and create a 'liminix' UBI partition:
 
-    Remember the 'Volume ID' that was created for this new partition, or
-    find the one labeled 'liminix' using 'ubinfo -d 0 -n 5' etc.
+[source,console]
+----
+root@OpenWrt:~# ubimkvol /dev/ubi0 --name=liminix --maxavsize
+----
 
-    Build the UBI image and write it to this new partition:
+Remember the 'Volume ID' that was created for this new partition, or
+find the one labeled 'liminix' using 'ubinfo -d 0 -n 5' etc.
 
-        $ nix-build -I liminix-config=./my-configuration.nix  --arg device "import ./devices/openwrt-one" -A outputs.default
-        $ cat result/rootfs | ssh root@192.168.1.1 "cat > /tmp/rootfs"
-        $ ssh root@192.168.1.1
-        root@OpenWrt:~# ubiupdatevol /dev/ubi0_X /tmp/rootfs # replace X with the volume id, if needed check with `ubinfo`
+Build the UBI image and write it to this new partition:
 
-    Reboot into the U-Boot prompt and boot with:
 
-        OpenWrt One> ubifsmount ubi0:liminix && ubifsload ''${loadaddr} boot/fit && bootm ''${loadaddr}'
+[source,console]
+----
+$ nix-build -I liminix-config=./my-configuration.nix --arg device
+"import ./devices/openwrt-one" -A outputs.default
+$ cat result/rootfs | ssh root@192.168.1.1 "cat > /tmp/rootfs"
+$ ssh root@192.168.1.1
+root@OpenWrt:~# ubiupdatevol /dev/ubi0_X /tmp/rootfs # replace X
+with the volume id, if needed check with `ubinfo`
+----
 
-    If this works, reboot into OpenWrt and configure U-Boot to boot ubifs by default:
+Reboot into the U-Boot prompt and boot with:
 
-        root@OpenWrt:~# fw_setenv orig_boot_production $(fw_printenv -n boot_production)
-        root@OpenWrt:~# fw_setenv boot_production 'led white on ; ubifsmount ubi0:liminix && ubifsload ''${loadaddr} boot/fit && bootm ''${loadaddr}'
+[source,console]
+----
+OpenWrt One> ubifsmount ubi0:liminix && ubifsload ''${loadaddr} boot/fit && bootm ''${loadaddr}
+----
 
-    Troubleshooting
-    ===============
+If this works, reboot into OpenWrt and configure U-Boot to boot ubifs by
+default:
 
-      The instructions above assume you can boot and SSH into the (recovery)
-      OpenWrt installation. If you have broken your device to the point where that
-      is no longer possible, you could re-install OpenWrt, but probably you could
-      also install directly from U-Boot:
+[source,console]
+----
+root@OpenWrt:~# fw_setenv orig_boot_production $(fw_printenv -n boot_production)
+root@OpenWrt:~# fw_setenv boot_production 'led white on ; ubifsmount ubi0:liminix && ubifsload ''${loadaddr} boot/fit && bootm ''${loadaddr}'
+----
 
-        https://github.com/u-boot/u-boot/blob/master/doc/README.ubi
+=== Troubleshooting
+
+The instructions above assume you can boot and SSH into the (recovery)
+OpenWrt installation. If you have broken your device to the point where
+that is no longer possible, you could re-install OpenWrt, but probably
+you could also install directly from U-Boot:
+
+https://github.com/u-boot/u-boot/blob/master/doc/README.ubi
   '';
 
   system = {

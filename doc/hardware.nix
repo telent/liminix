@@ -10,12 +10,11 @@ let
       tag = ".. _${lib.strings.replaceStrings [ " " ] [ "-" ] n}:";
       d' = {
         description = ''
-          ${n}
-          ${substring 0 (stringLength n) "============================"}
+          == ${n}
         '';
       } // d;
     in
-    "${tag}\n\n${d'.description}"
+    "\n${d'.description}"
   ) devices;
 in
 writeText "hwdoc" ''

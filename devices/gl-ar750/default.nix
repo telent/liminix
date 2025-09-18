@@ -10,46 +10,43 @@
   };
 
   description = ''
-    GL.iNet GL-AR750
-    ****************
 
-    Hardware summary
-    ================
+== GL.iNet GL-AR750
 
-    The GL-AR750 "Creta" travel router features:
+=== Hardware summary
 
-     - QCA9531 @650Mhz SoC
-     - dual band wireless: IEEE 802.11a/b/g/n/ac
-     - two 10/100Mbps LAN ports and one WAN
-     - 128MB DDR2 RAM
-     - 16MB NOR Flash
-     - supported in OpenWrt by the "ath79" SoC family
+The GL-AR750 "Creta" travel router features:
 
-    The GL-AR750 has two distinct sets of wifi hardware. The 2.4GHz
-    radio is part of the QCA9531 SoC, i.e. it's on the same silicon as
-    the CPU, the Ethernet, the USB etc. The device is connected to the
-    host via `AHB <https://en.wikipedia.org/wiki/Advanced_Microcontroller_Bus_Architecture>`_ and it is
-    supported in Linux using the ath9k driver. 5GHz wifi
-    is provided by a QCA9887 PCIe (PCI embedded) WLAN chip,
-    supported by the ath10k driver.
+* QCA9531 @650Mhz SoC
+* dual band wireless: IEEE 802.11a/b/g/n/ac
+* two 10/100Mbps LAN ports and one WAN
+* 128MB DDR2 RAM
+* 16MB NOR Flash
+* supported in OpenWrt by the "ath79" SoC family
 
-    Installation
-    ============
+The GL-AR750 has two distinct sets of wifi hardware. The 2.4GHz radio is
+part of the QCA9531 SoC, i.e. it's on the same silicon as the CPU, the
+Ethernet, the USB etc. The device is connected to the host via
+https://en.wikipedia.org/wiki/Advanced_Microcontroller_Bus_Architecture[AHB]
+and it is supported in Linux using the ath9k driver. 5GHz wifi is
+provided by a QCA9887 PCIe (PCI embedded) WLAN chip, supported by the
+ath10k driver.
 
-    As with many GL.iNet devices, the stock vendor firmware
-    is a fork of OpenWrt, meaning that the binary created by
-    :ref:`system-outputs-mtdimage` can be flashed using the
-    vendor web UI or the U-Boot emergency "unbrick" routine.
+=== Installation
 
-    Flashing over an existing Liminix system is not possible while
-    that system is running, otherwise you'll be overwriting flash
-    partitions while they're in use - and that might not end well.
-    Configure the system with :ref:`levitate` if you need to
-    make it upgradable.
+As with many GL.iNet devices, the stock vendor firmware is a fork of
+OpenWrt, meaning that the binary created by `+system-outputs-mtdimage+`
+can be flashed using the vendor web UI or the U-Boot emergency "unbrick"
+routine.
 
-    Vendor web page: https://www.gl-inet.com/products/gl-ar750/
+Flashing over an existing Liminix system is not possible while that
+system is running, otherwise you'll be overwriting flash partitions
+while they're in use - and that might not end well. Configure the system
+with `+levitate+` if you need to make it upgradable.
 
-    OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-ar750
+Vendor web page: https://www.gl-inet.com/products/gl-ar750/
+
+OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-ar750
 
   '';
 

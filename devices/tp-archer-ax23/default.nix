@@ -1,25 +1,22 @@
 {
   description = ''
-    TP-Link Archer AX23 / AX1800 Dual Band Wi-Fi 6 Router
-    *****************************************************
+== TP-Link Archer AX23 / AX1800 Dual Band Wi-Fi 6 Router
 
-    Hardware summary
-    ================
+=== Hardware summary
 
-    - MediaTek MT7621 (880MHz)
-    - 16MB Flash
-    - 128MB RAM
-    - WLan hardware: Mediatek MT7905, MT7975
+* MediaTek MT7621 (880MHz)
+* 16MB Flash
+* 128MB RAM
+* WLan hardware: Mediatek MT7905, MT7975
 
-    Limitations
-    ===========
+=== Limitations
 
-    Status LEDs do not work yet.
+Status LEDs do not work yet.
 
-    Uploading an image via tftp doesn't work yet, because the Archer uboot
-    version is so old it doesn't support overriding the DTB from the mboot
-    command. The tftpboot module doesn't support this yet, see
-    https://gti.telent.net/dan/liminix/pulls/5 for the WiP.
+Uploading an image via tftp doesn't work yet, because the Archer uboot
+version is so old it doesn't support overriding the DTB from the mboot
+command. The tftpboot module doesn't support this yet, see
+https://gti.telent.net/dan/liminix/pulls/5 for the WiP.
   '';
 
   system = {

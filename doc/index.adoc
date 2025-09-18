@@ -24,7 +24,7 @@ include::code-of-conduct.adoc[]
 [appendix]
 = Supported hardware
 
-=== Recommended devices
+== Recommended devices
 
 For development, the supported GL.iNet devices are all good choices if
 you can find them, as they have a builtin "debrick" procedure in the

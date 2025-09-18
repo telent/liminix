@@ -41,7 +41,7 @@ stdenv.mkDerivation {
   buildPhase = ''
     cat ${json} | fennel --correlate doc/parse-options.fnl > doc/module-options-generated.inc.rst
     cat ${json} | fennel --correlate doc/parse-options-outputs.fnl     > doc/outputs-generated.inc.rst
-    cp ${(import ./doc/hardware.nix)} doc/hardware.rst
+    cp ${(import ./doc/hardware.nix)} doc/hardware.adoc
     make -C doc html
   '';
   installPhase = ''

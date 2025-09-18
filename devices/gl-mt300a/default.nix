@@ -12,35 +12,33 @@
   };
 
   description = ''
-    GL.iNet GL-MT300A
-    *****************
 
-    The GL-MT300A is based on a MT7620 chipset.
+== GL.iNet GL-MT300A
 
-    For flashing from U-Boot, the firmware partition is from
-    0xbc050000 to 0xbcfd0000.
+The GL-MT300A is based on a MT7620 chipset.
 
-    WiFi on this device is provided by the rt2800soc module. It
-    expects firmware to be present in the "factory" MTD partition, so
-    - assuming we want to use the wireless - we need to build MTD
-    support into the kernel even if we're using TFTP root.
+For flashing from U-Boot, the firmware partition is from 0xbc050000 to
+0xbcfd0000.
 
-    Installation
-    ============
+WiFi on this device is provided by the rt2800soc module. It expects
+firmware to be present in the "factory" MTD partition, so - assuming we
+want to use the wireless - we need to build MTD support into the kernel
+even if we're using TFTP root.
 
-    The stock vendor firmware is a fork of OpenWrt, meaning that the
-    binary created by :ref:`system-outputs-mtdimage` can be flashed
-    using the vendor web UI or the U-Boot emergency "unbrick" routine.
+=== Installation
 
-    Flashing over an existing Liminix system is not possible while
-    that system is running, otherwise you'll be overwriting flash
-    partitions while they're in use - and that might not end well.
-    Configure the system with :ref:`levitate` if you need to
-    make it upgradable.
+The stock vendor firmware is a fork of OpenWrt, meaning that the binary
+created by `+system-outputs-mtdimage+` can be flashed using the vendor
+web UI or the U-Boot emergency "unbrick" routine.
 
-    Vendor web page: https://www.gl-inet.com/products/gl-mt300a/
+Flashing over an existing Liminix system is not possible while that
+system is running, otherwise you'll be overwriting flash partitions
+while they're in use - and that might not end well. Configure the system
+with `+levitate+` if you need to make it upgradable.
 
-    OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-mt300a
+Vendor web page: https://www.gl-inet.com/products/gl-mt300a/
+
+OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-mt300a
 
   '';
 
