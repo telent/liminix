@@ -538,8 +538,8 @@ somewhere on the Internet that I can clone from. It can be on Codeberg
 or Gitlab or Sourcehut or Forgejo or Gitea or Github or a bare repo in
 your own personal web space or any kind of hosting you like.
 
-2. Email devel@liminix.org with the URL of the repo and the branch
-name, and we will take a look.
+2. Email <<_mailing_lists,devel@liminix.org>> with the URL of the repo
+and the branch name, and we will take a look.
 
 If that's not an option, I’m also happy for you to send your changes
 direct to the list itself, as an incremental git bundle or using git
