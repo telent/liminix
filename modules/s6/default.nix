@@ -31,7 +31,7 @@ let
       pipecmds =
         [ "${s6}/bin/s6-log -bpd3 -- ${cfg.script} 1" ]
         ++ (lib.optional (cfg ? persistent && cfg.persistent.enable) "/bin/tee /dev/pmsg0")
-        ++ (lib.optional cfg.shipping.enable "${pkgs.logshipper}/bin/logtap ${cfg.shipping.socket} logshipper-socket-event");
+        ++ (lib.optional cfg.shipping.enable "${pkgs.logtap}/bin/logtap ${cfg.shipping.socket} logshipper-socket-event");
     in
     ''
       #!${execline}/bin/execlineb -P

@@ -2,7 +2,7 @@
   stdenv,
 }:
 stdenv.mkDerivation {
-  name = "logshipper";
+  name = "logtap";
   makeFlags = [ "PREFIX=${placeholder "out"}" ];
   src = ./.;
 }
