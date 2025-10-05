@@ -127,6 +127,13 @@ in
           guest.address = "10.0.2.15";
           guest.port = 22;
         }
+        {
+          # expose victorialogs on host so (clients attached to) guest
+          # can log
+          from = "guest"; # packets are forwarded from guest
+          guest.address = "10.0.2.10"; guest.port = 9428;
+          host.address = "127.0.0.1"; host.port = 9428;
+        }
       ];
       qemu = {
         networkingOptions = [ ];
