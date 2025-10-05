@@ -7637,3 +7637,53 @@ We should describe secrets subscriber here
 
 * some basic css to make it not the same as (I assume) every single
   other asciidoc site
+
+Mon Aug 11 23:36:29 BST 2025
+
+Reviewing notes from March: I *think* 53c6d506cf1a3fbc8df0e298cf6b988c808fdbe5
+was intended to fix the bug where the internet stops working at 1am sometimes,
+but I'm guessing it was never deployed
+
+Review how we do the deploy. I'm guessing it was
+
+ make -C ~/src/telent-nixox-config rotuer install-rotuer
+
+Consider doing something like /etc/os-release (q.v. os-release(5) ) so
+we can tell what version of what sw a particular box is runningg
+
+Wed Aug 27 21:03:04 BST 2025
+
+NAME=Liminix
+ID=liminix
+PRETTY_NAME=Liminix
+VERSION=1.0
+VERSION_ID=1.0
+
+os-release doesn't have a good field for the configuration and nixos
+doesn't seem to add one. I have BUILD_ID "25.05.805252.b43c397f6c21"
+but doesn't change it when config changes (maybe it's the nixos channel version?)
+
+we'd like to record
+
+nixpkgs git commit
+liminix git commit
+hash of the toplevel
+ or some other derivation that's common to every liminix install type
+
+Sat Oct  4 17:23:03 BST 2025
+
+Log shipping, how do we do log shipping
+
+1) victorialogs accepts log messages over http in jsonline format
+2) we should put https in front of it though because reasons
+3) we already wrote certifix, though
+4) apparently we also have log shipping? logtap tees stdin to {stdout,socket}
+ and the config logging.shipping.service is a longrun that sends its input
+ to whatever the log collector is
+
+so we need
+
+a) a log shipping service that opens an http(s) connection to victorialogs
+b) setup victorialogs to proxy ssl/authnz (probably just use socat here)
+
+pkgs/incz and s6-tlsclient probably do most of (a) already
