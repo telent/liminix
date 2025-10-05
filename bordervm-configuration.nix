@@ -116,12 +116,12 @@ in
 
     virtualisation = {
       forwardPorts = [
-        {
-          from = "host";
-          host.port = 7654;
-          #        guest.address = "10.0.2.15";
-          guest.port = 7654;
-        }
+        # {
+        #   # guest tang service exposed on host for easy querying
+        #   from = "host";
+        #   host.port = 7654;
+        #   guest.port = 7654;
+        # }
         {
           host.port = 2222;
           guest.address = "10.0.2.15";
