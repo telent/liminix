@@ -10,7 +10,7 @@
   stdenv,
 }:
 let
-  name = "incz";
+  name = "logshippers";
 in
 stdenv.mkDerivation {
   inherit name;
