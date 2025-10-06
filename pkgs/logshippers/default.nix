@@ -11,6 +11,14 @@
 }:
 let
   name = "logshippers";
+  luafy = name : source :
+    writeFennel name {
+      packages = [ anoia lualinux fennel ];
+      macros = [ anoia.dev ];
+      mainFunction = "run";
+    } source;
+  incz = luafy name ./incz.fnl;
+  victorialogsend = luafy name ./victorialogsend.fnl;
 in
 stdenv.mkDerivation {
   inherit name;
@@ -21,22 +29,13 @@ stdenv.mkDerivation {
 
   buildPhase = ''
     fennelrepl --test ./incz.fnl
-    cp -p ${
-      writeFennel name {
-        packages = [
-          anoia
-          lualinux
-          fennel
-        ];
-        macros = [
-          anoia.dev
-        ];
-        mainFunction = "run";
-      } ./incz.fnl
-    } ${name}
+    fennelrepl --test ./victorialogsend.fnl
+    cp -p ${incz} incz
+    cp -p ${victorialogsend} victorialogsend
   '';
 
   installPhase = ''
-    install -D ${name} $out/bin/${name}
+    install -D incz $out/bin/incz
+    install -D victorialogsend $out/bin/victorialogsend
   '';
 }
