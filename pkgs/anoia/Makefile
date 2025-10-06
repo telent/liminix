@@ -1,9 +1,9 @@
 servicedir:=$(shell mktemp -d)
 outputdir:=$(servicedir)/.outputs
 
-default: fs.lua init.lua nl.lua svc.lua process.lua net/constants.lua
+default: fs.lua init.lua nl.lua svc.lua process.lua net/constants.lua tai64.lua
 
-CHECK=fs.fnl init.fnl svc.fnl process.fnl
+CHECK=fs.fnl init.fnl svc.fnl process.fnl tai64.fnl
 
 check:
 	ln -s . anoia
