@@ -278,10 +278,7 @@ in
                 eat = longrun {
                   name = "log-shipping-pipe-eat";
                   run = ''
-                    fdmove -c 12 1 \
-                    ${pkgs.s6}/bin/s6-ipcserver ${cfg.shipping.socket} \
-                    fdmove -c 1 12 \
-                    cat
+                    cat ${cfg.shipping.socket}
                   '';
                   producer-for = spew.name;
                 };
