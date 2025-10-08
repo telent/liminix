@@ -14,7 +14,7 @@ let
     (mapAttrsToList (name: opts: "server ${name} ${concatStringsSep "" opts}") p.servers)
     ++ (mapAttrsToList (name: opts: "pool ${name} ${concatStringsSep "" opts}") p.pools)
     ++ (mapAttrsToList (name: opts: "peer ${name} ${concatStringsSep "" opts}") p.peers)
-    ++ lib.optional (p.user != null) "user ${p.user}"
+    ++ lib.optional (p.user != "root") "user ${p.user}"
     ++ (lib.optional (
       p.makestep != null
     ) "makestep ${toString p.makestep.threshold} ${toString p.makestep.limit}")

@@ -107,6 +107,7 @@ rec {
   };
 
   services.ntp = svc.ntp.build {
+    user = "root";
     pools = {
       "pool.ntp.org" = [ "iburst" ];
     };
