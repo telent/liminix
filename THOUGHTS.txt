@@ -7687,3 +7687,216 @@ a) a log shipping service that opens an http(s) connection to victorialogs
 b) setup victorialogs to proxy ssl/authnz (probably just use socat here)
 
 pkgs/incz and s6-tlsclient probably do most of (a) already
+
+cat pkgs/logshippers/test-data  | result/bin/victorialogsend http://localhost:9428/insert/jsonline
+
+Sun Oct  5 23:35:35 BST 2025
+
+Fucking leap seconds.
+
+On my router we have
+
+# echo |  s6-tai64n  ;date
+@4000000068e2f0d3257dc09b
+Sun Oct  5 22:26:54 UTC 2025
+epoch timestamp 1759703214
+
+#x0000000068e2f0d3 is 1759703251 so this timestamp is the actual real
+number of atomic seconds since TAI epoch time. It is 37 seconds ahead
+of the time shown by date, because UTC was defined as TAI-10 in 1972,
+and there have been 27 leap seconds since
+
+So to format our TAI64 timestamp as UTC, we must deduct from it 10 + the
+number of leap seconds that had occured by whatever time it was
+
+Mon Oct  6 22:26:05 BST 2025
+
+1) We need to make a logging.shipping.service that runs something like
+
+${pkgs.logshippers}/bin/victorialogsend http://loghost:9428/insert/jsonline  |  socat -t 4 -v - tcp-connect:localhost:9428"
+
+but using the s6 thingies instead of socat
+
+2) then see if logs are arriving in realtime
+
+3) then we need to dick around with tls
+
+4) then figure out backfilling logs when the shipper is not running
+
+* backfilling should operate only when the loghost is reachable
+  * maybe the backfill service can depend on whatever service is supposed
+    to achieve network connectivity
+  * probably we prefer some actual test for reachability of that specific
+    host. maybe it's on the lan we're the rotuer for and hasn't done dhcp yet
+* it should send the oldest->newest segment by doing whatever the
+    logshipper service does, and stop when it gets to the "online" cookie
+
+* if the live shipper dies, how do we know that more backfill will be needed
+   when the loghost comes back
+
+  - we need to detect when its down
+  - log shipper can periodically checkpoint to disk the last time it wrote
+  - backfill ckecks for checkpoint existence and skips forward until
+    it gets to logs later than the checkpoint
+  - if the shipper has been down and then up, its new instance cannot
+    touch the checkpoint until the backfill is done
+
+bottom line is you can't have more than one log writer unless the progress
+of each log writer is tracked separately
+
+Tue Oct  7 17:44:13 BST 2025
+
+${s6-networking}/bin/s6-tcpclient loghost 9428 ${pkgs.logshippers}/bin/victorialogsend http://loghost:9428/insert/jsonline
+
+need to get the logs from gl-ar750 -> bordervm -> loaclhost
+
+bordervm can see 10.0.2.10 so it needs to forward between a listening
+port on 10.0.0.1 to
+
+Our use of s6-ipcserverd is weird. After some reveng it looks like what
+we're doing is
+
+dup() fd 1 onto fd 12
+run a forking server that listens for socket connections
+fork a child for each conection with stdio connected to the socket
+in the child
+  dup() fd 12 to fd 1 so we're writing to the parent's stdout
+  cat stdin to stdout which is actually the parent's stdout
+
+this is non-obvious but perhaps it works? except that we're not
+actually getting any output from it that I can see, so perhaps it
+doesn't work?
+
+there's also the question of what happens when the shipper dies because
+it can't contact the peer, because we would like something to notice that
+log shipping broke - and do we need to remove the socket before logcat
+fills up its send buffer and stalls out?
+
+* we could write a tiny C program that calls accept() on fd 0 and
+use it in place of s6-ipcserverd
+
+* we could give up on having the log shipper be a service and
+ it could just be a command pipeline that gets ipcserver prepended to it,
+ but then we're still forking
+
+* we could decree that the shipper has to open and listen the socket itself
+
+is the s6-rc pipeliney thing really worth having here?
+
+would a fifo (named pipe) be a better fit for the problem here?
+
+* shipper can open it non-blocking for read
+* logtap can open it non-blocking for write (and check ENXIO)
+  - or nb for read+write and check for errors on writes
+
+is there any use case for either end to block? it won't hurt if the
+shipper blocks until logtap
+
+1) this is a significant change to logtap as the fd for the fifo will
+always be >= 0, and we check connectedness based on the return value from
+write()
+
+we should try and keep some memory of whether it was (dis)connected
+recently (1) so we don't copy every single message to the fifo when we
+know there's nothing there (is this actually bad though?) and (2)
+because we can print the fifo state into the logs and thus have an
+accurate record of which messages were sent contemperaneously vs not
+so that backfill can deal with gaps
+
+2) but it makes the shipper simple because it can open the fifo as if
+it were a regular file
+
+
+Wed Oct  8 07:15:39 AM BST 2025
+
+A fifo instead of a unix socket would be a better fit and avoid the
+forking, but it means basically rewriting logtap
+
+* if there was an error writing the fifo because the peer is not
+  connected, we don't want to spam it but instead to wait before
+  retrying. and log to stdout that it failed
+
+* when we do the first write (and only the first write) after a
+  backoff expires, we should log to stdout if it is successful
+
+fifo state is [in_timeout, uncertain, good]
+
+#define FIFO_STATE_GOOD (-1)
+#define FIFO_STATE_TIMEOUT_EXPIRED (0)
+#define FIFO_STATE_TIMEOUT_MAX (50) /* ? probably going to depend on log volume */
+
+
+
+it's ok for logtap to make the fifo when it starts: it's started by
+s6-svcan-log which is part of the early services that are running before the
+service manager starts. https://skarnet.org/software/s6-linux-init/overview.html
+
+, include-what-you-use pkgs/logtap/logtap.c  # this is handy
+
+
+Wed Oct  8 07:45:02 AM BST 2025
+
+For posterity, here is how we make a rotuer test board send logs to
+victorialogs on loaclhost
+
+  services.wan-address-for-logs =
+    let
+      interface = config.hardware.networkInterfaces.wan;
+      addr = svc.network.address.build {
+        inherit interface;
+        family = "inet";
+        address = "10.0.0.10";
+        prefixLength = 24;
+      };
+    in
+    svc.network.route.build {
+      target = "10.0.0.1";
+      inherit interface;
+      via = "10.0.0.10";
+      metric = 1;
+      dependencies = [ addr ];
+    };
+
+  logging.shipping = {
+    enable = true;
+    service = longrun {
+      name = "victorialogsend";
+      run = ''
+        ${pkgs.s6-networking}/bin/s6-tcpclient 10.0.0.1 9428 ${pkgs.logshippers}/bin/victorialogsend http://loaclhost:9428/insert/jsonline
+      '';
+      dependencies = [services.wan-address-for-secrets];
+    };
+  };
+
+and also need to forward conections from bordervm to the endpoint
+exposed by qemu
+
+[liminix@border:~]$ socat tcp-listen:9428,fork,reuseaddr tcp-connect:10.0.2.10:9428
+
+However it does not appear to to be stopping when the log shipper
+connection is down :-(
+
+
+@4000000068e681261d2ff716 rotuer victorialogsend s6-tcpclient: fatal: unable to connect to a suitable IP address
+@4000000068e6812722751fbc rotuer victorialogsend s6-tcpclient: warning: unable to connect to 10.0.0.1 port 9428: Connection refused
+@4000000068e68127227c00d0 rotuer victorialogsend s6-tcpclient: fatal: unable to connect to a suitable IP address
+[endless repeats]
+
+hypothesis: some kind of buffery thing going on in the s6-rc pipeline
+where it would rather try to respawn the consumer than signal to the
+producer that it's broken, it may be that a pipeline is the wrong model here
+
+...
+
+ok, it stopped eventually but it was quite eventual. When I restarted,
+it logged all the buffered messages as well. Is this actually bad?
+
+given that the producer part of this pipeline has reduced to "cat"
+maybe we could just(tm) make log shippers accept a pathname to read from
+
+options:
+* log shipper becomes a script not a service, so it can accept a pathname
+* do magic to the service to prepend stdin redirection to its `run`
+ attr
+* just hardcode the pathname
+* environment variable for the pathname?
