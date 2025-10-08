@@ -60,18 +60,25 @@ Host: %s\
   (expect=  (format-timestamp-rfc3339 "@4000000068e2f0d3257dc09b"  3)
             "2025-10-05T22:26:54.628Z"))
 
-
-
 (fn process-line [line]
   (let [(timestamp hostname service msg) (string.match line "(@%x+) (%g+) (%g+) (.+)$")]
     (->
-     (string.format
-      "{%q:%q,%q:%q,%q:%q,%q:%q}\n"
-      :_time (format-timestamp-rfc3339 timestamp 3)
-      :service service
-      :_msg msg
-      :host hostname)
-     chunk)))
+     (if timestamp
+         (string.format
+          "{%q:%q,%q:%q,%q:%q,%q:%q}\n"
+          :_time (format-timestamp-rfc3339 timestamp 3)
+          :service service
+          :_msg msg
+          :host hostname)
+         (string.format
+          "{%q:%q,%q:%q,%q:%q,%q:%q}\n"
+          :_time (os.date "!%FT%TZ")
+          :service "ERROR"
+          :_msg (string.format "can't parse log %q" msg)
+          :host hostname))
+     chunk)
+    ))
+
 (fn writefd [fd body]
   (case (ll.write fd body)
     (bytes) (when (< bytes (# body)) (writefd fd (string.sub body bytes)))
