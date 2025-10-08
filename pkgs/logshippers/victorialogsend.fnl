@@ -72,14 +72,22 @@ Host: %s\
       :_msg msg
       :host hostname)
      chunk)))
+(fn writefd [fd body]
+  (case (ll.write fd body)
+    (bytes) (when (< bytes (# body)) (writefd fd (string.sub body bytes)))
+    (nil errno)
+    (error (string.format "write to fd %d failed: %s" fd (ll.strerror errno))))
+  true)
 
 (fn run []
-  (let [{ : auth : url } (parse-args arg)]
-    (ll.write 1 (http-header url.host url.path auth))
+  (let [{ : auth : url } (parse-args arg)
+        in-fd 6
+        out-fd 7]
+    (writefd out-fd (http-header url.host url.path auth))
     (while (case (io.stdin:read "l")
-             line (ll.write 1 (process-line line))))
-    (ll.write 1 (chunk "")))
-  (io.stderr:write (ll.read 0)))
+             line (writefd out-fd (process-line line))))
+    (writefd out-fd (chunk ""))
+    (io.stderr:write (ll.read in-fd))))
 
 
 { : run }
