@@ -56,7 +56,9 @@ Host: %s\
 
 (define-tests
   (expect=  (format-timestamp-rfc3339 "@4000000068e2f0d3257dc09b"  9)
-           "2025-10-05T22:26:54.628998299Z"))
+            "2025-10-05T22:26:54.628998299Z")
+  (expect=  (format-timestamp-rfc3339 "@4000000068e2f0d3257dc09b"  3)
+            "2025-10-05T22:26:54.628Z"))
 
 
 
@@ -65,7 +67,7 @@ Host: %s\
     (->
      (string.format
       "{%q:%q,%q:%q,%q:%q,%q:%q}\n"
-      :_time (format-timestamp-rfc3339 timestamp)
+      :_time (format-timestamp-rfc3339 timestamp 3)
       :service service
       :_msg msg
       :host hostname)
