@@ -129,6 +129,32 @@ rec {
     s6
   ];
 
+  services.qemu-hyp-route =
+    let
+      interface = config.hardware.networkInterfaces.wan;
+      addr = svc.network.address.build {
+        inherit interface;
+        family = "inet";
+        address = "10.0.0.10";
+        prefixLength = 24;
+      };
+    in
+    svc.network.route.build {
+      target = "10.0.0.1";
+      inherit interface;
+      via = "10.0.0.10";
+      metric = 1;
+      dependencies = [ addr ];
+    };
+
+  logging.shipping = {
+    enable = true;
+    command = ''
+      ${pkgs.s6-networking}/bin/s6-tcpclient 10.0.0.1 9428 ${pkgs.logshippers}/bin/victorialogsend http://loaclhost:9428/insert/jsonline
+      '';
+    dependencies = [services.qemu-hyp-route];
+  };
+
   programs.busybox = {
     applets = [
       "fdisk"

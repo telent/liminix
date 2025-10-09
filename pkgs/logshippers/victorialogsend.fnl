@@ -88,13 +88,14 @@ Host: %s\
 
 (fn run []
   (let [{ : auth : url } (parse-args arg)
-        in-fd 6
-        out-fd 7]
-    (writefd out-fd (http-header url.host url.path auth))
-    (while (case (io.stdin:read "l")
-             line (writefd out-fd (process-line line))))
-    (writefd out-fd (chunk ""))
-    (io.stderr:write (ll.read in-fd))))
+        http-response-fd 6
+        http-req-fd 7]
+    (writefd http-req-fd (http-header url.host url.path auth))
+    (with-open [logs (assert (io.open (os.getenv "LOG_FIFO") :r))]
+      (while (case (logs:read "l")
+               line (writefd http-req-fd (process-line line)))))
+    (writefd http-req-fd (chunk ""))
+    (io.stderr:write (ll.read http-response-fd))))
 
 
 { : run }

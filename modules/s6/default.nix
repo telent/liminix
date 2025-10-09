@@ -242,9 +242,17 @@ in
           type = types.path;
           default = "/run/.log-shipping.sock";
         };
-        service = mkOption {
-          description = "log shipper service";
-          type = pkgs.liminix.lib.types.service;
+        command = mkOption {
+          description = "log shipping command, should open the file named by the environment variable $LOG_FIFO";
+          type = types.lines;
+          example = lib.literalExpression ''
+            ''${pkgs.s6-networking}/bin/s6-tcpclient loghost 9428 ''${pkgs.logshippers}/bin/victorialogsend http://loghost:9428/insert/jsonline
+          '';
+        };
+        dependencies = mkOption {
+          description = "services required by the shipping script";
+          type = types.listOf pkgs.liminix.lib.types.service;
+          default = [];
         };
       };
       script = mkOption {
@@ -268,32 +276,17 @@ in
         ...
       }:
       let
-        cfg = config.logging;
-        pipeline =
-          shipper:
-          bundle {
-            name = "log-shipping-pipe";
-            contents =
-              let
-                eat = longrun {
-                  name = "log-shipping-pipe-eat";
-                  run = ''
-                    cat ${cfg.shipping.socket}
-                  '';
-                  producer-for = spew.name;
-                };
-                spew = shipper.override {
-                  consumer-for = "log-shipping-pipe-eat";
-                };
-              in
-              [
-                eat
-                spew
-              ];
-          };
+        cfg = config.logging.shipping;
       in
-      mkIf cfg.shipping.enable {
-        services.${cfg.shipping.service.name} = pipeline cfg.shipping.service;
+      mkIf cfg.enable {
+        services.log-shipper = longrun {
+          name = "log-shipper";
+          run = ''
+            export LOG_FIFO=${cfg.socket}
+            ${cfg.command}
+          '';
+          inherit (cfg) dependencies;
+        };
       }
     )
   ];
