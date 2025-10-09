@@ -1,4 +1,5 @@
 TARGETS=logtap
+CFLAGS=-Wall
 default: $(TARGETS)
 
 install: $(TARGETS)
