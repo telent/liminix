@@ -247,14 +247,27 @@ extraPkgs
 
   lua = crossOnly prev.lua5_3 (_: luaHost);
 
-  luaossl' = luaHost.pkgs.luaossl.overrideAttrs (o: {
-    patches = [
-      (fetchpatch {
-        url = "https://patch-diff.githubusercontent.com/raw/wahern/luaossl/pull/218.patch";
-        hash = "sha256-2GOliY4/RUzOgx3rqee3X3szCdUVxYDut7d+XFcUTJw=";
-      })
-    ] ++ final.lib.optionals (o ? patches) o.patches;
-  });
+  luaossl' =
+    let inherit (final) fetchurl fetchzip;
+    in luaHost.pkgs.buildLuaPackage {
+      pname = "luaossl";
+      version = "20220711-0";
+      knownRockspec =
+        (fetchurl {
+          url = "mirror://luarocks/luaossl-20220711-0.rockspec";
+          sha256 = "0b68kvfz587ilmb5c1p7920kysg9q4m4fl4cz4d93jl3270mzh8y";
+        }).outPath;
+      src = fetchzip {
+        url = "https://github.com/wahern/luaossl/archive/rel-20220711.zip";
+        sha256 = "1a9pgmc6fbhgh1m9ksz9fq057yzz46npqgakcsy9vngg47xacfdb";
+      };
+      patches = [
+        (fetchpatch {
+          url = "https://patch-diff.githubusercontent.com/raw/wahern/luaossl/pull/218.patch";
+          hash = "sha256-2GOliY4/RUzOgx3rqee3X3szCdUVxYDut7d+XFcUTJw=";
+        })
+      ] ;
+    };
 
   mtdutils =
     (prev.mtdutils.overrideAttrs (o: {
