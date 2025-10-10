@@ -61,7 +61,7 @@ Host: %s\
             "2025-10-05T22:26:54.628Z"))
 
 (fn process-line [line]
-  (let [(timestamp hostname service msg) (string.match line "(@%x+) (%g+) (%g+) (.+)$")]
+  (let [(timestamp hostname service msg) (string.match line "(@%x+) (%g+) (%g+) (.*)$")]
     (->
      (if timestamp
          (string.format
