@@ -200,6 +200,10 @@ in
         enable = true;
         internalInterfaces = [ "eth1" ];
         externalInterface = "eth0";
+        extraCommands = ''
+          iptables -t nat -A PREROUTING -p tcp --dport 9428 -j DNAT --to-destination 10.0.2.10:9428
+          iptables -t nat -A POSTROUTING -p tcp -d 10.0.2.10 --dport 9428 -j SNAT --to-source 10.0.0.1
+        '';
       };
     };
     users.users.liminix = {
