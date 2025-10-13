@@ -97,7 +97,7 @@ in
       resolveLocalQueries = false;
       settings = {
         # domain-needed = true;
-        dhcp-range = [ "10.0.0.10,10.0.0.240" ];
+        dhcp-range = [ "10.0.0.12,10.0.0.240" ];
         interface = "eth1";
       };
     };
