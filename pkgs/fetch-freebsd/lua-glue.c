@@ -72,6 +72,15 @@ int lp_fetch(lua_State *L) {
     return lp_fetched(L, fp, &stat);
 }
 
+/* http_request_body seems to be semi-private in libfetch, but if using
+ * only the fetch* functions there's no way to send an http request
+ * with a body, so we use it anyway
+ */
+extern FXRETTYPE
+http_request_body(struct url *URL, const char *op, struct url_stat *us,
+		  struct url *purl, const char *flags, const char *content_type,
+		  const char *body);
+
 int lp_request(lua_State *L) {
     const char * request_method = luaL_checkstring(L, 1);
     const char * url_string = luaL_checkstring(L, 2);
