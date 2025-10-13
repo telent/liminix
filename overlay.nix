@@ -296,28 +296,23 @@ extraPkgs
     ];
   });
 
-  openssl = crossOnly prev.openssl (
-    d:
-    d.overrideAttrs (
-      o: with final; {
-        # we want to apply
-        # https://patch-diff.githubusercontent.com/raw/openssl/openssl/pull/20273.patch";
-        # which disables overriding the -march cflags to the wrong values,
-        # but openssl is used for bootstrapping so that's easier said than
-        # done. Do it the ugly way..
-        postPatch =
-          o.postPatch
-          + ''
-            sed -i.bak 's/linux.*-mips/linux-mops/' Configure
-          '';
-        # openssl with threads requires stdatomic which drags in libgcc
-        # as a dependency
-        configureFlags = [ "no-threads" ] ++ o.configureFlags;
-
-        # don't need or want this bash script
-        postInstall = o.postInstall + "rm $bin/bin/c_rehash\n";
-      }
-    )
+  opensslNoThreads = prev.openssl.overrideAttrs (
+    o: with final; {
+      pname = "${o.pname}-nothreads";
+      # openssl with threads requires stdatomic which drags in libgcc
+      # as a dependency
+      preConfigure =
+        let
+          arch = if stdenv.hostPlatform.gcc ? arch
+                 then "-march=${stdenv.hostPlatform.gcc.arch}"
+                 else "";
+          soft = if arch == "-march=24kc" then  "-msoft-float" else "";
+        in ''
+          configureFlagsArray+=(no-threads no-asm CFLAGS="${arch} ${soft}")
+        '';
+      # don't need or want this bash script
+      postInstall = o.postInstall + "rm $bin/bin/c_rehash\n";
+    }
   );
 
   pppBuild = prev.ppp;
