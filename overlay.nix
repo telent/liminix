@@ -248,18 +248,21 @@ extraPkgs
   lua = crossOnly prev.lua5_3 (_: luaHost);
 
   luaossl' =
-    let inherit (final) fetchurl fetchzip;
+    let inherit (final) fetchurl fetchzip libressl openssl;
     in luaHost.pkgs.buildLuaPackage {
       pname = "luaossl";
-      version = "20220711-0";
+      version = "20250929-0";
+      buildInputs = [ openssl ];
       knownRockspec =
         (fetchurl {
-          url = "mirror://luarocks/luaossl-20220711-0.rockspec";
-          sha256 = "0b68kvfz587ilmb5c1p7920kysg9q4m4fl4cz4d93jl3270mzh8y";
+          url = "https://luarocks.org/manifests/daurnimator/luaossl-20250929-0.rockspec";
+          sha256 = "sha256-tKcmqoE0G4d8owX0X2OGpwVvBQGbAkGKHowz1PYQqIY=";
         }).outPath;
+      makeFlags = [ "all5.3" ];
+      installPhase = "make install5.3 prefix=\$out";
       src = fetchzip {
-        url = "https://github.com/wahern/luaossl/archive/rel-20220711.zip";
-        sha256 = "1a9pgmc6fbhgh1m9ksz9fq057yzz46npqgakcsy9vngg47xacfdb";
+        url = "https://github.com/wahern/luaossl/archive/rel-20250929.zip";
+        sha256 = "sha256-bex1x8rTUPEhli4vxhUPOCdqngqlNNqlpYnhY0EuqoQ=";
       };
       patches = [
         (fetchpatch {
