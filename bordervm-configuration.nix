@@ -134,6 +134,11 @@ in
           guest.address = "10.0.2.10"; guest.port = 9428;
           host.address = "127.0.0.1"; host.port = 9428;
         }
+        {
+          from = "guest"; # packets are forwarded from guest
+          guest.address = "10.0.2.10"; guest.port = 19613;
+          host.address = "127.0.0.1"; host.port = 19613;
+        }
       ];
       qemu = {
         networkingOptions = [ ];
@@ -201,8 +206,12 @@ in
         internalInterfaces = [ "eth1" ];
         externalInterface = "eth0";
         extraCommands = ''
-          iptables -t nat -A PREROUTING -p tcp --dport 9428 -j DNAT --to-destination 10.0.2.10:9428
-          iptables -t nat -A POSTROUTING -p tcp -d 10.0.2.10 --dport 9428 -j SNAT --to-source 10.0.0.1
+          portfwd() {
+            iptables -t nat -A PREROUTING -p tcp --dport $2 -j DNAT --to-destination $1:$2
+            iptables -t nat -A POSTROUTING -p tcp -d $1 --dport $2 -j SNAT --to-source 10.0.0.1
+          }
+          portfwd 10.0.2.10 9428
+          portfwd 10.0.2.10 19613
         '';
       };
     };
