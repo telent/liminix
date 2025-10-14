@@ -61,9 +61,8 @@ OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-ar750
     let
       inherit (lib) mkIf;
       openwrt = pkgs.openwrt;
-      firmwareBlobs = pkgs.pkgsBuildBuild.fetchFromGitHub {
-        owner = "kvalo";
-        repo = "ath10k-firmware";
+      firmwareBlobs = pkgs.pkgsBuildBuild.fetchgit {
+        url = "https://git.codelinaro.org/clo/ath-firmware/ath10k-firmware";
         rev = "5d63529ffc6e24974bc7c45b28fd1c34573126eb";
         sha256 = "1bwpifrwl5mvsmbmc81k8l22hmkwk05v7xs8dxag7fgv2kd6lv2r";
       };
