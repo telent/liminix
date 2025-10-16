@@ -55,7 +55,7 @@
 
 (fn signing-request [pk]
   (doto (csr.new)
-    (: :setVersion 3)
+    (: :setVersion 1)
     (: :setSubject (x509-name options.subject))
     (: :setSubjectAlt (x509-altname options.subject))
     (: :setPublicKey pk)
