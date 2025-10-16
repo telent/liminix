@@ -7900,3 +7900,60 @@ options:
  attr
 * just hardcode the pathname
 * environment variable for the pathname?
+
+
+hint: print a file one line per second with pv
+cat THOUGHTS.txt | nix-shell -p pv --run " pv --quiet --line-mode --rate-lim
+it 1" | ./result/bin/logtap /tmp/feefifo backfill
+
+
+Thu Oct  9 21:40:05 BST 2025
+
+TODO
+
+- make it go over tls
+- try it on the annex wireless extender or somewhere
+- backfilling
+- deploy rotuer
+
+system.service.tls-certificate.certifix-client
+
+Sat Oct 11 00:28:36 BST 2025
+
+https://serverfault.com/a/976551
+    tcpdump ether[0x0c:2] == 0x8863 or ether[0x0c:2] == 0x8864
+
+we're getting weird problems where ppp fails to work when I add the
+certifix client
+
+
+Sun Oct 12 23:03:50 BST 2025
+
+for posterity:
+
+1) we never found out what the weird problems were, I am wondering if
+there's some kind of contention or race condition when pppoe and ip
+are happening on the same interface
+
+2) openssl won't run on mips 24kc unless compiled with soft-float,
+because that cpu has no fpu (the kernel fpu support is enabled but
+maybe it is not sufficent)
+
+3) certifix won't run before the time is set correctly because the ca
+cert has before and after times and 1970 is not in that range.  we
+might consider touching a file in /persist on rebot, for devices that
+have /persist
+
+4) although certifix-client works just fine(* almost) on loaclhost, it
+hangs indefinitely on gl-ar750. On loaclhost it prints this
+
+40A70C42647F0000:error:0A000126:SSL routines::unexpected eof while reading:ssl/record/rec_layer_s3.c:693:
+
+which I interpret to mean that certifix is not closing the ssl thingy
+properly.   (OpenSSL 3 feature to prevent truncation attacks)
+
+Mon Oct 13 17:55:30 BST 2025
+
+could we convert certifix-client to use s6-tlsclient instead of fetch?
+
+(would it help?)
