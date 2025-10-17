@@ -114,20 +114,6 @@ extraPkgs
     }
   );
 
-  # luarocks wants a cross-compiled cmake (which seems like a bug,
-  # we're never going to run luarocks on the device, but ...)
-  # but https://github.com/NixOS/nixpkgs/issues/284734
-  # so we do surgery on the cmake derivation until that's fixed
-
-  cmake = crossOnly prev.cmake (
-    d:
-    d.overrideAttrs (o: {
-      preConfigure =
-        builtins.replaceStrings [ "$configureFlags" ] [ "$configureFlags $cmakeFlags" ]
-          o.preConfigure;
-    })
-  );
-
   dnsmasq =
     let
       d = prev.dnsmasq.overrideAttrs (o: {
