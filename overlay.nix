@@ -20,7 +20,32 @@ let
         makeFlags = builtins.filter (x: (builtins.match "(PLAT|MYLIBS).*" x) == null) o.makeFlags;
       });
     in
-    l.override { self = l; };
+      l.override {
+        self = l;
+        packageOverrides = lua-final: lua-prev:
+          let openssl = final.opensslNoThreads;
+          in {
+            luaossl = lua-prev.luaossl.overrideAttrs(o: {
+              externalDeps = [
+                {
+                  name = "CRYPTO";
+                  dep = openssl;
+                }
+                {
+                  name = "OPENSSL";
+                  dep = openssl;
+                }
+              ];
+              name = "${o.name}-218";
+              patches = [
+                (fetchpatch {
+                  url = "https://patch-diff.githubusercontent.com/raw/wahern/luaossl/pull/218.patch";
+                  hash = "sha256-2GOliY4/RUzOgx3rqee3X3szCdUVxYDut7d+XFcUTJw=";
+                })
+              ];
+            });
+          };
+      };
 
   s6 = prev.s6.overrideAttrs (
     o:
@@ -231,32 +256,7 @@ extraPkgs
     doCheck = false;
   });
 
-  lua = crossOnly prev.lua5_3 (_: luaHost);
-
-  luaossl' =
-    let inherit (final) fetchurl fetchzip libressl openssl;
-    in luaHost.pkgs.buildLuaPackage {
-      pname = "luaossl";
-      version = "20250929-0";
-      buildInputs = [ openssl ];
-      knownRockspec =
-        (fetchurl {
-          url = "https://luarocks.org/manifests/daurnimator/luaossl-20250929-0.rockspec";
-          sha256 = "sha256-tKcmqoE0G4d8owX0X2OGpwVvBQGbAkGKHowz1PYQqIY=";
-        }).outPath;
-      makeFlags = [ "all5.3" ];
-      installPhase = "make install5.3 prefix=\$out";
-      src = fetchzip {
-        url = "https://github.com/wahern/luaossl/archive/rel-20250929.zip";
-        sha256 = "sha256-bex1x8rTUPEhli4vxhUPOCdqngqlNNqlpYnhY0EuqoQ=";
-      };
-      patches = [
-        (fetchpatch {
-          url = "https://patch-diff.githubusercontent.com/raw/wahern/luaossl/pull/218.patch";
-          hash = "sha256-2GOliY4/RUzOgx3rqee3X3szCdUVxYDut7d+XFcUTJw=";
-        })
-      ] ;
-    };
+  lua = luaHost;
 
   mtdutils =
     (prev.mtdutils.overrideAttrs (o: {
