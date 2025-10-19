@@ -23,7 +23,7 @@ oneshot {
   inherit name;
   up = ''
     (in_outputs ${name}
-     SSL_CA_CERT_FILE=${caCertFile} ${certifix-client}/bin/certifix-client --subject ${subject} --secret ${secretFile} --key-out key --certificate-out cert ${serviceUrl}
+     SSL_CERT_FILE=${caCertFile} ${certifix-client}/bin/certifix-client --subject ${subject} --secret ${secretFile} --key-out key --certificate-out cert ${serviceUrl}
     )
   '';
 }

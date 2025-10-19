@@ -7,7 +7,9 @@
 (local pkey (require :openssl.pkey))
 (local xn (require :openssl.x509.name))
 
-(local http (require :fetch))
+(local request (require :http.request))
+(local http_tls (require :http.tls))
+(local x509 (require :openssl.x509))
 
 (macro ncall [f]
   `(case ,f
@@ -62,22 +64,27 @@
     (: :addAttribute :challengePassword [options.secret])
     (: :sign pk)))
 
+(fn http-post [url  body]
+  (let [r (request.new_from_uri url)
+        h r.headers]
+    (h:upsert ":method" :POST)
+    (h:upsert "content-type" "application/x-pem-file")
+    (when body
+      (r:set_body body))
+    (or
+     (case (r:go)
+       (headers stream)
+       (if (= (headers:get ":status") "200")
+           (stream:get_body_as_string)
+           (error (.. "error response from server: "
+                      (headers:get ":status"))))
 
-(fn http-post [url body]
-  (match
-      (http.request "POST" url
-                    "" 0
-                    "application/x-pem-file"
-                    body)
-    s s
-    (nil code msg) (error (.. "Error " code " POST " url ": " msg))))
-
+       (nil failure)
+       (error (.. "error: " failure))))))
 
 (fn run []
   (let [pk (private-key)
         csr (signing-request pk)
-    ;; key-out (or options.key-out-handle io.stdout)
-    ;; cert-out (or options.cert-out-handle io.stdout)
         cert (http-post options.server (csr:toPEM))]
     (with-open [f (ncall (io.open options.key-out :w))]
       (f:write (pk:toPEM :private)))

@@ -7,9 +7,7 @@
   lua,
   anoia,
   lualinux,
-  fetch-freebsd,
   openssl,
-  luaossl',
   stdenv,
 }:
 let
@@ -20,7 +18,6 @@ stdenv.mkDerivation {
   src = ./.;
 
   buildInputs = [
-    fetch-freebsd
     openssl
     lua
   ];
@@ -30,12 +27,18 @@ stdenv.mkDerivation {
     mkdir -p $out/bin
     cp -p ${
       writeFennel name {
-        packages = [
-          fetch-freebsd
+        packages = with lua.pkgs; [
           fennel
           anoia
           lualinux
-          luaossl'
+          luaossl
+          http
+          lpeg
+          lpeg_patterns
+          basexx
+          cqueues
+          fifo
+          binaryheap
         ];
         mainFunction = "run";
       } ./${name}.fnl
