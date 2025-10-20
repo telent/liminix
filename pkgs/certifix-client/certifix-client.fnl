@@ -53,7 +53,7 @@
 (local options (parse-args arg))
 
 (fn private-key []
-  (pkey.new { :type :rsa :bits 1024 }))
+  (pkey.new { :type :rsa :bits 2048 }))
 
 (fn signing-request [pk]
   (doto (csr.new)
