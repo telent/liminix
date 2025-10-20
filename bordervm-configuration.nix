@@ -131,8 +131,8 @@ in
           # expose victorialogs on host so (clients attached to) guest
           # can log
           from = "guest"; # packets are forwarded from guest
-          guest.address = "10.0.2.10"; guest.port = 9428;
-          host.address = "127.0.0.1"; host.port = 9428;
+          guest.address = "10.0.2.10"; guest.port = 443;
+          host.address = "127.0.0.1"; host.port = 443;
         }
         {
           from = "guest"; # packets are forwarded from guest
@@ -210,7 +210,7 @@ in
             iptables -t nat -A PREROUTING -p tcp --dport $2 -j DNAT --to-destination $1:$2
             iptables -t nat -A POSTROUTING -p tcp -d $1 --dport $2 -j SNAT --to-source 10.0.0.1
           }
-          portfwd 10.0.2.10 9428
+          portfwd 10.0.2.10 443
           portfwd 10.0.2.10 19613
         '';
       };
