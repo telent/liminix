@@ -25,13 +25,14 @@ let
     types
     ;
   cfg = config.logging;
+  fifo = "${cfg.directory}/.fifo";
 
   logger =
     let
       pipecmds =
         [ "${s6}/bin/s6-log -bpd3 -- ${cfg.script} 1" ]
         ++ (lib.optional (cfg ? persistent && cfg.persistent.enable) "/bin/tee /dev/pmsg0")
-        ++ (lib.optional cfg.shipping.enable "${pkgs.logtap}/bin/logtap ${cfg.shipping.socket} logshipper-socket-event");
+        ++ (lib.optional cfg.shipping.enable "${pkgs.logtap}/bin/logtap ${fifo} logshipper-socket-event");
     in
     ''
       #!${execline}/bin/execlineb -P
@@ -236,12 +237,7 @@ in
   options = {
     logging = {
       shipping = {
-        enable = mkEnableOption "unix socket for log shipping";
-        socket = mkOption {
-          description = "socket pathname";
-          type = types.path;
-          default = "/run/.log-shipping.sock";
-        };
+        enable = mkEnableOption "fifo for log shipping";
         command = mkOption {
           description = "log shipping command, should open the file named by the environment variable $LOG_FIFO";
           type = types.lines;
@@ -275,7 +271,7 @@ in
         longrun {
           name = "log-shipper";
           run = ''
-            export LOG_FIFO=${cfg.socket}
+            export LOG_FIFO=${fifo}
             ${cfg.command}
           '';
           inherit (config.logging.shipping) dependencies;
