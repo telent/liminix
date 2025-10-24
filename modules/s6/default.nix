@@ -267,31 +267,21 @@ in
       };
     };
   };
-  imports = [
-    (
-      {
-        config,
-        pkgs,
-        lib,
-        ...
-      }:
-      let
-        cfg = config.logging.shipping;
-      in
-      mkIf cfg.enable {
-        services.log-shipper = longrun {
+
+  config = {
+    services.log-shipper =
+      let cfg = config.logging.shipping; in
+      mkIf config.logging.shipping.enable (
+        longrun {
           name = "log-shipper";
           run = ''
             export LOG_FIFO=${cfg.socket}
             ${cfg.command}
           '';
-          inherit (cfg) dependencies;
-        };
-      }
-    )
-  ];
+          inherit (config.logging.shipping) dependencies;
+        }
+      );
 
-  config = {
     filesystem = dir {
       etc = dir {
         s6-rc = dir {
