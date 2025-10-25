@@ -239,10 +239,12 @@ in
       shipping = {
         enable = mkEnableOption "fifo for log shipping";
         command = mkOption {
-          description = "log shipping command, should open the file named by the environment variable $LOG_FIFO";
-          type = types.lines;
+          description = "log shipping command, should accept one parmeter which is the file name to read";
+          type = types.pathInStore;
           example = lib.literalExpression ''
+            writeAshScript "shipper" {} \'\'
             ''${pkgs.s6-networking}/bin/s6-tcpclient loghost 9428 ''${pkgs.logshippers}/bin/victorialogsend http://loghost:9428/insert/jsonline
+            \'\'
           '';
         };
         dependencies = mkOption {
@@ -270,10 +272,7 @@ in
       mkIf config.logging.shipping.enable (
         longrun {
           name = "log-shipper";
-          run = ''
-            export LOG_FIFO=${fifo}
-            ${cfg.command}
-          '';
+          run = "${cfg.command} ${fifo}";
           inherit (config.logging.shipping) dependencies;
         }
       );

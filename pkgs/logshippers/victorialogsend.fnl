@@ -29,7 +29,7 @@
     ["--basic-auth" auth & rest]
     (assoc (parse-args rest) :auth auth)
 
-    [url] { :url (parse-url url) }
+    [fifo url] { :fifo fifo :url (parse-url url) }
     _ (error "invalid args")))
 
 
@@ -87,11 +87,11 @@ Host: %s\
   true)
 
 (fn run []
-  (let [{ : auth : url } (parse-args arg)
+  (let [{ : auth : url : fifo } (parse-args arg)
         http-response-fd 6
         http-req-fd 7]
     (writefd http-req-fd (http-header url.host url.path auth))
-    (with-open [logs (assert (io.open (os.getenv "LOG_FIFO") :r))]
+    (with-open [logs (assert (io.open fifo :r))]
       (while (case (logs:read "l")
                line (writefd http-req-fd (process-line line)))))
     (writefd http-req-fd (chunk ""))
