@@ -40,7 +40,8 @@ struct pollfd fds[] = {
     { .fd = -1, .events = POLLERR },
 };
 
-char *start_cookie, *stop_cookie;
+#define START_SENTINEL "# LOG-SHIPPING-START\n"
+#define STOP_SENTINEL "# LOG-SHIPPING-STOP\n"
 
 static int fifo_connected(void)
 {
@@ -77,7 +78,7 @@ int open_shipper_fifo(char* pathname)
         /* write cookie to stdout so that the backfill process knows
          * we are now logging realtime
          */
-        write(fds[1].fd, start_cookie, strlen(start_cookie));
+        write(fds[1].fd, START_SENTINEL, sizeof START_SENTINEL);
     } else {
         fifo_retry_timeout = FIFO_RETRY_TIMEOUT_MAX;
     }
@@ -93,18 +94,8 @@ int main(int argc, char* argv[])
     int tee_bytes = 0;
 
     if (argc != 3) {
-        error(1, 0, "usage: " PROGRAM_NAME " /path/to/fifo cookie-text");
+        error(1, 0, "usage: " PROGRAM_NAME " /path/to/fifo");
     }
-    char* cookie = argv[2];
-    start_cookie = malloc(strlen(cookie) + 9);
-    stop_cookie = malloc(strlen(cookie) + 8);
-
-    strcpy(start_cookie, "\n");
-    strcat(start_cookie, cookie);
-    strcat(start_cookie, " START\n");
-    strcpy(stop_cookie, "\n");
-    strcat(stop_cookie, cookie);
-    strcat(stop_cookie, " STOP\n");
 
     signal(SIGPIPE, SIG_IGN);
 
@@ -127,7 +118,7 @@ int main(int argc, char* argv[])
                 tee_bytes = 0;
                 /* FIXME: nonblocking write, if stdout is not ready
                  * we will lose the message */
-                (void)write(1, stop_cookie, strlen(stop_cookie));
+                (void) write(1, STOP_SENTINEL, sizeof STOP_SENTINEL);
                 fifo_retry_timeout = FIFO_RETRY_TIMEOUT_MAX;
             };
 

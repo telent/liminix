@@ -35,11 +35,11 @@
            (tonumber (slurp stampfile))
            0))
 
-  (each [l (: (io.input) :lines  "L")]
+  (each [l (: (io.input) :lines "L")]
     (case l
-      "START SHIPPING"
+      "# LOG-SHIPPING-START\n"
       (set backfill? false)
-      "STOP SHIPPING"
+      "# LOG-SHIPPING-STOP\n"
       (set backfill? true)
       message
       (let [message-ts (parse-timestamp message)]
