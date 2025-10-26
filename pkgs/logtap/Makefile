@@ -1,6 +1,9 @@
-TARGETS=logtap
+TARGETS=logtap backfill
 CFLAGS=-Wall
 default: $(TARGETS)
 
+backfill: backfill.fnl
+	fennelc $<
+
 install: $(TARGETS)
-	install -Dt $(PREFIX)/bin/ logtap
+	install -Dt $(PREFIX)/bin/ $(TARGETS)
