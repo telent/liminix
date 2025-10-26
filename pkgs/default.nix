@@ -85,6 +85,7 @@ in
   devout = callPackage ./devout { };
   fetch-freebsd = callPackage ./fetch-freebsd { };
   fennel = callPackage ./fennel { };
+  fennelc = callPackage ./fennelc {  };
   fennelrepl = callPackage ./fennelrepl { };
   firewallgen = callPackage ./firewallgen { };
   firmware-utils = callPackage ./firmware-utils { };
