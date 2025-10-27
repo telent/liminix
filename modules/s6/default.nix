@@ -28,6 +28,7 @@ let
   # don't put this in /run/log because logtap tries to create it
   # before s6-log makes the directory
   fifo = "/run/.log-fifo";
+  fifoBackfill = "/run/.log-fifo-backfill";
 
   logger =
     let
@@ -269,13 +270,38 @@ in
   };
 
   config = {
+    programs.busybox.applets = mkIf  config.logging.shipping.enable [ "mkfifo" ];
     services.log-shipper =
-      let cfg = config.logging.shipping; in
-      mkIf config.logging.shipping.enable (
-        longrun {
+      let
+        cfg = config.logging.shipping;
+        dependencies = config.logging.shipping.dependencies;
+      in mkIf cfg.enable (
+        let
+          live = longrun {
+            name = "log-shipper-live";
+            run = "${cfg.command} ${fifo}";
+            inherit dependencies;
+          };
+          source = longrun {
+            name = "log-shipper-backfill-source";
+            # if backfill dies we want the service manager to retry
+            # it (assuming that its dependencies are still healthy).
+            # But if it reaches the end of logs to backfill, we want
+            # it to rest quietly not to exit
+            run = ''
+              test -p ${fifoBackfill} || mkfifo ${fifoBackfill}
+              (cat ${config.logging.directory}/*; sleep 86400) | ${pkgs.logtap}/bin/backfill ${fifoBackfill} ${fifoBackfill}.ts
+            '';
+            dependencies  = dependencies ++ [live];
+          };
+          sink = longrun {
+            name = "log-shipper-backfill-sink";
+            run = "${cfg.command} ${fifoBackfill}";
+            dependencies = dependencies ++ [ source ];
+          };
+        in bundle {
           name = "log-shipper";
-          run = "${cfg.command} ${fifo}";
-          inherit (config.logging.shipping) dependencies;
+          contents = [live source sink];
         }
       );
 
