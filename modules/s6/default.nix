@@ -25,7 +25,9 @@ let
     types
     ;
   cfg = config.logging;
-  fifo = "${cfg.directory}/.fifo";
+  # don't put this in /run/log because logtap tries to create it
+  # before s6-log makes the directory
+  fifo = "/run/.log-fifo";
 
   logger =
     let
