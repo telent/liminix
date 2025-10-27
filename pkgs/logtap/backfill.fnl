@@ -28,7 +28,7 @@
     (f:read "a")))
 
 (let [[fifo-name stampfile] arg
-      fifo (ll.open fifo-name O_WRONLY)]
+      fifo (ll.open fifo-name O_WRONLY 0)]
   (var backfill? true)
   (var next-ts
        (if (file-exists? stampfile)
