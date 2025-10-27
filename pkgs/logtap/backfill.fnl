@@ -46,7 +46,7 @@
         (when (> message-ts next-ts)
           (set next-ts (write-timestamp stampfile message-ts)))
         (when (>= message-ts next-ts)
-          (io.stderr:write (.. "writing " message backfill?))
+          ; (io.stderr:write (.. "writing " message (if backfill? "true" "false")))
           (if backfill?
               (when (not (send-message fifo message))
                 ;; If the fifo write fails, it could be a glitch or it
