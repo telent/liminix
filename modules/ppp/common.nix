@@ -41,7 +41,7 @@ let
     if test -n "''${DNS1}" ;then echo ''${DNS1} > ns1 ; fi
     if test -n "''${DNS2}" ;then echo ''${DNS2} > ns2 ; fi
     touch ip-up
-    test -e ipv6-up && echo >/proc/self/fd/10
+    test -e ipv6-up && ( echo >/proc/self/fd/10 || true)
   '';
   ip6-up = writeAshScript "ip6-up" { } ''
     exec >&5 2>&5
@@ -50,7 +50,7 @@ let
     echo $5 > ipv6-peer-address
     echo $4 > ipv6-address
     touch ipv6-up
-    test -e ip-up && echo >/proc/self/fd/10
+    test -e ip-up && ( echo >/proc/self/fd/10 || true)
   '';
   literal_or_output =
     let
