@@ -64,7 +64,7 @@
         {:s sec :n nano})
       nil))
 
-(fn to-utc [tai]
+(fn to-unix [tai]
   (values (- tai.s (leap-seconds tai.s)) tai.n))
 
 (define-tests
@@ -72,8 +72,8 @@
    (from-timestamp "@4000000068e2f0d3257dc09b")
    {:s 1759703251 :n 628998299})
 
-  (let [(s n) (to-utc (from-timestamp "@4000000068e2f0d3257dc09b"))]
+  (let [(s n) (to-unix (from-timestamp "@4000000068e2f0d3257dc09b"))]
     (expect= [s n] [1759703214 628998299]))
   )
 
-{ : from-timestamp : to-utc }
+{ : from-timestamp : to-unix }

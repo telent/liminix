@@ -48,7 +48,7 @@ Host: %s\
    path host authstr)))
 
 (fn format-timestamp-rfc3339 [timestamp prec]
-  (let [(sec nano) (-> timestamp tai64.from-timestamp tai64.to-utc)
+  (let [(sec nano) (-> timestamp tai64.from-timestamp tai64.to-unix)
         subsec (string.sub (string.format "%09d" nano) 1 prec)]
     (.. (os.date "!%FT%T" sec)
         "." subsec
