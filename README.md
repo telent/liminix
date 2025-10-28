@@ -16,9 +16,19 @@ outside word goes across it.
 
 ## Current status (does it work yet?)
 
-Liminix is pre-1.0. We are still finding new and better ways to do things,
-and there is no attempt to maintain backward compatibility with the old
-ways.
+Liminix 1.0 was released in April 2025. It works for me and I would
+say it has seen lots of use in the particular applications of "home
+wifi router" and "wireless extender".
+
+It's not “finished” - we are still finding new and better ways to do
+things - but we endeavour to signal future breaking changes through the
+version number. This is “semver-adjacent”, in that minor bumps
+(1.1, 1.2 …) are used for minor new features and major bumps (2.0 …)
+for changes that are likely to break out-of-tree modules or
+configurations. It won’t be semver exactly because [every change
+breaks someone’s workflow](https://xkcd.com/1172/), but we aspire to
+have the magnitude of the version delta correlate with the scale of
+the consequences of upgrading.
 
 The [NEWS](NEWS) file (available wherever you found this README) is
 a high-level overview of breaking changes.
@@ -33,7 +43,7 @@ functioning version, see [the CI system](https://build.liminix.org/jobset/limini
 Documentation is in the [doc](doc/) directory. You can build it
 by running
 
-    nix-shell -p sphinx --run "make -C doc hardware.rst html"
+    nix-build -I liminix=`pwd`  ci.nix -A doc
 
 Rendered documentation corresponding to the latest commit on `main`
 is published to [https://www.liminix.org/doc/](https://www.liminix.org/doc/)
