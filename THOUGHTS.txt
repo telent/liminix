@@ -7952,8 +7952,249 @@ hangs indefinitely on gl-ar750. On loaclhost it prints this
 which I interpret to mean that certifix is not closing the ssl thingy
 properly.   (OpenSSL 3 feature to prevent truncation attacks)
 
+
+Mon Oct 13 12:23:35 BST 2025
+
+Missing ssl close_notify is probably not what's causing the certifix-client
+to stall, though it bears considering
+
+A truncation attack is: can a mitm alter the outcome by dropping
+packets so that an endpoint gets a partial message (or no message)
+that it interprets as a full message? if we expect close_notify then
+the answer is always "no" because any exchange that doesn't have a
+close_notify can be rejected as not a full exchange. Conversely, if we
+have ways at the upper protocol level of checking that a full message
+was sent (e.g. content-length, or chunked encoding) then we don't need
+the close_notify beause we know already if we got the whole thing.
+
+The problem is also not the weird iptables forwarding stuff on
+bordervm, because I tried disabling that and using socat instead which
+hangs in the same way
+
+Could we replace the use of fetch-freebsd here with s6-tlsclient and
+some shonky homerolled http header generation?
+
+
 Mon Oct 13 17:55:30 BST 2025
 
 could we convert certifix-client to use s6-tlsclient instead of fetch?
 
 (would it help?)
+
+Sun Oct 19 20:41:13 BST 2025
+
+> (would it help?)
+
+It seems to behave better.
+
+Now we need to hook all the things up: specifically, to put an https
+proxy in front of victorialogs that checks the client certificate is
+signed by the correct CA
+
+This (probably) means that the server certificate for the proxy also
+needs to be signed by the same CA. Or does it? Maybe it doesn't
+
+Mon Oct 20 17:56:56 BST 2025
+
+* we need to install the ca cert onto the device (certifix-client
+ already does)
+
+* log service to reference outputs of certifix-client
+
+* ok, *technically* we don't need to use our own CA to sign the cert
+  for victorialogs, but if we use letsencrypt then we do need to put
+  the letsencrypt root/intermediate certs on the device
+
+  question: are there other things a standard ca bundle would be
+  useful for? they'd have to be convincing, it's 500k
+
+so ...
+
+1) we teach certifix to sign for server use as well as client use, or
+
+2) (given that certifix and victorialogs are on the same box) we make the
+victorialogs cert in a cronjob on the server, or
+
+3) we use openssl commands to generate a CSR with extendedKeyUsage=serverAuth
+requested extension  and make certifix not overwrite that if if exists
+
+ openssl req -config <(printf '[req]\nprompt=no\nattributes=attrs\ndistinguished_name=DN\n[DN]"C=GB\nST=London\nO=Telent\nCN=loghost\n[attrs]\nchallengePassword=loves labours lost') -newkey rsa:2048  -addext "extendedKeyUsage = serverAuth" -addext "subjectAltName = DNS:loghost.lan,DNS:loghost,DNS:loghost.telent.net" -nodes -keyout private/loghost.key --out certs/loghost.csr
+
+test with openssl req -noout -in certs/loghost.csr -text
+
+curl --cacert certs/ca.crt   -v -H 'content-type:
+application/x-pem-file' --data-binary @certs/loghost.csr
+https://localhost:9191/sign -o loghost.crt
+
+Tue Oct 21 22:19:45 BST 2025
+
+Once we have per-tag RSS fields in ww.telent.net we can import them to
+jekyll using https://import.jekyllrb.com/docs/rss/
+
+Wed Oct 22 18:18:10 BST 2025
+
+How should we do backfill?
+
+* we can find out which logs were written live because there
+are START and STOP markers
+
+* the first time backfill runs, we assume that no logs were shipped
+  except the ones written live
+
+* if the backfill process starts but is interrupted, we need a way for
+  it to pick up where it left off.
+
+So I think we need some kind of timestamp that says "logs older than
+this have been written"
+
+backfill isn't really a service, it's just a process that runs until
+it's done
+
+if backfill gets all the way to the present day without encountering a
+START line ... something weird is happening. whatever network outage
+is stopping the live logging should, we assume, stop the backfull as well.
+
+backfill will want to read past a START line (but not write the
+live-logged lines) to see if there was a subsequent STOP line
+
+if the backfill process writes to the fifo, atomic writes are
+gauranteed only if it writes <=  PIPE_BUF bytes at a time. So we could
+get partial/overlapping log lines if a log message exceeds 4k
+
+the backfill can spawn a separate instance of the shipping command and
+provide it a file consisting of the logs to be shipped. If it does
+this with a fifo then it can get feedback on whether the shipper is
+working and use that to update the backfill progress timestamp
+
+there may be more than one message with the same timestamp, so it's
+not actually possible to pinpoint the last message sent with a
+timestamp alone. we could ... not care too much?
+
+timestamp semantics are "I was about to start sending messages
+beginning with timestamp t": we update it for each message before
+sending
+
+Fri Oct 24 19:41:16 BST 2025
+
+backfill process
+ * make a fifo
+ * spawn second copy of log shipper with LOG_FIFO set to that fifo
+ * send messages on stdin to fifo unless we saw them already
+
+we could put this and the live shipper in an s6-rc bundle
+
+we could get rid of cfg.socket as a configurable option - it's not a
+socket anyway, and we need two of them
+
+I don't think we need customisable stop/start marker either. it
+doesn't have a timestamp, so there's no local context required to
+know that it's not a log line. We could just do
+
+# started-log-shipping
+# stopped-log-shipping
+
+Sat Oct 25 19:39:24 BST 2025
+
+> we could put [backfill] and the live shipper in an s6-rc bundle
+
+except that backfill is not a persistent process, it's a one-off
+that we want to kick off when the shipper starts, and will terminate
+some time thereafter
+
+Could we: (1) add reading notification to logshipper; (2) have a
+oneshot backfill service tha depends on it?
+
+Sat Oct 25 22:11:14 BST 2025
+
+
+# s6-rc -u change log-shipper-backfill-sink
+/nix/store/6a2v6596knn2dnbxf3qc4nfsipd1qlh5-log-shipper-backfill-source-up: line 4: mkfifo: not found
+/nix/store/6a2v6596knn2dnbxf3qc4nfsipd1qlh5-log-shipper-backfill-source-up: line 5: /nix/store/rphrcqc6b2ajpfy38gs95c3c5rq71jpi-logtap-m
+ips-unknown-linux-musl/bin/backfill: not found
+s6-rc: warning: unable to start service log-shipper-backfill-source: command exited 127
+
+but also:
+
+# s6-rc -da list
+certifix-C=GB-ST=London-O=Telent-OU=devices-CN=rotuer
+log-shipper-backfill-source
+log-shipper-backfill-sink
+
+why did log-shipper-live start?
+
+TIL: bundles can't have dependencies
+
+Sun Oct 26 15:33:30 GMT 2025
+
+* we need a mkfifo command,
+* we need to turn backfill.fnl into something we can run
+
+idea: write a fennelc command. It could do
+
+* turn fennel into lua
+* require-as-include for files in cwd
+* resolve paths for other required packages?
+
+https://fennel-lang.org/api#search-the-path-for-a-module-without-loading-it
+
+... or a much simpler variant would be to set {LUA_C?}PATH as
+whatever it is in the build environment and then do fennel --compile
+
+we could write it in fennel if we can avoid getting hopelessly lost in
+nested fennels
+
+Sun Oct 26 23:01:48 GMT 2025
+
+Unrelated: have we done something stupid and firewally that's blocking
+our dhcp6 service discovery?
+@4000000068fea8cc24a62eae rotuer dhcp6c.wan.link.pppoe odhcp6c[632]: Send RENEW message (elapsed 1753088ms, rc 8)
+
+....
+
+oneshots won't work here (we just realise after trying it). The
+backfill source and sink have to be started together if they're going
+to work in tandem, bu the service manager doesn't consider a oneshot
+ready until the "start" script has completed - and the sink won't
+start until the source has finished.
+
+So either (a) we launch the backfill as a oneshot that backgrounds, or
+(b) we launch it from the live shipper as a child, or (c) as a longrun
+that goes to sleep when it runs out of input.
+
+When the backfill dies, it could be  because it failed immediately,
+or it failed after writing some of the backlog, or it succeeded to
+write all the backlog. In the failure case we want it to be restarted
+(perhaps when conditions allow). In the success case, we want the
+service manager to regard backfill as "happy". If live logging fails,
+there will subsequently be more lines to backfill. I think we can
+make backfill depend on live,so it will be killed off if live dies.
+
+Mon Oct 27 21:30:43 GMT 2025
+
+What shall we do with 1970s timestamps?
+
+- the collector will refuse them, but even if it didn't, are we going to
+go back to 1970 to look at them?
+
+- if we log them with time=now, backfilled log messages may appear to
+have been sent after live messages that actually succeeded them
+
+- we could figure out boot time = current time - uptime when the backfill
+process starts, and rewrite log line timestamps < 1991 as we send them.
+There might be some backwardsness as we catch up to whatever time the
+ntp syncs, but maybe if we subtract a few seconds that won't be too
+bad. We should add a field to the logs saying that the time was estimated
+
+- maybe we could add boot time to the log payload
+
+/proc/uptime "(including time spent in suspend)"
+
+Tue Oct 28 19:35:57 GMT 2025
+
+There's even a case for writing the logs with CLOCK_BOOTTIME instead
+of using TAI
+
+Tue Oct 28 23:31:22 GMT 2025
+
+backfill still trades in line-based s6-like logs so is not
+well-placed to add metadata
