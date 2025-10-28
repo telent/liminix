@@ -74,6 +74,10 @@
         {:s sec :n nano})
       nil))
 
+(fn to-timestamp [{: s : n }]
+  (let [label (+ s (lshift 1 62))]
+    (string.format "@%16x%08x" label n)))
+
 (fn to-unix [tai]
   (values (- tai.s (leap-seconds-tai tai.s)) tai.n))
 
@@ -90,6 +94,14 @@
   (expect=
    (from-timestamp "@4000000068e2f0d3257dc09b")
    {:s 1759703251 :n 628998299})
+
+  (expect=
+   (to-timestamp {:s 1759703251 :n 628998299})
+   "@4000000068e2f0d3257dc09b")
+
+  (expect=
+   (to-timestamp {:s -43200 :n 0})
+   "@3fffffffffff574000000000")
 
   (let [(s n) (to-unix (from-timestamp "@4000000068e2f0d3257dc09b"))]
     (expect= [s n] [1759703214 628998299]))
@@ -111,4 +123,4 @@
   )
 
 
-{ : from-timestamp : to-unix : from-unix }
+{ : from-timestamp : to-timestamp : to-unix : from-unix }
