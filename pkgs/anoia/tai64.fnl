@@ -37,21 +37,31 @@
         [3644697600      36]   ;    1 Jul 2015
         [3692217600      37]   ;    1 Jan 2017
         ]]
-   (icollect [_ [ts dtai] (ipairs tbl)]
-     [(+ (- ts 2208988800) dtai) dtai])))
+   {
+    :tai
+    (icollect [_ [ts dtai] (ipairs tbl)]
+      [(+ (- ts 2208988800) dtai) dtai])
+    :unix
+    (icollect [_ [ts dtai] (ipairs tbl)]
+      [(- ts 2208988800) dtai])
+    }))
 
-(fn leap-seconds [timestamp]
+
+(fn leap-seconds [timestamp list]
   (accumulate [secs 10
-               _ [epoch leap-seconds] (ipairs leap-seconds-list)
+               _ [epoch leap-seconds] (ipairs list)
                &until (> epoch timestamp)]
     leap-seconds))
 
+(fn leap-seconds-tai [tai] (leap-seconds tai leap-seconds-list.tai))
+(fn leap-seconds-unix [unix] (leap-seconds unix leap-seconds-list.unix))
+
 (define-tests :leap-seconds
-  (expect= (leap-seconds 104694412) 12)
-  (expect= (leap-seconds 23) 10)
-  (expect= (leap-seconds (+ 3692217600 60)) 37)
-  (expect= (leap-seconds (+ 10 773020829)) 29)
-  (expect= (leap-seconds 362793520) 19))
+  (expect= (leap-seconds-tai 104694412) 12)
+  (expect= (leap-seconds-tai 23) 10)
+  (expect= (leap-seconds-tai (+ 3692217600 60)) 37)
+  (expect= (leap-seconds-tai (+ 10 773020829)) 29)
+  (expect= (leap-seconds-tai 362793520) 19))
 
 (fn from-timestamp [str]
   (if (= (string.sub str 1 1) "@")
@@ -65,7 +75,16 @@
       nil))
 
 (fn to-unix [tai]
-  (values (- tai.s (leap-seconds tai.s)) tai.n))
+  (values (- tai.s (leap-seconds-tai tai.s)) tai.n))
+
+(fn from-unix [seconds nanos]
+  (let [s (math.floor seconds)
+        ;; subsecond value may be given as fraction or as a separate
+        ;; param, but not both
+        n (or nanos (* (- seconds s) 1e9))]
+    { :s
+      (+ s (leap-seconds-unix s))
+      :n n }))
 
 (define-tests
   (expect=
@@ -74,6 +93,22 @@
 
   (let [(s n) (to-unix (from-timestamp "@4000000068e2f0d3257dc09b"))]
     (expect= [s n] [1759703214 628998299]))
+
+  (let [{ : s : n } (from-unix 1759703214 1e6)]
+    (expect= [s n] [1759703251 1e6]))
+
+  (let [{ : s : n } (from-unix 1759703214.5)]
+    (expect= [s n] [1759703251 5e8]))
+
+  ;; check the leap second count is looked up correctly around a
+  ;; boundary
+  (let [unix (os.time {:year 2016 :month 12 :day 31 :hour 23 :min 59 :sec 58})
+        tai (from-unix unix)]
+    (expect= (- tai.s unix) 36))
+  (let [unix (os.time {:year 2016 :month 12 :day 31 :hour 23 :min 59 :sec 63})
+        tai (from-unix unix)]
+    (expect= (- tai.s unix) 37))
   )
 
-{ : from-timestamp : to-unix }
+
+{ : from-timestamp : to-unix : from-unix }
