@@ -32,5 +32,9 @@ let
 in
 longrun {
   inherit name;
-  run = "${chrony}/bin/chronyd -f ${config} -d";
+  notification-fd = 10;
+  run = ''
+    ( ${chrony}/bin/chronyc waitsync ; echo > /proc/self/fd/10 ) &
+    ${chrony}/bin/chronyd -f ${config} -d
+  '';
 }
