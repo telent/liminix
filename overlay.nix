@@ -25,6 +25,18 @@ let
         packageOverrides = lua-final: lua-prev:
           let openssl = final.opensslNoThreads;
           in {
+            cqueues = lua-prev.cqueues.overrideAttrs(o: {
+              externalDeps = [
+                {
+                  name = "CRYPTO";
+                  dep = openssl;
+                }
+                {
+                  name = "OPENSSL";
+                  dep = openssl;
+                }
+              ];
+            });
             luaossl = lua-prev.luaossl.overrideAttrs(o: {
               externalDeps = [
                 {
