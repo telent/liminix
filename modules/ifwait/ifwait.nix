@@ -8,7 +8,7 @@ let
   inherit (liminix.services) longrun;
 in
 longrun {
-  name = "ifwait.${interface.name}";
+  name = "ifwait.${interface.name}-${state}";
   buildInputs = [ service ];
   restart-on-upgrade = true;
   run = ''
