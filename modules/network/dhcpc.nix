@@ -28,7 +28,7 @@ let
       bound)
         # this doesn't actually replace, it adds a new address.
         set_address
-        echo  >/proc/self/fd/10
+        # echo  >/proc/self/fd/10
         ;;
       renew)
         set_address
@@ -41,7 +41,6 @@ let
 in
 longrun {
   inherit name;
-  run = "exec /bin/udhcpc -f -i $(output ${interface} ifname) -x hostname:$(cat /proc/sys/kernel/hostname) -s ${script}";
-  notification-fd = 10;
+  run = "exec /bin/udhcpc -n -A 15 -f -i $(output ${interface} ifname) -x hostname:$(cat /proc/sys/kernel/hostname) -s ${script}";
   dependencies = [ interface ];
 }
