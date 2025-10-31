@@ -8198,3 +8198,78 @@ Tue Oct 28 23:31:22 GMT 2025
 
 backfill still trades in line-based s6-like logs so is not
 well-placed to add metadata
+
+Thu Oct 30 21:25:10 GMT 2025
+
+wap profile is not bringing up dhcpc on boot.
+
+:00:16.843749368 outsdie int.link.dhcpc udhcpc: started, v1.36.1
+:00:17.136242303 outsdie int.link.dhcpc udhcpc: broadcasting discover
+:00:23.272561448 outsdie int.link.dhcpc udhcpc: broadcasting discover
+[....]
+:01:16.416571674 outsdie s6-svlisten1: fatal: timed out
+:01:16.419442464 outsdie s6-rc: warning: unable to start service int.link.dhcpc: command exited 99
+:01:16.424668369 outsdie ifwait.wlan0.link-running Executed "s6-rc -b -d change int.link.member.wlan0.link", exit code true
+:01:16.428327895 outsdie ifwait.lan.link-running Executed "s6-rc -b -d change int.link.member.lan.link", exit code true
+:01:16.456176883 outsdie int.link.dhcpc udhcpc: no lease, failing
+:01:16.588522107 outsdie ifwait.wlan0.link-running adding wlan0.link to int.link
+
+it starts int.link.dhcpc quite early, listed dependencies include
+int.link
+lan.link
+wlan0.link
+ifwait.wlan0.link-running
+ifwait.lan.link-running
+
+*but* the foo-running dependencies are service controllers: i.e. they
+are "ready" when started and control another service to go up/down
+when the link is running. We do it this way because otherwise
+services for unplugged lan ports hang forever/time out and this makes
+s6-rc sad
+
+int.link.dhcpc has a timeout of 60 seconds and nothing else related
+to lan.link seems to happen while it is running. This is a problem
+because until lan.link gets added to the bridge, no dhcp can succeed
+
+hypothesis: udhcpc is somehow starving the system of netlink events
+so they only arrive when it's finished. seems unlikely as we run it
+several times during the 60s. Even adding a sleep 5 before udhcpc
+doesn't change things, so hypothesis invalidated imo
+
+hypothesis: s6-rc won't start anything else while waiting for
+int.link.dhcpc to announce it's ready, and the -running service is
+using it to launch the scripts that add members to the bridge.
+~Doesn't seem to be, adding more prints before launching s6-rc and they
+don't happen.~  NOPE: I used the wrong variable name in the debug
+print, this probably is what's happening, on the assumption that
+s6-rc holds the database lock while it waits for a process to indicate
+readiness.
+
+bottom line: we can't launch dhcp client as a permanent service if it
+is dependent on a controlled service, which it is if adding bridge
+members is implemented as controlled services, which it is because
+members can't be added until their links are running, which is slow
+for wlan and maybe never for unplugged ethernet
+
+Fri Oct 31 19:59:44 GMT 2025
+
+An interim solution might be: remove readiness notification from
+dhcpc. This
+
+* would not be great for downstreams because they might have to retry
+a few times
+
+* _but_ would fix our current problem where there's a deadlock because
+  the thing that would unblock dhcpc would be able to actually run
+
+A more general solution might be something like the uevent-rule
+service which uses netlink to subscribe to "bridge gets a member
+interface" events and starts dhcp when that happens.
+
+I am concerned, a bit, that the service graph of the system becomes
+illegible if any random service can start other services imperatively
+and there's no way to introspect it.
+
+Also I can't remember if it's possible to define controlled services
+(or dependents of controlled services) in config.services without
+having s6-rc try to bring them up at boot
