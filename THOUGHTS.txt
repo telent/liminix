@@ -8273,3 +8273,14 @@ and there's no way to introspect it.
 Also I can't remember if it's possible to define controlled services
 (or dependents of controlled services) in config.services without
 having s6-rc try to bring them up at boot
+
+----
+
+the interim solution doesn't seem to actually work :-(
+
+1970-01-01 00:00:17.013450601 outsdie s6-rc: info: service route-37a8eec1ce19-417851ee9cfd: starting
+1970-01-01 00:00:18.154198328 outsdie cat: can't open '/nix/store/2cl121rpxc89x26wddysfmxn0n98rmxm-int.link.dhcpc/.outputs/router': No such file or directory
+1970-01-01 00:00:18.165965321 outsdie s6-rc: warning: unable to start service route-37a8eec1ce19-417851ee9cfd: command exited
+
+I am guessing that oneshots don't get restarted on failure as longruns
+do
