@@ -61,7 +61,12 @@ let
       flatDeps = s: [ s ] ++ concatMap flatDeps (deps s);
       allServices = unique (concatMap flatDeps (builtins.attrValues config.services));
       isDependentOnControlled =
-        s: isControlled s || (lib.lists.any isDependentOnControlled s.dependencies);
+        let inherit (lib.lists) any;
+        in s:
+          isControlled s ||
+          (any isDependentOnControlled s.dependencies) ||
+          ((s ? contents) &&
+           (any isDependentOnControlled s.contents));
 
       # all controlled services depend on this oneshot, which
       # makes a list of them so we can identify them at runtime
