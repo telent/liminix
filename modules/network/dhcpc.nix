@@ -18,7 +18,8 @@ let
         (in_outputs ${name}
          for i in lease mask ip router siaddr dns serverid subnet opt53 interface ; do
             (printenv $i || true) > $i
-         done)
+         done
+         touch state)
     }
     case $action in
       deconfig)
