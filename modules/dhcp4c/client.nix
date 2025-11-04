@@ -17,7 +17,10 @@ let
     . ${serviceFns}
     exec 2>&1
     action=$1
-
+    unset_address() {
+      ip -4 address flush $interface
+      ip link set up dev $interface
+    }
     set_address() {
         ip address replace $ip/$mask dev $interface
         (in_outputs ${name}
@@ -28,8 +31,7 @@ let
     }
     case $action in
       deconfig)
-        ip address flush $interface
-        ip link set up dev $interface
+        unset_address
         ;;
       bound)
         # this doesn't actually replace, it adds a new address.
@@ -40,6 +42,7 @@ let
         ;;
       nak)
         echo "received NAK on $interface"
+        unset_address
         ;;
     esac
   '';
