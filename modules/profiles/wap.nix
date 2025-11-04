@@ -44,6 +44,7 @@ in
     ../network
     ../hostapd
     ../bridge
+    ../dhcp4c
     { config.services = hostaps; }
   ];
 
@@ -57,7 +58,6 @@ in
     };
   };
   config = {
-
     services.int = svc.bridge.primary.build {
       ifname = "int";
     };
@@ -67,7 +67,7 @@ in
       members = cfg.interfaces;
     };
 
-    services.dhcpc = svc.network.dhcp.client.build {
+    services.dhcpc = svc.dhcp4c.client.build {
       interface = config.services.int;
       dependencies = [ config.services.hostname ];
     };
