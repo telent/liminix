@@ -36,7 +36,7 @@ let
         set_address
         ;;
       renew)
-        set_address
+        # renewal mut be for an address we already have, so do nothing
         ;;
       nak)
         echo "received NAK on $interface"
