@@ -9,7 +9,7 @@ rec {
     ./modules/network
     ./modules/ntp
     ./modules/vlan
-    ../modules/dhcp4c
+    ./modules/dhcp4c
   ];
 
   services.dhcpv4 =
