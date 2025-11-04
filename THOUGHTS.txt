@@ -8284,3 +8284,120 @@ the interim solution doesn't seem to actually work :-(
 
 I am guessing that oneshots don't get restarted on failure as longruns
 do
+
+Sun Nov  2 10:34:03 GMT 2025
+
+Sometimes we need to restart or signal a service when the output of
+some other service has changed, so that it can reread its config
+
+Sometimes the upness of a servive depends on some state
+ - output of another service
+ - other state like sysfs or netlink
+
+These are different things: the first case doesn't actually affect the
+service tree (except momentarily, if a whole tree is restarted)
+whereas the second case grafts/prunes things in and out of it.
+
+Is the first case a _subset_ of the second?
+
+there's difference in the responsibilities, because a service can't
+(in this scheme) decide for itself that it should be started or
+stopped - that decision rests with a parent. However, it can
+decide to restart itself
+
+If we accept that dhcp acquisition shouldn't block the service lock,
+it follows that services can't depend on "dhcpc is running" to
+signify "we have a lease".
+
+dhcp-lease-watcher: looks for outputs from dhcp and starts/stops
+dhcp-lease-acquired when that happens.
+
+Everything else depends on dhcp-lease-acquired instead of just dhcp
+
+*the issue*: there's logic/policy in dhcp-lease-watcher: rules for
+when to start/stop the controlled service tree based on the
+outputs being watched. This means we can't use watch-outputs
+unchanged, because it signals the subscriber on _every_ change.
+
+As far as I can tell/remember, every extant controller service is a
+handcrafted longrun
+
+How would it look if dhcp-lease-watcher were in fennel?  A lot like
+modules/dhcp6c/acquire-wan-address.fnl
+
+longrun {
+  name = "watch-${name}";
+  run = pkgs.runCommand "fennelc" {} "fennelc -o $out ${./dhcp-watcher.fnl}";
+}
+
+Sun Nov  2 23:32:01 GMT 2025
+
+services.dhcp-lease-acquired is being started at boot instead of when
+its controller starts it
+
+# s6-rc-db -d dependencies default |grep int.link-lease-acquired
+int.link-lease-acquired
+
+seems wrong. but yet:
+
+# s6-rc-db -d dependencies controlled
+int.link-lease-acquired
+
+======
+
+# s6-rc-db all-dependencies int.link-lease-acquired
+controlled
+int.link-lease-acquired
+int.link-lease-acquired-log
+s6rc-fdholder
+s6rc-oneshot-runner
+# s6-rc-db -d all-dependencies int.link-lease-acquired
+certifix-C=GB-ST=London-O=Telent-OU=devices-CN=outsdie
+resolvconf
+route-37a8eec1ce19-eb94cb82bf2a
+int.link-lease-acquired
+log-shipper-backfill-source
+ntp
+log-shipper-live
+log-shipper-backfill-sink
+
+the 'default' service transitively depends on int.link-lease-acquired
+presumably because log-shipper is in the default service list. but
+why?
+
+Mon Nov  3 18:39:21 GMT 2025
+
+logshipper is a bundle, and bundles don't have
+dependencies. defaultStart needs to also exclude any service which is
+a bundle and has a controlled service in its contents
+
+we need to
+
+- move the dhcp watcher into the dhcpc code not the wap profile
+
+- fix the ipv6 duplicate local route
+
+# ip -6 route
+2001:8b0:de3a:40de::/64 dev lan  metric 256  expires 5926sec
+2001:8b0:de3a:40de::/64 dev int  metric 256  expires 5925sec
+
+assumption: we're getting these routes with RA and they're not
+being removed when the lan link is added to the int bridge
+
+Mon Nov  3 22:05:17 GMT 2025
+
+It does actually work to flush the routes (as in c5e0567) but it just
+takes a very long time for the bridge to notice another RA packet.
+
+----
+
+I think we should
+(1) make ipv4 dhcp client a regular module like the ipv6 one
+(2) hide the services for the daemon and the watcher, and provide only
+the lease-acquired service as a thing (copy the outputs to it)
+(3) find out if we can use the nixos "deprecated" stuff to warn people
+ off using the original dhcp4 service
+
+----
+
+yay
