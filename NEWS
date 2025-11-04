@@ -169,3 +169,13 @@ not
 (svc.open "/nix/store/eeeeeeeeeeeeee-hellod/.outputs")
 
 This simplifies most extant uses of it
+
+2025-11-04
+
+services.network.dhcp is deprecated in favour of services.dhcp4c
+which is provided by modules/dhcp4c
+
+The new module should be _mostly_ backward compatible, but it
+doesn't hold the sr-rc database lock while waiting to get a lease,
+which was a source of boot-time deadlocks
+
