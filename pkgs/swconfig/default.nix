@@ -27,6 +27,7 @@ stdenv.mkDerivation {
   patchPhase = ''
     mkdir -p from_kernel/linux
     cp ${switchDotH} from_kernel/linux/switch.h
+    sed -i '1i #include <ctype.h>'  swlib.c
   '';
 
   buildPhase = ''
