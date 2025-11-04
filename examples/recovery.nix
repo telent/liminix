@@ -28,6 +28,7 @@ rec {
     ../modules/outputs/ubimage.nix
     ../modules/outputs/jffs2.nix
     ../modules/outputs/ext4fs.nix
+    ../modules/dhcp4c
   ];
 
   kernel.config = {
@@ -43,7 +44,7 @@ rec {
 
   hostname = "liminix-recovery";
 
-  services.dhcpc = svc.network.dhcp.client.build {
+  services.dhcpc = svc.dhcp4c.client.build {
     interface = config.hardware.networkInterfaces.lan2;
 
     # don't start DHCP until the hostname is configured,

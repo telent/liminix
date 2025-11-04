@@ -61,6 +61,7 @@ rec {
     ../modules/ntp
     ../modules/vlan
     ../modules/bridge
+    ../modules/dhcp4c
   ];
 
   hostname = "zyxel";
@@ -93,7 +94,7 @@ rec {
     let
       iface = services.int;
     in
-    svc.network.dhcp.client.build { interface = iface; };
+    svc.dhcp4c.client.build { interface = iface; };
 
   services.defaultroute4 = svc.network.route.build {
     via = "$(output ${services.dhcpv4} address)";

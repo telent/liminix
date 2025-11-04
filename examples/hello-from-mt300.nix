@@ -5,6 +5,7 @@ let
 in
 rec {
   imports = [
+    ../modules/dhcp4c
     ../modules/network
     ../modules/ssh
     ../modules/vlan
@@ -20,7 +21,7 @@ rec {
 
   hostname = "hello";
 
-  services.dhcpc = svc.network.dhcp.client.build {
+  services.dhcpc = svc.dhcp4c.client.build {
     interface = config.hardware.networkInterfaces.lan;
 
     # don't start DHCP until the hostname is configured,

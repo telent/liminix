@@ -62,6 +62,8 @@ rec {
     ../modules/health-check
     ../modules/secrets
     ../modules/profiles/gateway.nix
+    ../modules/dhcp4c
+
   ];
   hostname = "thing";
 
@@ -201,7 +203,7 @@ rec {
     };
   };
 
-  services.bootstrap-dhcpc = svc.network.dhcp.client.build {
+  services.bootstrap-dhcpc = svc.dhcp4c.client.build {
     interface = config.services.wwan;
     dependencies = [ config.services.hostname ];
   };

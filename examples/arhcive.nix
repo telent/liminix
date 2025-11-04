@@ -33,6 +33,7 @@ rec {
     ../modules/usb.nix
     ../modules/watchdog
     ../modules/mount
+    ../modules/dhcp4c
   ];
   hostname = "arhcive";
 
@@ -40,7 +41,7 @@ rec {
     let
       iface = config.hardware.networkInterfaces.lan;
     in
-    svc.network.dhcp.client.build {
+    svc.dhcp4c.client.build {
       interface = iface;
       dependencies = [ config.services.hostname ];
     };

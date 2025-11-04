@@ -16,9 +16,10 @@ rec {
     ../modules/wlan.nix
     ../modules/hostapd
     ../modules/bridge
+    ../modules/dhcp4c
 
-    ../modules/ext4fs.nix
-    ../modules/tftpboot.nix
+    ../modules/outputs/ext4fs.nix
+    ../modules/outputs/tftpboot.nix
   ];
 
   rootfsType = "ext4";
@@ -29,7 +30,7 @@ rec {
     # then these dummy values are fine
     ipaddr = "10.0.0.8"; # my address
     serverip = "10.0.0.1"; # build machine or other tftp server
-    loadAddress = lim.parseInt "0x40000800";
+    #    loadAddress = lim.parseInt "0x40000800";
   };
 
   hostname = "omnia";
@@ -91,7 +92,7 @@ rec {
     ifname = "int";
   };
 
-  services.dhcpc = svc.network.dhcp.client.build {
+  services.dhcpc = svc.dhcp4c.client.build {
     interface = services.int;
     dependencies = [ config.services.hostname ];
   };

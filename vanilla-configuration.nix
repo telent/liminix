@@ -9,13 +9,14 @@ rec {
     ./modules/network
     ./modules/ntp
     ./modules/vlan
+    ../modules/dhcp4c
   ];
 
   services.dhcpv4 =
     let
       iface = svc.network.link.build { ifname = "eth1"; };
     in
-    svc.network.dhcp.client.build { interface = iface; };
+    svc.dhcp4c.client.build { interface = iface; };
 
   services.defaultroute4 = svc.network.route.build {
     via = "$(output ${services.dhcpv4} ip)";
