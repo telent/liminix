@@ -211,9 +211,14 @@ in
                export PATH
             ''
           );
+          hosts = symlink (
+            pkgs.writeText "hosts" ''
+              127.0.0.1  localhost
+            ''
+          );
         in
         dir {
-          inherit profile;
+          inherit hosts profile;
           ashrc = profile;
         };
 
