@@ -162,7 +162,7 @@ diff -u examples/hello-from-qemu.nix examples/hello-from-mt300.nix
 
 You'll see a new `+boot.tftp+` stanza which you can ignore,
 `+services.dns+` has been removed, and the static IP address allocation
-has been replaced by a `+dhcp.client+` service.
+has been replaced by a DHCP client service.
 
 [source,console]
 ----
