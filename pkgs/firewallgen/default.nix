@@ -14,7 +14,13 @@ let
     ;
   inherit (lib.lists) groupBy;
   inherit (lib.attrsets) attrsToList mapAttrsToList;
-  inherit (builtins) elemAt map head tail toString;
+  inherit (builtins)
+    elemAt
+    map
+    head
+    tail
+    toString
+    ;
 
   indentLines =
     offset: lines:
@@ -63,7 +69,12 @@ let
     ''
       set ${name}  {
         type ${type}
-        ${if elements != [ ] then "elements = { ${concatStringsSep ", " (builtins.trace elements elements)} }" else ""}
+        ${
+          if elements != [ ] then
+            "elements = { ${concatStringsSep ", " (builtins.trace elements elements)} }"
+          else
+            ""
+        }
         ${optionalString (extraText != null) extraText}
       }
     '';
@@ -76,16 +87,26 @@ let
       extraText ? null,
       ...
     }:
-      let
-        colonize = v:
-          let  ty = elemAt (attrsToList v) 0; in "${ty.name}: ${ty.value}";
-      in ''
-        map ${name}  {
-          type ${colonize type}
-          ${if elements != [ ] then "elements = { ${concatStringsSep ", " (mapAttrsToList (k: v : "${k}: ${toString v}") elements)} }" else ""}
-          ${optionalString (extraText != null) extraText}
+    let
+      colonize =
+        v:
+        let
+          ty = elemAt (attrsToList v) 0;
+        in
+        "${ty.name}: ${ty.value}";
+    in
+    ''
+      map ${name}  {
+        type ${colonize type}
+        ${
+          if elements != [ ] then
+            "elements = { ${concatStringsSep ", " (mapAttrsToList (k: v: "${k}: ${toString v}") elements)} }"
+          else
+            ""
         }
-      '';
+        ${optionalString (extraText != null) extraText}
+      }
+    '';
 
   dochainorset =
     {

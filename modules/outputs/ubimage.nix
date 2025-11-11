@@ -5,7 +5,7 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkOption types;
+  inherit (lib) mkOption types;
   cfg = config.boot.tftp;
   instructions = pkgs.writeText "flash.scr" ''
     setenv serverip ${cfg.serverip}

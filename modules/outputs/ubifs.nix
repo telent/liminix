@@ -5,7 +5,7 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkOption types;
+  inherit (lib) mkIf;
   o = config.system.outputs;
 in
 {

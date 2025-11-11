@@ -11,9 +11,14 @@
 }:
 let
   name = "logshippers";
-  luafy = name : source :
+  luafy =
+    name: source:
     writeFennel name {
-      packages = [ anoia lualinux fennel ];
+      packages = [
+        anoia
+        lualinux
+        fennel
+      ];
       macros = [ anoia.dev ];
       mainFunction = "run";
     } source;

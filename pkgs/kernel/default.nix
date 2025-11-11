@@ -21,18 +21,19 @@ stdenv.mkDerivation rec {
   name = "kernel";
   inherit src extraPatchPhase;
   hardeningDisable = [ "all" ];
-  nativeBuildInputs =
-    [ buildPackages.stdenv.cc ]
-    ++ (with buildPackages.pkgs; [
-      rsync
-      bc
-      bison
-      flex
-      pkg-config
-      openssl
-      ncurses.all
-      perl
-    ]);
+  nativeBuildInputs = [
+    buildPackages.stdenv.cc
+  ]
+  ++ (with buildPackages.pkgs; [
+    rsync
+    bc
+    bison
+    flex
+    pkg-config
+    openssl
+    ncurses.all
+    perl
+  ]);
   CC = "${stdenv.cc.bintools.targetPrefix}gcc";
   HOSTCC = with buildPackages.pkgs; "gcc -I${openssl}/include -I${ncurses}/include";
   HOST_EXTRACFLAGS =
@@ -50,7 +51,8 @@ stdenv.mkDerivation rec {
     "headers"
     "modulesupport"
     "config"
-  ] ++ targetNames;
+  ]
+  ++ targetNames;
   phases = [
     "unpackPhase"
     "butcherPkgconfig"
@@ -66,7 +68,8 @@ stdenv.mkDerivation rec {
   patches = [
     ./cmdline-cookie.patch
     ./mips-malta-fdt-from-bootloader.patch
-  ] ++ lib.optional (lib.versionOlder version "5.18.0") ./phram-allow-cached-mappings.patch;
+  ]
+  ++ lib.optional (lib.versionOlder version "5.18.0") ./phram-allow-cached-mappings.patch;
 
   # this is here to work around what I think is a bug in nixpkgs
   # packaging of ncurses: it installs pkg-config data files which

@@ -5,7 +5,6 @@ let
       liminix-config = ./configuration.nix;
     }
   );
-  rogue = lmx.pkgs.rogue;
   myPkg = lmx.pkgs.rsyncSmall;
   img = lmx.outputs.vmroot;
   pkgs = import <nixpkgs> { overlays = [ (import ../../overlay.nix) ]; };

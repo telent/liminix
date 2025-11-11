@@ -32,10 +32,11 @@ let
 
   logger =
     let
-      pipecmds =
-        [ "${s6}/bin/s6-log -bpd3 -- ${cfg.script} 1" ]
-        ++ (lib.optional (cfg ? persistent && cfg.persistent.enable) "/bin/tee /dev/pmsg0")
-        ++ (lib.optional cfg.shipping.enable "${pkgs.logtap}/bin/logtap ${fifo} logshipper-socket-event");
+      pipecmds = [
+        "${s6}/bin/s6-log -bpd3 -- ${cfg.script} 1"
+      ]
+      ++ (lib.optional (cfg ? persistent && cfg.persistent.enable) "/bin/tee /dev/pmsg0")
+      ++ (lib.optional cfg.shipping.enable "${pkgs.logtap}/bin/logtap ${fifo} logshipper-socket-event");
     in
     ''
       #!${execline}/bin/execlineb -P
@@ -61,12 +62,13 @@ let
       flatDeps = s: [ s ] ++ concatMap flatDeps (deps s);
       allServices = unique (concatMap flatDeps (builtins.attrValues config.services));
       isDependentOnControlled =
-        let inherit (lib.lists) any;
-        in s:
-          isControlled s ||
-          (any isDependentOnControlled s.dependencies) ||
-          ((s ? contents) &&
-           (any isDependentOnControlled s.contents));
+        let
+          inherit (lib.lists) any;
+        in
+        s:
+        isControlled s
+        || (any isDependentOnControlled s.dependencies)
+        || ((s ? contents) && (any isDependentOnControlled s.contents));
 
       # all controlled services depend on this oneshot, which
       # makes a list of them so we can identify them at runtime
@@ -88,7 +90,8 @@ let
       };
       servicesAttrs = {
         default = defaultDefaultTarget;
-      } // config.services;
+      }
+      // config.services;
     in
     pkgs.s6-rc-database.override {
       services = builtins.attrValues servicesAttrs;
@@ -258,7 +261,7 @@ in
         dependencies = mkOption {
           description = "services required by the shipping script";
           type = types.listOf pkgs.liminix.lib.types.service;
-          default = [];
+          default = [ ];
         };
       };
       script = mkOption {
@@ -275,12 +278,13 @@ in
   };
 
   config = {
-    programs.busybox.applets = mkIf  config.logging.shipping.enable [ "mkfifo" ];
+    programs.busybox.applets = mkIf config.logging.shipping.enable [ "mkfifo" ];
     services.log-shipper =
       let
         cfg = config.logging.shipping;
         dependencies = config.logging.shipping.dependencies;
-      in mkIf cfg.enable (
+      in
+      mkIf cfg.enable (
         let
           live = longrun {
             name = "log-shipper-live";
@@ -297,16 +301,21 @@ in
               test -p ${fifoBackfill} || mkfifo ${fifoBackfill}
               (cat ${config.logging.directory}/*; sleep 86400) | ${pkgs.logtap}/bin/backfill ${fifoBackfill} ${fifoBackfill}.ts
             '';
-            dependencies  = dependencies ++ [live];
+            dependencies = dependencies ++ [ live ];
           };
           sink = longrun {
             name = "log-shipper-backfill-sink";
             run = "${cfg.command} ${fifoBackfill}";
             dependencies = dependencies ++ [ source ];
           };
-        in bundle {
+        in
+        bundle {
           name = "log-shipper";
-          contents = [live source sink];
+          contents = [
+            live
+            source
+            sink
+          ];
         }
       );
 

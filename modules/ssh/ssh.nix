@@ -22,28 +22,27 @@ let
   inherit (liminix.services) longrun;
   inherit (lib) concatStringsSep mapAttrs mapAttrsToList;
   keydir = "/run/${name}/authorized_keys";
-  options =
-    [
-      "-e" # pass environment to child
-      "-E" # log to stderr
-      "-R" # create hostkeys if needed
-      "-P /run/dropbear.pid"
-      "-F" # don't fork into background
-    ]
-    ++ (lib.optional (!allowRoot) "-w")
-    ++ (lib.optional (!allowPasswordLogin) "-s")
-    ++ (lib.optional (!allowPasswordLoginForRoot) "-g")
-    ++ (lib.optional (!allowLocalPortForward) "-j")
-    ++ (lib.optional (!allowRemotePortForward) "-k")
-    ++ (lib.optional (!allowRemoteConnectionToForwardedPorts) "-a")
-    ++ (lib.optionals (authorizedKeys != null) [
-      "-U"
-      "${keydir}/%n"
-    ])
-    ++ [
-      (if address != null then "-p ${address}:${toString port}" else "-p ${toString port}")
-    ]
-    ++ [ extraConfig ];
+  options = [
+    "-e" # pass environment to child
+    "-E" # log to stderr
+    "-R" # create hostkeys if needed
+    "-P /run/dropbear.pid"
+    "-F" # don't fork into background
+  ]
+  ++ (lib.optional (!allowRoot) "-w")
+  ++ (lib.optional (!allowPasswordLogin) "-s")
+  ++ (lib.optional (!allowPasswordLoginForRoot) "-g")
+  ++ (lib.optional (!allowLocalPortForward) "-j")
+  ++ (lib.optional (!allowRemotePortForward) "-k")
+  ++ (lib.optional (!allowRemoteConnectionToForwardedPorts) "-a")
+  ++ (lib.optionals (authorizedKeys != null) [
+    "-U"
+    "${keydir}/%n"
+  ])
+  ++ [
+    (if address != null then "-p ${address}:${toString port}" else "-p ${toString port}")
+  ]
+  ++ [ extraConfig ];
   isKeyservice = typeOf authorizedKeys == "lambda";
   authKeysConcat =
     if authorizedKeys != null && !isKeyservice then

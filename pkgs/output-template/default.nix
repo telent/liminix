@@ -18,7 +18,7 @@ stdenv.mkDerivation {
   src = ./.;
 
   buildInputs = [ lua ];
-  nativeBuildInputs = [ fennelrepl ] ;
+  nativeBuildInputs = [ fennelrepl ];
   buildPhase = ''
     fennelrepl --test ./output-template.fnl
     cp -p ${

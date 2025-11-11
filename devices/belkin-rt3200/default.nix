@@ -1,106 +1,106 @@
 {
   description = ''
 
-== Belkin RT-3200 / Linksys E8450
+    == Belkin RT-3200 / Linksys E8450
 
-This device is based on a 64 bit Mediatek MT7622 ARM platform, and has
-been powering my (Daniel's) home network since February 2025.
+    This device is based on a 64 bit Mediatek MT7622 ARM platform, and has
+    been powering my (Daniel's) home network since February 2025.
 
-=== Hardware summary
+    === Hardware summary
 
-* MediaTek MT7622BV (1350MHz)
-* 128MB NAND flash
-* 512MB RAM
-* b/g/n wireless using MediaTek MT7622BV (MT7615E driver)
-* a/n/ac/ax wireless using MediaTek MT7915E
+    * MediaTek MT7622BV (1350MHz)
+    * 128MB NAND flash
+    * 512MB RAM
+    * b/g/n wireless using MediaTek MT7622BV (MT7615E driver)
+    * a/n/ac/ax wireless using MediaTek MT7915E
 
-=== Installation
+    === Installation
 
-Liminix on this device uses the UBI volume management system to perform
-wear leveling on the flash. This is not set up from the factory, so a
-one-time step is needed to prepare it before Liminix can be installed.
+    Liminix on this device uses the UBI volume management system to perform
+    wear leveling on the flash. This is not set up from the factory, so a
+    one-time step is needed to prepare it before Liminix can be installed.
 
-==== Preparation
+    ==== Preparation
 
-To prepare the device for Liminix you first need to use the
-https://github.com/dangowrt/owrt-ubi-installer[OpenWrt UBI Installer]
-image to rewrite the flash layout. As of Jan 2025 there are two versions
-of the installer available: the release version 1.0.2 and the
-pre-release 1.1.3 and for Liminix you nee the pre-release. The release
-version of the installer creates UBI volumes according to an older
-layout that is not compatible with the Linux 6.6.67 kernel used in
-Liminix.
+    To prepare the device for Liminix you first need to use the
+    https://github.com/dangowrt/owrt-ubi-installer[OpenWrt UBI Installer]
+    image to rewrite the flash layout. As of Jan 2025 there are two versions
+    of the installer available: the release version 1.0.2 and the
+    pre-release 1.1.3 and for Liminix you nee the pre-release. The release
+    version of the installer creates UBI volumes according to an older
+    layout that is not compatible with the Linux 6.6.67 kernel used in
+    Liminix.
 
-You can run the installer in one of two ways: either follow the
-instructions to do it through the vendor web interface, or you can drop
-to U-Boot and use TFTP
+    You can run the installer in one of two ways: either follow the
+    instructions to do it through the vendor web interface, or you can drop
+    to U-Boot and use TFTP
 
-[source,console]
-----
-MT7622> setenv ipaddr 10.0.0.6
-MT7622> setenv serverip 10.0.0.1
-MT7622> tftpboot 0x42000000  openwrt-mediatek-mt7622-linksys_e8450-ubi-initramfs-recovery-installer.itb
-MT7622> bootm 0x42000000
-----
+    [source,console]
+    ----
+    MT7622> setenv ipaddr 10.0.0.6
+    MT7622> setenv serverip 10.0.0.1
+    MT7622> tftpboot 0x42000000  openwrt-mediatek-mt7622-linksys_e8450-ubi-initramfs-recovery-installer.itb
+    MT7622> bootm 0x42000000
+    ----
 
-This will write the new flash layout and then boot into a "recovery"
-OpenWrt installation.
+    This will write the new flash layout and then boot into a "recovery"
+    OpenWrt installation.
 
-==== Building/installing Liminix
+    ==== Building/installing Liminix
 
-The default target for this device is `+outputs.ubimage+` which makes a
-ubifs image suitable for use with `+ubiupdatevol+`. To write this to the
-device we use the OpenWrt recovery system installed in the previous
-step. In this configuration the device assigns itself the IP address
-192.168.1.1/24 on its LAN ports and expects the connected computer to
-have 192.168.1.254
+    The default target for this device is `+outputs.ubimage+` which makes a
+    ubifs image suitable for use with `+ubiupdatevol+`. To write this to the
+    device we use the OpenWrt recovery system installed in the previous
+    step. In this configuration the device assigns itself the IP address
+    192.168.1.1/24 on its LAN ports and expects the connected computer to
+    have 192.168.1.254
 
-[WARNING]
-====
-The [.title-ref]#ubi0_7# device in these instructions is correct as of
-Dec 2024 (dangowrt/owrt-ubi-installer commit d79e7928). If you are
-installing some time later, it is important to check the output from
-`+ubinfo -a+` and make sure you are updating the "liminix" volume and
-not some other one which had been introduced since I wrote this.
-====
+    [WARNING]
+    ====
+    The [.title-ref]#ubi0_7# device in these instructions is correct as of
+    Dec 2024 (dangowrt/owrt-ubi-installer commit d79e7928). If you are
+    installing some time later, it is important to check the output from
+    `+ubinfo -a+` and make sure you are updating the "liminix" volume and
+    not some other one which had been introduced since I wrote this.
+    ====
 
-[source,console]
-----
-$ nix-build -I liminix-config=./my-configuration.nix  --arg device "import ./devices/belkin-rt3200" -A outputs.default
-$ cat result/rootfs | ssh root@192.168.1.1 "cat > /tmp/rootfs"
-$ ssh root@192.168.1.1
-root@OpenWrt:~# ubimkvol /dev/ubi0 --name=liminix --maxavsize
-root@OpenWrt:~# ubinfo -a
-[...]
-Volume ID:   7 (on ubi0)
-Type:        dynamic
-Alignment:   1
-Size:        851 LEBs (108056576 bytes, 103.0 MiB)
-State:       OK
-Name:        liminix
-Character device major/minor: 250:8
-root@OpenWrt:~# ubiupdatevol /dev/ubi0_7 /tmp/rootfs
-----
+    [source,console]
+    ----
+    $ nix-build -I liminix-config=./my-configuration.nix  --arg device "import ./devices/belkin-rt3200" -A outputs.default
+    $ cat result/rootfs | ssh root@192.168.1.1 "cat > /tmp/rootfs"
+    $ ssh root@192.168.1.1
+    root@OpenWrt:~# ubimkvol /dev/ubi0 --name=liminix --maxavsize
+    root@OpenWrt:~# ubinfo -a
+    [...]
+    Volume ID:   7 (on ubi0)
+    Type:        dynamic
+    Alignment:   1
+    Size:        851 LEBs (108056576 bytes, 103.0 MiB)
+    State:       OK
+    Name:        liminix
+    Character device major/minor: 250:8
+    root@OpenWrt:~# ubiupdatevol /dev/ubi0_7 /tmp/rootfs
+    ----
 
-To make the new system bootable we also need to change some U-Boot
-variables. `+boot_production+` needs to mount the filesystem and boot
-the FIT image found there, and `+bootcmd+` needs to be told not to boot
-the rescue image if there are records in pstore, because that interferes
-with `+config.log.persistent+`
+    To make the new system bootable we also need to change some U-Boot
+    variables. `+boot_production+` needs to mount the filesystem and boot
+    the FIT image found there, and `+bootcmd+` needs to be told not to boot
+    the rescue image if there are records in pstore, because that interferes
+    with `+config.log.persistent+`
 
-[source,console]
-----
-root@OpenWrt:~# fw_setenv orig_boot_production $(fw_printenv -n boot_production)
-root@OpenWrt:~# fw_setenv orig_bootcmd $(fw_printenv -n bootcmd)
-root@OpenWrt:~# fw_setenv boot_production 'led $bootled_pwr on ; ubifsmount ubi0:liminix && ubifsload ''${loadaddr} boot/fit && bootm ''${loadaddr}'
-root@OpenWrt:~# fw_setenv bootcmd 'run boot_ubi'
-----
+    [source,console]
+    ----
+    root@OpenWrt:~# fw_setenv orig_boot_production $(fw_printenv -n boot_production)
+    root@OpenWrt:~# fw_setenv orig_bootcmd $(fw_printenv -n bootcmd)
+    root@OpenWrt:~# fw_setenv boot_production 'led $bootled_pwr on ; ubifsmount ubi0:liminix && ubifsload ''${loadaddr} boot/fit && bootm ''${loadaddr}'
+    root@OpenWrt:~# fw_setenv bootcmd 'run boot_ubi'
+    ----
 
-For subsequent Liminix reinstalls, just run the `+ubiupdatevol+` command
-again. You don't need to repeat the "Preparation" step and in fact
-should seek to avoid it if possible, as it will reset the erase counters
-used for write levelling. Using UBI-aware tools is therefore preferred
-over any kind of "factory" wipe which will reset them.
+    For subsequent Liminix reinstalls, just run the `+ubiupdatevol+` command
+    again. You don't need to repeat the "Preparation" step and in fact
+    should seek to avoid it if possible, as it will reset the erase counters
+    used for write levelling. Using UBI-aware tools is therefore preferred
+    over any kind of "factory" wipe which will reset them.
 
   '';
 

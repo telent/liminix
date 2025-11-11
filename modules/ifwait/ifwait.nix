@@ -2,7 +2,7 @@
 {
   state,
   interface,
-  service
+  service,
 }:
 let
   inherit (liminix.services) longrun;

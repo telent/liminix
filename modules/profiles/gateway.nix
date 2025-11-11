@@ -13,7 +13,7 @@ let
     mkIf
     types
     ;
-  inherit (pkgs) liminix serviceFns;
+  inherit (pkgs) liminix;
   inherit (liminix.services) bundle oneshot;
   hostaps =
     let

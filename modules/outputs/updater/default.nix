@@ -5,7 +5,6 @@
   ...
 }:
 let
-  inherit (lib) mkIf;
   o = config.system.outputs;
   inherit (pkgs) runCommand;
   inherit (lib) mkOption types;

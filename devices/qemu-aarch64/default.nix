@@ -11,16 +11,16 @@
 
   description = ''
 
-== QEMU Aarch64
+    == QEMU Aarch64
 
-This target produces an image for the
-https://www.qemu.org/docs/master/system/arm/virt.html[QEMU "virt"
-platform] using a 64 bit CPU type.
+    This target produces an image for the
+    https://www.qemu.org/docs/master/system/arm/virt.html[QEMU "virt"
+    platform] using a 64 bit CPU type.
 
-ARM targets differ from MIPS in that the kernel format expected by QEMU
-is an "Image" (raw binary file) rather than an ELF file, but this is
-taken care of by `+run.sh+`. Check the documentation for the `+qemu+`
-target for more information.
+    ARM targets differ from MIPS in that the kernel format expected by QEMU
+    is an "Image" (raw binary file) rather than an ELF file, but this is
+    taken care of by `+run.sh+`. Check the documentation for the `+qemu+`
+    target for more information.
   '';
 
   # this device is described by the "qemu" device

@@ -8,15 +8,10 @@ let
   inherit (lib)
     mkIf
     mkEnableOption
-    mkOption
-    types
-    concatStringsSep
     ;
   inherit (pkgs.pseudofile) dir symlink;
   cfg = config.boot.loader.fit;
   o = config.system.outputs;
-  cmdline = concatStringsSep " " config.boot.commandLine;
-  wantsDtb = config.hardware.dts ? src && config.hardware.dts.src != null;
 in
 {
   options.boot.loader.fit.enable = mkEnableOption "FIT in /boot";

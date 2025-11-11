@@ -35,7 +35,7 @@ let
           device = import (liminix + "/devices/qemu");
           liminix-config = vanilla;
         }).buildEnv;
-      doc = pkgs.callPackage ./doc.nix { inherit liminix borderVmConf; } ;
+      doc = pkgs.callPackage ./doc.nix { inherit liminix borderVmConf; };
     };
 in
 jobs

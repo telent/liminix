@@ -128,7 +128,8 @@ in
       "root=${config.hardware.rootDevice}"
       "rootfstype=${config.rootfsType}"
       "fw_devlink=off"
-    ] ++ lib.optional (config.rootOptions != null) "rootflags=${config.rootOptions}";
+    ]
+    ++ lib.optional (config.rootOptions != null) "rootflags=${config.rootOptions}";
 
     system.callService =
       path: parameters:

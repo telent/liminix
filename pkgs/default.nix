@@ -64,7 +64,7 @@ in
     lib = {
       types =
         let
-          inherit (lib) mkOption types isDerivation;
+          inherit (lib) types isDerivation;
         in
         rec {
           service = types.package // {
@@ -97,7 +97,7 @@ in
   devout = callPackage ./devout { };
   fetch-freebsd = callPackage ./fetch-freebsd { };
   fennel = callPackage ./fennel { };
-  fennelc = callPackage ./fennelc {  };
+  fennelc = callPackage ./fennelc { };
   fennelrepl = callPackage ./fennelrepl { };
   firewallgen = callPackage ./firewallgen { };
   firmware-utils = callPackage ./firmware-utils { };

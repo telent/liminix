@@ -13,7 +13,6 @@
   serviceUrl,
 }:
 let
-  inherit (builtins) filter isString split;
   inherit (liminix.services) oneshot;
   name = "certifix-${lib.strings.sanitizeDerivationName subject}";
   caCertFile = writeText "ca.crt" caCertificate;

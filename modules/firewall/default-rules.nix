@@ -200,7 +200,7 @@ in
     type = "filter";
     family = "ip";
 
-    rules = [];
+    rules = [ ];
   };
 
   input-ip4 = {

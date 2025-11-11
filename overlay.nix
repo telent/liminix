@@ -20,44 +20,47 @@ let
         makeFlags = builtins.filter (x: (builtins.match "(PLAT|MYLIBS).*" x) == null) o.makeFlags;
       });
     in
-      l.override {
-        self = l;
-        packageOverrides = lua-final: lua-prev:
-          let openssl = final.opensslNoThreads;
-          in {
-            cqueues = lua-prev.cqueues.overrideAttrs(o: {
-              externalDeps = [
-                {
-                  name = "CRYPTO";
-                  dep = openssl;
-                }
-                {
-                  name = "OPENSSL";
-                  dep = openssl;
-                }
-              ];
-            });
-            luaossl = lua-prev.luaossl.overrideAttrs(o: {
-              externalDeps = [
-                {
-                  name = "CRYPTO";
-                  dep = openssl;
-                }
-                {
-                  name = "OPENSSL";
-                  dep = openssl;
-                }
-              ];
-              name = "${o.name}-218";
-              patches = [
-                (fetchpatch {
-                  url = "https://patch-diff.githubusercontent.com/raw/wahern/luaossl/pull/218.patch";
-                  hash = "sha256-2GOliY4/RUzOgx3rqee3X3szCdUVxYDut7d+XFcUTJw=";
-                })
-              ];
-            });
-          };
-      };
+    l.override {
+      self = l;
+      packageOverrides =
+        lua-final: lua-prev:
+        let
+          openssl = final.opensslNoThreads;
+        in
+        {
+          cqueues = lua-prev.cqueues.overrideAttrs (o: {
+            externalDeps = [
+              {
+                name = "CRYPTO";
+                dep = openssl;
+              }
+              {
+                name = "OPENSSL";
+                dep = openssl;
+              }
+            ];
+          });
+          luaossl = lua-prev.luaossl.overrideAttrs (o: {
+            externalDeps = [
+              {
+                name = "CRYPTO";
+                dep = openssl;
+              }
+              {
+                name = "OPENSSL";
+                dep = openssl;
+              }
+            ];
+            name = "${o.name}-218";
+            patches = [
+              (fetchpatch {
+                url = "https://patch-diff.githubusercontent.com/raw/wahern/luaossl/pull/218.patch";
+                hash = "sha256-2GOliY4/RUzOgx3rqee3X3szCdUVxYDut7d+XFcUTJw=";
+              })
+            ];
+          });
+        };
+    };
 
   s6 = prev.s6.overrideAttrs (
     o:
@@ -262,7 +265,7 @@ extraPkgs
     ];
   });
 
-  libadwaita =  prev.libadwaita.overrideAttrs(o: {
+  libadwaita = prev.libadwaita.overrideAttrs (o: {
     # tests fail with a message
     # Gdk-DEBUG: error: XDG_RUNTIME_DIR is invalid or not set in the environment.
     doCheck = false;
@@ -273,9 +276,9 @@ extraPkgs
   mtdutils =
     (prev.mtdutils.overrideAttrs (o: {
 
-      src =  final.fetchgit {
+      src = final.fetchgit {
         url = "git://git.infradead.org/mtd-utils.git";
-        rev  = "77981a2888c711268b0e7f32af6af159c2288e23";
+        rev = "77981a2888c711268b0e7f32af6af159c2288e23";
         hash = "sha256-pHunlPOuvCRyyk9qAiR3Kn3cqS/nZHIxsv6m4nsAcbk=";
       };
 
@@ -301,11 +304,10 @@ extraPkgs
       # as a dependency
       preConfigure =
         let
-          arch = if stdenv.hostPlatform.gcc ? arch
-                 then "-march=${stdenv.hostPlatform.gcc.arch}"
-                 else "";
-          soft = if arch == "-march=24kc" then  "-msoft-float" else "";
-        in ''
+          arch = if stdenv.hostPlatform.gcc ? arch then "-march=${stdenv.hostPlatform.gcc.arch}" else "";
+          soft = if arch == "-march=24kc" then "-msoft-float" else "";
+        in
+        ''
           configureFlagsArray+=(no-threads no-asm CFLAGS="${arch} ${soft}")
         '';
       # don't need or want this bash script
@@ -328,30 +330,29 @@ extraPkgs
         ];
         buildInputs = o.buildInputs ++ [ final.libslirp ];
       });
-      overrides =
-        {
-          hostCpuTargets = map (f: "${f}-softmmu") [
-            "arm"
-            "aarch64"
-            "mips"
-            "mipsel"
-          ];
-          sdlSupport = false;
-          numaSupport = false;
-          seccompSupport = false;
-          usbredirSupport = false;
-          libiscsiSupport = false;
-          tpmSupport = false;
-          uringSupport = false;
-          capstoneSupport = false;
-        }
-        // lib.optionalAttrs (lib.versionOlder lib.version "24.10") {
-          texinfo = null;
-          nixosTestRunner = true;
-        }
-        // lib.optionalAttrs (lib.versionAtLeast lib.version "25.04") {
-          minimal = true;
-        };
+      overrides = {
+        hostCpuTargets = map (f: "${f}-softmmu") [
+          "arm"
+          "aarch64"
+          "mips"
+          "mipsel"
+        ];
+        sdlSupport = false;
+        numaSupport = false;
+        seccompSupport = false;
+        usbredirSupport = false;
+        libiscsiSupport = false;
+        tpmSupport = false;
+        uringSupport = false;
+        capstoneSupport = false;
+      }
+      // lib.optionalAttrs (lib.versionOlder lib.version "24.10") {
+        texinfo = null;
+        nixosTestRunner = true;
+      }
+      // lib.optionalAttrs (lib.versionAtLeast lib.version "25.04") {
+        minimal = true;
+      };
     in
     q.override overrides;
   rsyncSmall =

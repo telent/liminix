@@ -1,4 +1,5 @@
-{ stdenv,
+{
+  stdenv,
   lib,
   liminix,
   gnumake,
@@ -6,7 +7,7 @@
   pandoc,
   luaPackages,
   asciidoctor,
-  borderVmConf
+  borderVmConf,
 }:
 let
   json =
@@ -30,13 +31,19 @@ stdenv.mkDerivation {
     luaPackages.lyaml
   ];
 
-  src = lib.sources.sourceFilesBySuffices
-    (lib.cleanSource ./. ) [
-      ".adoc"
-      ".nix" ".rst" "Makefile" ".svg"
-      ".fnl" ".py" ".css" ".html"
-      ".md" ".html.in"
-    ];
+  src = lib.sources.sourceFilesBySuffices (lib.cleanSource ./.) [
+    ".adoc"
+    ".nix"
+    ".rst"
+    "Makefile"
+    ".svg"
+    ".fnl"
+    ".py"
+    ".css"
+    ".html"
+    ".md"
+    ".html.in"
+  ];
 
   buildPhase = ''
     cat ${json} | fennel --correlate doc/parse-options.fnl > doc/module-options-generated.inc.rst

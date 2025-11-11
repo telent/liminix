@@ -12,7 +12,6 @@
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
-  inherit (pkgs.liminix.services) longrun;
 in
 {
   options = {

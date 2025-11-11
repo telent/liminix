@@ -12,7 +12,6 @@
 }:
 let
   inherit (liminix.services) longrun;
-  inherit (lib) optionalString;
 in
 longrun {
   inherit name;

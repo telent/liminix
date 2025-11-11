@@ -3,8 +3,6 @@ let
   inherit (lib)
     mkIf
     mkEnableOption
-    mkOption
-    types
     ;
 in
 {

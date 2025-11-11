@@ -110,18 +110,19 @@ let
     inherit src;
 
     hardeningDisable = [ "all" ];
-    nativeBuildInputs =
-      [ buildPackages.stdenv.cc ]
-      ++ (with buildPackages.pkgs; [
-        bc
-        bison
-        flex
-        pkg-config
-        openssl
-        which
-        kmod
-        cpio
-      ]);
+    nativeBuildInputs = [
+      buildPackages.stdenv.cc
+    ]
+    ++ (with buildPackages.pkgs; [
+      bc
+      bison
+      flex
+      pkg-config
+      openssl
+      which
+      kmod
+      cpio
+    ]);
     inherit CC CROSS_COMPILE;
     ARCH = arch;
     dontStrip = true;
@@ -185,7 +186,8 @@ let
             let
               c = {
                 module = d;
-              } // configs.${d};
+              }
+              // configs.${d};
             in
             c.module
           ) drivers

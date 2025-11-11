@@ -14,7 +14,7 @@ let
   secrets = import ./extneder-secrets.nix;
   inherit (pkgs.liminix.services) oneshot longrun target;
   inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs) writeText serviceFns;
+  inherit (pkgs) writeText;
   svc = config.system.service;
 in
 rec {

@@ -147,15 +147,18 @@ in
       };
 
       dhcp.client =
-        lib.warn ''
-          system.services.network.dhcp.client is deprecated and will
-          be removed in 2026.  Use system.service.dhcp4c instead
-        ''
-        config.system.callService ./dhcpc.nix {
-          interface = mkOption {
-            type = liminix.lib.types.service;
+        lib.warn
+          ''
+            system.services.network.dhcp.client is deprecated and will
+            be removed in 2026.  Use system.service.dhcp4c instead
+          ''
+          config.system.callService
+          ./dhcpc.nix
+          {
+            interface = mkOption {
+              type = liminix.lib.types.service;
+            };
           };
-        };
 
     };
   };

@@ -8,7 +8,6 @@
 { config, pkgs, ... }:
 let
   inherit (pkgs.liminix.services) bundle oneshot;
-  inherit (pkgs) serviceFns;
   # EDIT: you can pick your preferred RFC1918 address space
   # for NATted connections, if you don't like this one.
   ipv4LocalNet = "10.8.0";

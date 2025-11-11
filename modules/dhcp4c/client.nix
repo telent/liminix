@@ -58,16 +58,21 @@ let
     run =
       let
         script = writeFennel "dhcp-lease-watcher" {
-          packages = [ anoia linotify lualinux ];
+          packages = [
+            anoia
+            linotify
+            lualinux
+          ];
           mainFunction = "run";
-        }
-          ./lease-watcher.fnl;
-      in ''
+        } ./lease-watcher.fnl;
+      in
+      ''
         export PATH=${s6-rc-up-tree}/bin/:$PATH
         ${script} ${service} ${controlled-name}
       '';
   };
-in longrun {
+in
+longrun {
   name = controlled-name;
   run = ''
     set -e

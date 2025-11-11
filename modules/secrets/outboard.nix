@@ -12,7 +12,7 @@
   password,
 }:
 let
-  inherit (liminix.services) oneshot longrun;
+  inherit (liminix.services) longrun;
   inherit (lib) optionalString;
 in
 longrun {

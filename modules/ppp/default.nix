@@ -22,13 +22,6 @@
 let
   inherit (lib) mkOption types;
   inherit (pkgs) liminix;
-  mkStringOption =
-    description:
-    mkOption {
-      type = types.nullOr types.str;
-      default = null;
-      inherit description;
-    };
 in
 {
   imports = [ ../secrets ];

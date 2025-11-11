@@ -5,7 +5,7 @@
   s6,
   s6-rc,
   watch-outputs,
-  s6-rc-up-tree
+  s6-rc-up-tree,
 }:
 {
   watch,
@@ -13,12 +13,10 @@
   action,
 }:
 let
-  inherit (liminix.services) oneshot longrun;
-  inherit (builtins) map length head toString;
-  inherit (lib) unique optional optionals concatStringsSep;
+  inherit (liminix.services) longrun;
+  inherit (builtins) map;
+  inherit (lib) optional concatStringsSep;
   inherit (service) name;
-
-  watched-services = unique (map (f: f "service") watch);
 
   restart-flag =
     {
@@ -38,8 +36,7 @@ let
   watcher =
     let
       name' = "restart-${name}";
-      refs = concatStringsSep " "
-        (map (s: "${s "service"}:${s "path"}") watch);
+      refs = concatStringsSep " " (map (s: "${s "service"}:${s "path"}") watch);
     in
     longrun {
       name = name';
@@ -54,8 +51,6 @@ let
     };
 in
 service.overrideAttrs (o: {
-  buildInputs = (lim.orEmpty o.buildInputs) ++ optional (watch != []) watcher;
-  dependencies =
-    (lim.orEmpty o.dependencies)
-    ++ optional (watch != []) watcher;
+  buildInputs = (lim.orEmpty o.buildInputs) ++ optional (watch != [ ]) watcher;
+  dependencies = (lim.orEmpty o.dependencies) ++ optional (watch != [ ]) watcher;
 })

@@ -25,76 +25,76 @@ let
       inherit name family;
       type = "ifname";
       extraText = ''
-      {{;
-         local services = { ${concatStringsSep ", " (map toJSON zones.${name})} }
-         local ifnames = {}
-         for _, v in ipairs(services) do
-           local o = output(v, "ifname")
-           if o then table.insert(ifnames, o) end
-         end
-         if (#ifnames > 0) then
-           return "elements = { " .. table.concat(ifnames, ", ") .. " }\n"
-         else
-           return ""
-         end
-      }}
+        {{;
+           local services = { ${concatStringsSep ", " (map toJSON zones.${name})} }
+           local ifnames = {}
+           for _, v in ipairs(services) do
+             local o = output(v, "ifname")
+             if o then table.insert(ifnames, o) end
+           end
+           if (#ifnames > 0) then
+             return "elements = { " .. table.concat(ifnames, ", ") .. " }\n"
+           else
+             return ""
+           end
+        }}
       '';
     };
 
   rateHook6 =
-    let rules =
-          map
-            (x: ''
-               {{;
-                local s = "${x}";
-                local n = output(s, "ifname");
-                local bw = output(s, "bandwidth");
-                if n and bw then
-                  return "meta l4proto icmpv6 iifname ".. n .. " limit rate over " .. (math.floor (tonumber(bw) / 8 / 20)) .. " bytes/second drop"
-                else
-                  return "# " .. (n or "not n") .. " " .. (bw or "not bw")
-                end
-               }}
-             '')
-            (concatLists (builtins.attrValues zones));
-    in {
-      type = "filter"; family = "ip6";
-      hook = "input"; priority = "-1"; policy = "accept";
+    let
+      rules = map (x: ''
+        {{;
+         local s = "${x}";
+         local n = output(s, "ifname");
+         local bw = output(s, "bandwidth");
+         if n and bw then
+           return "meta l4proto icmpv6 iifname ".. n .. " limit rate over " .. (math.floor (tonumber(bw) / 8 / 20)) .. " bytes/second drop"
+         else
+           return "# " .. (n or "not n") .. " " .. (bw or "not bw")
+         end
+        }}
+      '') (concatLists (builtins.attrValues zones));
+    in
+    {
+      type = "filter";
+      family = "ip6";
+      hook = "input";
+      priority = "-1";
+      policy = "accept";
       inherit rules;
     };
 
   rateHook4 =
-    let rules =
-          map
-            (x: ''
-               {{;
-                local s = "${x}";
-                local n = output(s, "ifname");
-                local bw = output(s, "bandwidth");
-                if n and bw then
-                  return "meta l4proto icmp iifname ".. n .. " limit rate over " .. (math.floor (tonumber(bw) / 8 / 20)) .. " bytes/second drop"
-                else
-                  return "# " .. (n or "not n") .. " " .. (bw or "not bw")
-                end
-               }}
-             '')
-            (concatLists (builtins.attrValues zones));
-    in {
-      type = "filter"; family = "ip";
-      hook = "input"; priority = "-1"; policy = "accept";
+    let
+      rules = map (x: ''
+        {{;
+         local s = "${x}";
+         local n = output(s, "ifname");
+         local bw = output(s, "bandwidth");
+         if n and bw then
+           return "meta l4proto icmp iifname ".. n .. " limit rate over " .. (math.floor (tonumber(bw) / 8 / 20)) .. " bytes/second drop"
+         else
+           return "# " .. (n or "not n") .. " " .. (bw or "not bw")
+         end
+        }}
+      '') (concatLists (builtins.attrValues zones));
+    in
+    {
+      type = "filter";
+      family = "ip";
+      hook = "input";
+      priority = "-1";
+      policy = "accept";
       inherit rules;
     };
 
-  sets = (mapAttrs' (n: _: mkSet "ip" n) zones) //
-         (mapAttrs' (n: _: mkSet "ip6" n) zones);
-  allRules =
-    {
-      icmp6-ratehook = rateHook6;
-      icmp4-ratehook = rateHook4;
-    } //
-    (lib.recursiveUpdate
-      extraRules
-      (lib.recursiveUpdate sets rules));
+  sets = (mapAttrs' (n: _: mkSet "ip" n) zones) // (mapAttrs' (n: _: mkSet "ip6" n) zones);
+  allRules = {
+    icmp6-ratehook = rateHook6;
+    icmp4-ratehook = rateHook4;
+  }
+  // (lib.recursiveUpdate extraRules (lib.recursiveUpdate sets rules));
   script = firewallgen "firewall1.nft" allRules;
   name = "firewall";
   service = longrun {
@@ -119,9 +119,9 @@ let
 in
 svc.secrets.subscriber.build {
   action = "usr1";
-  watch =
-    concatLists
-      (mapAttrsToList (_zone : services : map (s: outputRef s "ifname") services) zones);
+  watch = concatLists (
+    mapAttrsToList (_zone: services: map (s: outputRef s "ifname") services) zones
+  );
 
   inherit service;
 }

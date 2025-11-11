@@ -40,7 +40,7 @@ let
       buildInputs ? [ ],
       restart-on-upgrade ? false,
       controller ? null,
-      properties ? {}
+      properties ? { },
     }:
     stdenvNoCC.mkDerivation {
       # we use stdenvNoCC to avoid generating derivations with names
@@ -59,12 +59,14 @@ let
         timeout-up
         timeout-down
         restart-on-upgrade
-      ;
+        ;
       propertiesText =
-        let a = mapAttrsRecursive
-          (path: value: "writepath ${concatStringsSep "/" path} ${builtins.toString value}\n")
-          properties;
-        in collect builtins.isString a;
+        let
+          a = mapAttrsRecursive (
+            path: value: "writepath ${concatStringsSep "/" path} ${builtins.toString value}\n"
+          ) properties;
+        in
+        collect builtins.isString a;
 
       buildInputs =
         buildInputs ++ dependencies ++ contents ++ lib.optional (controller != null) controller;

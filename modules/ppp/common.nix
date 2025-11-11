@@ -22,7 +22,6 @@ let
     optional
     optionals
     escapeShellArgs
-    concatStringsSep
     ;
   inherit (liminix.services) longrun;
   inherit (builtins) toJSON toString typeOf;
@@ -68,46 +67,45 @@ let
     in
     o: "{{ ${v o} }}";
 
-  ppp-options' =
-    [
-      "+ipv6"
-      "noauth"
-    ]
-    ++ optional debug "debug"
-    ++ optionals (username != null) [
-      "name"
-      (literal_or_output username)
-    ]
-    ++ optionals (password != null) [
-      "password"
-      (literal_or_output password)
-    ]
-    ++ optional lcpEcho.adaptive "lcp-echo-adaptive"
-    ++ optionals (lcpEcho.interval != null) [
-      "lcp-echo-interval"
-      (toString lcpEcho.interval)
-    ]
-    ++ optionals (lcpEcho.failure != null) [
-      "lcp-echo-failure"
-      (toString lcpEcho.failure)
-    ]
-    ++ ppp-options
-    ++ [
-      "ip-up-script"
-      ip-up
-      "ipv6-up-script"
-      ip6-up
-      "ipparam"
-      name
-      "nodetach"
-      # usepeerdns requests DNS servers from peer (which is good),
-      # then attempts to write them to /nix/store/xxxx/ppp/resolv.conf
-      # which causes an unsightly but inconsequential error message
-      "usepeerdns"
-      "nodefaultroute"
-      "logfd"
-      "2"
-    ];
+  ppp-options' = [
+    "+ipv6"
+    "noauth"
+  ]
+  ++ optional debug "debug"
+  ++ optionals (username != null) [
+    "name"
+    (literal_or_output username)
+  ]
+  ++ optionals (password != null) [
+    "password"
+    (literal_or_output password)
+  ]
+  ++ optional lcpEcho.adaptive "lcp-echo-adaptive"
+  ++ optionals (lcpEcho.interval != null) [
+    "lcp-echo-interval"
+    (toString lcpEcho.interval)
+  ]
+  ++ optionals (lcpEcho.failure != null) [
+    "lcp-echo-failure"
+    (toString lcpEcho.failure)
+  ]
+  ++ ppp-options
+  ++ [
+    "ip-up-script"
+    ip-up
+    "ipv6-up-script"
+    ip6-up
+    "ipparam"
+    name
+    "nodetach"
+    # usepeerdns requests DNS servers from peer (which is good),
+    # then attempts to write them to /nix/store/xxxx/ppp/resolv.conf
+    # which causes an unsightly but inconsequential error message
+    "usepeerdns"
+    "nodefaultroute"
+    "logfd"
+    "2"
+  ];
   service = longrun {
     inherit name;
     run = ''

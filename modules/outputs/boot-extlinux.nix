@@ -8,8 +8,6 @@ let
   inherit (lib)
     mkIf
     mkEnableOption
-    mkOption
-    types
     concatStringsSep
     ;
   inherit (pkgs.pseudofile) dir symlink;

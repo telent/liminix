@@ -11,7 +11,7 @@
   healthCheck,
 }:
 let
-  inherit (liminix.services) oneshot longrun;
+  inherit (liminix.services) longrun;
   inherit (builtins) toString;
   inherit (service) name;
   checker =

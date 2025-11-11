@@ -10,27 +10,27 @@
   };
 
   description = ''
-== GL.iNet GL-MT300N-v2
+    == GL.iNet GL-MT300N-v2
 
-The GL-MT300N-v2 "Mango" is is very similar to the `+gl-mt300a+`, but is
-based on the MT7628 chipset instead of MT7620. It's also marginally
-cheaper and comes in a yellow case not a blue one. Be sure your device
-is v2 not v1, which is a different animal and has only half as much RAM.
+    The GL-MT300N-v2 "Mango" is is very similar to the `+gl-mt300a+`, but is
+    based on the MT7628 chipset instead of MT7620. It's also marginally
+    cheaper and comes in a yellow case not a blue one. Be sure your device
+    is v2 not v1, which is a different animal and has only half as much RAM.
 
-=== Installation
+    === Installation
 
-The stock vendor firmware is a fork of OpenWrt, meaning that the binary
-created by `+system-outputs-mtdimage+` can be flashed using the vendor
-web UI or the U-Boot emergency "unbrick" routine.
+    The stock vendor firmware is a fork of OpenWrt, meaning that the binary
+    created by `+system-outputs-mtdimage+` can be flashed using the vendor
+    web UI or the U-Boot emergency "unbrick" routine.
 
-Flashing over an existing Liminix system is not possible while that
-system is running, otherwise you'll be overwriting flash partitions
-while they're in use - and that might not end well. Configure the system
-with `+levitate+` if you need to make it upgradable.
+    Flashing over an existing Liminix system is not possible while that
+    system is running, otherwise you'll be overwriting flash partitions
+    while they're in use - and that might not end well. Configure the system
+    with `+levitate+` if you need to make it upgradable.
 
-Vendor web page: https://www.gl-inet.com/products/gl-mt300n-v2/
+    Vendor web page: https://www.gl-inet.com/products/gl-mt300n-v2/
 
-OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-mt300n_v2
+    OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-mt300n_v2
 
   '';
 
@@ -138,61 +138,60 @@ OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-mt300n_v2
         extraPatchPhase = ''
           ${openwrt.applyPatches.ramips}
         '';
-        config =
-          {
+        config = {
 
-            RALINK = "y";
-            PCI = "y";
-            SOC_MT7620 = "y";
+          RALINK = "y";
+          PCI = "y";
+          SOC_MT7620 = "y";
 
-            SERIAL_8250_CONSOLE = "y";
-            SERIAL_8250 = "y";
-            SERIAL_CORE_CONSOLE = "y";
-            SERIAL_OF_PLATFORM = "y";
+          SERIAL_8250_CONSOLE = "y";
+          SERIAL_8250 = "y";
+          SERIAL_CORE_CONSOLE = "y";
+          SERIAL_OF_PLATFORM = "y";
 
-            CONSOLE_LOGLEVEL_DEFAULT = "8";
-            CONSOLE_LOGLEVEL_QUIET = "4";
+          CONSOLE_LOGLEVEL_DEFAULT = "8";
+          CONSOLE_LOGLEVEL_QUIET = "4";
 
-            MTD = "y";
-            MTD_BLOCK = "y"; # fix undefined ref to register_mtd_blktrans_dev
+          MTD = "y";
+          MTD_BLOCK = "y"; # fix undefined ref to register_mtd_blktrans_dev
 
-            SPI = "y";
-            MTD_SPI_NOR = "y";
-            SPI_MT7621 = "y";
-            SPI_MASTER = "y";
-            SPI_MEM = "y";
+          SPI = "y";
+          MTD_SPI_NOR = "y";
+          SPI_MT7621 = "y";
+          SPI_MASTER = "y";
+          SPI_MEM = "y";
 
-            REGULATOR = "y";
-            REGULATOR_FIXED_VOLTAGE = "y";
+          REGULATOR = "y";
+          REGULATOR_FIXED_VOLTAGE = "y";
 
-            NET = "y";
-            ETHERNET = "y";
+          NET = "y";
+          ETHERNET = "y";
 
-            PHYLIB = "y";
-            AT803X_PHY = "y";
-            FIXED_PHY = "y";
-            GENERIC_PHY = "y";
-            NET_VENDOR_RALINK = "y";
-            NET_RALINK_RT3050 = "y";
-            NET_RALINK_SOC = "y";
-            SWPHY = "y";
+          PHYLIB = "y";
+          AT803X_PHY = "y";
+          FIXED_PHY = "y";
+          GENERIC_PHY = "y";
+          NET_VENDOR_RALINK = "y";
+          NET_RALINK_RT3050 = "y";
+          NET_RALINK_SOC = "y";
+          SWPHY = "y";
 
-            GPIOLIB = "y";
-            GPIO_MT7621 = "y";
+          GPIOLIB = "y";
+          GPIO_MT7621 = "y";
 
-            PHY_RALINK_USB = "y";
+          PHY_RALINK_USB = "y";
 
-            EARLY_PRINTK = "y";
+          EARLY_PRINTK = "y";
 
-            PRINTK_TIME = "y";
-          }
-          // lib.optionalAttrs (config.system.service ? vlan) {
-            SWCONFIG = "y";
-          }
-          // lib.optionalAttrs (config.system.service ? watchdog) {
-            RALINK_WDT = "y"; # watchdog
-            MT7621_WDT = "y"; # or it might be this one
-          };
+          PRINTK_TIME = "y";
+        }
+        // lib.optionalAttrs (config.system.service ? vlan) {
+          SWCONFIG = "y";
+        }
+        // lib.optionalAttrs (config.system.service ? watchdog) {
+          RALINK_WDT = "y"; # watchdog
+          MT7621_WDT = "y"; # or it might be this one
+        };
         conditionalConfig = {
           WLAN = {
             WLAN_VENDOR_RALINK = "y";

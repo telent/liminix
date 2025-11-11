@@ -131,13 +131,17 @@ in
           # expose victorialogs on host so (clients attached to) guest
           # can log
           from = "guest"; # packets are forwarded from guest
-          guest.address = "10.0.2.10"; guest.port = 443;
-          host.address = "127.0.0.1"; host.port = 443;
+          guest.address = "10.0.2.10";
+          guest.port = 443;
+          host.address = "127.0.0.1";
+          host.port = 443;
         }
         {
           from = "guest"; # packets are forwarded from guest
-          guest.address = "10.0.2.10"; guest.port = 19613;
-          host.address = "127.0.0.1"; host.port = 19613;
+          guest.address = "10.0.2.10";
+          guest.port = 19613;
+          host.address = "127.0.0.1";
+          host.port = 19613;
         }
       ];
       qemu = {

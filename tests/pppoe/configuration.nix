@@ -47,5 +47,8 @@ rec {
     domain = "fake.liminix.org";
   };
 
-  defaultProfile.packages = with pkgs; [ nftables hello ];
+  defaultProfile.packages = with pkgs; [
+    nftables
+    hello
+  ];
 }

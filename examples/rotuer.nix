@@ -15,7 +15,8 @@ let
   secrets = {
     domainName = "fake.liminix.org";
     firewallRules = { };
-  } // (import ./rotuer-secrets.nix);
+  }
+  // (import ./rotuer-secrets.nix);
   svc = config.system.service;
   wirelessConfig = {
     country_code = "GB";
@@ -58,8 +59,7 @@ rec {
         start = 10;
         end = 240;
         hosts =
-          { }
-          // lib.optionalAttrs (builtins.pathExists ./static-leases.nix) (import ./static-leases.nix);
+          { } // lib.optionalAttrs (builtins.pathExists ./static-leases.nix) (import ./static-leases.nix);
         localDomain = "lan";
       };
     };
@@ -92,7 +92,8 @@ rec {
         hw_mode = "g";
         channel = "2";
         ieee80211n = 1;
-      } // wirelessConfig;
+      }
+      // wirelessConfig;
       "${secrets.ssid}5" = rec {
         interface = config.hardware.networkInterfaces.wlan5;
         hw_mode = "a";
@@ -102,7 +103,8 @@ rec {
         vht_oper_centr_freq_seg0_idx = channel + 6;
         ieee80211n = 1;
         ieee80211ac = 1;
-      } // wirelessConfig;
+      }
+      // wirelessConfig;
     };
   };
 
@@ -151,8 +153,8 @@ rec {
     enable = true;
     command = ''
       ${pkgs.s6-networking}/bin/s6-tcpclient 10.0.0.1 9428 ${pkgs.logshippers}/bin/victorialogsend http://loaclhost:9428/insert/jsonline
-      '';
-    dependencies = [services.qemu-hyp-route];
+    '';
+    dependencies = [ services.qemu-hyp-route ];
   };
 
   programs.busybox = {

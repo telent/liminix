@@ -6,12 +6,9 @@
 }:
 let
   inherit (lib)
-    mkEnableOption
     mkOption
-    mkIf
     types
     ;
-  inherit (pkgs) runCommand;
 in
 {
   options = {

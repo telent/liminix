@@ -33,10 +33,8 @@ let
     address = "194.4.172.12";
   };
 
-  inherit (pkgs.liminix.services) oneshot longrun target;
+  inherit (pkgs.liminix.services) oneshot target;
   inherit (pkgs.liminix) outputRef;
-  inherit (pkgs.pseudofile) dir symlink;
-  inherit (pkgs) serviceFns;
   svc = config.system.service;
   wirelessConfig = {
     country_code = "GB";
@@ -110,8 +108,7 @@ rec {
         start = 10;
         end = 240;
         hosts =
-          { }
-          // lib.optionalAttrs (builtins.pathExists ./static-leases.nix) (import ./static-leases.nix);
+          { } // lib.optionalAttrs (builtins.pathExists ./static-leases.nix) (import ./static-leases.nix);
         localDomain = "lan";
       };
     };
@@ -173,33 +170,31 @@ rec {
       };
 
     wireless.networks = {
-      "${rsecrets.ssid}" =
-        {
-          interface = config.hardware.networkInterfaces.wlan;
-          hw_mode = "g";
-          channel = "6";
-          ieee80211n = 1;
-        }
-        // wirelessConfig
-        // {
-          wpa_passphrase = outputRef config.services.secrets "wpa_passphrase";
-        };
+      "${rsecrets.ssid}" = {
+        interface = config.hardware.networkInterfaces.wlan;
+        hw_mode = "g";
+        channel = "6";
+        ieee80211n = 1;
+      }
+      // wirelessConfig
+      // {
+        wpa_passphrase = outputRef config.services.secrets "wpa_passphrase";
+      };
 
-      "${rsecrets.ssid}5" =
-        rec {
-          interface = config.hardware.networkInterfaces.wlan5;
-          hw_mode = "a";
-          channel = 36;
-          ht_capab = "[HT40+]";
-          vht_oper_chwidth = 1;
-          vht_oper_centr_freq_seg0_idx = channel + 6;
-          ieee80211n = 1;
-          ieee80211ac = 1;
-        }
-        // wirelessConfig
-        // {
-          wpa_passphrase = outputRef config.services.secrets "wpa_passphrase";
-        };
+      "${rsecrets.ssid}5" = rec {
+        interface = config.hardware.networkInterfaces.wlan5;
+        hw_mode = "a";
+        channel = 36;
+        ht_capab = "[HT40+]";
+        vht_oper_chwidth = 1;
+        vht_oper_centr_freq_seg0_idx = channel + 6;
+        ieee80211n = 1;
+        ieee80211ac = 1;
+      }
+      // wirelessConfig
+      // {
+        wpa_passphrase = outputRef config.services.secrets "wpa_passphrase";
+      };
     };
   };
 

@@ -9,13 +9,10 @@
 { interface, params }:
 let
   inherit (liminix.services) longrun;
-  inherit (lib) concatStringsSep mapAttrsToList unique;
+  inherit (lib) concatStringsSep mapAttrsToList;
   inherit (builtins)
-    map
     filter
     attrValues
-    length
-    head
     typeOf
     ;
 

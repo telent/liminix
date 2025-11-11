@@ -13,32 +13,32 @@
 
   description = ''
 
-== GL.iNet GL-MT300A
+    == GL.iNet GL-MT300A
 
-The GL-MT300A is based on a MT7620 chipset.
+    The GL-MT300A is based on a MT7620 chipset.
 
-For flashing from U-Boot, the firmware partition is from 0xbc050000 to
-0xbcfd0000.
+    For flashing from U-Boot, the firmware partition is from 0xbc050000 to
+    0xbcfd0000.
 
-WiFi on this device is provided by the rt2800soc module. It expects
-firmware to be present in the "factory" MTD partition, so - assuming we
-want to use the wireless - we need to build MTD support into the kernel
-even if we're using TFTP root.
+    WiFi on this device is provided by the rt2800soc module. It expects
+    firmware to be present in the "factory" MTD partition, so - assuming we
+    want to use the wireless - we need to build MTD support into the kernel
+    even if we're using TFTP root.
 
-=== Installation
+    === Installation
 
-The stock vendor firmware is a fork of OpenWrt, meaning that the binary
-created by `+system-outputs-mtdimage+` can be flashed using the vendor
-web UI or the U-Boot emergency "unbrick" routine.
+    The stock vendor firmware is a fork of OpenWrt, meaning that the binary
+    created by `+system-outputs-mtdimage+` can be flashed using the vendor
+    web UI or the U-Boot emergency "unbrick" routine.
 
-Flashing over an existing Liminix system is not possible while that
-system is running, otherwise you'll be overwriting flash partitions
-while they're in use - and that might not end well. Configure the system
-with `+levitate+` if you need to make it upgradable.
+    Flashing over an existing Liminix system is not possible while that
+    system is running, otherwise you'll be overwriting flash partitions
+    while they're in use - and that might not end well. Configure the system
+    with `+levitate+` if you need to make it upgradable.
 
-Vendor web page: https://www.gl-inet.com/products/gl-mt300a/
+    Vendor web page: https://www.gl-inet.com/products/gl-mt300a/
 
-OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-mt300a
+    OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-mt300a
 
   '';
 
@@ -126,49 +126,48 @@ OpenWrt web page: https://openwrt.org/toh/gl.inet/gl-mt300a
           ${openwrt.applyPatches.ramips}
           ${openwrt.applyPatches.rt2x00}
         '';
-        config =
-          {
+        config = {
 
-            RALINK = "y";
-            PCI = "y";
-            SOC_MT7620 = "y";
+          RALINK = "y";
+          PCI = "y";
+          SOC_MT7620 = "y";
 
-            SERIAL_8250_CONSOLE = "y";
-            SERIAL_8250 = "y";
-            SERIAL_CORE_CONSOLE = "y";
-            SERIAL_OF_PLATFORM = "y";
+          SERIAL_8250_CONSOLE = "y";
+          SERIAL_8250 = "y";
+          SERIAL_CORE_CONSOLE = "y";
+          SERIAL_OF_PLATFORM = "y";
 
-            CONSOLE_LOGLEVEL_DEFAULT = "8";
-            CONSOLE_LOGLEVEL_QUIET = "4";
+          CONSOLE_LOGLEVEL_DEFAULT = "8";
+          CONSOLE_LOGLEVEL_QUIET = "4";
 
-            NET = "y";
-            ETHERNET = "y";
-            NET_VENDOR_RALINK = "y";
-            NET_RALINK_MDIO = "y";
-            NET_RALINK_MDIO_MT7620 = "y";
-            NET_RALINK_MT7620 = "y";
-            SWPHY = "y";
+          NET = "y";
+          ETHERNET = "y";
+          NET_VENDOR_RALINK = "y";
+          NET_RALINK_MDIO = "y";
+          NET_RALINK_MDIO_MT7620 = "y";
+          NET_RALINK_MT7620 = "y";
+          SWPHY = "y";
 
-            SPI = "y";
-            MTD_SPI_NOR = "y";
-            SPI_MT7621 = "y"; # } probably don't need both of these
-            SPI_RT2880 = "y"; # }
-            SPI_MASTER = "y";
-            SPI_MEM = "y";
+          SPI = "y";
+          MTD_SPI_NOR = "y";
+          SPI_MT7621 = "y"; # } probably don't need both of these
+          SPI_RT2880 = "y"; # }
+          SPI_MASTER = "y";
+          SPI_MEM = "y";
 
-            MTD = "y";
-            MTD_BLOCK = "y"; # fix undefined ref to register_mtd_blktrans_devs
+          MTD = "y";
+          MTD_BLOCK = "y"; # fix undefined ref to register_mtd_blktrans_devs
 
-            EARLY_PRINTK = "y";
+          EARLY_PRINTK = "y";
 
-            NEW_LEDS = "y";
-            LEDS_CLASS = "y"; # required by rt2x00lib
+          NEW_LEDS = "y";
+          LEDS_CLASS = "y"; # required by rt2x00lib
 
-            PRINTK_TIME = "y";
-          }
-          // lib.optionalAttrs (config.system.service ? vlan) {
-            SWCONFIG = "y";
-          };
+          PRINTK_TIME = "y";
+        }
+        // lib.optionalAttrs (config.system.service ? vlan) {
+          SWCONFIG = "y";
+        };
         conditionalConfig = {
           WLAN = {
             WLAN_VENDOR_RALINK = "y";

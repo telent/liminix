@@ -5,7 +5,6 @@
   ...
 }:
 let
-  inherit (pkgs) serviceFns;
   svc = config.system.service;
   inherit (pkgs.pseudofile) dir symlink;
   inherit (pkgs.liminix.services) oneshot target;
