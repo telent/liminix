@@ -25,6 +25,13 @@ oneshot {
   inherit name;
   up = ''
     ${rename}
+    ( cd /proc/sys/net/ipv6/conf/${ifname}
+      ${
+        liminix.writeSysctls {
+          autoconfig = 0;
+          accept_ra = 0;
+        }
+      } )
     ${liminix.networking.ifup name ifname}
   '';
   down = "ip link set down dev ${ifname}";
