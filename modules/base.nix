@@ -185,6 +185,18 @@ in
       };
     };
 
+    early.sysctl.net.ipv6.conf =
+      let
+        v = {
+          autoconf = 0;
+          accept_ra = 0;
+        };
+      in
+      {
+        default = v; # sets values for new interfaces
+        all = v; # probably does nothing
+      };
+
     filesystem = dir {
       dev =
         let
