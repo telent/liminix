@@ -45,6 +45,7 @@ in
     ../hostapd
     ../bridge
     ../dhcp4c
+    ../dhcp6c
     { config.services = hostaps; }
   ];
 
@@ -68,6 +69,11 @@ in
     };
 
     services.dhcpc = svc.dhcp4c.client.build {
+      interface = config.services.int;
+      dependencies = [ config.services.hostname ];
+    };
+
+    services.dhcpc6 = svc.dhcp6c.client.build {
       interface = config.services.int;
       dependencies = [ config.services.hostname ];
     };
