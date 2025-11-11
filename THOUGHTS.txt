@@ -8401,3 +8401,206 @@ the lease-acquired service as a thing (copy the outputs to it)
 ----
 
 yay
+
+Wed Nov  5 18:12:44 GMT 2025
+
+https://www.remlab.net/ndisc6/ could use this to trigger ipv6
+autoconfig on bridge
+
+does a bridge always want to have ipv6 autoconfig?
+
+Thu Nov  6 20:25:49 GMT 2025
+
+- we would like a mechanism for setting sysctls declaratively
+
+- and for the bridge module to use this to set accept_ra=0 on its
+ member interfaces
+
+- noting that the nodes in /proc/sys won't exist until the
+ interfaces are created (which is _probably_ boot time but may be later)
+
+... so maybe a single global attrset for all sysctls isn't the right
+way to go, as we can't apply them all at the same time
+
+the thing that makes the interface also has to apply the sysctls to
+it before bringing it up
+- noting that the liminix service name may not be the ifname
+  if we don't know ifname at compile time (e.g. if the kernel assigns it)
+  then "declarative" becomes problematic
+
+- noting that interfaces can get renamed
+
+annoyingly, there isn't a single parent directory for all the sysctls
+that go with an interface
+
+$ find /proc/sys -name eth1
+/proc/sys/net/ipv4/conf/eth1
+/proc/sys/net/ipv4/neigh/eth1
+/proc/sys/net/ipv6/conf/eth1
+/proc/sys/net/ipv6/neigh/eth1
+
+config.hardware.networkInterfaces.lan =
+  sysctl.ipv6 = {
+     accept_ra = 0;
+  };
+  sysctl.ipv4 = {
+     arp_accept = 0;
+  };
+};
+
+there is copy/paste reuse(sic) between modules/bridge/primary.nix and
+modules/network/link.nix
+
+Fri Nov  7 21:48:12 GMT 2025
+
+we can't just add stuff to config.hardware.networkInterfaces.lan
+because it's not a set of module options, it's a service.
+
+Sat Nov  8 15:54:50 GMT 2025
+
+OK, maybe we should make ipv6 autoconfig default _off_ and have a
+service to turn it on
+
+- dhcp6c can require it
+- wap profile can require it (it should probably be using dhcp6c
+  anyway)
+- router configurations shouldn't be using it anyway
+
+... but actually is there any reason not to enable configuring the
+link-local address?  In practical terms it's really the global address
+(RA/RS) we want to avoid picking up
+
+https://docs.manage.security.cisco.com/cdfmc/c_ipv6_addressing.html
+> For bridge group member interfaces, when you configure the global
+address on the BVI, the Firewall Threat Defense device automatically
+generates link-local addresses for member interfaces.
+
+but
+
+https://wiki.freebsd.org/crest/the-correct-way-to-configure-bridges-in-freebsd-for-ipv6-and-ipv4
+> From IPv6's point of view a bridge interface is a single link (just
+like multiple hosts connected to a physical Ethernet switch), but if
+there are IP addresses configured on the member interfaces of a
+FreeBSD bridge the kernel considers these interfaces as their own
+links with associated link scope. This will cause IPv6 to break. The
+only correct configuration is to have no IP addresses configured on
+the member interfaces. The IP addresses belong exclusively on the
+bridge interface itself.
+
+https://vyos.dev/T2367
+> Bridge members should not have any addresses. If a bridge member has
+an address, the outgoing packets from the router for those addresses
+will leave the interface directly, but all packets coming in to the
+router will be directed up to the bridge. While this technically may
+work if rp_filter is disabled, it's asymmetric behavior that's not
+wanted.
+
+https://github.com/vyos/vyos-1x/pull/371
+> Several protocols require a link-local address to work, including
+RA, NDP, SLAAC, DHCPv6, and OSPF
+
+https://man.freebsd.org/cgi/man.cgi?bridge(4)
+> When the if_bridge interface has IPv6 addresses, IPv6 addresses on the
+member interface will be automatically removed before the interface is
+added.
+
+
+so I think we should default to not having any autoconfig at all,
+then add services
+ - neighbor solicition/advertisement
+ - router solicitation (depend on previous)
+ - slaac (depends router solicitation)
+ - dhcp6c (depends on RS (expect RA packets without A header bits))
+
+when would we want ND without RS? seems it would be a niche case
+
+NDP is applicable to hosts and to routers but they play different
+roles: hosts send RS and routers send RA. That said, dnsmasq will
+deal with RA sending.
+
+decision time: we start with
+
+proc/sys/net/ipv6/conf/all/autoconf = 0
+
+then we make a service something like
+svc.ipv6-autoconfig {
+  interface = ...interfaces.lan;
+  role = "host"; # or "router"; controls accept_ra
+  enable = true; # default
+  sysctl = {
+    # other sysctls that override
+  };
+};
+
+we can make dhcp6c depend on this, or we can include it directly
+if we're on a slaac-only network. do we need a slaac service for
+discoverability?
+
+Sun Nov  9 11:47:47 GMT 2025
+
+the 'address' service manually sets outputs/ifname so it can be used
+in place of a link service. (1) autoconfig should do the same; (2)
+some more general means of delegation would be cool. Ideally it would
+also update if a service changes its outputs
+
+maybe rather than scattering watch-outputs everywhere, this could be
+implemented in the `output`/`output_path` logic itself. Note that the
+fennel stuff reimplements outputs so the logic would have to be
+duplicated there.
+
+Sun Nov  9 11:53:46 GMT 2025
+
+Apropos of nothing, we might potentially be able to improve
+performance by having a lua server process that was able to fork
+for each new lua script.
+
+* client conects on unix socket, passes stdin/out/err fds
+* check the client credentials
+* dup the passed fds onto 0/1/2
+* client sends argv as arg\0arg2\0argn\0\0
+* server unpacks into scriptname, arg array; forks, runs the
+  script
+* on script exit, server closes client connection
+* client exits
+
+This would be better if it could pass _all_ open fds (because e.g.
+forked service might want to send readiness notification on fd 10).
+I think the easiest way to do that is readdir() on /proc/self/fd
+
+It might be necessary to pass some environment variables as well?  Or
+maybe it would be more reasonable to say that scripts are started
+with a vanilla environment
+
+Sun Nov  9 23:01:47 GMT 2025
+
+* There are ways to make interfaces that aren't the link service
+(e.g. bridges, ppp) so we should do the sysctl thing at boot.  Maybe
+add a sysctl config option that's turned into an early service -
+i.e. it runs before any s6-rc stuff
+
+* wap profile needs to add autoconfig service on bridge controller
+(does it? dhcpc depends on it).
+
+* wap profile to get params for ipv4.enable and ipv6.enable
+
+* dnsmasq service potentially should depend on autoconfig with { role =
+"router" }. Or maybe we add this to the forwarding service?
+
+* do we need to change the ppp services? I don't think so because
+  dhcp6c will run on that link anyway
+
+Mon Nov 10 21:26:28 GMT 2025
+
+it's actually quite hard to do this at boot, because the semantics of
+conf/all are very woolly and the only reliable way to e.g. set
+accept_ra=0 is to iterate over each interface name.  Which is a
+problem to do declaratively if you don't kow what they're called.
+
+Plan C: we'll set the sysctls for each interface when we bring it up,
+which will cover interfaces that exist at boot time, *and* we'll set
+the default values at startup, which will cover cases where the
+interface is created after boot (ppp, wwan, bridge etc)
+
+we can't toggle accept_ra in for forwarding module because ipv6
+forwarding setting is system-wide not per-interface. so probably we
+should do it in dhcp6c
