@@ -297,7 +297,7 @@ hostname) and then run
 nix-build  -I liminix-config=./my-router.nix \
   --arg device "import ./devices/gl-ar750" \
   -A outputs.systemConfiguration && \
-result/install.sh root@address-of-the-device 
+result/install.sh root@address-of-the-device
 ----
 
 (This requires the device to be network-accessible from your build
