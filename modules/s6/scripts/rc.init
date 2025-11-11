@@ -27,6 +27,8 @@ if test -c /dev/pmsg0 ; then
     (cat /sys/fs/pstore/* && rm  /sys/fs/pstore/*) > /run/log/previous-boot
 fi
 
+/etc/sysctl.sh
+
 mkdir -m 0751 -p /run/services/outputs
 chgrp system /run/services/outputs
 

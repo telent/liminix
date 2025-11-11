@@ -113,6 +113,7 @@ in
       };
     };
   };
+  imports = [ ./early ];
   config = {
     defaultProfile.packages = with pkgs; [
       s6

@@ -22,6 +22,18 @@ in
       uimage = callPackage ./kernel/uimage.nix { };
       kernel = callPackage ./kernel { };
     };
+    writeSysctls =
+      let
+        inherit (lib) concatStringsSep collect mapAttrsRecursive;
+      in
+      s:
+      concatStringsSep "\n" (
+        collect (x: !builtins.isAttrs x) (
+          mapAttrsRecursive (
+            p: v: "echo ${builtins.toJSON (builtins.toString v)} > ${concatStringsSep "/" p}"
+          ) s
+        )
+      );
     outputRef =
       service: path:
       let
