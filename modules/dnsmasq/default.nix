@@ -15,6 +15,7 @@ let
   inherit (pkgs) liminix;
 in
 {
+  imports = [ ../ipv6-autoconfig ];
   options = {
     system.service.dnsmasq = mkOption {
       type = liminix.lib.types.serviceDefn;

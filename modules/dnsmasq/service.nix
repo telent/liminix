@@ -3,6 +3,7 @@
   dnsmasq,
   serviceFns,
   lib,
+  svc,
 }:
 {
   interface,
@@ -30,10 +31,17 @@ let
       v6s = concatStrings (map (a: ",[${a}]") v6);
     in
     "--dhcp-host=${mac},${v4}${v6s},${name},${builtins.toString leasetime}";
+  autoconfig = svc.ipv6.autoconfig.build {
+    inherit interface;
+    role = "router";
+  };
 in
 longrun {
   inherit name;
-  dependencies = [ interface ];
+  dependencies = [
+    interface
+    autoconfig
+  ];
   run = ''
     ${dnsmasq}/bin/dnsmasq \
     --user=${user} \
