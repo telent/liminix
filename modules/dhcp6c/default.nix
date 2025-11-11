@@ -20,6 +20,9 @@ let
   inherit (pkgs) liminix;
 in
 {
+  imports = [
+    ../ipv6-autoconfig
+  ];
   options = {
     system.service.dhcp6c = {
       client = mkOption { type = liminix.lib.types.serviceDefn; };
