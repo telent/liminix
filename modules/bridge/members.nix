@@ -24,7 +24,6 @@ let
         name = "${primary.name}.member.${member.name}";
         up = ''
           ip link set dev $(output ${member} ifname) master $(output ${primary} ifname)
-          ip -6 route flush dev $(output ${member} ifname)
         '';
         down = "ip link set dev $(output ${member} ifname) nomaster";
       };
