@@ -208,6 +208,8 @@ extraPkgs
     }
   );
 
+  fennel = final.lua53Packages.fennel;
+
   hostapd =
     let
       config = [

@@ -3,13 +3,13 @@
   lib,
   liminix,
   gnumake,
-  fennel,
   pandoc,
   luaPackages,
   asciidoctor,
   borderVmConf,
 }:
 let
+  fennel = luaPackages.fennel;
   json =
     (import liminix {
       inherit borderVmConf;
