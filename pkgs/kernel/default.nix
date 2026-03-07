@@ -1,5 +1,5 @@
 {
-  stdenv,
+  gcc13Stdenv,
   buildPackages,
   writeText,
   lib,
@@ -11,6 +11,7 @@
   targets ? [ "vmlinux" ],
 }:
 let
+  stdenv = gcc13Stdenv;
   writeConfig = import ./write-kconfig.nix { inherit lib writeText; };
   kconfigFile = writeConfig "kconfig" config;
   arch = stdenv.hostPlatform.linuxArch;
