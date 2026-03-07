@@ -124,9 +124,6 @@ extraPkgs
       libedit = null;
       libseccomp = null;
       libcap = null;
-      # should texinfo be in nativeBuildInputs instead of
-      # buildInputs?
-      texinfo = null;
     }
     // lib.optionalAttrs (lib.versionOlder lib.version "24.10") {
       nss = null;
