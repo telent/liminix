@@ -119,7 +119,7 @@
         installPhase = ''
           mkdir $out
 
-          cp ${pkgs.linux-firmware}/lib/firmware/airoha/* $out
+          cp -r ${pkgs.linux-firmware}/lib/firmware/airoha/* $out
         '';
       };
     in
