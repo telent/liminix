@@ -25,23 +25,15 @@ let
       liminix-config = vanilla;
     }).outputs.default;
   tests = import ./tests/ci.nix;
-  jobs =
-    (genAttrs devices for-device)
-    // tests
-    // {
-      buildEnv =
-        (import liminix {
-          inherit borderVmConf;
-          device = import (liminix + "/devices/qemu");
-          liminix-config = vanilla;
-        }).buildEnv;
-      doc = pkgs.callPackage ./doc.nix { inherit liminix borderVmConf; };
-    };
 in
-jobs
-// {
-  all = pkgs.mkShell {
-    name = "all tests";
-    contents = pkgs.lib.collect pkgs.lib.isDerivation jobs;
-  };
-}
+  (genAttrs devices for-device)
+  // tests
+  // {
+    buildEnv =
+      (import liminix {
+        inherit borderVmConf;
+        device = import (liminix + "/devices/qemu");
+        liminix-config = vanilla;
+      }).buildEnv;
+    doc = pkgs.callPackage ./doc.nix { inherit liminix borderVmConf; };
+  }
