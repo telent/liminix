@@ -14,7 +14,7 @@ stdenv.mkDerivation {
     owner = "openwrt";
     repo = "firmware-utils";
     rev = "6a87eaf434cb89d4eba0b811a4b5d158fd9c519f";
-    hash = "";
+    hash = "sha256-3pQKMV5cOl6/wmoh9gs6TTiBco/dhp1VzIsVknYk2tw=";
   };
 
   nativeBuildInputs = [
