@@ -35,7 +35,11 @@ a high-level overview of breaking changes.
 
 Development mostly happens on the `main` branch, which is therefore
 not guaranteed to build or to work on every commit. For the latest
-functioning version, see [the CI system](https://build.liminix.org/jobset/liminix/build) and pick a revision with all jobs green.
+functioning version, see [the CI
+system](https://build.liminix.org/jobset/liminix/build) and pick a
+revision with all jobs green. Note that Liminix `main` branch is built
+against the "unstable" version of nixpkgs/nixos, not against the
+yy.mm release versions.
 
 
 ## Documentation
