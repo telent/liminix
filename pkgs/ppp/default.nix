@@ -1,19 +1,20 @@
 {
   fetchFromGitHub,
-  stdenv,
+  gcc13Stdenv,
   autoreconfHook,
   substituteAll,
 }:
+let stdenv = gcc13Stdenv; in
 stdenv.mkDerivation {
   pname = "ppp";
-  version = "2.5.0";
+  version = "2.5.2";
   nativeBuildInputs = [ autoreconfHook ];
 
   src = fetchFromGitHub {
     repo = "ppp";
     owner = "ppp-project";
-    rev = "ppp-2.5.0";
-    hash = "sha256-J7udiLiJiJ1PzNxD+XYAUPXZ+ABGXt2U3hSFUWJXe94=";
+    rev = "v2.5.2";
+    hash = "sha256-NV8U0F8IhHXn0YuVbfFr992ATQZaXA16bb5hBIwm9Gs=";
   };
 
   configureFlags = [
