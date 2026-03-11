@@ -270,7 +270,7 @@
               minIOSize = "2048";
               logicalEraseBlockSize = "126976";
               physicalEraseBlockSize = "131072";
-              maxLEBcount = "1024"; # guessing
+              maxLEBcount = "1400"; # guessing
             };
 
             defaultOutput = "ubimage";
