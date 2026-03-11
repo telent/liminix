@@ -208,7 +208,19 @@ extraPkgs
     }
   );
 
-  fennel = final.lua53Packages.fennel;
+  fennel =
+    let version = "1.6.1"; in
+    luaHost.pkgs.buildLuaPackage {
+      pname= "fennel";
+      inherit version;
+      src = final.fetchFromSourcehut {
+        owner = "~technomancy";
+        repo = "fennel";
+        rev = version;
+        hash = "sha256-MLXLkRKlxqvEOogM5I4uHxnlRLjK8Pbeq9b1+kAgqFg=";
+      };
+      nativeBuildInputs = [ final.pkgsBuildBuild.lua5_3 ];
+    };
 
   hostapd =
     let
