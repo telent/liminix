@@ -167,24 +167,9 @@ extraPkgs
   dropbear = crossOnly prev.dropbear (
     d:
     d.overrideAttrs (o: rec {
-      # nixpkgs 25.05 contains newer dropbear (2025.87) than this,
-      # we can drop this override when that's ready
-      version = "2024.85";
-      src = final.fetchurl {
-        url = "https://matt.ucc.asn.au/dropbear/releases/dropbear-${version}.tar.bz2";
-        sha256 = "sha256-hrA2xDOmnYnOUeuuM11lxHc4zPkNE+XrD+qDLlVtpQI=";
-      };
-      patches =
-        # in 24.11 we need to update nixpkgs patch for new version of dropbear
-        let
-          passPath = final.runCommand "pass-path" { } ''
-            sed < ${builtins.head o.patches} -e 's,svr-chansession.c,src/svr-chansession.c,g' > $out
-          '';
-        in
-        [
-          (if (lib.versionOlder o.version "2024") then passPath else (builtins.head o.patches))
-          ./pkgs/dropbear/add-authkeyfile-option.patch
-        ];
+      patches = o.patches ++ [
+        ./pkgs/dropbear/add-authkeyfile-option.patch
+      ];
       postPatch = ''
         (echo '#define DSS_PRIV_FILENAME "/run/dropbear/dropbear_dss_host_key"'
          echo '#define RSA_PRIV_FILENAME "/run/dropbear/dropbear_rsa_host_key"'
