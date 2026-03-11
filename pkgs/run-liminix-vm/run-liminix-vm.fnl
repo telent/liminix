@@ -121,7 +121,8 @@
 (local exec-args
        (-> []
            (appendm (. bin options.arch))
-           (appendm ["-echr" "16"])
+           (appendm ["-no-reboot"
+                     "-echr" "16"])
            (appendm options.flags)
            (appendm (if options.phram-address
                         [
