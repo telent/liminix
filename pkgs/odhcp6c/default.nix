@@ -13,8 +13,12 @@ stdenv.mkDerivation {
   src = fetchFromGitHub {
     owner = "openwrt";
     repo = "odhcp6c";
-    rev = "bcd283632ac13391aac3ebdd074d1fd832d76fa3";
-    hash = "sha256-jqxr+N1PffWYmF0F6hJKxRLMN5Ht5WpehK1K2HjL+do=";
+    # this is the last revision before libubox was made a
+    # mandatory dependency
+    # https://github.com/openwrt/odhcp6c/pull/109/commits
+    rev = "5182e2b696ef21cb2df00e8e399e0af7c1b7bf6d";
+
+    hash = "sha256-i4ApAgeJ9tk8cPKgyaOQG9gdQzPjl3BsDWcZOe/INeM=";
   };
   name = "odhcp6c";
   nativeBuildInputs = [ cmake ];
