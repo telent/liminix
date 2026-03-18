@@ -58,6 +58,7 @@ let
                 hash = "sha256-2GOliY4/RUzOgx3rqee3X3szCdUVxYDut7d+XFcUTJw=";
               })
             ];
+            preInstall = "rm src/openssl.c.orig ; chmod +w src/openssl.c";
           });
         };
     };
