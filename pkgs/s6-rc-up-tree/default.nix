@@ -16,7 +16,6 @@ stdenv.mkDerivation {
     cp -p ${
       writeFennel "s6-rc-up-tree" {
         packages = [
-          fennel
           lualinux
         ];
         mainFunction = "run";
