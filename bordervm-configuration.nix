@@ -150,8 +150,10 @@ in
           [ ]
           ++ optional cfg.ethernet.pci.enable "-device vfio-pci,host=${cfg.ethernet.pci.id}"
           ++ optionals cfg.ethernet.usb.enable [
-            "-device usb-ehci,id=ehci"
-            "-device usb-host,bus=ehci.0,vendorid=${cfg.ethernet.usb.vendor},productid=${cfg.ethernet.usb.product}"
+            "-device qemu-xhci"
+            # "-device usb-ehci,id=ehci"
+            # "-device usb-host,bus=ehci.0,vendorid=${cfg.ethernet.usb.vendor},productid=${cfg.ethernet.usb.product}"
+            "-device usb-host,vendorid=${cfg.ethernet.usb.vendor},productid=${cfg.ethernet.usb.product}"
           ]
           ++ [
             "-nographic"
