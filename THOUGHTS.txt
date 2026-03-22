@@ -8557,7 +8557,7 @@ for each new lua script.
 * client conects on unix socket, passes stdin/out/err fds
 * check the client credentials
 * dup the passed fds onto 0/1/2
-* client sends argv as arg\0arg2\0argn\0\0
+* client sends argv as n_args\0arg\0arg2\0argn\0\0
 * server unpacks into scriptname, arg array; forks, runs the
   script
 * on script exit, server closes client connection
@@ -8604,3 +8604,48 @@ interface is created after boot (ppp, wwan, bridge etc)
 we can't toggle accept_ra in for forwarding module because ipv6
 forwarding setting is system-wide not per-interface. so probably we
 should do it in dhcp6c
+
+Fri Nov 14 08:12:08 GMT 2025
+
+thinking about the lua interpreter server and wondering if we could
+write it in rust as an exercise
+
+Sat Dec 13 21:46:15 GMT 2025
+
+what do we need to do?
+
+- find out why wlan5's not in the bridge
+  (because we forgot to add it to the bridge)
+
+- see if it works properly after that
+
+- get rid of debug output
+
+- build it properly, do video
+
+- do rotuer
+
+
+Wed Mar 18 21:35:12 GMT 2026
+
+After much neglect followed by some cursing, liminix now builds with
+nixpkgs-unstable, and I can get back to figuring out what I was doing
+
+It looks like I'd finished making it ship logs to victorialogs, but maybe
+we should think about where victorialogs is hosted because the log server
+shouldn't be depending on the router to get an IP address if the router
+is depending on the log server to work correctly
+
+admittedly the router doesn't (iirc) have a _hard_ dep on working logs,
+but if it's suffering in some way and this means that the victorialogs
+service isn't running either, then we don't have logs to diagnose the
+problem.
+
+So, loghost needs a static ip address, and to be able to answer
+local requests even without an upstream connection.
+
+It would be good if there were also a way to connect to it in such a
+situation that doesn't involve going out to the shed
+
+Also, the log streaming client probably wants to hardcode an ip address
+for loghost.telent.net
