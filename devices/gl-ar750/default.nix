@@ -60,7 +60,7 @@
     }:
     let
       inherit (lib) mkIf;
-      openwrt = pkgs.openwrt;
+      openwrt = pkgs.openwrt_25_12;
       firmwareBlobs = pkgs.pkgsBuildBuild.fetchgit {
         url = "https://git.codelinaro.org/clo/ath-firmware/ath10k-firmware";
         rev = "5d63529ffc6e24974bc7c45b28fd1c34573126eb";
@@ -175,13 +175,14 @@
         appendDTB = true;
       };
       kernel = {
-        # Mainline linux 5.19 doesn't have device-tree support for
+        # Mainline linux 6.12 doesn't have device-tree support for
         # this device or even for the SoC, so we use the extensive
         # OpenWrt kernel patches
+        src = openwrt.kernelSrc;
+        version = openwrt.kernelVersion;
         extraPatchPhase = ''
           ${openwrt.applyPatches.ath79}
           sed -i.bak -e '\,include <linux/hw_random.h>,a #include <linux/gpio/driver.h>'  drivers/net/wireless/ath/ath9k/ath9k.h # context reqd for next patch
-          patch -p1 <  ${openwrt.src}/package/kernel/mac80211/patches/ath9k/552-ath9k-ahb_of.patch
         '';
 
         config = {
