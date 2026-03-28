@@ -70,7 +70,13 @@ stdenv.mkDerivation rec {
     ./cmdline-cookie.patch
     ./mips-malta-fdt-from-bootloader.patch
   ]
-  ++ lib.optional (lib.versionOlder version "5.18.0") ./phram-allow-cached-mappings.patch;
+  ++ lib.optional (lib.versionOlder version "5.18.0")
+    ./phram-allow-cached-mappings.patch
+  ++ lib.optional
+    # this is inexact. kernels new enough to contain 2b0996c7646 but
+    # not new enough to contain 2fa490c0d759191
+    ((lib.versionAtLeast version "6.12.0") && (lib.versionOlder version "6.19.0"))
+    ./ath9k-ahb-replace-id_table-with-of.patch;
 
   # this is here to work around what I think is a bug in nixpkgs
   # packaging of ncurses: it installs pkg-config data files which

@@ -1,0 +1,250 @@
+commit b4206774fe8231187e5863ff861160db77d4960b
+Author: Rosen Penev <rosenp@gmail.com>
+Date:   Sun Apr 20 21:00:44 2025 -0700
+
+    wifi: ath9k: ahb: do ioremap resource in one step
+    
+    Simplifies probe slightly and adds extra error codes.
+    
+    Switching from devm_ioremap to the platform variant ends up calling
+    devm_request_mem_region, which reserves the memory region for the
+    various wmacs. Per board, there is only one wmac and after some fairly
+    thorough analysis, there are no overlapping memory regions between wmacs
+    and other devices on the ahb.
+    
+    Tested on a TP-Link Archer C7v2.
+    
+    Signed-off-by: Rosen Penev <rosenp@gmail.com>
+    Acked-by: Toke Høiland-Jørgensen <toke@toke.dk>
+    Link: https://patch.msgid.link/20250421040044.44887-1-rosenp@gmail.com
+    Signed-off-by: Jeff Johnson <jeff.johnson@oss.qualcomm.com>
+
+diff --git a/drivers/net/wireless/ath/ath9k/ahb.c b/drivers/net/wireless/ath/ath9k/ahb.c
+index d4805e02b927..49b7ab26c477 100644
+--- a/drivers/net/wireless/ath/ath9k/ahb.c
++++ b/drivers/net/wireless/ath/ath9k/ahb.c
+@@ -74,7 +74,6 @@ static int ath_ahb_probe(struct platform_device *pdev)
+ 	void __iomem *mem;
+ 	struct ath_softc *sc;
+ 	struct ieee80211_hw *hw;
+-	struct resource *res;
+ 	const struct platform_device_id *id = platform_get_device_id(pdev);
+ 	int irq;
+ 	int ret = 0;
+@@ -86,16 +85,10 @@ static int ath_ahb_probe(struct platform_device *pdev)
+ 		return -EINVAL;
+ 	}
+ 
+-	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	if (res == NULL) {
+-		dev_err(&pdev->dev, "no memory resource found\n");
+-		return -ENXIO;
+-	}
+-
+-	mem = devm_ioremap(&pdev->dev, res->start, resource_size(res));
+-	if (mem == NULL) {
++	mem = devm_platform_ioremap_resource(pdev, 0);
++	if (IS_ERR(mem)) {
+ 		dev_err(&pdev->dev, "ioremap failed\n");
+-		return -ENOMEM;
++		return PTR_ERR(mem);
+ 	}
+ 
+ 	irq = platform_get_irq(pdev, 0);
+
+commit 5cbfef9039f61691c87f522f8761d628033bc392
+Author: Rosen Penev <rosenp@gmail.com>
+Date:   Sun Jun 8 20:08:47 2025 -0700
+
+    wifi: ath9k: ahb: reorder declarations
+    
+    Easier to look at. Follows netdev style.
+    
+    Also remove ret assignment. Because of all of these devm conversions,
+    ret = 0 is a path that never gets hit. The first time it does it when
+    request_irq fails, but that ends up reassigning it.
+    
+    Signed-off-by: Rosen Penev <rosenp@gmail.com>
+    Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+    Acked-by: Toke Høiland-Jørgensen <toke@toke.dk>
+    Link: https://patch.msgid.link/20250609030851.17739-2-rosenp@gmail.com
+    Signed-off-by: Jeff Johnson <jeff.johnson@oss.qualcomm.com>
+
+diff --git a/drivers/net/wireless/ath/ath9k/ahb.c b/drivers/net/wireless/ath/ath9k/ahb.c
+index 49b7ab26c477..d2a97e74f451 100644
+--- a/drivers/net/wireless/ath/ath9k/ahb.c
++++ b/drivers/net/wireless/ath/ath9k/ahb.c
+@@ -71,14 +71,14 @@ static const struct ath_bus_ops ath_ahb_bus_ops  = {
+ 
+ static int ath_ahb_probe(struct platform_device *pdev)
+ {
+-	void __iomem *mem;
+-	struct ath_softc *sc;
+-	struct ieee80211_hw *hw;
+ 	const struct platform_device_id *id = platform_get_device_id(pdev);
+-	int irq;
+-	int ret = 0;
++	struct ieee80211_hw *hw;
++	struct ath_softc *sc;
+ 	struct ath_hw *ah;
++	void __iomem *mem;
+ 	char hw_name[64];
++	int irq;
++	int ret;
+ 
+ 	if (!dev_get_platdata(&pdev->dev)) {
+ 		dev_err(&pdev->dev, "no platform data specified\n");
+
+commit c8123302c01936d297e22adbd75cad38c5049f92
+Author: Rosen Penev <rosenp@gmail.com>
+Date:   Sun Jun 8 20:08:48 2025 -0700
+
+    wifi: ath9k: ahb: reorder includes
+    
+    Alphabetic includes are easier to look at and to make further changes to
+    them.
+    
+    Signed-off-by: Rosen Penev <rosenp@gmail.com>
+    Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+    Acked-by: Toke Høiland-Jørgensen <toke@toke.dk>
+    Link: https://patch.msgid.link/20250609030851.17739-3-rosenp@gmail.com
+    Signed-off-by: Jeff Johnson <jeff.johnson@oss.qualcomm.com>
+
+diff --git a/drivers/net/wireless/ath/ath9k/ahb.c b/drivers/net/wireless/ath/ath9k/ahb.c
+index d2a97e74f451..1ffec827ed87 100644
+--- a/drivers/net/wireless/ath/ath9k/ahb.c
++++ b/drivers/net/wireless/ath/ath9k/ahb.c
+@@ -16,10 +16,11 @@
+  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  */
+ 
++#include <linux/mod_devicetable.h>
++#include <linux/module.h>
+ #include <linux/nl80211.h>
+ #include <linux/platform_device.h>
+-#include <linux/module.h>
+-#include <linux/mod_devicetable.h>
++
+ #include "ath9k.h"
+ 
+ static const struct platform_device_id ath9k_platform_id_table[] = {
+
+commit 2fa490c0d7591918bed267059700f1c9e505e881
+Author: Rosen Penev <rosenp@gmail.com>
+Date:   Sun Jun 8 20:08:50 2025 -0700
+
+    wifi: ath9k: ahb: replace id_table with of
+    
+    Since 2b0996c7646 , all of this platform code became no-op with no OF
+    replacement. Not only that, there are no users of AHB here. Add an OF
+    match table that mostly mirrors the original platform device id table.
+    Use a qca prefix as is done for the only other property: qca,no-eeprom.
+    Also used qca prefix for ar9530 as the latter seems to be a mistake.
+    
+    This will be used to add ath9k support for the various ath79 devices
+    here.
+    
+    Signed-off-by: Rosen Penev <rosenp@gmail.com>
+    Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+    Acked-by: Toke Høiland-Jørgensen <toke@toke.dk>
+    Link: https://patch.msgid.link/20250609030851.17739-5-rosenp@gmail.com
+    Signed-off-by: Jeff Johnson <jeff.johnson@oss.qualcomm.com>
+
+    [ LIMINIX NOTE: this patch was hand-edited for whitespace and to
+      match .remove_new instead of .remove ]
+
+
+diff --git a/drivers/net/wireless/ath/ath9k/ahb.c b/drivers/net/wireless/ath/ath9k/ahb.c
+index 1ffec827ed87..802e6596a6a8 100644
+--- a/drivers/net/wireless/ath/ath9k/ahb.c
++++ b/drivers/net/wireless/ath/ath9k/ahb.c
+@@ -19,35 +19,18 @@
+ #include <linux/mod_devicetable.h>
+ #include <linux/module.h>
+ #include <linux/nl80211.h>
++#include <linux/of.h>
+ #include <linux/platform_device.h>
+ 
+ #include "ath9k.h"
+ 
+-static const struct platform_device_id ath9k_platform_id_table[] = {
+-	{
+-		.name = "ath9k",
+-		.driver_data = AR5416_AR9100_DEVID,
+-	},
+-	{
+-		.name = "ar933x_wmac",
+-		.driver_data = AR9300_DEVID_AR9330,
+-	},
+-	{
+-		.name = "ar934x_wmac",
+-		.driver_data = AR9300_DEVID_AR9340,
+-	},
+-	{
+-		.name = "qca955x_wmac",
+-		.driver_data = AR9300_DEVID_QCA955X,
+-	},
+-	{
+-		.name = "qca953x_wmac",
+-		.driver_data = AR9300_DEVID_AR953X,
+-	},
+-	{
+-		.name = "qca956x_wmac",
+-		.driver_data = AR9300_DEVID_QCA956X,
+-	},
++static const struct of_device_id ath9k_of_match_table[] = {
++	{ .compatible = "qca,ar9130-wifi", .data = (void *)AR5416_AR9100_DEVID },
++	{ .compatible = "qca,ar9330-wifi", .data = (void *)AR9300_DEVID_AR9330 },
++	{ .compatible = "qca,ar9340-wifi", .data = (void *)AR9300_DEVID_AR9340 },
++	{ .compatible = "qca,qca9530-wifi", .data = (void *)AR9300_DEVID_AR953X },
++	{ .compatible = "qca,qca9550-wifi", .data = (void *)AR9300_DEVID_QCA955X },
++	{ .compatible = "qca,qca9560-wifi", .data = (void *)AR9300_DEVID_QCA956X },
+ 	{},
+ };
+ 
+@@ -72,20 +55,15 @@ static const struct ath_bus_ops ath_ahb_bus_ops  = {
+ 
+ static int ath_ahb_probe(struct platform_device *pdev)
+ {
+-	const struct platform_device_id *id = platform_get_device_id(pdev);
+ 	struct ieee80211_hw *hw;
+ 	struct ath_softc *sc;
+ 	struct ath_hw *ah;
+ 	void __iomem *mem;
+ 	char hw_name[64];
++	u16 dev_id;
+ 	int irq;
+ 	int ret;
+ 
+-	if (!dev_get_platdata(&pdev->dev)) {
+-		dev_err(&pdev->dev, "no platform data specified\n");
+-		return -EINVAL;
+-	}
+-
+ 	mem = devm_platform_ioremap_resource(pdev, 0);
+ 	if (IS_ERR(mem)) {
+ 		dev_err(&pdev->dev, "ioremap failed\n");
+@@ -118,7 +96,8 @@ static int ath_ahb_probe(struct platform_device *pdev)
+ 		goto err_free_hw;
+ 	}
+ 
+-	ret = ath9k_init_device(id->driver_data, sc, &ath_ahb_bus_ops);
++	dev_id = (u16)(kernel_ulong_t)of_device_get_match_data(&pdev->dev);
++	ret = ath9k_init_device(dev_id, sc, &ath_ahb_bus_ops);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "failed to initialize device\n");
+ 		goto err_irq;
+@@ -156,11 +135,11 @@ static struct platform_driver ath_ahb_driver = {
+ 	.remove_new = ath_ahb_remove,
+ 	.driver 	= {
+ 		.name	= "ath9k",
++		.of_match_table = ath9k_of_match_table,
+ 	},
+-	.id_table    = ath9k_platform_id_table,
+ };
+ 
+-MODULE_DEVICE_TABLE(platform, ath9k_platform_id_table);
++MODULE_DEVICE_TABLE(of, ath9k_of_match_table);
+ 
+ int ath_ahb_init(void)
+ {
