@@ -63,8 +63,8 @@
       openwrt = pkgs.openwrt_25_12;
       firmwareBlobs = pkgs.pkgsBuildBuild.fetchgit {
         url = "https://git.codelinaro.org/clo/ath-firmware/ath10k-firmware";
-        rev = "5d63529ffc6e24974bc7c45b28fd1c34573126eb";
-        sha256 = "1bwpifrwl5mvsmbmc81k8l22hmkwk05v7xs8dxag7fgv2kd6lv2r";
+        rev = "e1d4991c717ecb252aeabd5f1a3c97551a1906f2";
+        hash = "sha256-skH12f4ZQouBU6Gb8dgWJYT3kkDFNEq7lg/0RDGJ8LY=";
       };
       firmware = pkgs.stdenv.mkDerivation {
         name = "wlan-firmware";
