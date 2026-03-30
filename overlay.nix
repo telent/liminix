@@ -445,6 +445,7 @@ extraPkgs
     nlsSupport = false;
     translateManpages = false;
     capabilitiesSupport = false;
+    withLastlog = false;
   };
 
   xl2tpd = prev.xl2tpd.overrideAttrs (o: {
