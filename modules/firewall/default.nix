@@ -21,9 +21,6 @@ let
       "nft_fib_ipv6"
       "nf_log_syslog"
 
-      "ip6_tables"
-      "ip_tables"
-      "iptable_nat"
       "nf_conntrack"
       "nf_defrag_ipv4"
       "nf_defrag_ipv6"
@@ -45,10 +42,6 @@ let
       "nft_reject_inet"
       "nft_reject_ipv4"
       "nft_reject_ipv6"
-      "x_tables"
-      "xt_MASQUERADE"
-      "xt_nat"
-      "xt_tcpudp"
     ];
   };
 in
@@ -109,11 +102,6 @@ in
       NF_CONNTRACK = "m";
 
       NETLINK_DIAG = "y";
-
-      IP6_NF_IPTABLES = "m";
-      IP_NF_IPTABLES = "m";
-      IP_NF_NAT = "m";
-      IP_NF_TARGET_MASQUERADE = "m";
 
       NFT_CT = "m";
       NFT_FIB_IPV4 = "m";
