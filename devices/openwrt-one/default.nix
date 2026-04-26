@@ -632,9 +632,8 @@
           tftp = {
             # Should be a segment of free RAM, where the tftp artifact
             # can be stored before unpacking it to the 'hardware.loadAddress'
-            # The 'hardware.loadAddress' is 0x44000000, and the bootlog
-            # suggests it loads the fit to 0x46000000
-            loadAddress = lim.parseInt "0x46000000";
+            # This address is after the reserved-memory regions.
+            loadAddress = lim.parseInt "0x48000000";
           };
           imageFormat = "fit";
           loader.fit.enable = lib.mkDefault true; # override this if you are building tftpboot
