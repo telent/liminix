@@ -8649,3 +8649,102 @@ situation that doesn't involve going out to the shed
 
 Also, the log streaming client probably wants to hardcode an ip address
 for loghost.telent.net
+
+Sat Apr  4 20:24:25 BST 2026
+
+ht8232 rsz #206
+
+TODO
+
+- add levitate to outsdie
+  - could we add levitate to the tftpboot image
+    and use it to write the final image
+  - levitate chroots to a subdir of /run so won't interfere
+    with phram shenanigans
+
+- single source of truth for wifi secrets
+
+- flash outsdie onto gl-ar750
+- unplug it from the serial port
+- upgrade kernel and audit firewall on lenscap
+- upgrade kernel on old outsdie
+- find omnia, plug in, upgrade kernel and install rotuer config
+
+
+## agenix
+
+agenix stores secrets as age-encrypted files in the nix store, using
+ssh hostkeys as the keys. this might not be ideal if our hosts are
+generating their keys at first boot because it means they won't get
+secrets until after they've booted and the pubkey sucked out and
+the secrets re-encrypted and pushed to the device a second time.
+a device with a wired ethernet doesn't need wireless keys for to be
+ssh-accessible but this does sound potentially chicken-eggy
+
+we'd need to create a keypair for the device at provisioning time, and
+bake the private key into the image, but not put it in the nix
+store. Perhaps we could append it to the image when we write it?
+
+I think agenix is tied also to the nixos-rebuild lifecycle, so each
+device would have to be rebuilt to notice when a secret is rotated
+
+## sops
+
+seems to be tailored to the EC2 use case where a hypervisor is
+available to say that the new instance is actually the new instance and not
+an interloper
+
+
+## certifix w/sops
+
+we could use a certifix cert to identify the device to the secrets
+service, using the pre-shared secret
+
+* the master secrets list should be encrypted at rest, but this means
+we don't have to encrypt it for each device, just for the humans and
+for the https server process
+
+* or we could put an age shared private key into the image, then the
+server process wouldn't need to contain all the decrypted secrets
+
+
+Tue Apr 14 13:16:01 BST 2026
+
+we already have a client key that's used for logs. if we ignore the
+maybe-questionable mechanism for ensuring it belongs to the client
+(which is maybe solvable depending on the client hardware/flashing
+mechanism/filesystem etc) we can use it for authenticating access to
+secrets. we can keep our secrets using SOPS, encrypted using
+~whatever~ (age?) , and have an https server that checks the client
+cert. the https server can have a private key which the sops yaml file
+is encrypted for
+
+> aside: we cold improve the ca signing policy if
+>
+> * we had a way of making a temporary unique-per-client shared key that
+> the CA could check, and embedding it into the client image (preferably
+> without putting it in the nix store).  For example, appending it to
+> the image and then having the client scan /dev/mtd3 starting from the
+> end of its filesystem to find it. Finding the end of the filesystem
+> would be fs-dependent (squashfs vs jffs2 vs ubifs vs ...)
+>
+> * or we could rely on functioning uboot with a writable env
+>
+> * or we could embed some other existing unique info into the csr. MAC
+>   address?
+
+on the server side we need
+
+- https and client cert checking
+- store the decrption key securely (e.g. with mlock())
+- decrypt the secrets file and serve it on request
+
+could we use some kind of fancy loopback mounts/private filesystem
+namespace thing to good effect here? I don't think we have a problem
+that they'd solve
+
+we can't just decrypt at startup unless we're going to restart every
+time the file changes, which doesn't seem less complicated as it adds
+some kind of inotify to the thigs that can go wrong.
+
+fennel or rust?
