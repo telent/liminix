@@ -187,6 +187,12 @@ extraPkgs
         configureFlags = o.configureFlags ++ [
           "ac_cv_has_stdatomic=no"
         ];
+        nativeBuildInputs = [
+          # upstream only includes this if enableDebuginfod is true,
+          # but seems it's now needed unconditionally
+          final.buildPackages.pkg-config
+          final.buildPackages.m4
+        ];
       });
     in
     e.override {
