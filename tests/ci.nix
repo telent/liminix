@@ -10,4 +10,5 @@
   tftpboot = import ./tftpboot/test.nix;
   updown = import ./updown/test.nix;
   wlan = import ./wlan/test.nix;
+  gateway = import ./gateway/test.nix;
 }
