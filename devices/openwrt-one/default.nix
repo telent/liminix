@@ -632,8 +632,11 @@
           tftp = {
             # Should be a segment of free RAM, where the tftp artifact
             # can be stored before unpacking it to the 'hardware.loadAddress'
-            # This address is after the reserved-memory regions.
-            loadAddress = lim.parseInt "0x48000000";
+            # This address is after the reserved-memory regions in both
+            # the kernel and OpenWrt's fork of U-Boot.
+            # https://github.com/torvalds/linux/blob/897d54018cc9aa97fd1529ca08a53b429d05a566/arch/arm64/boot/dts/mediatek/mt7981b.dtsi#L72
+            # https://github.com/openwrt/openwrt/blob/14a27ac99d627db519ab3454d98155567c4a8d88/package/boot/uboot-mediatek/patches/052-mt7981-enable-pstore.patch#L30
+            loadAddress = lim.parseInt "0x50000000";
           };
           imageFormat = "fit";
           loader.fit.enable = lib.mkDefault true; # override this if you are building tftpboot
