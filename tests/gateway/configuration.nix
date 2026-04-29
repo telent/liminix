@@ -1,0 +1,180 @@
+# this is, temporarily (as of april 2026), a copy of examples/rotuer.nix
+# without the external dependencies
+
+{
+  config,
+  pkgs,
+  lib,
+  modulesPath,
+  ...
+}:
+let
+  secrets = {
+    domainName = "fake.liminix.org";
+    firewallRules = { };
+    ssid = "NCSC free wifi";
+    wpa_passphrase = "my horse my horse";
+    lan = {
+      prefix = "10.9.8";
+    };
+    l2tp = {
+      name = "hello";
+      password = "jeff wayne";
+    };
+    root =  {
+      #  mkpasswd -m sha512crypt
+      passwd = "$6$6pt0mpbgcB7kC2RJ$kSBoCYGyi1.qxt7dqmexLj1l8E6oTZJZmfGyJSsMYMW.jlsETxdgQSdv6ptOYDM7DHAwf6vLG0pz3UD31XBfC1";
+      openssh.authorizedKeys.keys = [ ];
+    };
+  };
+
+  svc = config.system.service;
+  wirelessConfig = {
+    country_code = "GB";
+    inherit (secrets) wpa_passphrase;
+    wmm_enabled = 1;
+  };
+
+in
+rec {
+  boot = {
+    tftp = {
+      freeSpaceBytes = 3 * 1024 * 1024;
+      serverip = "10.0.0.1";
+      ipaddr = "10.0.0.8";
+    };
+  };
+
+  imports = [
+    "${modulesPath}/profiles/gateway.nix"
+  ];
+  hostname = "rotuer";
+
+  profile.gateway = {
+    lan = {
+      interfaces = with config.hardware.networkInterfaces; [
+        # EDIT: these are the interfaces exposed by the gl.inet gl-ar750:
+        # if your device has more or differently named lan interfaces,
+        # specify them here
+        wlan
+        wlan5
+        lan
+      ];
+      inherit (secrets.lan) prefix;
+      address = {
+        family = "inet";
+        address = "${secrets.lan.prefix}.1";
+        prefixLength = 24;
+      };
+      dhcp = {
+        start = 10;
+        end = 240;
+        hosts =
+          { } // lib.optionalAttrs (builtins.pathExists ./static-leases.nix) (import ./static-leases.nix);
+        localDomain = "lan";
+      };
+    };
+    wan = {
+      # wan interface depends on your upstream - could be dhcp, static
+      # ethernet, a pppoe, ppp over serial, a complicated bonded
+      # failover ... who knows what else?
+      interface = svc.pppoe.build {
+        interface = config.hardware.networkInterfaces.wan;
+        username = secrets.l2tp.name;
+        password = secrets.l2tp.password;
+        bandwidth = 70 * 1000 * 1000;
+      };
+      # once the wan has ipv4 connnectivity, should we run dhcp6
+      # client to potentially get an address range ("prefix
+      # delegation")
+      dhcp6.enable = true;
+    };
+    firewall = {
+      enable = true;
+      rules = secrets.firewallRules;
+    };
+    wireless.networks = {
+      # EDIT: if you have more or fewer wireless radios, here is where
+      # you need to say so.  hostapd tuning is hardware-specific and
+      # left as an exercise for the reader :-).
+
+      "${secrets.ssid}" = {
+        interface = config.hardware.networkInterfaces.wlan;
+        hw_mode = "g";
+        channel = "2";
+        ieee80211n = 1;
+      }
+      // wirelessConfig;
+      "${secrets.ssid}5" = rec {
+        interface = config.hardware.networkInterfaces.wlan5;
+        hw_mode = "a";
+        channel = 36;
+        ht_capab = "[HT40+]";
+        vht_oper_chwidth = 1;
+        vht_oper_centr_freq_seg0_idx = channel + 6;
+        ieee80211n = 1;
+        ieee80211ac = 1;
+      }
+      // wirelessConfig;
+    };
+  };
+
+  services.ntp = svc.ntp.build {
+    user = "root";
+    pools = {
+      "pool.ntp.org" = [ "iburst" ];
+    };
+    makestep = {
+      threshold = 1.0;
+      limit = 3;
+    };
+  };
+
+  services.sshd = svc.ssh.build { };
+
+  users.root = secrets.root;
+
+  defaultProfile.packages = with pkgs; [
+    min-collect-garbage
+    nftables
+    strace
+    tcpdump
+    s6
+  ];
+
+  services.qemu-hyp-route =
+    let
+      interface = config.hardware.networkInterfaces.wan;
+      addr = svc.network.address.build {
+        inherit interface;
+        family = "inet";
+        address = "10.0.0.10";
+        prefixLength = 24;
+      };
+    in
+    svc.network.route.build {
+      target = "10.0.0.1";
+      inherit interface;
+      via = "10.0.0.10";
+      metric = 1;
+      dependencies = [ addr ];
+    };
+
+  logging.shipping = {
+    enable = true;
+    command = ''
+      ${pkgs.s6-networking}/bin/s6-tcpclient 10.0.0.1 9428 ${pkgs.logshippers}/bin/victorialogsend http://loaclhost:9428/insert/jsonline
+    '';
+    dependencies = [ services.qemu-hyp-route ];
+  };
+
+  programs.busybox = {
+    applets = [
+      "fdisk"
+      "sfdisk"
+    ];
+    options = {
+      FEATURE_FANCY_TAIL = "y";
+    };
+  };
+}
