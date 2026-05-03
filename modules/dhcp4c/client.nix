@@ -80,7 +80,9 @@ longrun {
     (in_outputs ${controlled-name}
      cp $(output_path ${service})/* .
      )
+    echo > /proc/self/fd/10
     while sleep 86400 ; do true ; done
   '';
   controller = watcher;
+  notification-fd = 10;
 }
