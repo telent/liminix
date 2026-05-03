@@ -94,7 +94,7 @@ let
     icmp6-ratehook = rateHook6;
     icmp4-ratehook = rateHook4;
   }
-  // (lib.recursiveUpdate extraRules (lib.recursiveUpdate sets rules));
+  // (lib.recursiveUpdate (lib.recursiveUpdate sets rules) extraRules);
   script = firewallgen "firewall1.nft" allRules;
   name = "firewall";
   service = longrun {
