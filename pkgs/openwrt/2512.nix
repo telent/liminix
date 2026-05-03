@@ -50,6 +50,7 @@ let
     patches ${src}/target/linux/generic/pending-${kernelSeries}/*.patch
     patches ${src}/target/linux/generic/hack-${kernelSeries}/*.patch
     patches ${src}/target/linux/${family}/patches-${kernelSeries}/*.patch
+    ${lib.optionalString (family == "mediatek") "patches ${./fixup-731-v6.18-net-mediatek-wed-Introduce-MT7992-WED-support-to-MT7.patch}"}
 
     for kconfig in $(find drivers/net/wireless/ -name Kconfig); do
       sed -i.bak -E -e '/^((\s+))tristate/a\
