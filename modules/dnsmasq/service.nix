@@ -48,6 +48,7 @@ longrun {
     --domain=${domain} \
     --group=${group} \
     --interface=$(output ${interface} ifname) \
+    --bind-interfaces \
     ${lib.concatStringsSep " " (builtins.map (r: "--dhcp-range=${r}") ranges)} \
     ${lib.concatStringsSep " " (builtins.map (r: "--server=${r}") upstreams)} \
     --keep-in-foreground \
