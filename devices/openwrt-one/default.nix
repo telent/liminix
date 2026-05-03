@@ -103,7 +103,7 @@
       ...
     }:
     let
-      openwrt = pkgs.openwrt_24_10;
+      openwrt = pkgs.openwrt_25_12;
       mediatek-firmware = pkgs.stdenv.mkDerivation {
         name = "wlan-firmware";
         phases = [ "installPhase" ];
@@ -152,30 +152,18 @@
             ARCH_CORRECT_STACKTRACE_ON_KRETPROBE = "y";
             ARCH_DEFAULT_KEXEC_IMAGE_VERIFY_SIG = "y";
             ARCH_DMA_ADDR_T_64BIT = "y";
-            ARCH_FORCE_MAX_ORDER = "10";
             ARCH_KEEP_MEMBLOCK = "y";
             ARCH_MEDIATEK = "y";
             ARCH_MHP_MEMMAP_ON_MEMORY_ENABLE = "y";
-            ARCH_MMAP_RND_BITS = "18";
-            ARCH_MMAP_RND_BITS_MAX = "24";
-            ARCH_MMAP_RND_BITS_MIN = "18";
-            ARCH_MMAP_RND_COMPAT_BITS_MIN = "11";
             ARCH_PROC_KCORE_TEXT = "y";
             ARCH_SPARSEMEM_ENABLE = "y";
             ARCH_STACKWALK = "y";
             ARCH_SUSPEND_POSSIBLE = "y";
             ARCH_WANTS_NO_INSTR = "y";
-            ARCH_WANTS_THP_SWAP = "y";
             ARM64 = "y";
-            ARM64_4K_PAGES = "y";
             ARM64_ERRATUM_843419 = "y";
             ARM64_LD_HAS_FIX_ERRATUM_843419 = "y";
-            ARM64_PAGE_SHIFT = "12";
-            ARM64_PA_BITS = "48";
-            ARM64_PA_BITS_48 = "y";
             ARM64_TAGGED_ADDR_ABI = "y";
-            ARM64_VA_BITS = "39";
-            ARM64_VA_BITS_39 = "y";
             ARM_AMBA = "y";
             ARM_ARCH_TIMER = "y";
             ARM_ARCH_TIMER_EVTSTREAM = "y";
@@ -183,7 +171,7 @@
             ARM_GIC_V2M = "y";
             ARM_GIC_V3 = "y";
             ARM_GIC_V3_ITS = "y";
-            ARM_GIC_V3_ITS_PCI = "y";
+            ARM_MEDIATEK_CCI_DEVFREQ = "y";
             ARM_MEDIATEK_CPUFREQ = "y";
             ARM_PMU = "y";
             ARM_PMUV3 = "y";
@@ -202,7 +190,6 @@
             CC_HAVE_SHADOW_CALL_STACK = "y";
             CC_HAVE_STACKPROTECTOR_SYSREG = "y";
             #CC_IMPLICIT_FALLTHROUGH="-Wimplicit-fallthrough=5";
-            CC_NO_ARRAY_BOUNDS = "y";
             CLKSRC_MMIO = "y";
             CLONE_BACKWARDS = "y";
             CMDLINE_OVERRIDE = "y";
@@ -275,6 +262,7 @@
             DCACHE_WORD_ACCESS = "y";
             #DEBUG_INFO="y";
             DEBUG_MISC = "y";
+            DEVFREQ_GOV_PASSIVE = "y";
             DIMLIB = "y";
             DMADEVICES = "y";
             DMATEST = "y";
@@ -302,7 +290,6 @@
             #FW_LOADER_SYSFS="y";
             #GCC11_NO_ARRAY_BOUNDS="y";
             #GCC_ASM_GOTO_OUTPUT_WORKAROUND="y";
-            GCC_SUPPORTS_DYNAMIC_FTRACE_WITH_ARGS = "y";
             GENERIC_ALLOCATOR = "y";
             GENERIC_ARCH_TOPOLOGY = "y";
             GENERIC_BUG = "y";
@@ -361,6 +348,7 @@
             JUMP_LABEL = "y";
             LEDS_PWM = "y";
             LEDS_SMARTRG_LED = "y";
+            LEDS_TRIGGER_PATTERN = "y";
             LIBFDT = "y";
             LOCK_DEBUGGING_SUPPORT = "y";
             LOCK_SPIN_ON_OWNER = "y";
@@ -397,6 +385,7 @@
             MTD_SPI_NOR = "y";
             MTD_SPLIT_FIRMWARE = "y";
             MTD_SPLIT_FIT_FW = "y";
+            MTD_SPLIT_MSTC_BOOT = "y";
             MTD_UBI = "y";
             MTD_UBI_BEB_LIMIT = "20";
             MTD_UBI_BLOCK = "y";
@@ -457,8 +446,6 @@
             PADATA = "y";
             PAGE_POOL = "y";
             PAGE_POOL_STATS = "y";
-            PAGE_SIZE_LESS_THAN_256KB = "y";
-            PAGE_SIZE_LESS_THAN_64KB = "y";
             #PAHOLE_HAS_LANG_EXCLUDE="y";
             PARTITION_PERCPU = "y";
             PCI = "y";
@@ -476,7 +463,6 @@
             PCS_MTK_USXGMII = "y";
             PERF_EVENTS = "y";
             PER_VMA_LOCK = "y";
-            PGTABLE_LEVELS = "3";
             PHYLIB = "y";
             PHYLIB_LEDS = "y";
             PHYLINK = "y";
@@ -492,6 +478,8 @@
             PINCTRL_MTK_V2 = "y";
             PM = "y";
             PM_CLK = "y";
+            PM_DEVFREQ = "y";
+            PM_DEVFREQ_EVENT = "y";
             PM_GENERIC_DOMAINS = "y";
             PM_GENERIC_DOMAINS_OF = "y";
             PM_OPP = "y";
@@ -510,7 +498,6 @@
             PTP_1588_CLOCK_OPTIONAL = "y";
             PWM = "y";
             PWM_MEDIATEK = "y";
-            PWM_SYSFS = "y";
             QUEUED_RWLOCKS = "y";
             QUEUED_SPINLOCKS = "y";
             RANDSTRUCT_NONE = "y";
@@ -576,7 +563,6 @@
             THERMAL_GOV_USER_SPACE = "y";
             THERMAL_HWMON = "y";
             THERMAL_OF = "y";
-            THERMAL_WRITABLE_TRIPS = "y";
             THREAD_INFO_IN_TASK = "y";
             TICK_CPU_ACCOUNTING = "y";
             TIMER_OF = "y";
