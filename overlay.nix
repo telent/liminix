@@ -1,9 +1,10 @@
-final: prev:
+nixpkgs: final: prev:
 let
   isCross = final.stdenv.buildPlatform != final.stdenv.hostPlatform;
   crossOnly = pkg: amendFn: if isCross then (amendFn pkg) else pkg;
   extraPkgs = import ./pkgs/default.nix {
     inherit (final) lib callPackage;
+    inherit nixpkgs;
   };
   inherit (final) fetchpatch lib;
   luaHost =

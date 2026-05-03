@@ -1,4 +1,4 @@
-{ callPackage, lib }:
+{ callPackage, lib, nixpkgs }:
 let
   typeChecked =
     caller: type: value:
@@ -17,7 +17,9 @@ in
 {
   liminix = {
     builders = {
-      squashfs = callPackage ./liminix-tools/builders/squashfs.nix { };
+      squashfs = callPackage ./liminix-tools/builders/squashfs.nix {
+        inherit nixpkgs;
+      };
       dtb = callPackage ./kernel/dtb.nix { };
       uimage = callPackage ./kernel/uimage.nix { };
       kernel = callPackage ./kernel { };
