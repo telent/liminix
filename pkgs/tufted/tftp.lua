@@ -177,9 +177,10 @@ function tftp:handle_RRQ(socket, host, port, source, options)
         end
         log(("coroutine started on %s:%s/"):format(host, port))
         while not done do
-            if tid >= 2^16 then
-                socket:sendto(err("File too big."), host, port)
-                error("File too big.")
+            if tid == 2^16 then
+                -- Roll over the tid. The specific rollover value is unspecified, but we
+                -- assume that the other side is U-Boot which rolls over to 0.
+                tid = 0
             end
             local okay, continue, data = pcall(source, blksize)
             if not okay then
