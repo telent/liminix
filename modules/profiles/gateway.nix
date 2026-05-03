@@ -127,6 +127,11 @@ in
               inherit client;
               interface = config.services.wan;
             })
+            (svc.network.route.build {
+              via = "$(output ${client} route/default/gateway)";
+              target = "default";
+              interface = client;
+            })
           ];
         };
       in
@@ -158,12 +163,6 @@ in
       via = "$(output ${config.services.wan} address)";
       target = "default";
       dependencies = [ config.services.wan ];
-    };
-
-    services.defaultroute6 = svc.network.route.build {
-      via = "$(output ${config.services.wan} ipv6-peer-address)";
-      target = "default";
-      interface = config.services.wan;
     };
 
     services.firewall = mkIf cfg.firewall.enable (
