@@ -111,10 +111,10 @@
  )
 
 (fn dig [tree path]
-  (match path
-    [el & more] (dig (. tree el) more)
-    [el] (. tree el)
-    [] tree))
+  (if tree (match path
+             [el & more] (dig (. tree el) more)
+             [el] (. tree el)
+             [] tree) nil))
 
 (fn %% [fmt ...] (string.format fmt ...))
 
