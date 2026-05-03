@@ -28,7 +28,7 @@ let
         depmod -b . 0.0
 
         (for i in ${lib.concatStringsSep " " targets}; do
-          modprobe -S 0.0 -d  $NIX_BUILD_TOP --show-depends $i | sed "s,^insmod $NIX_BUILD_TOP/lib/modules/0.0/,,g"
+          modprobe -S 0.0 -d  $NIX_BUILD_TOP --show-depends $i | grep "^insmod" | sed "s,^insmod $NIX_BUILD_TOP/lib/modules/0.0/,,g"
         done) | awk '!a[$0]++' > load-order
 
         mkdir $out
