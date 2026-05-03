@@ -28,7 +28,7 @@ oneshot {
     ( cd /proc/sys/net/ipv6/conf/${ifname}
       ${
         liminix.writeSysctls {
-          autoconfig = 0;
+          autoconf = 0;
           accept_ra = 0;
         }
       } )
