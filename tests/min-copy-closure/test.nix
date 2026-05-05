@@ -7,7 +7,7 @@ let
   );
   myPkg = lmx.pkgs.rsyncSmall;
   img = lmx.outputs.vmroot;
-  pkgs = import <nixpkgs> { overlays = [ (import ../../overlay.nix) ]; };
+  pkgs = import <nixpkgs> { overlays = [ (import ../../overlay.nix <nixpkgs>) ]; };
 in
 pkgs.runCommand "check"
   {

@@ -4,7 +4,9 @@ let
       device = import <liminix/devices/qemu>;
       liminix-config = ./configuration.nix;
     }).outputs.vmroot;
-  pkgs = import <nixpkgs> { overlays = [ (import ../../overlay.nix) ]; };
+  pkgs = import <nixpkgs> {
+    overlays = [ ((import ../../overlay.nix) <nixpkgs>) ];
+  };
 in
 pkgs.runCommand "check"
   {

@@ -1,5 +1,5 @@
 let
-  overlay = import <liminix/overlay.nix>;
+  overlay = import <liminix/overlay.nix> <nixpkgs>;
   pkgs = import <nixpkgs> { overlays = [ overlay ]; };
   fixture = pkgs.callPackage ./fixture.nix { };
 in

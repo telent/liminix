@@ -4,7 +4,7 @@ let
       device = import <liminix/devices/qemu>;
       liminix-config = ./configuration.nix;
     }).outputs.default;
-  pkgs = import <nixpkgs> { overlays = [ (import ../../overlay.nix) ]; };
+  pkgs = import <nixpkgs> { overlays = [ (import ../../overlay.nix <nixpkgs>)  ]; };
   inherit (pkgs.pkgsBuildBuild) routeros;
 in
 pkgs.runCommand "check"
