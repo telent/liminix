@@ -1,3 +1,4 @@
+nixpkgs:
 {
   config,
   pkgs,
@@ -65,7 +66,7 @@ in
     };
   };
   imports = [
-    <nixpkgs/nixos/modules/virtualisation/qemu-vm.nix>
+    "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
   ];
   config = {
     boot.kernelParams = [ "loglevel=9" ];

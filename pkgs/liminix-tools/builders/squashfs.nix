@@ -1,6 +1,7 @@
 {
   buildPackages,
   callPackage,
+  nixpkgs,
   pseudofile,
   runCommand,
   writeText,
@@ -9,7 +10,7 @@ filesystem:
 let
   pseudofiles = pseudofile.write "files.pf" filesystem;
 
-  storefs = callPackage <nixpkgs/nixos/lib/make-squashfs.nix> {
+  storefs = callPackage "${nixpkgs}/nixos/lib/make-squashfs.nix" {
     # 1) Every required package is referenced from somewhere
     # outside /nix/store. 2) Every file outside the store is
     # specified by config.filesystem. 3) Therefore, closing over
