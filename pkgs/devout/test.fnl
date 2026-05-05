@@ -173,8 +173,8 @@ MINOR=17")
 
 (example
  "I can subscribe to some search terms and be notified of matching events"
- (var received [])
  (let [db (database)
+       received []
        subscriber (fn [e] (table.insert received e))]
    (db:subscribe :me subscriber {:devname "/dev/sdb1"})
    (db:add sdb1-insert)
@@ -184,8 +184,8 @@ MINOR=17")
 
 (example
  "Subscribers get notifications of prior events for present devices"
- (var received [])
  (let [db (database)
+       received []
        subscriber (fn [e] (table.insert received e))]
    (db:add sdb1-insert)
    (db:add sda-uevent)
@@ -194,8 +194,8 @@ MINOR=17")
 
 (example
  "I can unsubscribe after subscribing"
- (var received [])
  (let [db (database)
+       received []
        subscriber (fn [e] (table.insert received e))]
    (db:subscribe :me subscriber {:devname "/dev/sdb1"})
    (db:unsubscribe :me)
