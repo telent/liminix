@@ -8748,3 +8748,15 @@ time the file changes, which doesn't seem less complicated as it adds
 some kind of inotify to the thigs that can go wrong.
 
 fennel or rust?
+
+Wed Apr 29 11:52:58 BST 2026
+
+I left the slops code on my laptop, but we can fake it using nginx for
+testing purposes
+
+Need
+
+- a source of secrets accessible through bordervm, preferably at the
+same url as it would be in "prod"
+ 
+- for outsdie,          x
