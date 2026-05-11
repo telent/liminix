@@ -276,6 +276,19 @@ extraPkgs
   });
 
   lua = luaHost;
+  luad =
+    let s = final.fetchFromGitea {
+          domain = "gti.telent.net";
+          owner = "dan";
+          repo= "luad";
+          rev = "73efb4223387a64ae11490648b51c632a98e4737";
+          hash = "sha256-gPIrqL5wDTkvkyTIBq6CJwzmEBvhfMBcVh9GYgCVohQ=";
+        };
+    in  (final.callPackage s { lua = luaHost; })
+      .overrideAttrs(o: {
+        RUSTFLAGS = "-C prefer-dynamic";
+        stripAllList = [ "bin" ];
+      });
 
   mtdutils =
     (prev.mtdutils.overrideAttrs (o: {
