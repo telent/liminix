@@ -27,7 +27,7 @@
   installer = "vmroot";
 
   module =
-    { config, lim, ... }:
+    { config, lim, pkgs, ... }:
     {
       imports = [
         ../../modules/arch/aarch64.nix
@@ -53,5 +53,6 @@
           loadAddress = addr;
           entryPoint = addr;
         };
+      system.outputs.u-boot = pkgs.ubootQemuAarch64;
     };
 }
