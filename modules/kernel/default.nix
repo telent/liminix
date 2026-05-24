@@ -130,6 +130,9 @@ in
         # at boot time unless we disable trying to call it.
         # https://lkml.org/lkml/2013/8/5/175
         FW_LOADER_USER_HELPER = "n";
+
+        # SPI NAND access may be slow without this.
+        HIGH_RES_TIMERS = "y";
       };
     };
   };
