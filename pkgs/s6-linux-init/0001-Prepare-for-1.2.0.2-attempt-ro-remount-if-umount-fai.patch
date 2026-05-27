@@ -1,0 +1,38 @@
+From 7329cd1b23ba51c9ea8f526dbd491b8cd9d5b822 Mon Sep 17 00:00:00 2001
+From: Laurent Bercot <ska-skaware@skarnet.org>
+Date: Sat, 23 May 2026 12:30:44 +0000
+Subject: [PATCH]  Prepare for 1.2.0.2; attempt ro remount if umount fails
+
+---
+ src/misc/s6-linux-init-umountall.c | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/src/misc/s6-linux-init-umountall.c b/src/misc/s6-linux-init-umountall.c
+index d4320ad..e7a2f53 100644
+--- a/src/misc/s6-linux-init-umountall.c
++++ b/src/misc/s6-linux-init-umountall.c
+@@ -55,8 +55,19 @@ int main (int argc, char const *const *argv)
+   while (line--)
+     if (umount(sa.s + mountpoints[line]) == -1)
+     {
+-      e++ ;
+-      strerr_warnwu2sys("umount ", sa.s + mountpoints[line]) ;
++      if (errno == EBUSY)
++      {
++        if (mount(0, sa.s + mountpoints[line], 0, MS_REMOUNT | MS_RDONLY, 0) == -1)
++        {
++          e++ ;
++          strerr_warnwusys("read-only remount ", sa.s + mountpoints[line]) ;
++        }
++      }
++      else
++      {
++        e++ ;
++        strerr_warnwu2sys("umount ", sa.s + mountpoints[line]) ;
++      }
+     }
+   stralloc_free(&sa) ;
+   return e ;
+-- 
+2.54.0
+
