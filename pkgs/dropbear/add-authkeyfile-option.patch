@@ -1,18 +1,27 @@
+commit 105b29c579003c08452ed2a9b267653cd870564d
+Author: Daniel Barlow <dan@telent.net>
+Date:   Wed Mar 11 18:13:32 2026 +0000
+
+    add -U otion to set path to authorized_keys file
+    
+    allow %u, %d, %n "format specifiers" in the name so that the user's
+    username/homedir/uid can be embedded into the path
+
 diff --git a/Makefile.in b/Makefile.in
-index fe63a80..b050be3 100644
+index a26f011..e5bb99a 100644
 --- a/Makefile.in
 +++ b/Makefile.in
 @@ -51,7 +51,7 @@ COMMONOBJS = $(patsubst %,$(OBJ_DIR)/%,$(_COMMONOBJS))
  _SVROBJS=svr-kex.o svr-auth.o sshpty.o \
  		svr-authpasswd.o svr-authpubkey.o svr-authpubkeyoptions.o svr-session.o svr-service.o \
  		svr-chansession.o svr-runopts.o svr-agentfwd.o svr-main.o svr-x11fwd.o\
--		svr-tcpfwd.o svr-authpam.o
-+		svr-tcpfwd.o svr-authpam.o pathexpand.o
+-		svr-forward.o svr-tcpfwd.o svr-streamfwd.o svr-authpam.o
++		svr-forward.o svr-tcpfwd.o svr-streamfwd.o svr-authpam.o  pathexpand.o
  SVROBJS = $(patsubst %,$(OBJ_DIR)/%,$(_SVROBJS))
  
  _CLIOBJS=cli-main.o cli-auth.o cli-authpasswd.o cli-kex.o \
 diff --git a/manpages/dropbear.8 b/manpages/dropbear.8
-index 72be0ae..78e0a99 100644
+index fc44db3..bb968dd 100644
 --- a/manpages/dropbear.8
 +++ b/manpages/dropbear.8
 @@ -29,6 +29,9 @@ or automatically with the '-R' option. See "Host Key Files" below.
@@ -181,10 +190,10 @@ index 0000000..07e6955
 +    return filename;		/* caller must free */
 +}
 diff --git a/src/runopts.h b/src/runopts.h
-index c8072b3..73ffdb1 100644
+index 166ad4a..b6772fa 100644
 --- a/src/runopts.h
 +++ b/src/runopts.h
-@@ -124,6 +124,7 @@ typedef struct svr_runopts {
+@@ -125,6 +125,7 @@ typedef struct svr_runopts {
  	char * pidfile;
  
  	char * authorized_keys_dir;
@@ -193,7 +202,7 @@ index c8072b3..73ffdb1 100644
  	char * forced_command;
  	char* interface;
 diff --git a/src/svr-authpubkey.c b/src/svr-authpubkey.c
-index 94ae728..9da6654 100644
+index b0e67ba..d3f4f8f 100644
 --- a/src/svr-authpubkey.c
 +++ b/src/svr-authpubkey.c
 @@ -72,6 +72,7 @@
@@ -202,9 +211,9 @@ index 94ae728..9da6654 100644
  static char * authorized_keys_filepath(void);
 +extern char * pathexpand(char *input);
  static int checkpubkey(const char* keyalgo, unsigned int keyalgolen,
- 		const unsigned char* keyblob, unsigned int keybloblen);
- static int checkpubkeyperms(void);
-@@ -441,6 +442,10 @@ static char *authorized_keys_filepath() {
+ 		const unsigned char* keyblob, unsigned int keybloblen,
+ 		struct PubKeyOptions **ret_options);
+@@ -461,6 +462,10 @@ static char *authorized_keys_filepath() {
  	char *pathname = NULL, *dir = NULL;
  	const char *filename = "authorized_keys";
  
@@ -216,18 +225,18 @@ index 94ae728..9da6654 100644
  				       ses.authstate.pw_dir);
  
 diff --git a/src/svr-runopts.c b/src/svr-runopts.c
-index 8034c50..986c552 100644
+index b5fa462..6d25494 100644
 --- a/src/svr-runopts.c
 +++ b/src/svr-runopts.c
-@@ -150,6 +150,7 @@ void svr_getopts(int argc, char ** argv) {
- 	char* maxauthtries_arg = NULL;
+@@ -157,6 +157,7 @@ void svr_getopts(int argc, char ** argv) {
  	char* reexec_fd_arg = NULL;
  	char* keyfile = NULL;
+ 	char *algo_print_arg = NULL;
 +	char* authkeysfile = NULL;
  	char c;
  #if DROPBEAR_PLUGIN
          char* pubkey_plugin = NULL;
-@@ -177,6 +178,7 @@ void svr_getopts(int argc, char ** argv) {
+@@ -184,6 +185,7 @@ void svr_getopts(int argc, char ** argv) {
  	svr_opts.delay_hostkey = 0;
  	svr_opts.pidfile = expand_homedir_path(DROPBEAR_PIDFILE);
  	svr_opts.authorized_keys_dir = "~/.ssh";
@@ -235,7 +244,7 @@ index 8034c50..986c552 100644
  #if DROPBEAR_SVR_LOCALANYFWD
  	svr_opts.nolocaltcp = 0;
  #endif
-@@ -344,6 +346,9 @@ void svr_getopts(int argc, char ** argv) {
+@@ -362,6 +364,9 @@ void svr_getopts(int argc, char ** argv) {
  				case 'u':
  					/* backwards compatibility with old urandom option */
  					break;
@@ -245,7 +254,7 @@ index 8034c50..986c552 100644
  #if DROPBEAR_PLUGIN
                                  case 'A':
                                          next = &pubkey_plugin;
-@@ -394,6 +399,10 @@ void svr_getopts(int argc, char ** argv) {
+@@ -412,6 +417,10 @@ void svr_getopts(int argc, char ** argv) {
  				addhostkey(keyfile);
  				keyfile = NULL;
  			}
