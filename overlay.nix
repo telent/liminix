@@ -362,12 +362,6 @@ extraPkgs
         tpmSupport = false;
         uringSupport = false;
         capstoneSupport = false;
-      }
-      // lib.optionalAttrs (lib.versionOlder lib.version "24.10") {
-        texinfo = null;
-        nixosTestRunner = true;
-      }
-      // lib.optionalAttrs (lib.versionAtLeast lib.version "25.04") {
         minimal = true;
       };
     in
