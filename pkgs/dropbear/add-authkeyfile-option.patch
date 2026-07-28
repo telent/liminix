@@ -1,14 +1,22 @@
-commit 105b29c579003c08452ed2a9b267653cd870564d
-Author: Daniel Barlow <dan@telent.net>
-Date:   Wed Mar 11 18:13:32 2026 +0000
+From 43f6d11e986666b0871b4e5b03171a4e7e8cb0e9 Mon Sep 17 00:00:00 2001
+From: Daniel Barlow <dan@telent.net>
+Date: Wed, 11 Mar 2026 18:13:32 +0000
+Subject: [PATCH] add -U otion to set path to authorized_keys file
 
-    add -U otion to set path to authorized_keys file
-    
-    allow %u, %d, %n "format specifiers" in the name so that the user's
-    username/homedir/uid can be embedded into the path
+allow %u, %d, %n "format specifiers" in the name so that the user's
+username/homedir/uid can be embedded into the path
+---
+ Makefile.in          |   2 +-
+ manpages/dropbear.8  |   2 +
+ src/pathexpand.c     | 149 +++++++++++++++++++++++++++++++++++++++++++
+ src/runopts.h        |   1 +
+ src/svr-authpubkey.c |   5 ++
+ src/svr-runopts.c    |  25 +++++---
+ 6 files changed, 175 insertions(+), 9 deletions(-)
+ create mode 100644 src/pathexpand.c
 
 diff --git a/Makefile.in b/Makefile.in
-index a26f011..e5bb99a 100644
+index a26f0112..e5bb99a3 100644
 --- a/Makefile.in
 +++ b/Makefile.in
 @@ -51,7 +51,7 @@ COMMONOBJS = $(patsubst %,$(OBJ_DIR)/%,$(_COMMONOBJS))
@@ -21,22 +29,21 @@ index a26f011..e5bb99a 100644
  
  _CLIOBJS=cli-main.o cli-auth.o cli-authpasswd.o cli-kex.o \
 diff --git a/manpages/dropbear.8 b/manpages/dropbear.8
-index fc44db3..bb968dd 100644
+index fdfd2710..34bb3f38 100644
 --- a/manpages/dropbear.8
 +++ b/manpages/dropbear.8
-@@ -29,6 +29,9 @@ or automatically with the '-R' option. See "Host Key Files" below.
- .B \-R
- Generate hostkeys automatically. See "Host Key Files" below.
- .TP
-+.B \-U \fIauthorized_keys
+@@ -35,6 +35,8 @@ below.
+ Generate hostkeys automatically. See
+ .Dq Host Key Files
+ below.
++.Fl U Ar Iauthorized_keys
 +Absolute pathname to file containing authorized user keys. May contain the sequences %d, %n, %u which are expanded to the user's home directory, username and numeric uid respectively. Default '%d/.ssh/authorized_keys'.
-+.TP
- .B \-F
+ .It Fl F
  Don't fork into background.
- .TP
+ .It Fl E
 diff --git a/src/pathexpand.c b/src/pathexpand.c
 new file mode 100644
-index 0000000..07e6955
+index 00000000..07e69553
 --- /dev/null
 +++ b/src/pathexpand.c
 @@ -0,0 +1,149 @@
@@ -190,7 +197,7 @@ index 0000000..07e6955
 +    return filename;		/* caller must free */
 +}
 diff --git a/src/runopts.h b/src/runopts.h
-index 166ad4a..b6772fa 100644
+index 166ad4a7..b6772faf 100644
 --- a/src/runopts.h
 +++ b/src/runopts.h
 @@ -125,6 +125,7 @@ typedef struct svr_runopts {
@@ -202,18 +209,18 @@ index 166ad4a..b6772fa 100644
  	char * forced_command;
  	char* interface;
 diff --git a/src/svr-authpubkey.c b/src/svr-authpubkey.c
-index b0e67ba..d3f4f8f 100644
+index 938b52da..8e25c238 100644
 --- a/src/svr-authpubkey.c
 +++ b/src/svr-authpubkey.c
-@@ -72,6 +72,7 @@
- #define MAX_AUTHKEYS_LINE 4200 /* max length of a line in authkeys */
+@@ -76,6 +76,7 @@
+ #define MAX_AUTHKEYS_LINE 3000
  
  static char * authorized_keys_filepath(void);
 +extern char * pathexpand(char *input);
  static int checkpubkey(const char* keyalgo, unsigned int keyalgolen,
  		const unsigned char* keyblob, unsigned int keybloblen,
  		struct PubKeyOptions **ret_options);
-@@ -461,6 +462,10 @@ static char *authorized_keys_filepath() {
+@@ -465,6 +466,10 @@ static char *authorized_keys_filepath() {
  	char *pathname = NULL, *dir = NULL;
  	const char *filename = "authorized_keys";
  
@@ -225,9 +232,42 @@ index b0e67ba..d3f4f8f 100644
  				       ses.authstate.pw_dir);
  
 diff --git a/src/svr-runopts.c b/src/svr-runopts.c
-index b5fa462..6d25494 100644
+index 2baec6bd..c0c73ee6 100644
 --- a/src/svr-runopts.c
 +++ b/src/svr-runopts.c
+@@ -1,19 +1,19 @@
+ /*
+  * Dropbear - a SSH2 server
+- * 
++ *
+  * Copyright (c) 2002,2003 Matt Johnston
+  * All rights reserved.
+- * 
++ *
+  * Permission is hereby granted, free of charge, to any person obtaining a copy
+  * of this software and associated documentation files (the "Software"), to deal
+  * in the Software without restriction, including without limitation the rights
+  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  * copies of the Software, and to permit persons to whom the Software is
+  * furnished to do so, subject to the following conditions:
+- * 
++ *
+  * The above copyright notice and this permission notice shall be included in
+  * all copies or substantial portions of the Software.
+- * 
++ *
+  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+@@ -65,7 +65,7 @@ static void printhelp(const char * progname) {
+ 					"-D		Directory containing authorized_keys file\n"
+ #endif
+ #if DROPBEAR_DELAY_HOSTKEY
+-					"-R		Create hostkeys as required\n" 
++					"-R		Create hostkeys as required\n"
+ #endif
+ 					"-F		Don't fork into background\n"
+ 					"-e		Pass on server process environment to child process\n"
 @@ -157,6 +157,7 @@ void svr_getopts(int argc, char ** argv) {
  	char* reexec_fd_arg = NULL;
  	char* keyfile = NULL;
@@ -244,6 +284,15 @@ index b5fa462..6d25494 100644
  #if DROPBEAR_SVR_LOCALANYFWD
  	svr_opts.nolocaltcp = 0;
  #endif
+@@ -199,7 +201,7 @@ void svr_getopts(int argc, char ** argv) {
+ 
+ #ifndef DISABLE_ZLIB
+ 	opts.compression = 1;
+-#endif 
++#endif
+ 
+ 	/* not yet
+ 	opts.ipv4 = 1;
 @@ -362,6 +364,9 @@ void svr_getopts(int argc, char ** argv) {
  				case 'u':
  					/* backwards compatibility with old urandom option */
@@ -265,3 +314,24 @@ index b5fa462..6d25494 100644
  		}
  	}
  
+@@ -709,7 +718,7 @@ void load_all_hostkeys() {
+ 	- Otherwise no ecdsa keys will be advertised */
+ 
+ 	/* check if any keys were loaded at startup */
+-	loaded_any_ecdsa = 
++	loaded_any_ecdsa =
+ 		0
+ #if DROPBEAR_ECC_256
+ 		|| svr_opts.hostkey->ecckey256
+@@ -756,7 +765,7 @@ void load_all_hostkeys() {
+ #endif
+ #if DROPBEAR_SK_ECDSA
+ 	disablekey(DROPBEAR_SIGNATURE_SK_ECDSA_NISTP256);
+-#endif 
++#endif
+ #if DROPBEAR_SK_ED25519
+ 	disablekey(DROPBEAR_SIGNATURE_SK_ED25519);
+ #endif
+-- 
+2.54.0
+
