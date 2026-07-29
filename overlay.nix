@@ -12,7 +12,7 @@ let
       l = prev.lua5_3.overrideAttrs (o: {
         name = "lua-tty";
         preBuild = ''
-          makeFlagsArray+=(PLAT="posix" SYSLIBS="-Wl,-E -ldl"  CFLAGS="-O2 -fPIC -DLUA_USE_POSIX -DLUA_USE_DLOPEN")
+          makeFlagsArray+=(PLAT="posix" SYSLIBS="${if final.stdenv.isDarwin then "" else "-Wl,-E "}-ldl"  CFLAGS="-O2 -fPIC -DLUA_USE_POSIX -DLUA_USE_DLOPEN")
         '';
         # lua in nixpkgs has a postInstall stanza that assumes only
         # one output, we need to override that if we're going to
