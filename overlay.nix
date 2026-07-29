@@ -345,8 +345,12 @@ extraPkgs
             hash = "sha256-jOsGka7xLkJznb9M90v5TsJraXXTAj84lcphcSxjYLU=";
           })
         ];
-        buildInputs = o.buildInputs ++ [ final.libslirp ];
+        buildInputs = o.buildInputs ++ [
+          final.libslirp
+          final.libtasn1        # https://github.com/NixOS/nixpkgs/issues/547163
+        ];
       });
+
       overrides = {
         hostCpuTargets = map (f: "${f}-softmmu") [
           "arm"
