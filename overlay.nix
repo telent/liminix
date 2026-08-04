@@ -460,6 +460,7 @@ extraPkgs
     translateManpages = false;
     capabilitiesSupport = false;
     withLastlog = false;
+    shadowSupport = false;      # transitively depends on systemd
   };
 
   xl2tpd = prev.xl2tpd.overrideAttrs (o: {
