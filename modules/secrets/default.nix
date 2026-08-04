@@ -43,6 +43,18 @@ in
         description = "password for HTTP basic auth";
         type = types.nullOr types.str;
       };
+      tlsCertificate = mkOption {
+        description = "client certificate to present for mTLS";
+        type = types.nullOr types.path;
+      };
+      tlsCaCertificate = mkOption {
+        description = "CA certificate";
+        type = types.nullOr types.path;
+      };
+      tlsPrivateKey = mkOption {
+        description = "client private key to use for mTLS";
+        type = types.nullOr types.path;
+      };
       name = mkOption {
         description = "service name";
         type = types.str;
