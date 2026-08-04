@@ -2,7 +2,13 @@ let
   img =
     (import <liminix> {
       device = import <liminix/devices/qemu>;
-      liminix-config = <liminix/vanilla-configuration.nix>;
+      liminix-config = { ... }:
+        {
+          imports = [ <liminix/vanilla-configuration.nix> ];
+          config.hosts = {
+            "127.0.0.53" = [ "apple" "orange" ];
+          };
+        };
     }).outputs.rootfs;
   pkgs = import <nixpkgs> { };
 in
@@ -21,6 +27,9 @@ pkgs.runCommand "check"
     trap 'echo "command $(eval echo $BASH_COMMAND) failed with exit code $?"; exit $?' ERR
     unsquashfs -q -d $destpath -excludes ${img}  /dev
     cd $destpath;
+    hostsfile=$(echo $(readlink etc/hosts) | sed 's/^.//')
+    grep -q -E '127.0.0.1.+localhost' $hostsfile
+    grep -q -E '127.0.0.53.+apple.+orange' $hostsfile
     db=nix/store/*-s6-rc-database/compiled/
     test -d $db
     chmod -R +w $db

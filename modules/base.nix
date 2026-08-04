@@ -32,7 +32,14 @@ in
     system.callService = mkOption {
       type = types.functionTo (types.functionTo types.anything);
     };
-
+    hosts = mkOption {
+      type = with types; attrsOf (listOf str);
+      description = "Locally defined IP address to hostname map";
+      example = {
+        "127.0.0.1" = [ "foo.bar.baz" ];
+        "192.168.0.2" = [ "fileserver.local" "nameserver.local" ];
+      };
+    };
     filesystem = mkOption {
       type = types.anything;
       description = ''
@@ -115,6 +122,8 @@ in
   };
   imports = [ ./early ];
   config = {
+    hosts."127.0.0.1" = [ "localhost" ] ;
+
     defaultProfile.packages = with pkgs; [
       s6
       s6-init-bin
@@ -226,9 +235,11 @@ in
             ''
           );
           hosts = symlink (
-            pkgs.writeText "hosts" ''
-              127.0.0.1  localhost
-            ''
+            pkgs.writeText "hosts" (
+              lib.concatMapAttrsStringSep ""
+                (n: v: "${n}  ${lib.concatStringsSep " " v}\n")
+                config.hosts
+            )
           );
         in
         dir {
