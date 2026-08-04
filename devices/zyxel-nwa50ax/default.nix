@@ -112,9 +112,9 @@
       inherit (pkgs.pseudofile) dir symlink;
       inherit (pkgs) openwrt;
 
-      mac80211 = pkgs.mac80211.override {
-        drivers = [ "mt7915e" ];
-        klibBuild = config.system.outputs.kernel.modulesupport;
+      mac80211 = pkgs.kmodloader.override {
+        targets = [ "mt7915e" ];
+        inherit (config.system.outputs) kernel;
       };
       # v204520220929
       wlan_firmware = pkgs.fetchurl {
@@ -327,7 +327,6 @@
 
           NET = "y";
           ETHERNET = "y";
-          WLAN = "y";
 
           PHYLIB = "y";
           AT803X_PHY = "y";
@@ -363,6 +362,13 @@
         // lib.optionalAttrs (config.system.service ? watchdog) {
           RALINK_WDT = "y"; # watchdog
           MT7621_WDT = "y"; # or it might be this one
+        };
+        conditionalConfig = {
+          WLAN = {
+            WLAN_VENDOR_RALINK = "y";
+            WLAN_VENDOR_MEDIATEK = "y";
+            MT7915E = "m";
+          };
         };
       };
     };
