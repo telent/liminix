@@ -35,6 +35,6 @@ longrun {
   notification-fd = 10;
   run = ''
     ( ${chrony}/bin/chronyc waitsync ; echo > /proc/self/fd/10 ) &
-    ${chrony}/bin/chronyd -f ${config} -d
+    exec ${chrony}/bin/chronyd -f ${config} -d
   '';
 }
