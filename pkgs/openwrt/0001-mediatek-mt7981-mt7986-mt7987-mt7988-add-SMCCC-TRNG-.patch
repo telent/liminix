@@ -1,0 +1,216 @@
+From 476cf6629f7675c9857b59458851dda64de88343 Mon Sep 17 00:00:00 2001
+From: Peter Collingbourne <peter@pcc.me.uk>
+Date: Wed, 20 May 2026 01:31:38 -0700
+Subject: [PATCH] mediatek: mt7981, mt7986, mt7987, mt7988: add SMCCC TRNG
+ support
+
+This will allow U-Boot to provide a KASLR seed to Linux. U-Boot only
+supports the standard SMCCC TRNG interface and not the MTK-specific one.
+
+Tested on MT7981 only.
+
+Signed-off-by: Peter Collingbourne <peter@pcc.me.uk>
+---
+ plat/mediatek/apsoc_common/bl31/mtk_sip_svc.h         |  1 +
+ .../apsoc_common/drivers/trng/v1/{rng.c => trng.c}    | 11 +++++++++++
+ .../apsoc_common/drivers/trng/v2/{rng.c => trng.c}    | 11 +++++++++++
+ plat/mediatek/mt7981/bl31/bl31.mk                     |  3 ++-
+ plat/mediatek/mt7981/platform.mk                      |  2 ++
+ plat/mediatek/mt7986/bl31/bl31.mk                     |  3 ++-
+ plat/mediatek/mt7986/platform.mk                      |  2 ++
+ plat/mediatek/mt7987/bl31/bl31.mk                     |  3 ++-
+ plat/mediatek/mt7987/platform.mk                      |  2 ++
+ plat/mediatek/mt7988/bl31/bl31.mk                     |  3 ++-
+ plat/mediatek/mt7988/platform.mk                      |  2 ++
+ 11 files changed, 39 insertions(+), 4 deletions(-)
+ rename plat/mediatek/apsoc_common/drivers/trng/v1/{rng.c => trng.c} (88%)
+ rename plat/mediatek/apsoc_common/drivers/trng/v2/{rng.c => trng.c} (91%)
+
+diff --git a/plat/mediatek/apsoc_common/bl31/mtk_sip_svc.h b/plat/mediatek/apsoc_common/bl31/mtk_sip_svc.h
+index 6c7ef9bba..7060bd221 100644
+--- a/plat/mediatek/apsoc_common/bl31/mtk_sip_svc.h
++++ b/plat/mediatek/apsoc_common/bl31/mtk_sip_svc.h
+@@ -7,6 +7,7 @@
+ #define MTK_SIP_SVC_H
+ 
+ #include <stdint.h>
++#include <common/runtime_svc.h>
+ #include <lib/smccc.h>
+ #include <lib/utils_def.h>
+ 
+diff --git a/plat/mediatek/apsoc_common/drivers/trng/v1/rng.c b/plat/mediatek/apsoc_common/drivers/trng/v1/trng.c
+similarity index 88%
+rename from plat/mediatek/apsoc_common/drivers/trng/v1/rng.c
+rename to plat/mediatek/apsoc_common/drivers/trng/v1/trng.c
+index 6e6977ac2..1d4e76b28 100644
+--- a/plat/mediatek/apsoc_common/drivers/trng/v1/rng.c
++++ b/plat/mediatek/apsoc_common/drivers/trng/v1/trng.c
+@@ -68,3 +68,14 @@ uint32_t plat_get_rnd(uint32_t *val)
+ 
+ 	return ret;
+ }
++
++bool plat_get_entropy(uint64_t *val)
++{
++	uint32_t lo, hi;
++
++	if (plat_get_rnd(&lo) || plat_get_rnd(&hi))
++		return false;
++
++	*val = (((uint64_t)hi) << 32) | lo;
++	return true;
++}
+diff --git a/plat/mediatek/apsoc_common/drivers/trng/v2/rng.c b/plat/mediatek/apsoc_common/drivers/trng/v2/trng.c
+similarity index 91%
+rename from plat/mediatek/apsoc_common/drivers/trng/v2/rng.c
+rename to plat/mediatek/apsoc_common/drivers/trng/v2/trng.c
+index dbcad8cc5..ed784cb58 100644
+--- a/plat/mediatek/apsoc_common/drivers/trng/v2/rng.c
++++ b/plat/mediatek/apsoc_common/drivers/trng/v2/trng.c
+@@ -87,3 +87,14 @@ uint32_t plat_get_rnd(uint32_t *val)
+ 
+ 	return ret;
+ }
++
++bool plat_get_entropy(uint64_t *val)
++{
++	uint32_t lo, hi;
++
++	if (plat_get_rnd(&lo) || plat_get_rnd(&hi))
++		return false;
++
++	*val = (((uint64_t)hi) << 32) | lo;
++	return true;
++}
+diff --git a/plat/mediatek/mt7981/bl31/bl31.mk b/plat/mediatek/mt7981/bl31/bl31.mk
+index 42ba3e8f0..28ba620c2 100644
+--- a/plat/mediatek/mt7981/bl31/bl31.mk
++++ b/plat/mediatek/mt7981/bl31/bl31.mk
+@@ -19,7 +19,7 @@ BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
+ 				lib/cpus/aarch64/cortex_a53.S			\
+ 				plat/common/plat_gicv3.c			\
+ 				$(APSOC_COMMON)/drivers/uart/aarch64/hsuart.S	\
+-				$(APSOC_COMMON)/drivers/trng/v2/rng.c		\
++				$(APSOC_COMMON)/drivers/trng/v2/trng.c		\
+ 				$(APSOC_COMMON)/drivers/wdt/mtk_wdt.c		\
+ 				$(APSOC_COMMON)/bl31/mtk_sip_svc.c		\
+ 				$(APSOC_COMMON)/bl31/mtk_boot_next.c		\
+@@ -28,6 +28,7 @@ BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
+ 				$(APSOC_COMMON)/bl31/plat_topology.c		\
+ 				$(APSOC_COMMON)/bl31/mtk_gic_v3.c		\
+ 				$(APSOC_COMMON)/bl31/plat_pm.c			\
++				$(MTK_PLAT)/drivers/rng/rng.c			\
+ 				$(MTK_PLAT_SOC)/aarch64/plat_helpers.S		\
+ 				$(MTK_PLAT_SOC)/aarch64/platform_common.c	\
+ 				$(MTK_PLAT_SOC)/bl31/bl31_plat_setup.c		\
+diff --git a/plat/mediatek/mt7981/platform.mk b/plat/mediatek/mt7981/platform.mk
+index 5c105d211..4fe95e2c7 100644
+--- a/plat/mediatek/mt7981/platform.mk
++++ b/plat/mediatek/mt7981/platform.mk
+@@ -8,6 +8,8 @@ MTK_PLAT		:=	plat/mediatek
+ MTK_PLAT_SOC		:=	$(MTK_PLAT)/$(PLAT)
+ APSOC_COMMON		:=	$(MTK_PLAT)/apsoc_common
+ 
++TRNG_SUPPORT		:=	1
++
+ # Enable workarounds for selected Cortex-A53 erratas.
+ ERRATA_A53_826319	:=	1
+ ERRATA_A53_836870	:=	1
+diff --git a/plat/mediatek/mt7986/bl31/bl31.mk b/plat/mediatek/mt7986/bl31/bl31.mk
+index 7ab7a5cab..2fa6e75f9 100644
+--- a/plat/mediatek/mt7986/bl31/bl31.mk
++++ b/plat/mediatek/mt7986/bl31/bl31.mk
+@@ -27,7 +27,8 @@ BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
+ 				$(APSOC_COMMON)/bl31/plat_topology.c		\
+ 				$(APSOC_COMMON)/bl31/mtk_gic_v3.c		\
+ 				$(APSOC_COMMON)/bl31/plat_pm.c			\
+-				$(APSOC_COMMON)/drivers/trng/v1/rng.c		\
++				$(APSOC_COMMON)/drivers/trng/v1/trng.c		\
++				$(MTK_PLAT)/drivers/rng/rng.c			\
+ 				$(MTK_PLAT_SOC)/aarch64/plat_helpers.S		\
+ 				$(MTK_PLAT_SOC)/aarch64/platform_common.c	\
+ 				$(MTK_PLAT_SOC)/bl31/bl31_plat_setup.c		\
+diff --git a/plat/mediatek/mt7986/platform.mk b/plat/mediatek/mt7986/platform.mk
+index ba11e7898..b5a43cb0d 100644
+--- a/plat/mediatek/mt7986/platform.mk
++++ b/plat/mediatek/mt7986/platform.mk
+@@ -8,6 +8,8 @@ MTK_PLAT		:=	plat/mediatek
+ MTK_PLAT_SOC		:=	$(MTK_PLAT)/$(PLAT)
+ APSOC_COMMON		:=	$(MTK_PLAT)/apsoc_common
+ 
++TRNG_SUPPORT		:=	1
++
+ # Enable workarounds for selected Cortex-A53 erratas.
+ ERRATA_A53_826319	:=	1
+ ERRATA_A53_836870	:=	1
+diff --git a/plat/mediatek/mt7987/bl31/bl31.mk b/plat/mediatek/mt7987/bl31/bl31.mk
+index 96ad51432..719b141ca 100644
+--- a/plat/mediatek/mt7987/bl31/bl31.mk
++++ b/plat/mediatek/mt7987/bl31/bl31.mk
+@@ -19,7 +19,7 @@ BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
+ 				$(CPU_SOURCES)					\
+ 				plat/common/plat_gicv3.c			\
+ 				$(APSOC_COMMON)/drivers/uart/aarch64/hsuart.S	\
+-				$(APSOC_COMMON)/drivers/trng/v2/rng.c		\
++				$(APSOC_COMMON)/drivers/trng/v2/trng.c		\
+ 				$(APSOC_COMMON)/drivers/wdt/mtk_wdt.c		\
+ 				$(APSOC_COMMON)/bl31/mtk_sip_svc.c		\
+ 				$(APSOC_COMMON)/bl31/mtk_boot_next.c		\
+@@ -28,6 +28,7 @@ BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
+ 				$(APSOC_COMMON)/bl31/plat_topology.c		\
+ 				$(APSOC_COMMON)/bl31/mtk_gic_v3.c		\
+ 				$(APSOC_COMMON)/bl31/plat_pm.c			\
++				$(MTK_PLAT)/drivers/rng/rng.c			\
+ 				$(MTK_PLAT_SOC)/aarch64/plat_helpers.S		\
+ 				$(MTK_PLAT_SOC)/aarch64/platform_common.c	\
+ 				$(MTK_PLAT_SOC)/bl31/bl31_plat_setup.c		\
+diff --git a/plat/mediatek/mt7987/platform.mk b/plat/mediatek/mt7987/platform.mk
+index 1b0d4bedd..82913b9d5 100644
+--- a/plat/mediatek/mt7987/platform.mk
++++ b/plat/mediatek/mt7987/platform.mk
+@@ -8,6 +8,8 @@ MTK_PLAT		:=	plat/mediatek
+ MTK_PLAT_SOC		:=	$(MTK_PLAT)/$(PLAT)
+ APSOC_COMMON		:=	$(MTK_PLAT)/apsoc_common
+ 
++TRNG_SUPPORT		:=	1
++
+ ifeq ($(FPGA),1)
+ MTK_PLAT_SOC_BSP	:=	$(MTK_PLAT_SOC)/fpga
+ include $(MTK_PLAT_SOC_BSP)/fpga.mk
+diff --git a/plat/mediatek/mt7988/bl31/bl31.mk b/plat/mediatek/mt7988/bl31/bl31.mk
+index 5b5b3cdc1..957a992f8 100644
+--- a/plat/mediatek/mt7988/bl31/bl31.mk
++++ b/plat/mediatek/mt7988/bl31/bl31.mk
+@@ -19,7 +19,7 @@ BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
+ 				lib/cpus/aarch64/cortex_a73.S			\
+ 				plat/common/plat_gicv3.c			\
+ 				$(APSOC_COMMON)/drivers/uart/aarch64/hsuart.S	\
+-				$(APSOC_COMMON)/drivers/trng/v2/rng.c		\
++				$(APSOC_COMMON)/drivers/trng/v2/trng.c		\
+ 				$(APSOC_COMMON)/drivers/wdt/mtk_wdt.c		\
+ 				$(APSOC_COMMON)/bl31/mtk_sip_svc.c		\
+ 				$(APSOC_COMMON)/bl31/mtk_boot_next.c		\
+@@ -28,6 +28,7 @@ BL31_SOURCES		+=	drivers/arm/cci/cci.c				\
+ 				$(APSOC_COMMON)/bl31/plat_topology.c		\
+ 				$(APSOC_COMMON)/bl31/mtk_gic_v3.c		\
+ 				$(APSOC_COMMON)/bl31/plat_pm.c			\
++				$(MTK_PLAT)/drivers/rng/rng.c			\
+ 				$(MTK_PLAT_SOC)/aarch64/plat_helpers.S		\
+ 				$(MTK_PLAT_SOC)/aarch64/platform_common.c	\
+ 				$(MTK_PLAT_SOC)/bl31/bl31_plat_setup.c		\
+diff --git a/plat/mediatek/mt7988/platform.mk b/plat/mediatek/mt7988/platform.mk
+index 6696b0270..56b4d98c4 100644
+--- a/plat/mediatek/mt7988/platform.mk
++++ b/plat/mediatek/mt7988/platform.mk
+@@ -8,6 +8,8 @@ MTK_PLAT		:=	plat/mediatek
+ MTK_PLAT_SOC		:=	$(MTK_PLAT)/$(PLAT)
+ APSOC_COMMON		:=	$(MTK_PLAT)/apsoc_common
+ 
++TRNG_SUPPORT		:=	1
++
+ # Enable workarounds for selected Cortex-A73 erratas.
+ ERRATA_A73_852427	:=	1
+ ERRATA_A73_855423	:=	1
+-- 
+2.54.0
+

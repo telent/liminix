@@ -1,0 +1,157 @@
+From d5888d509cc43942ec98d993f2d129f5c8ddc432 Mon Sep 17 00:00:00 2001
+From: Peter Collingbourne <peter@pcc.me.uk>
+Date: Tue, 5 May 2026 03:38:16 -0700
+Subject: [PATCH] fs: ubifs: fix bugs involving symlinks in ubifs_findfile
+
+When encountering a symlink pointing to an absolute path, ubifs_findfile
+would return the target of the symlink as the result instead of resolving
+any following components in the original path. Fix it by following the
+same code path that is used for relative paths except that we set the
+next inode to the root if we see a leading slash.
+
+The existing code used memcpy and sprintf to copy the symlink target
+into a fixed size stack buffer and was therefore vulnerable to buffer
+overflows with a sufficiently long symlink target. Fix it by using a
+heap buffer for the temporary path during path resolution.
+
+Signed-off-by: Peter Collingbourne <peter@pcc.me.uk>
+Fixes: 9d7952e4c636 ("ubifs: Add support for looking up directory and relative symlinks")
+---
+ fs/ubifs/ubifs.c | 70 +++++++++++++++++++++++++++++++-----------------
+ 1 file changed, 45 insertions(+), 25 deletions(-)
+
+diff --git a/fs/ubifs/ubifs.c b/fs/ubifs/ubifs.c
+index b0cc0d2e1b2..aafbd01a028 100644
+--- a/fs/ubifs/ubifs.c
++++ b/fs/ubifs/ubifs.c
+@@ -505,26 +505,32 @@ static unsigned long ubifs_findfile(struct super_block *sb, char *filename)
+ {
+ 	int ret;
+ 	char *next;
+-	char fpath[128];
+-	char symlinkpath[128];
+-	char *name = fpath;
++	char *buf;
++	char *name;
+ 	unsigned long root_inum = 1;
+ 	unsigned long inum;
+ 	int symlink_count = 0; /* Don't allow symlink recursion */
+-	char link_name[64];
+-
+-	strcpy(fpath, filename);
++	size_t filenamelen;
+ 
+ 	/* Remove all leading slashes */
+-	while (*name == '/')
+-		name++;
++	while (*filename == '/')
++		filename++;
++
++	filenamelen = strlen(filename);
++	buf = kmalloc(filenamelen + 1, GFP_NOFS);
++	if (!buf)
++		return -ENOMEM;
++	memcpy(buf, filename, filenamelen + 1);
++	name = buf;
+ 
+ 	/*
+ 	 * Handle root-direcoty ('/')
+ 	 */
+ 	inum = root_inum;
+-	if (!name || *name == '\0')
++	if (!name || *name == '\0') {
++		kfree(buf);
+ 		return inum;
++	}
+ 
+ 	for (;;) {
+ 		struct inode *inode;
+@@ -537,41 +543,53 @@ static unsigned long ubifs_findfile(struct super_block *sb, char *filename)
+ 			while (*next == '/')
+ 				*(next++) = '\0';
+ 		}
+-
+ 		ret = ubifs_finddir(sb, name, root_inum, &inum);
+-		if (!ret)
++		if (!ret) {
++			kfree(buf);
+ 			return 0;
++		}
+ 		inode = ubifs_iget(sb, inum);
+ 
+-		if (!inode)
++		if (!inode) {
++			kfree(buf);
+ 			return 0;
++		}
+ 		ui = ubifs_inode(inode);
+ 
+ 		if ((inode->i_mode & S_IFMT) == S_IFLNK) {
+-			char buf[128];
++			size_t newbufsize;
++			char *newbuf;
++			char *linkdata = ui->data;
++			size_t linklen = ui->data_len;
+ 
+ 			/* We have some sort of symlink recursion, bail out */
+ 			if (symlink_count++ > 8) {
+ 				ubifs_iput(inode);
+ 				printf("Symlink recursion, aborting\n");
++				kfree(buf);
+ 				return 0;
+ 			}
+-			memcpy(link_name, ui->data, ui->data_len);
+-			link_name[ui->data_len] = '\0';
+ 
+-			if (link_name[0] == '/') {
+-				/* Absolute path, redo everything without
+-				 * the leading slash */
+-				next = name = link_name + 1;
++			while (linklen && *linkdata == '/') {
++				/* Absolute path, i.e. relative to root. */
+ 				root_inum = 1;
++				linkdata++;
++				linklen--;
++			}
++			newbufsize =
++				linklen + 1 + (next ? strlen(next) : 0) + 1;
++			newbuf = kmalloc(newbufsize, GFP_NOFS);
++			if (!newbuf) {
++				kfree(buf);
+ 				ubifs_iput(inode);
+-				continue;
++				return -ENOMEM;
+ 			}
+-			/* Relative to cur dir */
+-			sprintf(buf, "%s/%s",
+-					link_name, next == NULL ? "" : next);
+-			memcpy(symlinkpath, buf, sizeof(buf));
+-			next = name = symlinkpath;
++
++			memcpy(newbuf, linkdata, linklen);
++			sprintf(newbuf + linklen, "/%s", next ?: "");
++			kfree(buf);
++			buf = newbuf;
++			name = newbuf;
+ 			ubifs_iput(inode);
+ 			continue;
+ 		}
+@@ -583,6 +601,7 @@ static unsigned long ubifs_findfile(struct super_block *sb, char *filename)
+ 		/* Found the node!  */
+ 		if (!next || *next == '\0') {
+ 			ubifs_iput(inode);
++			kfree(buf);
+ 			return inum;
+ 		}
+ 
+@@ -590,6 +609,7 @@ static unsigned long ubifs_findfile(struct super_block *sb, char *filename)
+ 		name = next;
+ 	}
+ 
++	kfree(buf);
+ 	return 0;
+ }
+ 
+-- 
+2.54.0
+
