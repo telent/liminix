@@ -85,7 +85,7 @@ in
           cmdline = concatStringsSep " " config.boot.commandLine;
           objcopy = "${pkgs.stdenv.cc.bintools.targetPrefix}objcopy";
           stripAndZip = ''
-            ${objcopy} -O binary -R .reginfo -R .notes -R .note -R .comment -R .mdebug -R .note.gnu.build-id -S vmlinux.elf vmlinux.bin
+            ${objcopy} -O binary -S vmlinux.elf vmlinux.bin
             rm -f vmlinux.bin.lzma ; lzma -k -z  vmlinux.bin
           '';
         in
