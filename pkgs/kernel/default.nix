@@ -32,7 +32,9 @@ stdenv.mkDerivation rec {
     flex
     pkg-config
     openssl
-    ncurses.all
+    ncurses.out
+    ncurses.dev
+    ncurses.man
     perl
   ]);
   CC = "${stdenv.cc.bintools.targetPrefix}gcc";
