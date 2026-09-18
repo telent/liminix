@@ -582,6 +582,18 @@ can add to `+/etc+` or `+/bin+` or other global state, create services,
 all that side-effecty stuff. Generally it should be a package unless it
 can't be.
 
+=== AI policy
+
+The following is not allowed in Liminix:
+
+* Submitting contributions fully or in part created by generative AI tools
+
+* Recommending generative AI tools to other community members for solving problems in the Liminix space.
+
+That's it, there is no nuance.  if you would like to understand this position
+further, I suggest reading the https://docs.postmarketos.org/policies-and-processes/development/ai-policy.html[postmarketOS AI Policy] from which that text was borrowed.
+
+
 === Copyright
 
 The Nix code in Liminix is MIT-licenced (same as Nixpkgs), but the code
