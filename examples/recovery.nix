@@ -92,6 +92,7 @@ rec {
     mnt = dir { };
   };
   rootfsType = "ext4";
+  rootOptions = lib.mkForce "";
 
   # sda is most likely correct for the boot-from-USB case. For tftp
   # it's overridden by the boot.scr anyway, so maybe it all works out
