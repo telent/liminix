@@ -14,12 +14,10 @@ let
   kernelVersion = "6.6.67";
   kernelSeries = lib.versions.majorMinor kernelVersion;
   doPatch = family: ''
-    cp -av ${src}/target/linux/generic/files/* .
-    chmod -R u+w .
-    cp -av ${src}/target/linux/${family}/files/* .
-    chmod -R u+w .
-    test -d ${src}/target/linux/${family}/files-${kernelSeries}/ && cp -av ${src}/target/linux/${family}/files-${kernelSeries}/* .
-    chmod -R u+w .
+    cp -av --no-preserve=mode,ownership ${src}/target/linux/generic/files/* .
+    cp -av --no-preserve=mode,ownership ${src}/target/linux/${family}/files/* .
+    test -d ${src}/target/linux/${family}/files-${kernelSeries}/ && \
+    cp -av --no-preserve=mode,ownership ${src}/target/linux/${family}/files-${kernelSeries}/* .
     patches() {
       for i in $* ; do patch --batch --forward -p1 < $i ;done
     }

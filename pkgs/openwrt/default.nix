@@ -8,12 +8,10 @@ let
     hash = "sha256-kP+cSOB6LiOMWs7g+ji7P7ehiDYDwRdmT4R5jSzw6K4=";
   };
   doPatch = family: ''
-    cp -av ${src}/target/linux/generic/files/* .
-    chmod -R u+w .
-    cp -av ${src}/target/linux/${family}/files/* .
-    chmod -R u+w .
-    test -d ${src}/target/linux/${family}/files-5.15/ && cp -av ${src}/target/linux/${family}/files-5.15/* .
-    chmod -R u+w .
+    cp -av --no-preserve=mode,ownership ${src}/target/linux/generic/files/* .
+    cp -av --no-preserve=mode,ownership ${src}/target/linux/${family}/files/* .
+    test -d ${src}/target/linux/${family}/files-5.15/ && \
+    cp -av --no-preserve=mode,ownership ${src}/target/linux/${family}/files-5.15/* .
     patches() {
       for i in $* ; do patch --batch --forward -p1 < $i ;done
     }
