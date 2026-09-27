@@ -149,13 +149,6 @@ rec {
       dependencies = [ addr ];
     };
 
-  logging.shipping = {
-    enable = true;
-    command = ''
-      ${pkgs.s6-networking}/bin/s6-tcpclient 10.0.0.1 9428 ${pkgs.logshippers}/bin/victorialogsend http://loaclhost:9428/insert/jsonline
-    '';
-    dependencies = [ services.qemu-hyp-route ];
-  };
 
   programs.busybox = {
     applets = [
