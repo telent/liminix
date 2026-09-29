@@ -19,7 +19,6 @@ let
       export SERVICE_STATE=$SERVICE_OUTPUTS/${name}
       ifname=$(output ${interface} ifname)
       test -n "$ifname" && ${odhcp6c}/bin/odhcp6c -s ${odhcp-script} -e -v -p /run/${name}.pid -P0 $ifname
-      )
     '';
     dependencies = [
       interface
