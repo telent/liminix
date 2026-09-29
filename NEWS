@@ -179,3 +179,8 @@ The new module should be _mostly_ backward compatible, but it
 doesn't hold the sr-rc database lock while waiting to get a lease,
 which was a source of boot-time deadlocks
 
+2026-09-28
+
+* DCCP support has been removed from the firewall module, but it's
+  unlikely anyone will notice
+  (https://www.phoronix.com/news/Linux-6.16-Net-Next-Drops-DCCP)
