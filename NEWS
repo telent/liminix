@@ -181,6 +181,8 @@ which was a source of boot-time deadlocks
 
 2026-09-28
 
+* Turris Omnia gets an upgrade to the latest LTS kernel (6.18.54)
+
 * DCCP support has been removed from the firewall module, but it's
   unlikely anyone will notice
   (https://www.phoronix.com/news/Linux-6.16-Net-Next-Drops-DCCP)

@@ -74,8 +74,8 @@ stdenv.mkDerivation rec {
     ./phram-allow-cached-mappings.patch
   ++ lib.optional
     # this is inexact. kernels new enough to contain 2b0996c7646 but
-    # not new enough to contain 2fa490c0d759191
-    ((lib.versionAtLeast version "6.12.0") && (lib.versionOlder version "6.19.0"))
+    # not new enough to contain 2fa490c0d759191 (6.16.0-rc3)
+    ((lib.versionAtLeast version "6.12.0") && (lib.versionOlder version "6.16.0"))
     ./ath9k-ahb-replace-id_table-with-of.patch;
 
   # this is here to work around what I think is a bug in nixpkgs
