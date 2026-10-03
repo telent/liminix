@@ -178,6 +178,7 @@ in
       name = "resolvconf";
       up = ''
         ( in_outputs ${name}
+         chmod 0755 . # dnsmasq user needs this directory to be readable
          echo "nameserver $(output ${config.services.wan} ns1)" > resolv.conf
          echo "nameserver $(output ${config.services.wan} ns2)" >> resolv.conf
          chmod 0444 resolv.conf
