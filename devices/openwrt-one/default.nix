@@ -79,6 +79,54 @@
     you could also install directly from U-Boot:
 
     https://github.com/u-boot/u-boot/blob/master/doc/README.ubi
+
+    === Flashing the bootloader
+
+    Flashing the bootloader (U-Boot and Trusted Firmware-A) is not
+    currently necessary, but may become necessary in at least  some
+    configurations in a future version of Liminix.
+
+    Currently, the main advantage of flashing the bootloader is that it
+    enables KASLR support in Linux. It also avoids the need to manually
+    run the `fw_setenv` commands, as the necessary environment variable
+    update is built into the U-Boot binary.
+
+    The bootloader can be built via the `u-boot` output, e.g.:
+
+    [source,console]
+    ----
+    $ nix-build -I liminix-config=./my-configuration.nix --arg device
+    "import ./devices/openwrt-one" -A outputs.u-boot
+    ----
+
+    To flash the bootloader, set up a TFTP server, run the commands in
+    `result/flash.scr` from U-Boot and reboot.
+
+    The `u-boot` output can also be used in the following ways:
+
+    1. Chain load U-Boot from a running U-Boot. This can be used to
+       test changes to U-Boot without flashing the bootloader. To do this,
+       run the commands in `result/boot.scr` from U-Boot.
+
+    2. Send the bootloader over the serial port and boot it. This can
+       be used to test changes to U-Boot or Trusted Firmware-A without
+       flashing the bootloader, or to recover from flashing a broken
+       bootloader. To do this, remove power from the target device,
+       start the command `result/uartboot.sh` passing as an argument the
+       path to the device node for the serial port (e.g. `/dev/ttyACM0`),
+       and then apply power.
+
+       U-Boot will start running on the target device as soon as
+       `uartboot.sh` exits, so you may need to interrupt autoboot to
+       issue your testing or recovery commands. To do this, you can
+       issue a command such as the following (substitute `tio` with your
+       preferred tool for connecting to the serial port), and be ready
+       to interrupt autoboot when your serial port tool starts:
+
+    [source,console]
+    ----
+    $ result/uartboot.sh /dev/ttyACM0 && tio /dev/ttyACM0
+    ----
   '';
 
   system = {
@@ -748,6 +796,21 @@
                 };
               };
           };
+        system.outputs.u-boot = openwrt.buildMediatekBootloader rec {
+          inherit (config.boot.tftp) loadAddress serverip ipaddr;
+          ubootDefconfig = "mt7981_openwrt-one-spi-nand_defconfig";
+          ubootenv = {
+            boot_production = "led white on ; ubifsmount ubi0:liminix && ubifsload \${loadaddr} boot/fit && bootm \${loadaddr}";
+          };
+          tfaPlatform = "mt7981";
+          tfaMakeFlags = [
+            "BOOT_DEVICE=spim-nand"
+            "DRAM_USE_DDR4=1"
+            "HAVE_DRAM_OBJ_FILE=yes"
+            "UBI=1"
+            "OVERRIDE_UBI_START_ADDR=0x100000"
+          ];
+        };
       };
     };
 }
