@@ -321,11 +321,12 @@ extraPkgs
       # as a dependency
       preConfigure =
         let
-          arch = if stdenv.hostPlatform.gcc ? arch then "-march=${stdenv.hostPlatform.gcc.arch}" else "";
-          soft = if arch == "-march=24kc" then "-msoft-float" else "";
+          cflags = if stdenv.hostPlatform.gcc ? arch then "-march=${stdenv.hostPlatform.gcc.arch}" else "";
+          cflags' = if cflags == "-march=24kc" then "${cflags} -msoft-float" else cflags;
         in
         ''
-          configureFlagsArray+=(no-threads no-asm CFLAGS="${arch} ${soft}")
+          CFLAGS="${cflags'}"
+          configureFlagsArray+=(no-threads no-asm )
         '';
       # don't need or want this bash script
       postInstall = o.postInstall + "rm $bin/bin/c_rehash\n";
