@@ -157,7 +157,7 @@ extraPkgs
     let
       d = prev.dnsmasq.overrideAttrs (o: {
         preBuild = ''
-          makeFlagsArray=("COPTS=")
+          makeFlagsArray=("COPTS=-DNO_INOTIFY")
         '';
       });
     in
