@@ -6,7 +6,7 @@
 let
   conf = eval.config;
   rootDir = builtins.toPath ./..;
-  stripAnyPrefixes = lib.flip (lib.fold lib.removePrefix) [ "${rootDir}/" ];
+  stripAnyPrefixes = lib.flip (lib.foldr lib.removePrefix) [ "${rootDir}/" ];
   optToDoc = name: opt: {
     inherit name;
     description = opt.description or null;
