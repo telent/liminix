@@ -192,10 +192,10 @@
         kernel = {
           src = pkgs.pkgsBuildBuild.fetchurl {
             name = "linux.tar.gz";
-            url = "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.54.tar.gz";
-            hash = "sha256-rHSOttt5N+piPpXCEP6aELvvOzXX+kmoBCkcoP1kOvk=";
+            url = "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.60.tar.gz";
+            hash = "sha256-7TrPeZnNxUGUEDXH2hT0qpFM6bl6bIMV/FMLVK1Ik1U=";
           };
-          version = "6.18.54";
+          version = "6.18.60";
           config = {
             PCI = "y";
             OF = "y";
