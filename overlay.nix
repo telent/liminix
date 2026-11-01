@@ -99,7 +99,7 @@ extraPkgs
       gnutls = null;
       libedit = null;
       libseccomp = null;
-      libcap = null;
+      libcap = final.pkgsStatic.libcap;
     }
     // lib.optionalAttrs (lib.versionOlder lib.version "24.10") {
       nss = null;
