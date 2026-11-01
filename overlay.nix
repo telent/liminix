@@ -250,8 +250,9 @@ extraPkgs
     doCheck = false;
   });
 
-  libpcap = crossOnly prev.libpcap (d: d.override { rdma-core = null; } );
   libcap = crossOnly prev.libcap (d: d.override { withGo = false; usePam = false; });
+
+  libpcap = crossOnly prev.libpcap (d: d.override { rdma-core = null; withRdma = false; } );
 
   lua = crossOnly prev.lua5_3 (_: luaHost);
   luad =
