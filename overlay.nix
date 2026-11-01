@@ -64,32 +64,6 @@ let
         };
     };
 
-  s6 = prev.s6.overrideAttrs (
-    o:
-    let
-      patch = fetchpatch {
-        # add "p" directive in s6-log
-        url = "https://github.com/skarnet/s6/commit/ddc76841398dfd5e18b22943727ad74b880236d3.patch";
-        hash = "sha256-fBtUinBdp5GqoxgF6fcR44Tu8hakxs/rOShhuZOgokc=";
-      };
-      patch_needed = builtins.compareVersions o.version "2.11.1.2" <= 0;
-    in
-    {
-      configureFlags =
-        (builtins.filter (x: (builtins.match ".*shared.*" x) == null) o.configureFlags)
-        ++ [
-          "--disable-allstatic"
-          "--disable-static"
-          "--enable-shared"
-        ];
-      hardeningDisable = [ "all" ];
-      stripAllList = [
-        "sbin"
-        "bin"
-      ];
-      patches = (if o ? patches then o.patches else [ ]) ++ (if patch_needed then [ patch ] else [ ]);
-    }
-  );
 in
 extraPkgs
 // {
@@ -384,13 +358,40 @@ extraPkgs
     in
     r.override { openssl = null; };
 
-  inherit s6;
+  skawarePackages = prev.skawarePackages.overrideScope (sfinal: sprev:
+    let tripleize  = flags:
+          builtins.map
+            (f : if (builtins.match "--with-pkgconfig.*" f) != null
+                 then  "--with-pkgconfig=${final.stdenv.cc.targetPrefix}pkg-config"
+                 else f)
+            flags;
+        fix = o: { configureFlags = tripleize o.configureFlags; };
+    in {
+      s6 = sprev.s6.overrideAttrs (
+        o:
+        {
+          configureFlags = tripleize o.configureFlags;
+          stripAllList = [
+            "sbin"
+            "bin"
+          ];
+        });
 
-  s6-rc = prev.s6-rc.override {
-    skawarePackages = prev.skawarePackages // {
-      inherit s6;
-    };
-  };
+    execline = sprev.execline.overrideAttrs (o: {
+      configureFlags = tripleize o.configureFlags;
+      postInstall =
+        builtins.replaceStrings
+          ["(pkg-config "]
+          ["(${final.stdenv.cc.targetPrefix}pkg-config "]
+          o.postInstall;
+    });
+
+    s6-rc = sprev.s6-rc.overrideAttrs fix;
+    s6-networking = sprev.s6-networking.overrideAttrs fix;
+    s6-dns = sprev.s6-dns.overrideAttrs fix;
+    s6-linux-init = sprev.s6-linux-init.overrideAttrs fix;
+  });
+
 
   strace = prev.strace.override { libunwind = null; };
 
