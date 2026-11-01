@@ -99,7 +99,6 @@ extraPkgs
       gnutls = null;
       libedit = null;
       libseccomp = null;
-      libcap = final.pkgsStatic.libcap;
     }
     // lib.optionalAttrs (lib.versionOlder lib.version "24.10") {
       nss = null;
@@ -252,6 +251,7 @@ extraPkgs
   });
 
   libpcap = crossOnly prev.libpcap (d: d.override { rdma-core = null; } );
+  libcap = crossOnly prev.libcap (d: d.override { withGo = false; usePam = false; });
 
   lua = crossOnly prev.lua5_3 (_: luaHost);
   luad =
