@@ -215,6 +215,8 @@ extraPkgs
       nativeBuildInputs = [ final.pkgsBuildBuild.lua5_3 ];
     };
 
+  fetch-freebsd = extraPkgs.fetch-freebsd.override { openssl = final.opensslNoThreads; };
+
   hostapd =
     let
       config = [
@@ -313,6 +315,9 @@ extraPkgs
       "--without-cli"
     ];
   });
+
+  nginx-small = extraPkgs.nginx-small.override { openssl = final.opensslNoThreads; };
+
 
   opensslNoThreads = prev.openssl.overrideAttrs (
     o: with final; {
