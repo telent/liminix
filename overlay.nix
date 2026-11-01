@@ -251,6 +251,8 @@ extraPkgs
     doCheck = false;
   });
 
+  libpcap = crossOnly prev.libpcap (d: d.override { rdma-core = null; } );
+
   lua = crossOnly prev.lua5_3 (_: luaHost);
   luad =
     let s = final.fetchFromGitea {
