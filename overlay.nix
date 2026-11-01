@@ -392,6 +392,7 @@ extraPkgs
     s6-networking = sprev.s6-networking.overrideAttrs fix;
     s6-dns = sprev.s6-dns.overrideAttrs fix;
     s6-linux-init = sprev.s6-linux-init.overrideAttrs fix;
+    mdevd = sprev.mdevd.overrideAttrs fix;
   });
 
 
