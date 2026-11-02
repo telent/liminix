@@ -9,8 +9,8 @@ let
     name = "openwrt-source";
     repo = "openwrt";
     owner = "openwrt";
-    rev = "v25.12.3";
-    hash = "sha256-POlPwrWHH6UPO6I0O9baFED7959vPkuoL1cZITktG9k=";
+    rev = "8303e9b2a004a6c3754aaa1edb32cfc7c0cfe55b";
+    hash = "sha256-ZsfCncw0oIhtjKvDQfYmaE/LYEa5eikq1xSjQPU1BdE=";
   };
   # we don't use different kernel versions for monolith and mac80211 as
   # openwrt does, so we also need an older openwrt version with
@@ -22,7 +22,7 @@ let
     rev = "c8eacec725dce34c7b621f00c9bce814fe413759";
     hash = "sha256-YTfAWmFPXPXFQ56QGRLgCc/QY+RndOdVdcgtBaZsh1E=";
   };
-  kernelVersion = "6.12.85";
+  kernelVersion = "6.12.113";
   kernelSeries = lib.versions.majorMinor kernelVersion;
   doPatch = family: ''
     tar -C ${src}/target/linux/generic/files -cf - . | tar xpf -
@@ -74,7 +74,7 @@ in
   kernelSrc = pkgsBuildBuild.fetchurl {
     name = "linux.tar.gz";
     url = "https://cdn.kernel.org/pub/linux/kernel/v${lib.versions.major kernelVersion}.x/linux-${kernelVersion}.tar.gz";
-    hash = "sha256-bRV7pa8ZHuWf7oSy4VZzqqjuI0emK1Vjr1wnmjg4M+s=";
+    hash = "sha256-QT99n8u9hcmAmHuMy2+yR+nKvZtf3MKS4twdVfQotj0=";
   };
   inherit kernelVersion;
 
