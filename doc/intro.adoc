@@ -24,9 +24,11 @@ https://www.liminix.org/doc/
 === Source code
 
 Liminix source code is held in git, and hosted at
-https://gti.telent.net/dan/liminix, with a mirror at
-https://github.com/telent/liminix. You can clone from either of those
-repos.  For more on this, see <<_contributing>>.
+https://gti.telent.net/dan/liminix. It is mirrored to
+https://github.com/telent/liminix *but as of Oct 2026 this is a manual
+process* - you should check you have the latest, because it might
+not be. You can clone from either of those repos.  For more on this,
+see <<_contributing>>.
 
 === IRC
 
