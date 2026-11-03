@@ -1,0 +1,26 @@
+From 2267b7c8bbfaf29b7eb5d8bd1d08277d84d57d77 Mon Sep 17 00:00:00 2001
+From: Peter Collingbourne <peter@pcc.me.uk>
+Date: Wed, 20 May 2026 04:02:07 -0700
+Subject: [PATCH] Upgrade psci compatible to 1.0
+
+This enables U-Boot to probe for PSCI features such as TRNG.
+---
+ arch/arm/dts/mt7981.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/mt7981.dtsi b/arch/arm/dts/mt7981.dtsi
+index 26e7486eb88..3365733bc21 100644
+--- a/arch/arm/dts/mt7981.dtsi
++++ b/arch/arm/dts/mt7981.dtsi
+@@ -34,7 +34,7 @@
+ 	};
+ 
+ 	psci {
+-		compatible  = "arm,psci-0.2";
++		compatible  = "arm,psci-1.0";
+ 		method      = "smc";
+ 	};
+ 
+-- 
+2.54.0
+
