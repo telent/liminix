@@ -136,6 +136,7 @@ in
     hook = "input";
     rules = [
       (accept "meta l4proto icmpv6")
+      "iifname lo accept"
       "iifname @lan jump input-ip6-lan"
       "iifname @wan jump input-ip6-wan"
       (if allow-incoming then accept "iifname @wan" else "iifname @wan jump incoming-allowed-ip6")

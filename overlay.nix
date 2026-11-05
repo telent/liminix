@@ -64,32 +64,6 @@ let
         };
     };
 
-  s6 = prev.s6.overrideAttrs (
-    o:
-    let
-      patch = fetchpatch {
-        # add "p" directive in s6-log
-        url = "https://github.com/skarnet/s6/commit/ddc76841398dfd5e18b22943727ad74b880236d3.patch";
-        hash = "sha256-fBtUinBdp5GqoxgF6fcR44Tu8hakxs/rOShhuZOgokc=";
-      };
-      patch_needed = builtins.compareVersions o.version "2.11.1.2" <= 0;
-    in
-    {
-      configureFlags =
-        (builtins.filter (x: (builtins.match ".*shared.*" x) == null) o.configureFlags)
-        ++ [
-          "--disable-allstatic"
-          "--disable-static"
-          "--enable-shared"
-        ];
-      hardeningDisable = [ "all" ];
-      stripAllList = [
-        "sbin"
-        "bin"
-      ];
-      patches = (if o ? patches then o.patches else [ ]) ++ (if patch_needed then [ patch ] else [ ]);
-    }
-  );
 in
 extraPkgs
 // {
@@ -125,7 +99,6 @@ extraPkgs
       gnutls = null;
       libedit = null;
       libseccomp = null;
-      libcap = null;
     }
     // lib.optionalAttrs (lib.versionOlder lib.version "24.10") {
       nss = null;
@@ -157,7 +130,7 @@ extraPkgs
     let
       d = prev.dnsmasq.overrideAttrs (o: {
         preBuild = ''
-          makeFlagsArray=("COPTS=")
+          makeFlagsArray=("COPTS=-DNO_INOTIFY")
         '';
       });
     in
@@ -214,6 +187,8 @@ extraPkgs
       };
       nativeBuildInputs = [ final.pkgsBuildBuild.lua5_3 ];
     };
+
+  fetch-freebsd = extraPkgs.fetch-freebsd.override { openssl = final.opensslNoThreads; };
 
   hostapd =
     let
@@ -275,6 +250,10 @@ extraPkgs
     doCheck = false;
   });
 
+  libcap = crossOnly prev.libcap (d: d.override { withGo = false; usePam = false; });
+
+  libpcap = crossOnly prev.libpcap (d: d.override { rdma-core = null; withRdma = false; } );
+
   lua = crossOnly prev.lua5_3 (_: luaHost);
   luad =
     let s = final.fetchFromGitea {
@@ -314,6 +293,9 @@ extraPkgs
     ];
   });
 
+  nginx-small = extraPkgs.nginx-small.override { openssl = final.opensslNoThreads; };
+
+
   opensslNoThreads = prev.openssl.overrideAttrs (
     o: with final; {
       pname = "${o.pname}-nothreads";
@@ -321,11 +303,12 @@ extraPkgs
       # as a dependency
       preConfigure =
         let
-          arch = if stdenv.hostPlatform.gcc ? arch then "-march=${stdenv.hostPlatform.gcc.arch}" else "";
-          soft = if arch == "-march=24kc" then "-msoft-float" else "";
+          cflags = if stdenv.hostPlatform.gcc ? arch then "-march=${stdenv.hostPlatform.gcc.arch}" else "";
+          cflags' = if cflags == "-march=24kc" then "${cflags} -msoft-float" else cflags;
         in
         ''
-          configureFlagsArray+=(no-threads no-asm CFLAGS="${arch} ${soft}")
+          CFLAGS="${cflags'}"
+          configureFlagsArray+=(no-threads no-asm )
         '';
       # don't need or want this bash script
       postInstall = o.postInstall + "rm $bin/bin/c_rehash\n";
@@ -378,13 +361,41 @@ extraPkgs
     in
     r.override { openssl = null; };
 
-  inherit s6;
+  skawarePackages = prev.skawarePackages.overrideScope (sfinal: sprev:
+    let tripleize  = flags:
+          builtins.map
+            (f : if (builtins.match "--with-pkgconfig.*" f) != null
+                 then  "--with-pkgconfig=${final.stdenv.cc.targetPrefix}pkg-config"
+                 else f)
+            flags;
+        fix = o: { configureFlags = tripleize o.configureFlags; };
+    in {
+      s6 = sprev.s6.overrideAttrs (
+        o:
+        {
+          configureFlags = tripleize o.configureFlags;
+          stripAllList = [
+            "sbin"
+            "bin"
+          ];
+        });
 
-  s6-rc = prev.s6-rc.override {
-    skawarePackages = prev.skawarePackages // {
-      inherit s6;
-    };
-  };
+    execline = sprev.execline.overrideAttrs (o: {
+      configureFlags = tripleize o.configureFlags;
+      postInstall =
+        builtins.replaceStrings
+          ["(pkg-config "]
+          ["(${final.stdenv.cc.targetPrefix}pkg-config "]
+          o.postInstall;
+    });
+
+    s6-rc = sprev.s6-rc.overrideAttrs fix;
+    s6-networking = sprev.s6-networking.overrideAttrs fix;
+    s6-dns = sprev.s6-dns.overrideAttrs fix;
+    s6-linux-init = sprev.s6-linux-init.overrideAttrs fix;
+    mdevd = sprev.mdevd.overrideAttrs fix;
+  });
+
 
   strace = prev.strace.override { libunwind = null; };
 

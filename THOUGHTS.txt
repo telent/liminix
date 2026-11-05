@@ -9165,3 +9165,104 @@ evaluation model as TeX
 
 why did we decide to make outputRef a function anyway and not a
 attrset?
+
+Thu Sep 24 21:50:49 BST 2026
+
+we can't build a filesystem image using btrfs because I didn't implement it
+
+the tftpboot image for rotuer on turris is pretty big, because ext2fs
+
+Tue Sep 29 22:13:15 BST 2026
+
+dnsmasq won't start, because it is trying to add an inotify watch to
+the directory containing its resolv.conf, which is an output of the
+resonvconf service, and outputs are root:system 2751. I don't seem to
+have documented why these perms except that it used to be 2750 and tbh
+they're not _unreasonable_: read-only for group and execute-only for
+other.
+
+however, dnsmasq is operating as dnsmasq:dnsmasq
+
+I am thinking that the least invasive way to deal with this would be
+to make an `outputs` group for the outputs and make dnsmasq (or any
+other non-root daemon) a member of it.
+
+.... no, I have misdiagnosed.
+
+# cat /etc/group
+dnsmasq:x:51:dnsmasq
+root:x:0:root
+system:x:1:root,dnsmasq
+
+Further investigation revealed that dnsmasq has code to drop its
+supplementary groups. Admittedly it does this before setuid so they
+wwould have been root's supplementary groups anyway, but insofar as I
+understand it, just calling setuid() doesn't add the new user's
+supplementary groups
+
+What we might try: creating a subdir "etc" in
+/run/services/outputs/resolvconf with permissions that dnsmasq can read,
+and putting the resolv.conf file inside that. It should be noted that
+there are a bunch of examples that expect it not to move, so
+maybe we need it in both places
+
+Or the dnsmasq service could copy the resolvconf into some directory
+it owns before starting the daemon, but i think that's not as good a
+solution as it won't pick up changes to the resolvconf without
+restarting. (Unless it gets restarted anyway? dnsmasq longrun
+doesn't have resolvconf as a dependency (it can't be, otherwise lan
+name resoution would break when the internet is down)
+
+Or we could say that services whose outputs are "public" are
+responsible for setting permissions on their outputs directory
+
+
+Sat Oct  3 23:32:10 BST 2026
+
+let's try and set up rotuer with logging and secrets
+
+we will need to dick around with name resolution so that loghost,
+undercroft, certifix are all available
+
+ideally we would do this without changing the configuration, such that
+the same device could be plugged into the test lan or into my actual lan
+without needing a rebuild
+
+this is made a tiny(sic) bit more complicated because rotuer expects to
+be authoritative for .lan (so maybe we need undercroft.telent.net)
+
+this would mean we are sending logs across the internet, is this a big deal?
+
+to log without going to the internet ... the only connection from the
+device is its wan port, which provides a default route for everything
+that's not 192.168.8.x, so we would have to look into the
+
+Sun Oct 11 13:23:21 BST 2026
+
+I think it might be a lot easier if we give up and have two configurations
+for dev and live.
+
+For dev, we will give the wan port an address as well as using it for
+pppoe, and we will make alias loghost,undercroft,certifix to bordervm,
+and bordervm will need an sni-aware proxy to steer those requests to the
+actual services. That means we can continue to use *.lan addresses
+
+Sun Oct 25 20:17:30 GMT 2026
+
+Added rotuer.test.nix which imports the real rotuer as
+a module, will mkForce the differences between dev and live
+
+note that certifix is plain http so sni won't help there
+
+we can add hosts entries in rotuer.test.nix to point
+loghost,undercroft,certifix at bordervm, so we don't need anything
+too fancy on that vm
+
+loghost.telent.net:443
+undercroft.lan:19614/
+certifix.lan:19614/ # actually this is loaclhost.lan, no host alias yet
+
+Tue Oct 27 23:42:45 GMT 2026
+
+certifix server.crt had expired, and doesn't have certifix.lan as a SAN
+which we should probably add. I did recreate it but without that extra name
