@@ -36,7 +36,6 @@ in
         ASN1 = "y";
         ASYMMETRIC_KEY_TYPE = "y";
         ASYMMETRIC_PUBLIC_KEY_SUBTYPE = "y";
-        CRC_CCITT = "y";
         CRYPTO = "y";
         CRYPTO_ARC4 = "y";
         CRYPTO_CBC = "y";
