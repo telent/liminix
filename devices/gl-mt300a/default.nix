@@ -170,6 +170,7 @@
         };
         conditionalConfig = {
           WLAN = {
+            CRC_CCITT = "y";
             WLAN_VENDOR_RALINK = "y";
             RT2800SOC = "m";
             RT2X00 = "m";
