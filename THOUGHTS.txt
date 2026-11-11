@@ -9266,3 +9266,19 @@ Tue Oct 27 23:42:45 GMT 2026
 
 certifix server.crt had expired, and doesn't have certifix.lan as a SAN
 which we should probably add. I did recreate it but without that extra name
+
+Thu Nov  5 21:02:12 GMT 2026
+
+The omnia complains when I set kconfig CRC_CCITT (set in
+modules/wlan.nix) because that option doesn't have a prompt in Kconfig
+files and therefore can only be set when another symbol requires
+it. Somehow this is only true of the omnia (maybe because it's
+mainline kernel not openwrt patched)
+
+7939da264bcc91ced4d01014241a581e79d414d9 lib/crc: remove unnecessary prompt for CONFIG_CRC_CCITT
+    "All modules that need CONFIG_CRC_CCITT already select it, so there is no
+    need to bother users about the option."
+
+this is fine, because we got rid of the backports thing and our wifi
+modules are being built by the kernel derivation using
+conditionalConfig.WLAN (kmodloader merely loads it does not build)
