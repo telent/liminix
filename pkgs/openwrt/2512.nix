@@ -19,8 +19,8 @@ let
     name = "openwrt-source";
     repo = "openwrt";
     owner = "openwrt";
-    rev = "c8eacec725dce34c7b621f00c9bce814fe413759";
-    hash = "sha256-YTfAWmFPXPXFQ56QGRLgCc/QY+RndOdVdcgtBaZsh1E=";
+    rev = "a85059438f2caed0d01a87fce9b8bd5bed134bb2";
+    hash = "sha256-WE6MFvtr2mTnnVL9EqlGmWXEoYb6J24C74kK4bNw5qM=";
   };
   kernelVersion = "6.12.113";
   kernelSeries = lib.versions.majorMinor kernelVersion;
@@ -57,6 +57,7 @@ let
 \tdepends on m'  $kconfig
     done
 
+    echo doPatch ${family} done
   '';
 in
 {
@@ -79,17 +80,19 @@ in
 
   applyPatches.rt2x00 = ''
     PATH=${pkgsBuildBuild.patchutils}/bin:$PATH
-    for i in ${src}/package/kernel/mac80211/patches/rt2x00/6*.patch ; do
+    for i in ${oldSrc}/package/kernel/mac80211/patches/rt2x00/6*.patch ; do
       fixed=$(basename $i).fixed
       sed '/depends on m/d'  < $i | sed 's/CPTCFG_/CONFIG_/g' | recountdiff | filterdiff -x '*/local-symbols' > $fixed
+      echo Applying $fixed
+
       case $fixed in
-        606-*)
+        606-*|607-*)
           ;;
         611-*)
           filterdiff -x '*/rt2x00.h' < $fixed | patch --forward -p1
           ;;
-        601-*|607-*)
-          filterdiff -x '*/rt2x00_platform.h' < $fixed | patch --forward -p1
+        609-*)
+          sed < $fixed -e 's/ralink,rt7620-wmac/ralink,rt7620-wifi/g' -e 's/ralink,rt2880-wmac/ralink,rt2880-wifi/g' | patch --forward -p1
           ;;
         *)
           cat $fixed | patch --forward -p1
