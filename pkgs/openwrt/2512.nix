@@ -57,12 +57,6 @@ let
 \tdepends on m'  $kconfig
     done
 
-    mkdir backport_patches
-    for f in ${oldSrc}/package/kernel/mac80211/patches/*.*; do
-      out=backport_patches/`basename $f`
-      sed < $f 's/CPTCFG_/CONFIG_/g' > $out
-      ensure_patch $out
-    done
   '';
 in
 {
