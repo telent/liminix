@@ -51,7 +51,7 @@
       ...
     }:
     let
-      inherit (pkgs) openwrt;
+      openwrt = pkgs.openwrt_25_12;
       mac80211 = pkgs.kmodloader.override {
         targets = [ "rt2800soc" ];
         inherit (config.system.outputs) kernel;
@@ -122,6 +122,8 @@
       };
 
       kernel = {
+        src = openwrt.kernelSrc;
+        version = openwrt.kernelVersion;
         extraPatchPhase = ''
           ${openwrt.applyPatches.ramips}
           ${openwrt.applyPatches.rt2x00}
@@ -131,6 +133,7 @@
           RALINK = "y";
           PCI = "y";
           SOC_MT7620 = "y";
+          CLK_MTMIPS = "y";
 
           SERIAL_8250_CONSOLE = "y";
           SERIAL_8250 = "y";
