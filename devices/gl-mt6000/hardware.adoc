@@ -1,0 +1,35 @@
+== GL.iNet GL-MT6000 (Flint 2)
+
+The default Liminix output is an experimental factory payload for the router's eMMC.
+A separate TFTP output supports development with a serial console.
+Installation, boot and network operation still require testing on a physical Flint 2.
+
+=== Building
+
+From the Liminix checkout, build either output with a system configuration:
+
+[source,console]
+----
+$ nix-build -I liminix-config=./vanilla-configuration.nix --argstr deviceName gl-mt6000 -A outputs.default
+$ nix-build -I liminix-config=./vanilla-configuration.nix --argstr deviceName gl-mt6000 -A outputs.tftpboot -o result-tftp
+----
+
+The first command produces the same file as outputs.factory. The second produces a directory containing the boot script, kernel image, device tree and root filesystem. Both commands run on the build host.
+
+=== Kernel, device tree and networking
+
+The board module selects AArch64 Linux with musl. Liminix's pkgs/openwrt/2512.nix pins Linux 6.12.113 and applies OpenWrt's generic and MediaTek files and patches. The Flint 2 kernel configuration is defined in devices/gl-mt6000/default.nix. The Flint 2 enables GPT partition parsing for eMMC and selects mt7915e and the MT798x integrated radio when WLAN is enabled.
+
+The https://github.com/openwrt/openwrt/blob/8303e9b2a004a6c3754aaa1edb32cfc7c0cfe55b/target/linux/mediatek/dts/mt7986a-glinet-gl-mt6000.dts[pinned OpenWrt device tree] describes the serial console at 115200 baud, the MT7531 switch on GMAC0, the external WAN PHY on GMAC1 and the factory partition containing the radio EEPROM and MAC address data. Liminix uses the board tree directly and applies ramboot.dtsi to remove its appended eMMC root argument. Each output then supplies its own root device.
+
+The https://github.com/openwrt/openwrt/blob/8303e9b2a004a6c3754aaa1edb32cfc7c0cfe55b/target/linux/mediatek/filogic/base-files/etc/board.d/02_network#L98-L103[OpenWrt network definition] maps eth1 to WAN and lan1 through lan5 to LAN. Liminix exposes these ports individually and aliases lan to lan1. A router configuration can bridge the desired ports. The wlan and wlan5 services refer to wlan0 and wlan1 and load mt7915e. The mapping of radio names to physical bands awaits hardware verification. Liminix copies the five MT7986 radio runtime files and two offload files from linux-firmware. OpenWrt lists the corresponding runtime images in its https://github.com/openwrt/openwrt/blob/8303e9b2a004a6c3754aaa1edb32cfc7c0cfe55b/package/kernel/mt76/Makefile#L636-L645[mt76 package].
+
+=== Factory image layout
+
+The https://github.com/openwrt/openwrt/blob/8303e9b2a004a6c3754aaa1edb32cfc7c0cfe55b/target/linux/mediatek/image/filogic.mk#L1751-L1764[OpenWrt Flint 2 recipe] places the kernel at the start of the factory payload and the root filesystem at byte offset 32 MiB. Liminix factory.nix builds a FIT with the kernel and device tree, checks that it fits, pads to that offset and appends squashfs. The kernel waits for the eMMC partition named rootfs. The https://github.com/openwrt/openwrt/blob/8303e9b2a004a6c3754aaa1edb32cfc7c0cfe55b/target/linux/mediatek/image/Makefile#L14-L24[Filogic kernel load address] is 0x48000000. The https://github.com/openwrt/openwrt/blob/8303e9b2a004a6c3754aaa1edb32cfc7c0cfe55b/include/image-commands.mk#L448[FIT entry point] defaults to the same address.
+
+OpenWrt's https://github.com/openwrt/openwrt/blob/8303e9b2a004a6c3754aaa1edb32cfc7c0cfe55b/package/boot/uboot-mediatek/patches/436-add-glinet-mt6000.patch#L245-L269[board-specific U-Boot environment] writes its factory payload starting at the existing kernel partition. Its sysupgrade image uses a different archive and GL metadata. The Liminix factory output contains neither a partition table nor bootloader images. Compatibility with the stock GL.iNet web updater has not been established.
+
+=== TFTP RAM boot
+
+Liminix modules/outputs/tftpboot.nix generates the U-Boot commands in boot.scr. It stages squashfs at 0x50000000, reserves that memory in the device tree and boots Linux with a phram root at /dev/mtdblock0. The staging address is a Liminix choice inside the https://github.com/openwrt/openwrt/blob/8303e9b2a004a6c3754aaa1edb32cfc7c0cfe55b/package/boot/uboot-mediatek/patches/436-add-glinet-mt6000.patch#L21-L23[board's 1 GiB RAM range]. The 64 KiB erase size describes the emulated phram device. OpenWrt's U-Boot menu entry labelled “Load Firmware via TFTP then write to eMMC” performs a persistent write. Use the Liminix-generated commands for a RAM boot.
