@@ -29,7 +29,6 @@
 (fn write-addresses [prefix addresses]
   (each [_ a (ipairs (split " " addresses))]
     (let [address (parse-address a)
-          suffix (base64url (string.pack "n" (hash a)))
           keydir (..
                   prefix
                   (-> address.address
@@ -39,13 +38,33 @@
       (each [k v (pairs address)]
         (write-value (.. keydir "/" k) v)))))
 
+(fn parse-route [str]
+  (let [(address len gateway valid metric)
+        (string.match str "(.-)/(%d+),(.-),(%d+),(%d+)$")]
+    {: address : len : gateway : valid : metric}))
+
+(fn write-routes [addresses]
+  (each [_ a (ipairs (split " " addresses))]
+    (let [route (parse-route a)
+          keydir (..
+                  "route/"
+                  (if (= route.address "::")
+                      "default"
+                      (-> route.address
+                          (: :gsub "::$" "")
+                          (: :gsub ":" "-"))))]
+      (mktree (.. state-directory "/" keydir))
+      (each [k v (pairs route)]
+        (write-value (.. keydir "/" k) v)))))
+
 ;; we remove state before updating to ensure that consumers don't get
 ;; a half-updated snapshot
 (os.remove (.. state-directory "/state"))
 
-;; remove parsed addresses/prefixes from any previous run
+;; remove parsed addresses/prefixes/routes from any previous run
 (rmtree (.. state-directory "/prefix"))
 (rmtree (.. state-directory "/address"))
+(rmtree (.. state-directory "/route"))
 
 (let [wanted
       [
@@ -84,7 +103,9 @@
     (write-value-from-env n))
 
   (match (os.getenv :ADDRESSES) s (write-addresses "address/" s))
-  (match (os.getenv :PREFIXES) s (write-addresses "prefix/" s)))
+  (match (os.getenv :RA_ADDRESSES) s (write-addresses "address/" s))
+  (match (os.getenv :PREFIXES) s (write-addresses "prefix/" s))
+  (match (os.getenv :RA_ROUTES) s (write-routes s)))
 
 (let [[ifname state] arg
       ready (match state
